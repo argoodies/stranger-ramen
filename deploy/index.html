@@ -450,10 +450,11 @@ function drawWorld(t, dt) {
   }
   if (mode === 'title') {
     // the title, in the Monument Valley manner: thin, widely spaced lettering beside the clock face
-    const a = v.P(1.5, -1.5, 7.5), chars = [...'拉面怪奇物语'], fs = clamp(s * .86, 13, 26), x0 = a[0] + fs * 1.5, gap = Math.min(fs * 1.9, (W - fs * 1.3 - x0) / (chars.length - 1)), y = a[1];
+    const a = v.P(1.5, -1.5, 7.5), chars = [...'拉面怪奇物语'], fs = Math.max(11, Math.min(clamp(s * .86, 13, 26), (W - a[0]) / 11.6)), x0 = a[0] + fs * 1.15, gap = Math.min(fs * 1.9, (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
     ctx.font = `200 ${fs}px "PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.96)';
-    chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y));
+    ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
+    chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y)); ctx.restore();
   }
   if (mode === 'world' && G.late) text('夜深了，回拉面档口睡觉', W / 2, H * 0.9, 15, [255, 236, 190], .7 + .3 * Math.sin(t * 3), 'center', true);
 }
