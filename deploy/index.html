@@ -51,7 +51,7 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
   </div>
 </div>
 <button class="pill" id="enter">进入拉面档口</button>
-<div id="title"></div>
+<div id="title"><h1>拉面怪奇物语</h1></div>
 <div id="err"></div>
 <script>
 'use strict';
@@ -476,7 +476,7 @@ function worldTap(sx, sy) {
 const stall = { sinceSelf: 0, myBowl: null, eatT: 0, ownSay: '', ownSayT: 0, pot: 'empty', potT: 0, strainer: false, bowl: null, seats: [null, null, null], spawn: 1.2, owner: { x: 2.4, y: 1.2, tx: 2.4, ty: 1.2 }, fx: [], fly: [], bowlAnim: {}, nope: null, nopeT: 0 };
 const save = JSON.parse(localStorage.getItem('ctramen') || '{"coins":0,"served":0}');
 const has = () => false;
-const G = { n: 0, late: false, t: 0 }, HALF = 180;
+const HALF = 180, G = { n: 1, late: false, t: HALF };      // the game always opens at night
 function gameHour() { return (6 + 12 * (G.t % (2 * HALF)) / HALF) % 24; }
 function clockHands() { const h = gameHour(); return [(h % 12) / 12 * TAU, (h % 1) * TAU]; }
 function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = lerp(G.n, night ? 1 : 0, 1 - Math.pow(0.8, dt)); }
@@ -1138,6 +1138,7 @@ if (location.hash) {
   if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), .95], bar: [4.45, .95], bin: [3.8, 3.05], door: SHOP_DOOR, seat2: [SEATX[2], .95] }; let bad = 0;
     for (const k in spots) { o.tx = spots[k][0]; o.ty = spots[k][1]; let n = 0, hit = 0; for (; n < 300; n++) { stall.leaving = false; updateStall(0.03); if (shopBlocked(o.x, o.y)) hit++; if (Math.hypot(o.x - o.tx, o.y - o.ty) < .02) break; } if (hit || n >= 300) bad++; log.push(k + ':' + n + (hit ? '!hit' + hit : '') + (n >= 300 ? '!stuck' : '')); }
     document.title = 'bad=' + bad + ' ' + log.join(' '); }, 300);
+  if (location.hash === '#world' || location.hash === '#far' || location.hash === '#day') { G.t = 0; G.n = 0; }
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
   if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
@@ -1163,7 +1164,7 @@ if (location.hash) {
       act('boil'); stall.potT = 9; updateStall(0.01); ['scoop', 'put'].forEach(a => act(a));
       const doorPath = bfs([-1, 3], DOOR); let cut = 0; for (let i = -5; i < 11; i++) for (let j = -5; j < 5; j++) if (walkable(i, j) && !bfs([-1, 3], [i, j])) cut++;
       log.push('doorPath=' + (doorPath ? doorPath.length : 'NONE') + ' unreachableCells=' + cut);
-      { const ring = [[-3, -3], [-2, -3], [-1, -3], [0, -3], [1, -3], [2, -3], [2, -2], [3, -2], [3, -1], [3, 0], [3, 1], [2, 1], [2, 2], [1, 2], [0, 2], [-1, 2], [-2, 2], [-3, 2], [-3, 1], [-3, 0], [-3, -1], [-3, -2]]; log.push('ringBlocked=' + ring.filter(c => !walkable(c[0], c[1])).length + ' behindShop=' + !!bfs([-1, 3], [-4, 0])); for (let k = 0; k < 200; k++) tick(1); log.push('t200 n=' + G.n.toFixed(2) + ' hour=' + gameHour().toFixed(1)); }
+      { const ring = [[-3, -3], [-2, -3], [-1, -3], [0, -3], [1, -3], [2, -3], [2, -2], [3, -2], [3, -1], [3, 0], [3, 1], [2, 1], [2, 2], [1, 2], [0, 2], [-1, 2], [-2, 2], [-3, 2], [-3, 1], [-3, 0], [-3, -1], [-3, -2]]; log.push('ringBlocked=' + ring.filter(c => !walkable(c[0], c[1])).length + ' behindShop=' + !!bfs([-1, 3], [-4, 0])); log.push('startNight n=' + G.n + ' hour=' + gameHour().toFixed(1)); for (let k = 0; k < 200; k++) tick(1); log.push('+200s n=' + G.n.toFixed(2) + ' hour=' + gameHour().toFixed(1)); }
       document.title = log.join(' ; ');
     }
     if (location.hash === '#tap') setTimeout(() => {
