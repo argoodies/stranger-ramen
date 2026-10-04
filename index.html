@@ -51,7 +51,7 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
   </div>
 </div>
 <button class="pill" id="enter">进入拉面档口</button>
-<div id="title"><h1>拉面怪奇物语</h1><p>STRANGER RAMEN</p></div>
+<div id="title"><h1>拉面怪奇物语</h1><p>CLOCKTOWER RAMEN</p></div>
 <div id="err"></div>
 <script>
 'use strict';
@@ -748,7 +748,7 @@ async function playBotc() {
   const roles = ['sailor', 'pukka', 'heretic']; for (let i = 2; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [roles[i], roles[j]] = [roles[j], roles[i]]; }
   Object.assign(g, { snaps: [], roles, alive: [true, true, true], drunk: -1, poisoned: -1, night: 0, isNight: false, votes: null, reveal: false, revealT: 0, showMine: false, deathBy: [null, null, null], gonePoison: -1, goneDrunk: -1, over: false, result: null, log: [] });
   const si = roles.indexOf('sailor'), pi = roles.indexOf('pukka'), hi = roles.indexOf('heretic');
-  const poisonedNow = i => g.poisoned === i && g.alive[pi] && (i === pi || g.drunk !== pi);      // the Pukka's poison only works while the Pukka is sober
+  const poisonedNow = i => g.poisoned === i && g.alive[pi] && g.drunk !== pi;      // the Pukka's poison only works while the Pukka is sober
   const sailorSafe = () => g.drunk !== si && !poisonedNow(si);
   const win = () => !g.alive[pi] ? 'good' : live() <= 2 ? 'evil' : null;
   // a dead character's tokens leave play: the Pukka's single poison token, the Sailor's drunk token
@@ -921,7 +921,7 @@ function drawBotc(t, dt) {
       if (!g.alive[i]) shroud(tx, ty, R * pp, clamp((g.revealT - 1.0 - i * .2) / .4));
       const ra = clamp((g.revealT - 1.5) / .4); let k = 0;
       if (g.drunk === i) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'sailor', ra);
-      if (g.poisoned === i) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra * (g.pukkaSober ? 1 : .45));
+      if (g.poisoned === i && g.pukkaSober) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra);
       if (g.goneDrunk === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'sailor', ra); shroud(mx, my, R * .56, ra); }
       if (g.gonePoison === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'pukka', ra); shroud(mx, my, R * .56, ra); }
     } else if (i === 0 && g.showMine) roleToken(tx, ty, R, g.roles[0]);
