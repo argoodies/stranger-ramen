@@ -83,11 +83,3 @@ jobs:
             echo "::error::altool upload to App Store Connect failed (see the validation details above)"
             exit 1
           fi
-
-      - name: Upload .ipa artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: stranger-ramen-ipa
-          path: ${{ runner.temp }}/export-ios/**/*.ipa
-          if-no-files-found: warn
