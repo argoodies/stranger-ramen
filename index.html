@@ -789,9 +789,16 @@ async function playBotc() {
     }
     if (g.alive[pi]) {
       const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], '普卡，选一个人。')
-        : pick([0, 1, 2].filter(k => k !== pi && g.alive[k]));
+        : pick([0, 1, 2].filter(k => (k !== pi || (g.auto && Math.random() < .3)) && g.alive[k]));
       lastPick[pi] = tgt;
-      if (g.drunk !== pi && g.poisoned !== pi) { const prev = g.poisoned; if (prev >= 0 && g.alive[prev]) { g.alive[prev] = false; g.deathBy[prev] = 'night'; died = prev; } g.poisoned = tgt; if (tgt === si) g.drunk = -1; rec += nm(pi) + '让' + (tgt === pi ? '自己' : nm(tgt)) + '中了毒' + (died >= 0 ? '；上一个中毒的' + nm(died) + '毒发身亡。' : '。'); clean(); }
+      if (g.drunk !== pi && g.poisoned !== pi) {
+        const prev = g.poisoned;
+        // poisoning himself still lands, but a Pukka poisoned that night cannot make the last victim die
+        if (tgt !== pi && prev >= 0 && g.alive[prev]) { g.alive[prev] = false; g.deathBy[prev] = 'night'; died = prev; }
+        g.poisoned = tgt; if (tgt === si) g.drunk = -1;
+        rec += nm(pi) + '让' + (tgt === pi ? '自己' : nm(tgt)) + '中了毒' + (died >= 0 ? '；上一个中毒的' + nm(died) + '毒发身亡。' : tgt === pi && prev >= 0 && prev !== pi ? '；自己中了毒，上一个中毒的人没有毒发。' : '。'); clean();
+        aud.self = tgt === pi; aud.prevAlive = prev >= 0 && prev !== pi;
+      }
       else rec += nm(pi) + (g.drunk === pi ? '醉了' : '中着自己的毒') + '，没能下毒，也没有人毒发身亡。';
       if (pi === 0) await bsay(ST, '好的。');
     }
@@ -997,7 +1004,11 @@ function drawLib(t) {
   if (lib.path.length) { const c = lib.path[lib.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
   // you
   const K = s * 1.1, op = P(lib.x, lib.y), hop = lib.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
-  fig(op[0], op[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) });
+  { const u = (lib.x - .05) / 2.65, inX = u >= 0 && u <= 1, lo = lerp(1.0, 2.0, u), hi = lerp(2.0, 3.3, u), edge = Math.min(lib.y - lo, hi - lib.y, lib.x - .05, 2.7 - lib.x);
+    lib.lit = lerp(lib.lit || 0, inX ? clamp(edge / .3 + .5) : 0, .18); }
+  const lit = c => mix(tn(c), mix(c, lightC, .14), lib.lit);
+  if (lib.lit > .02) glow(op[0], op[1] - K * .6, K * 1.1, lightC, .3 * lib.lit);
+  fig(op[0], op[1] - hop, K, { kind: 'chef', apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) });
   if (lib.sayT > 0) {
     const fs = clamp(s * .3, 12.5, 15), al = clamp(lib.sayT * 2); ctx.font = FONT(fs, true);
     const cw = ctx.measureText(lib.say).width + 22, bh = fs * 1.4 + 12, hx = op[0], top = op[1] - K * 1.5, bx = clamp(hx - cw / 2, 8, W - cw - 8), by = top - bh - 8;
@@ -1062,7 +1073,8 @@ if (location.hash) {
   if (location.hash === '#bye') { enterTower(); fade = 0; const log = []; let n = 0; const step = () => { if (n++ > 600) { document.title = 'timeout'; return; } const w = BG.wait; if (BG.over && BG.bubble && BG.bubble.text === '欢迎下次再玩。') { botcTap(5, 5); setTimeout(() => { log.push('tap1 mode=' + mode + ' bubble=' + (BG.bubble ? 'shown' : 'gone')); botcTap(5, 5); setTimeout(() => { log.push('tap2 mode=' + mode); document.title = log.join(' ; '); }, 50); }, 50); return; } if (w) { w.type === 'say' ? botcTap(5, 5) : (BG.wait = null, w.res(w.blank !== undefined ? w.blank : [1, 2, 0].find(w.ok))); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
-  if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
+  if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
+  if (location.hash === '#liblit') setTimeout(() => { goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); fade = 0; lib.x = 1.5; lib.y = 2.2; lib.lit = 1; }, 300);
   if (location.hash === '#libview2') setTimeout(() => { goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); fade = 0; drawLib(1); lib.x = 2.5; lib.y = 1.5; lib.pending = 'shelf'; libArrive(); }, 300);
   if (location.hash === '#botctap') { enterTower(); fade = 0; const log = []; let guard = 0; const step = () => { const w = BG.wait; if (guard++ > 400 || BG.over) { document.title = log.join(' ; ') + ' over=' + BG.over; return; } if (w) { if (w.type === 'say') botcTap(5, 5); else if (w.blank === 'none') { botcTap(5, H - 5); log.push('blankNominate->' + (BG.wait !== w)); } else if (w.blank === 'no') { const k = [0, 1, 2].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); log.push('tapNomineeVote->' + (BG.votes && BG.votes[0])); } else { const k = [1, 2, 0].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); log.push('pick' + k); } } setTimeout(step, 25); }; setTimeout(step, 100); }
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
