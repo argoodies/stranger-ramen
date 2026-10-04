@@ -507,7 +507,7 @@ function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
 const SPOT = { boil: [1.6, 1.6], scoop: [1.6, 1.6], put: [2.45, 1.25], soup: [1.6, 2.6], chili: [3.3, 1.25], cilantro: [4.0, 1.25], beef: [4.7, 1.25], bowl: [2.45, 1.25] };
 const FLYC = { noodle: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
-const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; } };
+const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; stall.leaving = false; } };
 // pick something up
 function grab(k) {
   const s = stall, b = s.bowl;
@@ -537,7 +537,7 @@ function serve(i) {
   save.served++; s.sinceSelf++; localStorage.setItem('ctramen', JSON.stringify(save));
   if (s.sinceSelf >= 3) { s.ownSay = '有点饿了，给自己做一碗吧。'; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
   if (ok) [67, 71, 74, 79, 83].forEach((m, k) => chime(m, k * .09, .16, 1.4)); else { chime(61, 0, .16, 1); chime(62, 0.02, .12, 1); }
-  s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = SEATX[i]; s.owner.ty = 0.95;
+  s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = Math.max(SEATX[i], 1.5); s.owner.ty = 0.95;
   return true;
 }
 // whole steps in one go, for the automated checks: act('soup') = pick the ladle up + pour it in, act('serve', i) = lift the bowl + hand it over
@@ -565,6 +565,38 @@ function hintKey() {
   if (w.length) { const want = s.seats[w[0]].want; for (const k of ['chili', 'cilantro', 'beef']) if (want[k] && !b[k]) return k; return 'bowl'; }
   return null;
 }
+// --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
+const SG = 0.2, SGX = 26, SGY = 22, SM = 0.2;
+function shopBlocked(x, y) {
+  if (x < SM || y < SM || x > 5 - SM * .5 || y > 4.2 - SM * .5) return true;
+  if (x > .5 - SM && y < .6 + SM) return true;                                   // counter under the window
+  if (x < 1.2 + SM && y > 1.0 - SM && y < 3.2 + SM) return true;                 // stove
+  if (x > 1.9 - SM && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
+  if (Math.hypot(x - 4.45, y - 3.0) < .26 + SM) return true;                     // bin
+  return false;
+}
+const sgFree = (i, j) => i >= 0 && j >= 0 && i < SGX && j < SGY && !shopBlocked(i * SG, j * SG);
+function sgNearest(p) { let best = null, bd = 1e9; for (let i = 0; i < SGX; i++) for (let j = 0; j < SGY; j++) if (sgFree(i, j)) { const d = (i * SG - p[0]) ** 2 + (j * SG - p[1]) ** 2; if (d < bd) { bd = d; best = [i, j]; } } return best; }
+function shopPath(from, to) {
+  const a = sgNearest(from), b = sgNearest(to), q = [a], prev = new Map([[a[0] * 100 + a[1], null]]);
+  while (q.length) {
+    const c = q.shift(); if (c[0] === b[0] && c[1] === b[1]) break;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+      const n = [c[0] + dx, c[1] + dy], k = n[0] * 100 + n[1];
+      if (prev.has(k) || !sgFree(n[0], n[1]) || (dx && dy && !(sgFree(c[0] + dx, c[1]) && sgFree(c[0], c[1] + dy)))) continue;
+      prev.set(k, c); q.push(n);
+    }
+  }
+  if (!prev.has(b[0] * 100 + b[1])) return [to];
+  let pts = []; for (let c = b; c; c = prev.get(c[0] * 100 + c[1])) pts.unshift([c[0] * SG, c[1] * SG]);
+  // drop the points you can walk straight past
+  const clear = (p, r) => { const n = Math.ceil(Math.hypot(r[0] - p[0], r[1] - p[1]) / .08); for (let k = 1; k < n; k++) if (shopBlocked(lerp(p[0], r[0], k / n), lerp(p[1], r[1], k / n))) return false; return true; };
+  const out = [pts[0]]; let i = 0;
+  while (i < pts.length - 1) { let j = pts.length - 1; while (j > i + 1 && !clear(pts[i], pts[j])) j--; out.push(pts[j]); i = j; }
+  if (!shopBlocked(to[0], to[1]) && clear(out[out.length - 1], to)) out.push(to);
+  return out.slice(1);
+}
+const SHOP_DOOR = [1.8, 3.95];
 // tap an object in the shop
 const HIT = {};
 function stallTap(x, y) {
@@ -572,7 +604,7 @@ function stallTap(x, y) {
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
   if (!best) return;
   const s = stall, h = s.hold; let ok = false;
-  if (best === 'exit') { if (h) { ok = false; } else { leaveStall(); return; } }
+  if (best === 'exit') { if (h) { ok = false; } else { s.owner.tx = SHOP_DOOR[0]; s.owner.ty = SHOP_DOOR[1]; s.leaving = true; chime(69, 0, .1, .8); return; } }
   else if (best === 'pot') ok = h === 'noodle' ? false : s.pot === 'empty' ? act('boil') : grab('noodle');
   else if (ING.includes(best)) { if (h === best) { setHold(null); chime(57, 0, .1, .6); ok = true; } else ok = grab(best); }
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
@@ -593,11 +625,11 @@ function barTap() {
 function dump() {
   const s = stall; if (!s.hold) return false;
   if (s.hold === 'bowl') { s.bowl = emptyBowl(); s.bowlAnim = {}; }
-  setHold(null); s.owner.tx = 4.0; s.owner.ty = 2.9; chime(50, 0, .14, .8); return true;
+  setHold(null); s.owner.tx = 3.8; s.owner.ty = 3.05; chime(50, 0, .14, .8); return true;
 }
 function enterStall() {
   mode = 'stall'; $('leave').style.display = 'block'; $('zoom').style.display = 'none'; $('enter').style.display = 'none';
-  setHold(null); stall.spawn = 3; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
+  setHold(null); stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
 }
 function leaveStall() {
   $('leave').classList.remove('hint');
@@ -610,7 +642,11 @@ function updateStall(dt) {
   if (s.pot === 'cooking') { s.potT += dt; if (s.potT >= cookT()) { s.pot = 'done'; chime(86, 0, .14, 1); chime(90, .1, .12, 1); refreshUI(); } }
   if (boilGain) boilGain.gain.value = lerp(boilGain.gain.value, s.pot === 'cooking' ? 0.05 : s.pot === 'done' ? 0.025 : 0.008, 0.1);
   for (const k in s.bowlAnim) s.bowlAnim[k] = Math.min(1, s.bowlAnim[k] + dt * 3);
-  s.owner.x = lerp(s.owner.x, s.owner.tx, 1 - Math.pow(0.002, dt)); s.owner.y = lerp(s.owner.y, s.owner.ty, 1 - Math.pow(0.002, dt));
+  { const o = s.owner;      // walk to the target around the furniture
+    if (o.ptx !== o.tx || o.pty !== o.ty) { o.path = shopPath([o.x, o.y], [o.tx, o.ty]); o.ptx = o.tx; o.pty = o.ty; }
+    let step = 5.2 * dt;
+    while (o.path && o.path.length && step > 0) { const [px, py] = o.path[0], d = Math.hypot(px - o.x, py - o.y); if (d <= step) { o.x = px; o.y = py; o.path.shift(); step -= d; } else { o.x += (px - o.x) / d * step; o.y += (py - o.y) / d * step; step = 0; } }
+    if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; } }
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 10; refreshUI(); }
   if (s.ownSayT > 0) s.ownSayT -= dt;
   if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.ownSay = s.done ? pick(['真香。', '再来一碗也行。', '还是自己做的合口味。']) : '吃饱了。今天就到这儿，可以出去走走了。'; s.ownSayT = s.done ? 3 : 7; s.done = true; [79, 83, 86].forEach((m, k) => chime(m, k * .12, .14, 1.4)); } }
@@ -1098,7 +1134,10 @@ if (location.hash) {
     const real = initAudio; initAudio = () => {}; await AC.close(); returnCheck(); await wait(2000); log.push('cannotRebuild-> restarts=' + restarts); initAudio = real;
     document.title = log.join(' ; '); $('err').style.cssText += ';font-size:15px;line-height:1.5'; $('err').textContent = log.join('\n'); }, 300);
   if (location.hash === '#bye') { enterTower(); fade = 0; const log = []; let n = 0; const step = () => { if (n++ > 600) { document.title = 'timeout'; return; } const w = BG.wait; if (BG.over && BG.bubble && BG.bubble.text === '欢迎下次再玩。') { botcTap(5, 5); setTimeout(() => { log.push('tap1 mode=' + mode + ' bubble=' + (BG.bubble ? 'shown' : 'gone')); botcTap(5, 5); setTimeout(() => { log.push('tap2 mode=' + mode); document.title = log.join(' ; '); }, 50); }, 50); return; } if (w) { w.type === 'say' ? botcTap(5, 5) : (BG.wait = null, w.res(w.blank !== undefined ? w.blank : [1, 2, 0].find(w.ok))); } setTimeout(step, 20); }; setTimeout(step, 100); }
-  if (location.hash.startsWith('#hold')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); const m = location.hash.slice(5); if (m === 'soup') grab('soup'); else { act('soup'); act('beef'); if (m === 'beef') { stall.bowl.beef = false; grab('beef'); } else grab('bowl'); } stall.owner.x = stall.owner.tx; stall.owner.y = stall.owner.ty; }, 200);
+  if (location.hash.startsWith('#hold')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); const m = location.hash.slice(5); if (m === 'soup') grab('soup'); else { act('soup'); act('beef'); if (m === 'beef') { stall.bowl.beef = false; grab('beef'); } else grab('bowl'); } stall.owner.x = stall.owner.tx; stall.owner.y = stall.owner.ty; stall.owner.ptx = stall.owner.tx; stall.owner.pty = stall.owner.ty; stall.owner.path = []; }, 200);
+  if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), .95], bar: [4.45, .95], bin: [3.8, 3.05], door: SHOP_DOOR, seat2: [SEATX[2], .95] }; let bad = 0;
+    for (const k in spots) { o.tx = spots[k][0]; o.ty = spots[k][1]; let n = 0, hit = 0; for (; n < 300; n++) { stall.leaving = false; updateStall(0.03); if (shopBlocked(o.x, o.y)) hit++; if (Math.hypot(o.x - o.tx, o.y - o.ty) < .02) break; } if (hit || n >= 300) bad++; log.push(k + ':' + n + (hit ? '!hit' + hit : '') + (n >= 300 ? '!stuck' : '')); }
+    document.title = 'bad=' + bad + ' ' + log.join(' '); }, 300);
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
   if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
@@ -1108,7 +1147,7 @@ if (location.hash) {
   if (location.hash === '#botcpop') { enterTower(); fade = 0; let n = 0; const step = () => { const w = BG.wait; if (n++ > 400) return; if (w && w.type === 'pick') { drawBotc(1, .016); const k = [1, 2, 0].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); document.title = 'pop=' + JSON.stringify(BG.pop); BG.pop.t = .16; BG.wait = { type: 'hold' }; return; } if (w) botcTap(5, 5); setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#botcview')) { enterTower(); fade = 0; const n = +location.hash.slice(9) || 0; let k = 0; const step = () => { if (k++ < n && BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); setTimeout(step, 30); } }; setTimeout(step, 100); }
-  if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode); document.title = log.join(' ; '); }, 500);
+  if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode + ' leaving=' + stall.leaving); let hitFurn = 0, steps = 0; for (; steps < 200 && mode === 'stall'; steps++) { updateStall(0.05); if (shopBlocked(stall.owner.x, stall.owner.y)) hitFurn++; } log.push('walkedOut mode=' + mode + ' steps=' + steps + ' throughFurniture=' + hitFurn); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#bump') setTimeout(() => { const log = []; npcs.forEach((n, k) => { n.path = []; n.wait = 999; n.x = 8.5 + k % 3; n.y = -.5 + (k / 3 | 0); }); const a = npcs[0]; a.x = .5; a.y = 3.5; player.x = -.5; player.y = 3.5; player.path = bfs([-1, 3], [2, 3]).slice(1); let overlap = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (Math.floor(player.x) === 0 && Math.floor(player.y) === 3) overlap++; } log.push('walkAround overlap=' + overlap + ' at=' + cellOf(player)); const b = npcs[1]; b.x = 4.5; b.y = 3.5; b.wait = 0; b.path = bfs([4, 3], [1, 3]).slice(1); let ov2 = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (cellOf(b) + '' === cellOf(player) + '' || cellOf(b) + '' === cellOf(a) + '') ov2++; } log.push('npc overlap=' + ov2); drawWorld(1, 0.01); const p = wv.P(a.x, a.y); worldTap(p[0], p[1] - wv.s * .5); log.push('hello=' + a.say); enterStall(); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); act('soup'); log.push('barEarly=' + barTap() + ' say=' + stall.ownSay); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#lib') setTimeout(() => { const log = []; goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); log.push('enter=' + mode); fade = 0; drawLib(1); const fp = lv.P(3.5, 2.5); libTap(fp[0], fp[1]); for (let k = 0; k < 200 && lib.path.length; k++) updateLib(0.05); log.push('walk=' + cellOf(lib)); const sh = LHIT.shelf; libTap((sh[0] + sh[2]) / 2, (sh[1] + sh[3]) / 2); for (let k = 0; k < 200 && (lib.path.length || lib.pending); k++) updateLib(0.05); log.push('shelf at ' + cellOf(lib) + ' say=' + lib.say + ' ' + (lib.sayT > 0)); drawLib(1); libTap(LHIT.exit[0], LHIT.exit[1]); for (let k = 0; k < 200 && mode === 'lib'; k++) updateLib(0.05); log.push('exit=' + mode + ' at ' + cellOf(player)); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#stairs') setTimeout(() => { const log = []; player.x = 3.5; player.y = 1.5; drawWorld(1, .01); const sp = wv.P(2.1, 0, .6); worldTap(sp[0], sp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapStairs mode=' + mode); leaveTower(); player.x = -3.5; player.y = 3.5; drawWorld(1, .01); const hp = wv.P(-4.17, 2.15, 1.6); worldTap(hp[0], hp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapShopRoof mode=' + mode); document.title = log.join(' ; '); }, 500);
