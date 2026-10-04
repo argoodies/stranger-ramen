@@ -52,5 +52,10 @@ public class MainActivity extends Activity {
     protected void onPause() { super.onPause(); web.onPause(); }
 
     @Override
-    protected void onResume() { super.onResume(); web.onResume(); }
+    protected void onResume() {
+        super.onResume();
+        web.onResume();
+        // back from the background: let the game check that its sound still works (it restarts itself if not)
+        web.evaluateJavascript("window.__wake && window.__wake()", null);
+    }
 }

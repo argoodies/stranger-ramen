@@ -14,6 +14,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = window
         return true
     }
+
+    // back from the background: let the game check that its sound still works (it restarts itself if not)
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        (window?.rootViewController as? GameViewController)?.wake()
+    }
 }
 
 final class GameViewController: UIViewController {
@@ -22,6 +27,10 @@ final class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .portrait }
+
+    func wake() {
+        webView?.evaluateJavaScript("window.__wake && window.__wake()", completionHandler: nil)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -213,7 +213,7 @@ function randomLook() {
 // ------------------------------------------------------------ audio
 let AC = null, bus, master, muted = false, nextBar = 0, barIdx = 0, boilGain = null, mode = 'title';
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
-function initAudio() {
+let initAudio = function () {
   if (AC) return;
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -229,7 +229,7 @@ function initAudio() {
     boilGain = AC.createGain(); boilGain.gain.value = 0; ns.connect(bp); bp.connect(boilGain); boilGain.connect(master); ns.start();
     nextBar = AC.currentTime + 0.1;
   } catch (e) { AC = null; }
-}
+};
 function tone(f, t, dur, vol, type = 'sine') {
   const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f;
   g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
@@ -267,8 +267,23 @@ function wakeAudio(gesture) {
     if (gesture) setTimeout(() => { if (AC === old && old.state !== 'running') { try { old.close(); } catch (e) {} AC = null; initAudio(); } }, 600);
   }
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeAudio(false); });
-window.addEventListener('pageshow', () => wakeAudio(false));
+let wakeSeq = 0, restartGame = () => location.reload();
+const audioAlive = t0 => AC && AC.state === 'running' && AC.currentTime > t0 + 0.05;
+function returnCheck() {
+  if (mode === 'title' || !AC || document.hidden) return;
+  const seq = ++wakeSeq, live = () => seq === wakeSeq && !document.hidden;
+  wakeAudio(false);
+  setTimeout(() => { if (!live()) return; const t0 = AC ? AC.currentTime : 0;
+    setTimeout(() => { if (!live() || audioAlive(t0)) return;             // sound is running again: nothing to do
+      try { AC.close(); } catch (e) {} AC = null; initAudio();              // dead context: build a fresh one
+      const t1 = AC ? AC.currentTime : 0;
+      setTimeout(() => { if (live() && !audioAlive(t1)) restartGame(); }, 700);   // still silent: start the game over
+    }, 400);
+  }, 500);
+}
+window.__wake = returnCheck;
+document.addEventListener('visibilitychange', () => { if (!document.hidden) returnCheck(); });
+window.addEventListener('pageshow', e => { if (e.persisted) returnCheck(); else wakeAudio(false); });
 window.addEventListener('focus', () => wakeAudio(false));
 for (const ev of ['pointerdown', 'touchend', 'keydown']) window.addEventListener(ev, () => wakeAudio(true), true);
 function musicTick() {
@@ -828,6 +843,7 @@ async function playBotc() {
   g.over = true; if (!g.auto) resultMusic(mine === fin);
   await bsay(ST, (fin === 'good' ? '善良' : '邪恶') + '阵营获胜。');
   await bsay(ST, '欢迎下次再玩。');
+  await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
   if (!g.auto && run === g.run && mode === 'tower') leaveTower();
   return g.result;
 }
@@ -1037,7 +1053,13 @@ resize(); refreshUI();
 // debug entry points for automated checks: #world, #stall, #test
 if (location.hash) {
   $('title').style.display = 'none'; mode = 'world'; zoomOut = zoomTarget = 0; $('zoom').style.display = 'block';
-  if (location.hash === '#audio') setTimeout(async () => { const log = []; try { initAudio(); log.push('ctx=' + !!AC + ' state=' + (AC && AC.state)); if (AC) { await AC.resume(); musicTick(); const b0 = barIdx; await AC.suspend(); log.push('suspended=' + AC.state); document.dispatchEvent(new Event('visibilitychange')); await new Promise(r => setTimeout(r, 300)); log.push('afterReturn=' + AC.state); nextBar = AC.currentTime - 30; musicTick(); log.push('barsScheduledAfterGap=' + (barIdx - b0) + ' nextBarAhead=' + (nextBar > AC.currentTime)); const old = AC; await AC.close(); window.dispatchEvent(new Event('pointerdown')); log.push('afterClosed newCtx=' + (AC && AC !== old) + ' state=' + (AC && AC.state)); } } catch (e) { log.push('ERR ' + e.message); } document.title = log.join(' ; '); }, 300);
+  if (location.hash === '#audio') setTimeout(async () => { const log = []; restartGame = () => {}; try { initAudio(); log.push('ctx=' + !!AC + ' state=' + (AC && AC.state)); if (AC) { await AC.resume(); musicTick(); const b0 = barIdx; await AC.suspend(); log.push('suspended=' + AC.state); document.dispatchEvent(new Event('visibilitychange')); await new Promise(r => setTimeout(r, 300)); log.push('afterReturn=' + AC.state); nextBar = AC.currentTime - 30; musicTick(); log.push('barsScheduledAfterGap=' + (barIdx - b0) + ' nextBarAhead=' + (nextBar > AC.currentTime)); const old = AC; await AC.close(); window.dispatchEvent(new Event('pointerdown')); log.push('afterClosed newCtx=' + (AC && AC !== old) + ' state=' + (AC && AC.state)); } } catch (e) { log.push('ERR ' + e.message); } document.title = log.join(' ; '); }, 300);
+  if (location.hash === '#wake') setTimeout(async () => { const log = [], wait = ms => new Promise(r => setTimeout(r, ms)); let restarts = 0; restartGame = () => { restarts++; }; mode = 'world'; initAudio(); await AC.resume();
+    await AC.suspend(); returnCheck(); await wait(2000); log.push('suspended->' + AC.state + ' restarts=' + restarts);
+    const dead = AC; await dead.close(); returnCheck(); await wait(2000); log.push('closed-> newCtx=' + (AC !== dead) + ' ' + (AC && AC.state) + ' restarts=' + restarts);
+    const real = initAudio; initAudio = () => {}; await AC.close(); returnCheck(); await wait(2000); log.push('cannotRebuild-> restarts=' + restarts); initAudio = real;
+    document.title = log.join(' ; '); $('err').style.cssText += ';font-size:15px;line-height:1.5'; $('err').textContent = log.join('\n'); }, 300);
+  if (location.hash === '#bye') { enterTower(); fade = 0; const log = []; let n = 0; const step = () => { if (n++ > 600) { document.title = 'timeout'; return; } const w = BG.wait; if (BG.over && BG.bubble && BG.bubble.text === '欢迎下次再玩。') { botcTap(5, 5); setTimeout(() => { log.push('tap1 mode=' + mode + ' bubble=' + (BG.bubble ? 'shown' : 'gone')); botcTap(5, 5); setTimeout(() => { log.push('tap2 mode=' + mode); document.title = log.join(' ; '); }, 50); }, 50); return; } if (w) { w.type === 'say' ? botcTap(5, 5) : (BG.wait = null, w.res(w.blank !== undefined ? w.blank : [1, 2, 0].find(w.ok))); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
   if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
