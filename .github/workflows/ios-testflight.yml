@@ -1,0 +1,93 @@
+name: iOS → TestFlight
+
+# Wraps index.html in a WKWebView shell and uploads it to App Store Connect
+# (app "拉麵怪奇物語", bundle meloalright.ramen-ya). Manual trigger only.
+on:
+  workflow_dispatch:
+
+env:
+  TEAM_ID: "9TGD35M5GT"
+  SCHEME: "StrangerRamen"
+
+jobs:
+  ios:
+    name: iOS → TestFlight
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          set -eo pipefail
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sed 's#.*/Xcode_##;s#.app##' | sort -V | tail -1)
+          sudo xcode-select -s "/Applications/Xcode_${LATEST}.app/Contents/Developer"
+          xcodebuild -version
+
+      - name: Write App Store Connect API key
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: |
+          set -eo pipefail
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo "$ASC_API_KEY_P8" > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          echo "ASC_KEY_PATH=$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" >> "$GITHUB_ENV"
+
+      - name: Generate Xcode project
+        run: |
+          set -eo pipefail
+          brew install xcodegen
+          mkdir -p ios/web
+          cp index.html ios/web/index.html
+          cd ios && xcodegen generate
+          ls -la
+
+      - name: Archive & upload
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -eo pipefail
+          # the old Godot builds went up to 49; stay well above them
+          BUILD_NUM=$(( 1000 + ${{ github.run_number }} ))
+          echo "BUILD_NUM=$BUILD_NUM"
+
+          xcodebuild -project "ios/$SCHEME.xcodeproj" -scheme "$SCHEME" -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/app.xcarchive" \
+            CURRENT_PROJECT_VERSION=$BUILD_NUM \
+            CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM="$TEAM_ID" \
+            -allowProvisioningUpdates -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" archive
+
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>destination</key><string>export</string>
+          </dict></plist>
+          PLIST
+
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/app.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export-ios" -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+          IPA=$(find "$RUNNER_TEMP/export-ios" -name "*.ipa" | head -1)
+          echo "ipa=$IPA"
+          xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee "$RUNNER_TEMP/altool-ios.log"
+          if grep -qiE 'ERROR:|Validation failed' "$RUNNER_TEMP/altool-ios.log"; then
+            echo "::error::altool upload to App Store Connect failed (see the validation details above)"
+            exit 1
+          fi
+
+      - name: Upload .ipa artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stranger-ramen-ipa
+          path: ${{ runner.temp }}/export-ios/**/*.ipa
+          if-no-files-found: warn
