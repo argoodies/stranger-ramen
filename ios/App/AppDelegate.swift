@@ -15,6 +15,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    // going to the background: fade the sound out and pause it, so nothing crackles or hisses on the way out
+    func applicationWillResignActive(_ application: UIApplication) {
+        (window?.rootViewController as? GameViewController)?.hush()
+    }
+
     // back from the background: let the game check that its sound still works (it restarts itself if not)
     func applicationDidBecomeActive(_ application: UIApplication) {
         (window?.rootViewController as? GameViewController)?.wake()
@@ -27,6 +32,10 @@ final class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .portrait }
+
+    func hush() {
+        webView?.evaluateJavaScript("window.__hush && window.__hush()", completionHandler: nil)
+    }
 
     func wake() {
         webView?.evaluateJavaScript("window.__wake && window.__wake()", completionHandler: nil)

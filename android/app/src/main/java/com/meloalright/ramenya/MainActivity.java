@@ -49,7 +49,12 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onPause() { super.onPause(); web.onPause(); }
+    protected void onPause() {
+        // fade the sound out and pause it before the page is frozen, so nothing crackles or hisses on the way out
+        web.evaluateJavascript("window.__hush && window.__hush()", null);
+        super.onPause();
+        web.postDelayed(() -> { if (!hasWindowFocus()) web.onPause(); }, 150);
+    }
 
     @Override
     protected void onResume() {

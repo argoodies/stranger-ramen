@@ -257,12 +257,21 @@ const MUSIC = {
 };
 let melIdx = 3;
 // keep the music alive across tab switches / app backgrounding: resume the context, or rebuild it if the browser killed it
+function hushAudio() {
+  if (!AC || AC.state !== 'running') return;
+  const ctx = AC, t = ctx.currentTime;
+  try { master.gain.cancelScheduledValues(t); master.gain.setTargetAtTime(0, t, .012); if (boilGain) boilGain.gain.value = 0; } catch (e) {}
+  setTimeout(() => { if (document.hidden && ctx.state === 'running') { const p = ctx.suspend(); if (p && p.catch) p.catch(() => {}); } }, 70);
+}
+function unhush() { if (AC && master && AC.state === 'running') { const t = AC.currentTime; try { master.gain.cancelScheduledValues(t); master.gain.setTargetAtTime(.85, t, .08); } catch (e) {} } }
+window.__hush = hushAudio;
 function wakeAudio(gesture) {
+  unhush();
   if (!AC) { if (gesture && mode !== 'title') initAudio(); return; }
   if (AC.state === 'closed') { AC = null; if (gesture) initAudio(); return; }
   if (AC.state !== 'running') {
     const old = AC, p = old.resume();
-    if (p && p.catch) p.catch(() => {});
+    if (p && p.then) p.then(unhush, () => {});
     // still not running shortly after a real tap → throw the dead context away and start a fresh one
     if (gesture) setTimeout(() => { if (AC === old && old.state !== 'running') { try { old.close(); } catch (e) {} AC = null; initAudio(); } }, 600);
   }
@@ -282,12 +291,14 @@ function returnCheck() {
   }, 500);
 }
 window.__wake = returnCheck;
-document.addEventListener('visibilitychange', () => { if (!document.hidden) returnCheck(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) hushAudio(); else returnCheck(); });
+window.addEventListener('pagehide', hushAudio);
 window.addEventListener('pageshow', e => { if (e.persisted) returnCheck(); else wakeAudio(false); });
 window.addEventListener('focus', () => wakeAudio(false));
 for (const ev of ['pointerdown', 'touchend', 'keydown']) window.addEventListener(ev, () => wakeAudio(true), true);
 function musicTick() {
   if (!AC || AC.state !== 'running') return;
+  if (boilGain && mode !== 'stall' && boilGain.gain.value > 0) boilGain.gain.value = 0;      // the simmer is a shop sound only
   if (nextBar < AC.currentTime - .05) nextBar = AC.currentTime + .15;   // came back after being away: pick the music up right now
   while (nextBar < AC.currentTime + 1.2) {
     const [ch, sc] = (MUSIC[mode] || MUSIC.world)[barIdx++ % 4];
@@ -438,10 +449,11 @@ function drawWorld(t, dt) {
     ctx.fillStyle = css([250, 246, 238], .96 * al); rrect(bx - tw / 2, by - 15, tw, 30, 12); ctx.fill(); poly([[p[0] - 6, by + 14], [p[0] + 6, by + 14], [p[0], by + 23]], [250, 246, 238], .96 * al); text(n.say, bx, by, fs, [50, 36, 70], al, 'center', true);
   }
   if (mode === 'title') {
-    // small horizontal lettering beside the clock face, sitting on a hairline
-    const a = v.P(1.5, -1.5, 7.5), fs = clamp(s * .92, 14, 28), gap = fs * 1.34, chars = [...'拉面怪奇物语'], x0 = Math.min(a[0] + fs * 1.5, W - gap * (chars.length - 1) - fs * 1.1), y = a[1] - fs * .1;
-    chars.forEach((ch, k) => text(ch, x0 + gap * k, y, fs, [255, 255, 255], 1, 'center', false));
-    line([[x0 - fs * .5, y + fs * .95], [x0 + gap * (chars.length - 1) + fs * .5, y + fs * .95]], [255, 255, 255], 1, .55);
+    // the title, in the Monument Valley manner: thin, widely spaced lettering beside the clock face
+    const a = v.P(1.5, -1.5, 7.5), chars = [...'拉面怪奇物语'], fs = clamp(s * .86, 13, 26), x0 = a[0] + fs * 1.5, gap = Math.min(fs * 1.9, (W - fs * 1.3 - x0) / (chars.length - 1)), y = a[1];
+    ctx.font = `200 ${fs}px "PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.96)';
+    chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y));
   }
   if (mode === 'world' && G.late) text('夜深了，回拉面档口睡觉', W / 2, H * 0.9, 15, [255, 236, 190], .7 + .3 * Math.sin(t * 3), 'center', true);
 }
@@ -1134,6 +1146,9 @@ resize(); refreshUI();
 if (location.hash) {
   $('title').style.display = 'none'; mode = 'world'; zoomOut = zoomTarget = 0; $('zoom').style.display = 'block';
   if (location.hash === '#audio') setTimeout(async () => { const log = []; restartGame = () => {}; try { initAudio(); log.push('ctx=' + !!AC + ' state=' + (AC && AC.state)); if (AC) { await AC.resume(); musicTick(); const b0 = barIdx; await AC.suspend(); log.push('suspended=' + AC.state); document.dispatchEvent(new Event('visibilitychange')); await new Promise(r => setTimeout(r, 300)); log.push('afterReturn=' + AC.state); nextBar = AC.currentTime - 30; musicTick(); log.push('barsScheduledAfterGap=' + (barIdx - b0) + ' nextBarAhead=' + (nextBar > AC.currentTime)); const old = AC; await AC.close(); window.dispatchEvent(new Event('pointerdown')); log.push('afterClosed newCtx=' + (AC && AC !== old) + ' state=' + (AC && AC.state)); } } catch (e) { log.push('ERR ' + e.message); } document.title = log.join(' ; '); }, 300);
+  if (location.hash === '#hush') setTimeout(async () => { const log = [], wait = ms => new Promise(r => setTimeout(r, ms)); restartGame = () => { log.push('RESTART'); }; mode = 'world'; initAudio(); await AC.resume(); enterStall(); stall.pot = 'cooking'; for (let k = 0; k < 40; k++) updateStall(.05); log.push('boilInShop=' + boilGain.gain.value.toFixed(3)); leaveStall(); musicTick(); log.push('boilOutside=' + boilGain.gain.value);
+    hushAudio(); await wait(300); log.push('afterHush gain=' + master.gain.value.toFixed(3) + ' state=' + AC.state); wakeAudio(false); await wait(600); log.push('afterWake gain=' + master.gain.value.toFixed(2) + ' state=' + AC.state);
+    document.title = log.join(' ; '); $('err').textContent = log.join('\n'); }, 300);
   if (location.hash === '#wake') setTimeout(async () => { const log = [], wait = ms => new Promise(r => setTimeout(r, ms)); let restarts = 0; restartGame = () => { restarts++; }; mode = 'world'; initAudio(); await AC.resume();
     await AC.suspend(); returnCheck(); await wait(2000); log.push('suspended->' + AC.state + ' restarts=' + restarts);
     const dead = AC; await dead.close(); returnCheck(); await wait(2000); log.push('closed-> newCtx=' + (AC !== dead) + ' ' + (AC && AC.state) + ' restarts=' + restarts);
