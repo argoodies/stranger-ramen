@@ -499,52 +499,69 @@ function spawnCustomer() {
 }
 const same = (b, w) => b.chili === w.chili && b.cilantro === w.cilantro && b.beef === w.beef;
 function waiting() { return stall.seats.map((c, i) => c && c.state === 'wait' ? i : -1).filter(i => i >= 0).sort((a, b) => stall.seats[b].wait - stall.seats[a].wait); }
-function can(a) {
-  const s = stall, b = s.bowl;
-  switch (a) {
-    case 'boil': return s.pot === 'empty';
-    case 'scoop': return s.pot === 'done' && !s.strainer;
-    case 'put': return s.strainer && !b.noodle;
-    case 'soup': return b.noodle && !b.soup;
-    case 'chili': case 'cilantro': case 'beef': return b.noodle && !b[a];
-    case 'serve': return b.noodle && b.soup && waiting().length > 0;
-  }
-}
-function hintAction() {
-  const s = stall, b = s.bowl, w = waiting();
-  if (!b.noodle) { if (s.strainer) return 'put'; if (s.pot === 'empty') return 'boil'; if (s.pot === 'done') return 'scoop'; return null; }
-  if (!b.soup) return 'soup';
-  if (w.length) { const want = s.seats[w[0]].want; for (const k of ['chili', 'cilantro', 'beef']) if (want[k] && !b[k]) return k; return 'serve'; }
-  return null;
-}
+// Everything in the shop is "pick it up, then put it down": stall.hold is what is in your hand
+// (null | 'noodle' | 'soup' | 'chili' | 'cilantro' | 'beef' | 'bowl').
+const ING = ['soup', 'chili', 'cilantro', 'beef'];
+function setHold(h) { stall.hold = h; stall.strainer = h === 'noodle'; }
 function refreshUI() {}
-const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81 };
-// where the owner stands, and what flies into the bowl, for each action
-const SPOT = { boil: [1.6, 1.6], scoop: [1.6, 1.6], put: [2.45, 1.25], soup: [1.6, 2.6], chili: [3.3, 1.25], cilantro: [4.0, 1.25], beef: [4.7, 1.25] };
-const FLYC = { put: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
+const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
+const SPOT = { boil: [1.6, 1.6], scoop: [1.6, 1.6], put: [2.45, 1.25], soup: [1.6, 2.6], chili: [3.3, 1.25], cilantro: [4.0, 1.25], beef: [4.7, 1.25], bowl: [2.45, 1.25] };
+const FLYC = { noodle: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
+const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; } };
+// pick something up
+function grab(k) {
+  const s = stall, b = s.bowl;
+  if (s.hold) return false;
+  if (k === 'noodle') { if (s.pot !== 'done') return false; s.pot = 'empty'; goTo('scoop'); chime(NOTE.scoop, 0, .2, 1.4); }
+  else if (k === 'bowl') { if (!b.noodle) return false; goTo('bowl'); chime(NOTE.bowl, 0, .16, 1); }
+  else if (ING.includes(k)) { if (!b.noodle || b[k]) return false; goTo(k); chime(NOTE[k] - 12, 0, .14, .9); }
+  else return false;
+  setHold(k); return true;
+}
+// put what is in your hand into the bowl on the table
+function intoBowl() {
+  const s = stall, b = s.bowl, h = s.hold;
+  if (!h || h === 'bowl') return false;
+  if (h === 'noodle') { if (b.noodle) return false; b.noodle = true; } else { if (!b.noodle || b[h]) return false; b[h] = true; }
+  s.bowlAnim[h] = 0; goTo('put'); chime(NOTE[h === 'noodle' ? 'put' : h], 0, .2, 1.4);
+  if (HIT.own && HIT.bowl) s.fly.push({ a: [HIT.own[0], HIT.own[1]], b: [HIT.bowl[0], HIT.bowl[1]], t: 0, c: FLYC[h] });
+  setHold(null); return true;
+}
+// carry the bowl in your hands to a customer
+function serve(i) {
+  const s = stall, b = s.bowl, c = s.seats[i];
+  if (s.hold !== 'bowl' || !b.soup || !c || c.state !== 'wait') return false;
+  if (s.sinceSelf >= 3) { s.ownSay = '有点饿了。先给自己做一碗，放到吧台上。'; s.ownSayT = 4; return false; }
+  const ok = same(b, c.want);
+  c.state = 'eat'; c.t = 0; c.dish = Object.assign({}, b); c.say = ok ? pick(['好吃！', '就是这个味！', '暖和了～', '谢谢老板！']) : pick(['嗯…这不是我点的', '好像不太对？']);
+  save.served++; s.sinceSelf++; localStorage.setItem('ctramen', JSON.stringify(save));
+  if (s.sinceSelf >= 3) { s.ownSay = '有点饿了，给自己做一碗吧。'; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
+  if (ok) [67, 71, 74, 79, 83].forEach((m, k) => chime(m, k * .09, .16, 1.4)); else { chime(61, 0, .16, 1); chime(62, 0.02, .12, 1); }
+  s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = SEATX[i]; s.owner.ty = 0.95;
+  return true;
+}
+// whole steps in one go, for the automated checks: act('soup') = pick the ladle up + pour it in, act('serve', i) = lift the bowl + hand it over
 function act(a, seat) {
-  const s = stall, b = s.bowl, o = s.owner;
-  if (!can(a)) return false;
-  if (NOTE[a]) chime(NOTE[a], 0, .2, 1.4);
-  if (SPOT[a]) { o.tx = SPOT[a][0]; o.ty = SPOT[a][1]; }
-  if (FLYC[a] && HIT[a === 'put' ? 'pot' : a] && HIT.bowl) s.fly.push({ a: a === 'put' ? [HIT.own[0], HIT.own[1]] : [HIT[a][0], HIT[a][1]], b: [HIT.bowl[0], HIT.bowl[1]], t: 0, c: FLYC[a] });
-  if (a === 'boil') { s.pot = 'cooking'; s.potT = 0; }
-  else if (a === 'scoop') { s.pot = 'empty'; s.strainer = true; }
-  else if (a === 'put') { s.strainer = false; b.noodle = true; s.bowlAnim.noodle = 0; }
-  else if (a === 'soup') { b.soup = true; s.bowlAnim.soup = 0; }
-  else if (a === 'serve') {
-    const w = waiting(); let i = seat;
-    if (i == null) { const hit = w.find(k => same(b, s.seats[k].want)); i = hit != null ? hit : w[0]; }
-    const c = s.seats[i]; if (!c || c.state !== 'wait') return false;
-    if (s.sinceSelf >= 3) { s.ownSay = '有点饿了。先给自己做一碗，放到吧台上。'; s.ownSayT = 4; return false; }
-    const ok = same(b, c.want);
-    c.state = 'eat'; c.t = 0; c.dish = Object.assign({}, b); c.say = ok ? pick(['好吃！', '就是这个味！', '暖和了～', '谢谢老板！']) : pick(['嗯…这不是我点的', '好像不太对？']);
-    save.served++; s.sinceSelf++; localStorage.setItem('ctramen', JSON.stringify(save));
-    if (s.sinceSelf >= 3) { s.ownSay = '有点饿了，给自己做一碗吧。'; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
-    if (ok) [67, 71, 74, 79, 83].forEach((m, k) => chime(m, k * .09, .16, 1.4)); else { chime(61, 0, .16, 1); chime(62, 0.02, .12, 1); }
-    s.bowl = emptyBowl(); s.bowlAnim = {}; o.tx = SEATX[i]; o.ty = 0.95;
-  } else { b[a] = true; s.bowlAnim[a] = 0; }
-  refreshUI(); return true;
+  const s = stall;
+  if (a === 'boil') { if (s.pot !== 'empty' || s.hold) return false; s.pot = 'cooking'; s.potT = 0; goTo('boil'); chime(NOTE.boil, 0, .2, 1.4); return true; }
+  if (a === 'scoop') return grab('noodle');
+  if (a === 'put') return s.hold === 'noodle' && intoBowl();
+  if (ING.includes(a)) return grab(a) && intoBowl();
+  if (a === 'serve') { const w = waiting(); let i = seat; if (i == null) { const m = w.find(k => same(s.bowl, s.seats[k].want)); i = m != null ? m : w[0]; } if (i == null || !s.bowl.soup) return false; if (!s.hold && !grab('bowl')) return false; const ok = serve(i); if (!ok && s.hold === 'bowl') setHold(null); return ok; }
+  return false;
+}
+// what to touch next
+function hintKey() {
+  const s = stall, b = s.bowl, w = waiting(), h = s.hold, self = s.sinceSelf >= 3;
+  if (h === 'bowl') { if (!b.soup) return 'bin'; if (self) return 'bar'; const m = w.find(k => same(b, s.seats[k].want)); return w.length ? 'spot' + (m != null ? m : w[0]) : null; }
+  if (h) return 'bowl';
+  if (s.myBowl) return s.eatT > 0 ? null : 'bar';
+  if (s.done) return 'exit';
+  if (!b.noodle) return s.pot === 'cooking' ? null : 'pot';
+  if (!b.soup) return 'soup';
+  if (self) return 'bowl';
+  if (w.length) { const want = s.seats[w[0]].want; for (const k of ['chili', 'cilantro', 'beef']) if (want[k] && !b[k]) return k; return 'bowl'; }
+  return null;
 }
 // tap an object in the shop
 const HIT = {};
@@ -552,33 +569,38 @@ function stallTap(x, y) {
   let best = null, bd = 1e9;
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
   if (!best) return;
-  let ok = false;
-  if (best === 'pot') { ok = stall.pot === 'empty' ? act('boil') : stall.pot === 'done' ? act('scoop') : false; if (ok && stall.strainer && has('scoop')) act('put'); }
-  else if (best === 'bowl') ok = act('put');
-  else if (best === 'bin') { dump(); ok = true; }
+  const s = stall, h = s.hold; let ok = false;
+  if (best === 'exit') { if (h) { ok = false; } else { leaveStall(); return; } }
+  else if (best === 'pot') ok = h === 'noodle' ? false : s.pot === 'empty' ? act('boil') : grab('noodle');
+  else if (ING.includes(best)) { if (h === best) { setHold(null); chime(57, 0, .1, .6); ok = true; } else ok = grab(best); }
+  else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
+  else if (best === 'bin') ok = dump();
   else if (best === 'bar') ok = barTap();
-  else if (best === 'exit') { leaveStall(); return; }
-  else if (best.startsWith('seat') || best.startsWith('spot')) ok = act('serve', +best[4]);
-  else ok = act(best);
-  if (!ok) { stall.nope = best; stall.nopeT = 0.35; chime(45, 0, .1, .3); }
+  else if (best.startsWith('seat') || best.startsWith('spot')) ok = serve(+best[4]);
+  if (!ok) { s.nope = best; s.nopeT = 0.35; chime(45, 0, .1, .3); }
 }
 function barTap() {
   const s = stall, b = s.bowl;
-  if (s.myBowl) { if (s.eatT > 0) return true; s.eatT = 2.4; s.owner.tx = 4.45; s.owner.ty = .95; [67, 71, 74].forEach((m, k) => chime(m, k * .5, .14, 1.2)); return true; }
+  if (s.myBowl) { if (s.hold) return false; if (s.eatT > 0) return true; s.eatT = 2.4; s.owner.tx = 4.45; s.owner.ty = .95; [67, 71, 74].forEach((m, k) => chime(m, k * .5, .14, 1.2)); return true; }
   if (s.sinceSelf < 3) { s.ownSay = pick(['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。']); s.ownSayT = 3; return false; }
-  if (!(b.noodle && b.soup)) return false;
-  s.myBowl = Object.assign({}, b); s.bowl = emptyBowl(); s.bowlAnim = {}; s.owner.tx = 4.45; s.owner.ty = .95; chime(79, 0, .18, 1.4); chime(83, .1, .14, 1.4);
+  if (s.hold !== 'bowl' || !b.soup) return false;
+  s.myBowl = Object.assign({}, b); s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = 4.45; s.owner.ty = .95; chime(79, 0, .18, 1.4); chime(83, .1, .14, 1.4);
   s.ownSayT = 0; return true;
 }
-function dump() { stall.bowl = emptyBowl(); stall.bowlAnim = {}; stall.strainer = false; stall.owner.tx = 4.0; stall.owner.ty = 2.9; chime(50, 0, .14, .8); refreshUI(); }
+// the bin takes whatever is in your hand: a whole bowl, or just the ladle / topping / noodles you picked up
+function dump() {
+  const s = stall; if (!s.hold) return false;
+  if (s.hold === 'bowl') { s.bowl = emptyBowl(); s.bowlAnim = {}; }
+  setHold(null); s.owner.tx = 4.0; s.owner.ty = 2.9; chime(50, 0, .14, .8); return true;
+}
 function enterStall() {
   mode = 'stall'; $('leave').style.display = 'block'; $('zoom').style.display = 'none'; $('enter').style.display = 'none';
-  stall.spawn = 3; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
+  setHold(null); stall.spawn = 3; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
 }
 function leaveStall() {
   $('leave').classList.remove('hint');
   mode = 'world'; $('leave').style.display = 'none'; $('zoom').style.display = 'block';
-  stall.seats = [null, null, null]; stall.pot = 'empty'; stall.strainer = false; stall.bowl = emptyBowl(); stall.bowlAnim = {}; stall.ownSayT = 0;
+  stall.seats = [null, null, null]; stall.pot = 'empty'; setHold(null); stall.bowl = emptyBowl(); stall.bowlAnim = {}; stall.ownSayT = 0;
   player.x = DOOR[0] + .5; player.y = DOOR[1] + .5; player.path = []; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
 function updateStall(dt) {
@@ -681,12 +703,18 @@ function drawStall(t) {
   const drawOwner = () => {
     fig(op[0], op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0), s * 1.15, { kind: 'chef', apron: [220, 80, 80] });
     HIT.own = [op[0] + s * .45, op[1] - s * 1.0, 0];
-    if (st.strainer) { const hp = HIT.own; line([[hp[0], hp[1]], [hp[0] + s * .3, hp[1] - s * .3]], [150, 110, 90], s * .05); circ(hp[0], hp[1], s * .17, [190, 196, 214]); circ(hp[0], hp[1], s * .13, [250, 232, 170]); }
+    const hp = HIT.own, hd = st.hold;
+    if (hd === 'noodle') { line([[hp[0], hp[1]], [hp[0] + s * .3, hp[1] - s * .3]], [150, 110, 90], s * .05); circ(hp[0], hp[1], s * .17, [190, 196, 214]); circ(hp[0], hp[1], s * .13, [250, 232, 170]); }
+    else if (hd === 'soup') { line([[hp[0], hp[1]], [hp[0] + s * .28, hp[1] - s * .34]], [150, 110, 90], s * .05); ell(hp[0], hp[1], s * .17, s * .12, [190, 196, 214]); ell(hp[0], hp[1] - s * .02, s * .13, s * .08, [226, 160, 84]); }
+    else if (hd === 'chili') { ell(hp[0], hp[1], s * .13, s * .09, [236, 232, 240]); for (let i = 0; i < 4; i++) circ(hp[0] + Math.cos(i * 1.7) * s * .06, hp[1] - s * .03 + Math.sin(i * 1.7) * s * .03, s * .035, [220, 40, 40]); }
+    else if (hd === 'cilantro') { for (let i = 0; i < 5; i++) ell(hp[0] + Math.cos(i * 1.3) * s * .08, hp[1] - s * .04 * (i % 3), s * .09, s * .06, i % 2 ? [96, 186, 106] : [62, 152, 86]); }
+    else if (hd === 'beef') { ctx.save(); ctx.translate(hp[0], hp[1]); ctx.rotate(-.5); ctx.fillStyle = css([150, 86, 62]); rrect(-s * .15, -s * .06, s * .3, s * .12, s * .05); ctx.fill(); ctx.fillStyle = css([190, 124, 96]); rrect(-s * .1, -s * .02, s * .2, s * .035, s * .015); ctx.fill(); ctx.restore(); }
+    else if (hd === 'bowl') bowlTopMini(hp[0] - s * .12, hp[1] + s * .08, s * .36 * 1.2247, st.bowl);
   };
   const inFront = st.owner.y > 2.4; if (!inFront) drawOwner();
   // prep table: the bowl and the three toppings
   v.box(1.9, 1.6, 0, 3.3, .95, 1.0, [150, 108, 88]);
-  hit('bowl', 2.45, 2.07, 1.1, .55); ctx.save(); ctx.translate(wob('bowl'), 0); iso_bowl(v, 2.45, 2.07, 1.03, .36, st.bowl); ctx.restore();
+  hit('bowl', 2.45, 2.07, 1.1, .55); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(2.45, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .4, s * .22, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else iso_bowl(v, 2.45, 2.07, 1.03, .36, st.bowl); ctx.restore();
   hit('chili', 3.3, 2.07, 1.2, .46); ctx.save(); ctx.translate(wob('chili'), 0);
   v.disc(3.3, 2.07, 1.0, .25, .34, [236, 232, 240]); v.disc(3.3, 2.07, 1.34, .2, 0, [214, 48, 44]); { const p = P(3.3, 2.07, 1.36); for (let i = 0; i < 5; i++) circ(p[0] + Math.cos(i * 1.9) * s * .1, p[1] + Math.sin(i * 1.9) * s * .05, s * .03, [255, 150, 90]); } ctx.restore();
   hit('cilantro', 4.0, 2.07, 1.2, .46); ctx.save(); ctx.translate(wob('cilantro'), 0);
@@ -698,13 +726,9 @@ function drawStall(t) {
   hit('bin', 4.45, 3.0, .35, .42); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(4.45, 3.0, 0, .26, .55, [120, 132, 150]); v.disc(4.45, 3.0, .55, .21, 0, [50, 44, 70]); ctx.restore();
   // hanging lamps
   for (const lx of [1.5, 3.6]) { const a = P(lx, 1.3, Hh + .6), b = P(lx, 1.3, 3.2); line([a, b], [70, 52, 92], 1.5); glow(b[0], b[1] + s * .15, s * 1.7, [255, 214, 140], .5); poly([[b[0] - s * .22, b[1] + s * .16], [b[0] + s * .22, b[1] + s * .16], [b[0], b[1] - s * .12]], [226, 106, 96]); circ(b[0], b[1] + s * .18, s * .07, [255, 240, 190]); }
-  // gentle pointer to the next thing to touch: always when it is your own bowl's turn, otherwise only for the first few bowls
-  const selfDue = st.sinceSelf >= 3 || st.myBowl;
+  // a ring around the next thing to touch
   {
-    const h = hintAction(), w = waiting(), b = st.bowl;
-    let k = h === 'serve' ? (w.length ? 'spot' + w[0] : null) : h === 'boil' || h === 'scoop' ? 'pot' : h === 'put' ? 'bowl' : h;
-    if (st.done) k = 'exit';
-    else if (selfDue) k = null;
+    const k = hintKey();
     const o = k && HIT[k];
     if (o) { ctx.beginPath(); ctx.ellipse(o[0], o[1], o[2] * (1 + .08 * Math.sin(t * 5)), o[2] * (.72 + .06 * Math.sin(t * 5)), 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .55 + .35 * Math.sin(t * 5)); ctx.lineWidth = 2.5; ctx.stroke(); }
   }
@@ -1071,6 +1095,7 @@ if (location.hash) {
     const real = initAudio; initAudio = () => {}; await AC.close(); returnCheck(); await wait(2000); log.push('cannotRebuild-> restarts=' + restarts); initAudio = real;
     document.title = log.join(' ; '); $('err').style.cssText += ';font-size:15px;line-height:1.5'; $('err').textContent = log.join('\n'); }, 300);
   if (location.hash === '#bye') { enterTower(); fade = 0; const log = []; let n = 0; const step = () => { if (n++ > 600) { document.title = 'timeout'; return; } const w = BG.wait; if (BG.over && BG.bubble && BG.bubble.text === '欢迎下次再玩。') { botcTap(5, 5); setTimeout(() => { log.push('tap1 mode=' + mode + ' bubble=' + (BG.bubble ? 'shown' : 'gone')); botcTap(5, 5); setTimeout(() => { log.push('tap2 mode=' + mode); document.title = log.join(' ; '); }, 50); }, 50); return; } if (w) { w.type === 'say' ? botcTap(5, 5) : (BG.wait = null, w.res(w.blank !== undefined ? w.blank : [1, 2, 0].find(w.ok))); } setTimeout(step, 20); }; setTimeout(step, 100); }
+  if (location.hash.startsWith('#hold')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); const m = location.hash.slice(5); if (m === 'soup') grab('soup'); else { act('soup'); act('beef'); if (m === 'beef') { stall.bowl.beef = false; grab('beef'); } else grab('bowl'); } stall.owner.x = stall.owner.tx; stall.owner.y = stall.owner.ty; }, 200);
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
   if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
@@ -1079,7 +1104,7 @@ if (location.hash) {
   if (location.hash === '#botctap') { enterTower(); fade = 0; const log = []; let guard = 0; const step = () => { const w = BG.wait; if (guard++ > 400 || BG.over) { document.title = log.join(' ; ') + ' over=' + BG.over; return; } if (w) { if (w.type === 'say') botcTap(5, 5); else if (w.blank === 'none') { botcTap(5, H - 5); log.push('blankNominate->' + (BG.wait !== w)); } else if (w.blank === 'no') { const k = [0, 1, 2].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); log.push('tapNomineeVote->' + (BG.votes && BG.votes[0])); } else { const k = [1, 2, 0].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); log.push('pick' + k); } } setTimeout(step, 25); }; setTimeout(step, 100); }
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#botcview')) { enterTower(); fade = 0; const n = +location.hash.slice(9) || 0; let k = 0; const step = () => { if (k++ < n && BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); setTimeout(step, 30); } }; setTimeout(step, 100); }
-  if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length); mk(); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode); document.title = log.join(' ; '); }, 500);
+  if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#bump') setTimeout(() => { const log = []; npcs.forEach((n, k) => { n.path = []; n.wait = 999; n.x = 8.5 + k % 3; n.y = -.5 + (k / 3 | 0); }); const a = npcs[0]; a.x = .5; a.y = 3.5; player.x = -.5; player.y = 3.5; player.path = bfs([-1, 3], [2, 3]).slice(1); let overlap = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (Math.floor(player.x) === 0 && Math.floor(player.y) === 3) overlap++; } log.push('walkAround overlap=' + overlap + ' at=' + cellOf(player)); const b = npcs[1]; b.x = 4.5; b.y = 3.5; b.wait = 0; b.path = bfs([4, 3], [1, 3]).slice(1); let ov2 = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (cellOf(b) + '' === cellOf(player) + '' || cellOf(b) + '' === cellOf(a) + '') ov2++; } log.push('npc overlap=' + ov2); drawWorld(1, 0.01); const p = wv.P(a.x, a.y); worldTap(p[0], p[1] - wv.s * .5); log.push('hello=' + a.say); enterStall(); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); act('soup'); log.push('barEarly=' + barTap() + ' say=' + stall.ownSay); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#lib') setTimeout(() => { const log = []; goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); log.push('enter=' + mode); fade = 0; drawLib(1); const fp = lv.P(3.5, 2.5); libTap(fp[0], fp[1]); for (let k = 0; k < 200 && lib.path.length; k++) updateLib(0.05); log.push('walk=' + cellOf(lib)); const sh = LHIT.shelf; libTap((sh[0] + sh[2]) / 2, (sh[1] + sh[3]) / 2); for (let k = 0; k < 200 && (lib.path.length || lib.pending); k++) updateLib(0.05); log.push('shelf at ' + cellOf(lib) + ' say=' + lib.say + ' ' + (lib.sayT > 0)); drawLib(1); libTap(LHIT.exit[0], LHIT.exit[1]); for (let k = 0; k < 200 && mode === 'lib'; k++) updateLib(0.05); log.push('exit=' + mode + ' at ' + cellOf(player)); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#stairs') setTimeout(() => { const log = []; player.x = 3.5; player.y = 1.5; drawWorld(1, .01); const sp = wv.P(2.1, 0, .6); worldTap(sp[0], sp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapStairs mode=' + mode); leaveTower(); player.x = -3.5; player.y = 3.5; drawWorld(1, .01); const hp = wv.P(-4.17, 2.15, 1.6); worldTap(hp[0], hp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapShopRoof mode=' + mode); document.title = log.join(' ; '); }, 500);
@@ -1099,13 +1124,16 @@ if (location.hash) {
       document.title = log.join(' ; ');
     }
     if (location.hash === '#tap') setTimeout(() => {
-      const tap = k => { const h = HIT[k]; if (!h) return 'NOHIT:' + k; stallTap(h[0], h[1]); return k; }, log = [];
-      const i = waiting()[0], want = stall.seats[i].want;
-      log.push(tap('soup') + '(early)->soup=' + stall.bowl.soup); log.push(tap('pot') + '->' + stall.pot); stall.potT = 9; updateStall(0.01);
-      log.push(tap('pot') + '->strainer=' + stall.strainer); log.push(tap('bowl') + '->noodle=' + stall.bowl.noodle); log.push(tap('soup') + '->soup=' + stall.bowl.soup);
-      for (const k of ['chili', 'cilantro', 'beef']) if (want[k]) log.push(tap(k) + '->' + stall.bowl[k]);
-      log.push(tap('seat' + i) + '->' + stall.seats[i].state + ':' + stall.seats[i].say);
-      tap('pot'); stall.potT = 9; updateStall(0.01); tap('pot'); tap('bowl'); log.push('bin:' + tap('bin') + '->noodle=' + stall.bowl.noodle);
+      const tap = k => { drawStall(1); const h = HIT[k]; if (!h) return 'NOHIT:' + k; stallTap(h[0], h[1]); return k; }, log = [], st = stall, hk = () => 'hint=' + hintKey();
+      const i = waiting()[0], want = st.seats[i].want;
+      log.push(hk()); tap('soup'); log.push('soupEarly hold=' + st.hold); tap('pot'); log.push('pot=' + st.pot + ' ' + hk()); st.potT = 9; updateStall(0.01);
+      log.push(hk()); tap('pot'); log.push('hold=' + st.hold + ' ' + hk()); tap('bowl'); log.push('noodle=' + st.bowl.noodle + ' hold=' + st.hold + ' ' + hk());
+      tap('soup'); log.push('hold=' + st.hold + ' soup=' + st.bowl.soup + ' ' + hk()); tap('bowl'); log.push('soup=' + st.bowl.soup + ' ' + hk());
+      for (const k of ['chili', 'cilantro', 'beef']) if (want[k]) { tap(k); const hd = st.hold; tap('bowl'); log.push(k + ':' + hd + '->' + st.bowl[k]); }
+      log.push(hk()); tap('seat' + i); log.push('serveNoBowlInHand=' + st.seats[i].state); tap('bowl'); log.push('hold=' + st.hold + ' ' + hk()); tap('spot' + i); log.push('served=' + st.seats[i].state + ':' + st.seats[i].say + ' hold=' + st.hold);
+      tap('pot'); st.potT = 9; updateStall(0.01); tap('pot'); tap('bin'); log.push('binNoodle hold=' + st.hold + ' noodle=' + st.bowl.noodle);
+      tap('pot'); st.potT = 9; updateStall(0.01); tap('pot'); tap('bowl'); tap('bowl'); log.push('liftBowl hold=' + st.hold + ' ' + hk()); tap('bin'); log.push('binBowl noodle=' + st.bowl.noodle + ' hold=' + st.hold);
+      tap('chili'); log.push('toppingOnEmptyBowl hold=' + st.hold);
       document.title = log.join(' ; ');
     }, 500);
     refreshUI();
