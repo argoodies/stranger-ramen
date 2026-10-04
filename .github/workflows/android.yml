@@ -30,6 +30,7 @@ jobs:
           VERSION_CODE: ${{ github.run_number }}
         run: |
           set -eo pipefail
+          mkdir -p android/app/src/main/assets
           cp index.html android/app/src/main/assets/index.html
           echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/release.p12"
           export KEYSTORE_FILE="$RUNNER_TEMP/release.p12"
