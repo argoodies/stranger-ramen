@@ -3,3 +3,7 @@ index_v*.html
 ios/web/
 ios/*.xcodeproj
 .DS_Store
+android/app/src/main/assets/index.html
+android/.gradle/
+android/app/build/
+deploy/*.apk

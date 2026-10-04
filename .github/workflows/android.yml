@@ -1,0 +1,48 @@
+name: Android APK
+
+# Wraps index.html in a WebView shell, signs it and publishes the APK as a GitHub release asset.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: Build signed APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          set -eo pipefail
+          cp index.html android/app/src/main/assets/index.html
+          echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/release.p12"
+          export KEYSTORE_FILE="$RUNNER_TEMP/release.p12"
+          gradle -p android assembleRelease --no-daemon
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          cp "$APK" stranger-ramen.apk
+          ls -la stranger-ramen.apk
+          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify --print-certs stranger-ramen.apk | head -3
+
+      - name: Publish as release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eo pipefail
+          TAG="android-${{ github.run_number }}"
+          gh release create "$TAG" stranger-ramen.apk --title "Android build ${{ github.run_number }}" --notes "Signed APK built from ${{ github.sha }}"
