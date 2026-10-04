@@ -256,8 +256,24 @@ const MUSIC = {
   stall: [[[43, 50, 55, 59, 62], [67, 69, 71, 74, 76, 79]], [[40, 47, 52, 55, 62], [64, 67, 69, 71, 74, 76]], [[36, 43, 52, 55, 64], [60, 64, 67, 69, 72, 76]], [[38, 45, 50, 54, 57], [62, 66, 69, 71, 74, 78]]],
 };
 let melIdx = 3;
+// keep the music alive across tab switches / app backgrounding: resume the context, or rebuild it if the browser killed it
+function wakeAudio(gesture) {
+  if (!AC) { if (gesture && mode !== 'title') initAudio(); return; }
+  if (AC.state === 'closed') { AC = null; if (gesture) initAudio(); return; }
+  if (AC.state !== 'running') {
+    const old = AC, p = old.resume();
+    if (p && p.catch) p.catch(() => {});
+    // still not running shortly after a real tap → throw the dead context away and start a fresh one
+    if (gesture) setTimeout(() => { if (AC === old && old.state !== 'running') { try { old.close(); } catch (e) {} AC = null; initAudio(); } }, 600);
+  }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeAudio(false); });
+window.addEventListener('pageshow', () => wakeAudio(false));
+window.addEventListener('focus', () => wakeAudio(false));
+for (const ev of ['pointerdown', 'touchend', 'keydown']) window.addEventListener(ev, () => wakeAudio(true), true);
 function musicTick() {
-  if (!AC) return;
+  if (!AC || AC.state !== 'running') return;
+  if (nextBar < AC.currentTime - .05) nextBar = AC.currentTime + .15;   // came back after being away: pick the music up right now
   while (nextBar < AC.currentTime + 1.2) {
     const [ch, sc] = (MUSIC[mode] || MUSIC.world)[barIdx++ % 4];
     pad(ch, nextBar, 8.5);
@@ -1021,6 +1037,7 @@ resize(); refreshUI();
 // debug entry points for automated checks: #world, #stall, #test
 if (location.hash) {
   $('title').style.display = 'none'; mode = 'world'; zoomOut = zoomTarget = 0; $('zoom').style.display = 'block';
+  if (location.hash === '#audio') setTimeout(async () => { const log = []; try { initAudio(); log.push('ctx=' + !!AC + ' state=' + (AC && AC.state)); if (AC) { await AC.resume(); musicTick(); const b0 = barIdx; await AC.suspend(); log.push('suspended=' + AC.state); document.dispatchEvent(new Event('visibilitychange')); await new Promise(r => setTimeout(r, 300)); log.push('afterReturn=' + AC.state); nextBar = AC.currentTime - 30; musicTick(); log.push('barsScheduledAfterGap=' + (barIdx - b0) + ' nextBarAhead=' + (nextBar > AC.currentTime)); const old = AC; await AC.close(); window.dispatchEvent(new Event('pointerdown')); log.push('afterClosed newCtx=' + (AC && AC !== old) + ' state=' + (AC && AC.state)); } } catch (e) { log.push('ERR ' + e.message); } document.title = log.join(' ; '); }, 300);
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
   if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
