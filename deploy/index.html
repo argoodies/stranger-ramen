@@ -438,9 +438,10 @@ function drawWorld(t, dt) {
     ctx.fillStyle = css([250, 246, 238], .96 * al); rrect(bx - tw / 2, by - 15, tw, 30, 12); ctx.fill(); poly([[p[0] - 6, by + 14], [p[0] + 6, by + 14], [p[0], by + 23]], [250, 246, 238], .96 * al); text(n.say, bx, by, fs, [50, 36, 70], al, 'center', true);
   }
   if (mode === 'title') {
-    const a = v.P(1.5, -1.5, 8.8), fs = clamp(s * 1.02, 15, 30), gap = fs * 1.42, x = a[0] + fs * 1.7, y0 = a[1] - fs * 1.9, chars = [...'拉面怪奇物语'];
-    line([[x - fs * .95, y0 - fs * .2], [x - fs * .95, y0 + gap * (chars.length - 1) + fs * .2]], [255, 255, 255], 1, .55);
-    chars.forEach((ch, k) => text(ch, x, y0 + gap * k, fs, [255, 255, 255], 1, 'center', false));
+    // small horizontal lettering beside the clock face, sitting on a hairline
+    const a = v.P(1.5, -1.5, 7.5), fs = clamp(s * .92, 14, 28), gap = fs * 1.34, chars = [...'拉面怪奇物语'], x0 = Math.min(a[0] + fs * 1.5, W - gap * (chars.length - 1) - fs * 1.1), y = a[1] - fs * .1;
+    chars.forEach((ch, k) => text(ch, x0 + gap * k, y, fs, [255, 255, 255], 1, 'center', false));
+    line([[x0 - fs * .5, y + fs * .95], [x0 + gap * (chars.length - 1) + fs * .5, y + fs * .95]], [255, 255, 255], 1, .55);
   }
   if (mode === 'world' && G.late) text('夜深了，回拉面档口睡觉', W / 2, H * 0.9, 15, [255, 236, 190], .7 + .3 * Math.sin(t * 3), 'center', true);
 }
