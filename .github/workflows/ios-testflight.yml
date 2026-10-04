@@ -83,3 +83,14 @@ jobs:
             echo "::error::altool upload to App Store Connect failed (see the validation details above)"
             exit 1
           fi
+
+      # Each run makes Apple issue a one-off development certificate; clear them so the account never hits its limit.
+      - name: Revoke leftover CI certificates
+        if: always()
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography || python3 -m pip install --quiet pyjwt cryptography
+          python3 tools/revoke_ci_certs.py

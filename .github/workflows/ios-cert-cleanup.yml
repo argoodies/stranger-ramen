@@ -1,0 +1,19 @@
+name: iOS certificate cleanup
+
+# Revokes the one-off "Created via API" development certificates left behind by CI signing.
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Revoke leftover CI certificates
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: |
+          python3 -m pip install --quiet pyjwt cryptography
+          python3 tools/revoke_ci_certs.py
