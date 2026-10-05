@@ -1184,13 +1184,22 @@ function drawLib(t) {
     const rec = [P(.6, .651, .16), P(3.7, .651, .16), P(3.7, .651, 2.4), P(.6, .651, 2.4)]; poly(rec, tn([84, 58, 56]));
     ctx.save(); ctx.beginPath(); rec.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.clip();      // nothing may stick out of the opening
     const cs = [[90, 150, 230], [226, 106, 96], [240, 190, 110], [150, 200, 160], [200, 160, 220], [236, 226, 204]];
+    let leaning = 0;
     for (let r = 0; r < 3; r++) {
       const z0 = .22 + r * .76; let x = .7, k = r * 5 + 1;
       poly([P(.6, .65, z0), P(3.7, .65, z0), P(3.7, .05, z0), P(.6, .05, z0)], tn([150, 108, 90]));                                   // the board itself: a solid top surface running back into the case
       poly([P(.6, .651, z0 - .06), P(3.7, .651, z0 - .06), P(3.7, .651, z0), P(.6, .651, z0)], tn([176, 132, 108]));      // and its front edge, flush with the frame
       while (x < 3.5) {
         k = (k * 7 + 3) % 31; const w = .09 + (k % 5) * .026, h = .5;
-        if (k % 11 === 0) { x += .14; continue; }                                            // a gap now and then
+        if (k % 11 === 0) {                                                                 // a gap now and then; in the first few, a book has slumped against its neighbour
+          if (leaning < 3 && x > .75) {
+            const th = .2 + .05 * (leaning % 2), sn = Math.sin(th), co = Math.cos(th), wl = .11, xb = x - .012 + h * sn, y0 = .23, y1 = .65, [ct, cl, cr] = v.sh(cs[(k + r + 2) % cs.length]);
+            const A = [xb, z0], B = [xb + wl * co, z0 + wl * sn], D = [xb - h * sn, z0 + h * co], C = [B[0] - h * sn, B[1] + h * co], Q = (p, y) => P(p[0], y, p[1]);
+            poly([Q(D, y1), Q(C, y1), Q(C, y0), Q(D, y0)], ct); poly([Q(B, y1), Q(C, y1), Q(C, y0), Q(B, y0)], cr); poly([Q(A, y1), Q(B, y1), Q(C, y1), Q(D, y1)], cl);
+            leaning++; x = xb + wl * co + .05; continue;
+          }
+          x += .14; continue;
+        }
         if (x + w > 3.6) break;
         v.box(x, .23, z0, w, .42, h, cs[(k + r) % cs.length]);      // deep and thin: a book, not a pillar
         x += w + .012;
