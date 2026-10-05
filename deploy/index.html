@@ -1272,7 +1272,8 @@ cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
 $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
-$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); chime(74, 0, .12, .8); }));
+// choosing a language saves it and starts the game over, so everything on screen is in the new language
+$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const same = b.dataset.l === langPref; setLang(b.dataset.l); $('langMenu').classList.remove('open'); if (same) return; chime(74, 0, .12, .8); fade = 1; setTimeout(() => restartGame(), 260); }));
 setLang(langPref);
 const ZOOM_ICO = ['<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10h6M14 10V4M10 14H4M10 14v6M14 10l7-7M10 14l-7 7"/></svg>'];
 $('zoom').addEventListener('click', () => { zoomTarget = zoomTarget > 0.5 ? 0 : 1; $('zoom').innerHTML = ZOOM_ICO[zoomTarget]; });
