@@ -36,9 +36,9 @@ jobs:
           export KEYSTORE_FILE="$RUNNER_TEMP/release.p12"
           gradle -p android assembleRelease --no-daemon
           APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
-          cp "$APK" stranger-ramen.apk
-          ls -la stranger-ramen.apk
-          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify --print-certs stranger-ramen.apk | head -3
+          cp "$APK" ramen-puzzle.apk
+          ls -la ramen-puzzle.apk
+          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify --print-certs ramen-puzzle.apk | head -3
 
       - name: Publish as release asset
         env:
@@ -46,4 +46,4 @@ jobs:
         run: |
           set -eo pipefail
           TAG="android-${{ github.run_number }}"
-          gh release create "$TAG" stranger-ramen.apk --title "Android build ${{ github.run_number }}" --notes "Signed APK built from ${{ github.sha }}"
+          gh release create "$TAG" ramen-puzzle.apk --title "Android build ${{ github.run_number }}" --notes "Signed APK built from ${{ github.sha }}"

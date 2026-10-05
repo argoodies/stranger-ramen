@@ -1,4 +1,4 @@
-app = "clocktower-ramen"
+app = "ramen-puzzle"
 primary_region = "lax"
 
 [http_service]
