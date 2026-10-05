@@ -1180,7 +1180,22 @@ function drawLib(t) {
     const ep = P(ex + ew / 2, N + .35, -.35); LHIT.exit = [ep[0], ep[1], s * .85]; }
   // bookshelves along the back wall
   v.box(.5, .05, 0, 3.3, .6, 2.5, [140, 98, 84]);
-  { const cs = [[90, 150, 230], [226, 106, 96], [240, 190, 110], [150, 200, 160], [200, 160, 220]]; for (let r = 0; r < 3; r++) for (let b = 0; b < 12; b++) { const x0 = .62 + b * .26, z0 = .28 + r * .75, h = .46 + .08 * ((b * 7 + r) % 3); poly([P(x0, .65, z0), P(x0 + .21, .65, z0), P(x0 + .21, .65, z0 + h), P(x0, .65, z0 + h)], tn(cs[(b * 3 + r * 2) % 5])); } }
+  { // the shelf is hollow: a dark recess, three boards, and the books standing on them as little blocks (spine, top and side)
+    poly([P(.6, .651, .16), P(3.7, .651, .16), P(3.7, .651, 2.4), P(.6, .651, 2.4)], tn([84, 58, 56]));
+    const cs = [[90, 150, 230], [226, 106, 96], [240, 190, 110], [150, 200, 160], [200, 160, 220], [236, 226, 204]];
+    for (let r = 0; r < 3; r++) {
+      const z0 = .22 + r * .76; let x = .66, k = r * 5 + 1;
+      v.box(.6, .5, z0 - .06, 3.1, .17, .06, [166, 122, 100]);
+      while (x < 3.5) {
+        k = (k * 7 + 3) % 31; const w = .15 + (k % 4) * .028, h = .4 + (k % 6) * .04;
+        if (k % 11 === 0) { x += .14; continue; }                                            // a gap now and then
+        if (x + w > 3.66) break;
+        v.box(x, .5, z0, w, .16, h, cs[(k + r) % cs.length]);
+        { const a = P(x + w * .2, .661, z0 + h * .72), b = P(x + w * .8, .661, z0 + h * .72), c = P(x + w * .8, .661, z0 + h * .8), d = P(x + w * .2, .661, z0 + h * .8); poly([a, b, c, d], tn([250, 240, 220]), .55); }   // a label band on the spine
+        x += w + .012;
+      }
+    }
+  }
   { const a = P(.5, .65, 2.5), b = P(3.8, .65, 0); LHIT.shelf = [a[0], a[1] - s * .3, b[0], b[1]]; }
   if (lib.path.length) { const c = lib.path[lib.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
   // you
