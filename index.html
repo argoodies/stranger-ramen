@@ -37,6 +37,10 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
 #title .go{position:absolute;bottom:calc(9vh + env(safe-area-inset-bottom));padding:12px 30px;font-size:18px;letter-spacing:.3em;animation:breath 2s ease-in-out infinite}
 @keyframes breath{50%{opacity:.55}}
 #leave,#enter{display:none!important}
+#langMenu{display:none;position:absolute;right:0;top:46px;flex-direction:column;gap:6px;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
+#langMenu.open{display:flex}
+#langMenu button{appearance:none;border:0;border-radius:11px;padding:9px 18px;font:15px var(--serif);letter-spacing:.08em;color:#f4ecdc;background:transparent;white-space:nowrap;text-align:left;cursor:pointer}
+#langMenu button.on{background:rgba(255,236,170,.2);color:#ffe9b0}
 #err{position:fixed;left:0;top:0;right:0;color:#ff8;background:#600;font:12px monospace;z-index:9;white-space:pre-wrap}
 </style>
 </head>
@@ -47,7 +51,9 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
     <button class="pill" id="leave" style="display:none">← 离开</button>
     <button class="pill" id="zoom" style="display:none;padding:8px 11px;line-height:0" aria-label="全景"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
   </div>
-  <div style="display:flex;gap:8px">
+  <div style="display:flex;gap:8px;position:relative">
+    <button class="pill" id="lang" style="display:none;padding:8px 11px;line-height:0" aria-label="Language"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></button>
+    <div id="langMenu"><button data-l="hans">简体中文</button><button data-l="hant">繁體中文</button><button data-l="en">English</button><button data-l="auto">跟随系统</button></div>
   </div>
 </div>
 <button class="pill" id="enter">进入拉面档口</button>
@@ -108,6 +114,108 @@ function rrect(x, y, w, h, r) {
 const FONT = (px, bold) => `${bold ? '700 ' : ''}${px}px "Noto Serif SC","Songti SC","STSong",serif`;
 function text(t, x, y, px, c = [255, 255, 255], a = 1, align = 'center', bold = false) {
   ctx.font = FONT(px, bold); ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = css(c, a); ctx.fillText(t, x, y);
+}
+
+// ------------------------------------------------------------ languages
+// Simplified Chinese, Traditional Chinese and English; 'auto' follows the system language.
+const STR = {
+  hans: (() => { const st = ['你', '左边那位', '右边那位'], who = (v, t) => t === v ? '自己' : t === 0 ? '你' : '他'; return {
+    title: '拉面怪奇物语', auto: '跟随系统',
+    hello: {
+      ida: ['今天天气真好。', '钟楼的钟好像又慢了五分钟。', '听说你家的面不错。', '我可是好人，真的。', '香菜多放点才好吃。', '晚上别乱走，小心恶魔。', '你看见说书人了吗？', '散步呢？一起走走。'],
+      ft: ['水晶球说，你今天会煮三碗面。', '我昨晚查了两个人……算了，不说了。', '你身上没有恶魔的气息。大概吧。'],
+      crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降临时，记得闭上眼睛。', '钟楼里正缺一个人，来玩一局？', '魔典里可没有写你的坏话。'],
+      demon: ['我真的只是路过。', '别这么看我，我是镇民。', '今晚……你睡得沉吗？'], scarlet: ['别怕，有姐姐在。', '小老板，面里别放香菜哦。', '你猜我是好人还是坏人？'] },
+    beefY: ['牛肉面', '来碗牛肉面', '要牛肉面'], beefN: ['素面一碗', '来碗素面', '面不加肉'],
+    chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '别放辣', '不吃辣'],
+    cilY: ['加香菜', '放香菜', '多点香菜'], cilN: ['不要香菜', '别放香菜', '香菜不要'],
+    sayOk: ['好吃！', '就是这个味！', '暖和了～', '谢谢老板！'], sayBad: ['嗯…这不是我点的', '好像不太对？'], later: '下次再来吧…',
+    hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
+    notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了。今天就到这儿，可以出去走走了。',
+    libAway: '图书管理员不在，不要乱动。',
+    welcome: '欢迎来到三人血染。', night: '天黑请闭眼。', pickSailor: '水手，选一个人。', pickPukka: '普卡，选一个人。', ok: '好的。',
+    dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
+    sailorSay: (v, t) => '我是水手。昨晚我选了' + who(v, t) + '。', hereticSay: '我是异端分子。',
+    nomPrompt: '点一个人提名。', iNominate: (v, n) => '那我来。我提名' + (n === v ? '我自己' : who(v, n)) + '。', nominated: (a, b) => st[a] + '提名' + (a === b ? '自己' : st[b]) + '。',
+    iVote: '我举手。', iDont: '我不举手。',
+    voteSafe: (y, i) => y + ' 票，够了。可是' + st[i] + '没有死。', voteExec: (y, i) => y + ' 票，够了。' + st[i] + '被处决了。', voteFail: (y, n) => '只有 ' + y + ' 票，需要 ' + n + ' 票。今天没有人被处决。',
+    noNom: '今天没有人被提名。', goodWins: '善良阵营获胜。', evilWins: '邪恶阵营获胜。', bye: '欢迎下次再玩。',
+  }; })(),
+  hant: (() => { const st = ['你', '左邊那位', '右邊那位'], who = (v, t) => t === v ? '自己' : t === 0 ? '你' : '他'; return {
+    title: '拉麵怪奇物語', auto: '跟隨系統',
+    hello: {
+      ida: ['今天天氣真好。', '鐘樓的鐘好像又慢了五分鐘。', '聽說你家的麵不錯。', '我可是好人，真的。', '香菜多放點才好吃。', '晚上別亂走，小心惡魔。', '你看見說書人了嗎？', '散步呢？一起走走。'],
+      ft: ['水晶球說，你今天會煮三碗麵。', '我昨晚查了兩個人……算了，不說了。', '你身上沒有惡魔的氣息。大概吧。'],
+      crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降臨時，記得閉上眼睛。', '鐘樓裡正缺一個人，來玩一局？', '魔典裡可沒有寫你的壞話。'],
+      demon: ['我真的只是路過。', '別這麼看我，我是鎮民。', '今晚……你睡得沉嗎？'], scarlet: ['別怕，有姐姐在。', '小老闆，麵裡別放香菜哦。', '你猜我是好人還是壞人？'] },
+    beefY: ['牛肉麵', '來碗牛肉麵', '要牛肉麵'], beefN: ['素麵一碗', '來碗素麵', '麵不加肉'],
+    chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '別放辣', '不吃辣'],
+    cilY: ['加香菜', '放香菜', '多點香菜'], cilN: ['不要香菜', '別放香菜', '香菜不要'],
+    sayOk: ['好吃！', '就是這個味！', '暖和了～', '謝謝老闆！'], sayBad: ['嗯…這不是我點的', '好像不太對？'], later: '下次再來吧…',
+    hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
+    notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了。今天就到這兒，可以出去走走了。',
+    libAway: '圖書館員不在，不要亂動。',
+    welcome: '歡迎來到三人血染。', night: '天黑請閉眼。', pickSailor: '水手，選一個人。', pickPukka: '普卡，選一個人。', ok: '好的。',
+    dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
+    sailorSay: (v, t) => '我是水手。昨晚我選了' + who(v, t) + '。', hereticSay: '我是異端分子。',
+    nomPrompt: '點一個人提名。', iNominate: (v, n) => '那我來。我提名' + (n === v ? '我自己' : who(v, n)) + '。', nominated: (a, b) => st[a] + '提名' + (a === b ? '自己' : st[b]) + '。',
+    iVote: '我舉手。', iDont: '我不舉手。',
+    voteSafe: (y, i) => y + ' 票，夠了。可是' + st[i] + '沒有死。', voteExec: (y, i) => y + ' 票，夠了。' + st[i] + '被處決了。', voteFail: (y, n) => '只有 ' + y + ' 票，需要 ' + n + ' 票。今天沒有人被處決。',
+    noNom: '今天沒有人被提名。', goodWins: '善良陣營獲勝。', evilWins: '邪惡陣營獲勝。', bye: '歡迎下次再玩。',
+  }; })(),
+  en: (() => { const st = ['you', 'the player on the left', 'the player on the right'], cap = x => x[0].toUpperCase() + x.slice(1), who = (v, t) => t === v ? 'myself' : t === 0 ? 'you' : 'them'; return {
+    title: 'CLOCKTOWER RAMEN', auto: 'System',
+    hello: {
+      ida: ['Lovely weather today.', 'The clock seems five minutes slow again.', 'I hear your noodles are good.', "I'm good. Honestly.", 'Extra cilantro makes it better.', "Don't wander at night. Mind the Demon.", 'Have you seen the Storyteller?', 'Out for a walk? Join me.'],
+      ft: ['My crystal ball says three bowls today.', 'I checked two players last night… never mind.', 'No trace of the Demon on you. Probably.'],
+      crow: ['Caw.', 'Caw caw?', '…caw.'], teller: ['When night falls, remember to close your eyes.', 'The clocktower is one player short. Care for a game?', 'The Grimoire says nothing bad about you.'],
+      demon: ['Just passing through. Really.', "Don't look at me like that. I'm a Townsfolk.", 'Tonight… are you a heavy sleeper?'], scarlet: ["Don't worry, I'm right here.", 'No cilantro in mine, little chef.', 'Guess: am I good or evil?'] },
+    beefY: ['Beef noodles', 'A beef noodle bowl', 'Beef noodles, please'], beefN: ['Plain noodles', 'Plain noodles, please', 'Noodles, no beef'],
+    chiliY: ['with chili', 'extra chili', 'make it spicy'], chiliN: ['no chili', 'hold the chili', 'not spicy'],
+    cilY: ['with cilantro', 'add cilantro', 'extra cilantro'], cilN: ['no cilantro', 'hold the cilantro', 'skip the cilantro'],
+    sayOk: ['Delicious!', 'Just right!', 'So warming~', 'Thanks, chef!'], sayBad: ["Hmm… that's not my order.", "That's not quite right?"], later: 'Maybe next time…',
+    hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
+    notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. That's it for today, time for a walk.",
+    libAway: "The librarian is out. Better not touch anything.",
+    welcome: 'Welcome to three-player Clocktower.', night: 'Night falls. Close your eyes.', pickSailor: 'Sailor, choose a player.', pickPukka: 'Pukka, choose a player.', ok: 'Very well.',
+    dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
+    sailorSay: (v, t) => 'I am the Sailor. Last night I chose ' + who(v, t) + '.', hereticSay: 'I am the Heretic.',
+    nomPrompt: 'Tap a player to nominate.', iNominate: (v, n) => 'Then I will. I nominate ' + who(v, n) + '.', nominated: (a, b) => cap(st[a]) + ' nominates ' + (a === b ? 'themself' : st[b]) + '.',
+    iVote: 'I vote.', iDont: "I don't vote.",
+    voteSafe: (y, i) => y + ' votes. Enough, yet ' + st[i] + (i === 0 ? ' do' : ' does') + ' not die.', voteExec: (y, i) => y + ' votes. Enough. ' + cap(st[i]) + (i === 0 ? ' are' : ' is') + ' executed.', voteFail: (y, n) => 'Only ' + y + (y === 1 ? ' vote; ' : ' votes; ') + n + ' needed. No one is executed today.',
+    noNom: 'No one was nominated today.', goodWins: 'Good wins.', evilWins: 'Evil wins.', bye: 'Come and play again.',
+  }; })(),
+};
+let langPref = 'auto', LANG = 'hans';
+try { langPref = localStorage.getItem('ctramen_lang') || 'auto'; } catch (e) {}
+function sysLang() { const l = ((navigator.languages && navigator.languages[0]) || navigator.language || 'zh-CN').toLowerCase(); return !l.startsWith('zh') ? 'en' : /tw|hk|mo|hant/.test(l) ? 'hant' : 'hans'; }
+function setLang(p) {
+  langPref = STR[p] || p === 'auto' ? p : 'auto'; LANG = langPref === 'auto' ? sysLang() : langPref;
+  try { localStorage.setItem('ctramen_lang', langPref); } catch (e) {}
+  document.documentElement.lang = LANG === 'en' ? 'en' : LANG === 'hant' ? 'zh-Hant' : 'zh-Hans';
+  const m = document.getElementById('langMenu');
+  if (m) m.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.l === langPref); if (b.dataset.l === 'auto') b.textContent = STR[LANG].auto; });
+}
+const S = () => STR[LANG];
+// break a line of speech to a width: Chinese breaks anywhere (never before punctuation), English at spaces
+function wrapText(txt, maxw) {
+  const out = [];
+  for (const para of String(txt).split('\n')) {
+    let cur = '';
+    for (const tok of para.match(/[A-Za-z0-9'’…~.,!?;:\-]+\s*|\s+|[\s\S]/g) || ['']) {
+      if (cur && ctx.measureText((cur + tok).trimEnd()).width > maxw && !'，。！？：；、】—…～'.includes(tok)) { out.push(cur.trimEnd()); cur = ''; }
+      cur += tok;
+    }
+    out.push(cur.trimEnd());
+  }
+  return out;
+}
+// a speech bubble sitting above a point, tail pointing down at it
+function sayBubble(x, topY, txt, fs, al, maxw) {
+  ctx.font = FONT(fs, true);
+  const lines = wrapText(txt, maxw), lh = fs * 1.38, cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 22, bh = lines.length * lh + 12, bx = clamp(x - cw / 2, 8, W - cw - 8), by = topY - bh - 8;
+  ctx.fillStyle = css([250, 246, 238], .97 * al); rrect(bx, by, cw, bh, 11); ctx.fill(); poly([[x - 6, by + bh - 1], [x + 6, by + bh - 1], [x, by + bh + 8]], [250, 246, 238], .97 * al);
+  lines.forEach((l, k) => text(l, bx + cw / 2, by + 6 + lh * (k + .5), fs, [50, 36, 70], al, 'center', true));
 }
 
 // ------------------------------------------------------------ iso view
@@ -443,14 +551,10 @@ function drawWorld(t, dt) {
   for (const n of npcs) objs.push({ k: n.x + n.y, d: () => { const p = v.P(n.x, n.y); fig(p[0], p[1] - Math.abs(Math.sin(n.hop || 0)) * s * .08, K, n.look); } });
   objs.push({ k: player.x + player.y + 0.01, d: () => { const p = v.P(player.x, player.y), hop = player.path.length ? Math.abs(Math.sin(t * 11)) * s * .1 : 0; glow(p[0], p[1] - K * .6, K * 1.3, [255, 240, 200], .35); fig(p[0], p[1] - hop, K, { kind: 'chef', apron: [220, 80, 80] }); } });
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
-  for (const n of npcs) if (n.sayT > 0) {
-    const p = v.P(n.x, n.y), fs = clamp(W * .036, 12, 15), al = clamp(n.sayT * 2); ctx.font = FONT(fs, true);
-    const tw = ctx.measureText(n.say).width + 22, bx = clamp(p[0], tw / 2 + 8, W - tw / 2 - 8), by = p[1] - K * 1.75 - 22;
-    ctx.fillStyle = css([250, 246, 238], .96 * al); rrect(bx - tw / 2, by - 15, tw, 30, 12); ctx.fill(); poly([[p[0] - 6, by + 14], [p[0] + 6, by + 14], [p[0], by + 23]], [250, 246, 238], .96 * al); text(n.say, bx, by, fs, [50, 36, 70], al, 'center', true);
-  }
+  for (const n of npcs) if (n.sayT > 0) { const p = v.P(n.x, n.y); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
   if (mode === 'title') {
     // the title, in the Monument Valley manner: thin, widely spaced lettering beside the clock face
-    const a = v.P(1.5, -1.5, 7.5), chars = [...'拉面怪奇物语'], fs = Math.max(11, Math.min(clamp(s * .86, 13, 26), (W - a[0]) / 11.6)), x0 = a[0] + fs * 1.15, gap = Math.min(fs * 1.9, (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
+    const a = v.P(1.5, -1.5, 7.5), chars = [...S().title], en = LANG === 'en', fs = Math.max(en ? 9 : 11, Math.min(clamp(s * (en ? .7 : .86), en ? 10 : 13, 26), (W - a[0]) / (en ? 3.85 + (chars.length - 1) * .74 : 11.6))), x0 = a[0] + fs * 1.15, gap = Math.min(fs * (en ? .92 : 1.9), (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
     ctx.font = `200 ${fs}px "PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.96)';
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
@@ -482,7 +586,7 @@ function updateWorld(dt) {
 }
 function worldTap(sx, sy) {
   const v = wv, hp = v.P(-4.17, 2.15, 1.1), tp = v.P(0, 0, 6), K = v.s * .72;
-  for (const n of npcs) { const p = v.P(n.x, n.y); if (Math.abs(sx - p[0]) < K * .5 && sy > p[1] - K * 1.7 && sy < p[1] + K * .25) { n.say = pick(HELLO[n.look.kind] || HELLO.ida); n.sayT = 3.4; n.path = []; n.wait = 3.6; chime(pick([76, 79, 81, 83]), 0, .12, .9); chime(pick([83, 86, 88]), .1, .09, .9); return; } }
+  for (const n of npcs) { const p = v.P(n.x, n.y); if (Math.abs(sx - p[0]) < K * .5 && sy > p[1] - K * 1.7 && sy < p[1] + K * .25) { n.say = pick(S().hello[n.look.kind] || S().hello.ida); n.sayT = 3.4; n.path = []; n.wait = 3.6; chime(pick([76, 79, 81, 83]), 0, .12, .9); chime(pick([83, 86, 88]), .1, .09, .9); return; } }
   if (Math.abs(sx - hp[0]) < v.s * 1.5 && Math.abs(sy - hp[1]) < v.s * 1.7) { goDoor('stall'); chime(74, 0, .12); return; }
   { const lp = v.P(2.85, -3.75, 1.3); if (Math.abs(sx - lp[0]) < v.s * 1.2 && Math.abs(sy - lp[1]) < v.s * 1.9) { goDoor('lib'); chime(69, 0, .12); return; } }
   { const sp = v.P(2.1, 0, .6); if (Math.hypot(sx - sp[0], sy - sp[1]) < v.s * 1.15 || (Math.abs(sx - tp[0]) < v.s * 1.5 && sy < v.P(1.5, 1.5, 0)[1] && sy > v.P(0, 0, 13)[1])) { goDoor('tower'); chime(62, 0, .12); return; } }
@@ -503,12 +607,7 @@ const cookT = () => has('fast') ? 1.3 : 2.6, waitMax = () => has('calm') ? 110 :
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
 stall.bowl = emptyBowl();
 const SEATX = [1.2, 2.5, 3.8], CUSTY = -0.45;
-function orderText(w) {
-  const base = w.beef ? pick(['牛肉面', '来碗牛肉面', '要牛肉面']) : pick(['素面一碗', '来碗素面', '面不加肉']);
-  const chili = w.chili ? pick(['要辣', '多放辣', '加辣']) : pick(['不要辣', '别放辣', '不吃辣']);
-  const cil = w.cilantro ? pick(['加香菜', '放香菜', '多点香菜']) : pick(['不要香菜', '别放香菜', '香菜不要']);
-  return base + '，' + chili + '，' + cil;
-}
+function orderText(w) { const L = S(); return [pick(w.beef ? L.beefY : L.beefN), pick(w.chili ? L.chiliY : L.chiliN), pick(w.cilantro ? L.cilY : L.cilN)].join('\n'); }
 function spawnCustomer() {
   const free = [0, 1, 2].filter(i => !stall.seats[i]); if (!free.length) return;
   const look = randomLook(), w = { chili: Math.random() < .5, cilantro: Math.random() < .5, beef: Math.random() < .55 };
@@ -550,11 +649,11 @@ function intoBowl() {
 function serve(i) {
   const s = stall, b = s.bowl, c = s.seats[i];
   if (s.hold !== 'bowl' || !b.soup || !c || c.state !== 'wait') return false;
-  if (s.sinceSelf >= 3) { s.ownSay = '有点饿了。先给自己做一碗，放到吧台上。'; s.ownSayT = 4; return false; }
+  if (s.sinceSelf >= 3) { s.ownSay = S().hungryFirst; s.ownSayT = 4; return false; }
   const ok = same(b, c.want);
-  c.state = 'eat'; c.t = 0; c.dish = Object.assign({}, b); c.say = ok ? pick(['好吃！', '就是这个味！', '暖和了～', '谢谢老板！']) : pick(['嗯…这不是我点的', '好像不太对？']);
+  c.state = 'eat'; c.t = 0; c.dish = Object.assign({}, b); c.say = pick(ok ? S().sayOk : S().sayBad);
   save.served++; s.sinceSelf++; localStorage.setItem('ctramen', JSON.stringify(save));
-  if (s.sinceSelf >= 3) { s.ownSay = '有点饿了，给自己做一碗吧。'; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
+  if (s.sinceSelf >= 3) { s.ownSay = S().hungry; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
   if (ok) [67, 71, 74, 79, 83].forEach((m, k) => chime(m, k * .09, .16, 1.4)); else { chime(61, 0, .16, 1); chime(62, 0.02, .12, 1); }
   s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = Math.max(SEATX[i], 1.5); s.owner.ty = 0.95;
   return true;
@@ -635,7 +734,7 @@ function stallTap(x, y) {
 function barTap() {
   const s = stall, b = s.bowl;
   if (s.myBowl) { if (s.hold) return false; if (s.eatT > 0) return true; s.eatT = 2.4; s.owner.tx = 4.45; s.owner.ty = .95; [67, 71, 74].forEach((m, k) => chime(m, k * .5, .14, 1.2)); return true; }
-  if (s.sinceSelf < 3) { s.ownSay = pick(['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。']); s.ownSayT = 3; return false; }
+  if (s.sinceSelf < 3) { s.ownSay = pick(S().notYet); s.ownSayT = 3; return false; }
   if (s.hold !== 'bowl' || !b.soup) return false;
   s.myBowl = Object.assign({}, b); s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = 4.45; s.owner.ty = .95; chime(79, 0, .18, 1.4); chime(83, .1, .14, 1.4);
   s.ownSayT = 0; return true;
@@ -668,11 +767,11 @@ function updateStall(dt) {
     if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; } }
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 10; refreshUI(); }
   if (s.ownSayT > 0) s.ownSayT -= dt;
-  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.ownSay = s.done ? pick(['真香。', '再来一碗也行。', '还是自己做的合口味。']) : '吃饱了。今天就到这儿，可以出去走走了。'; s.ownSayT = s.done ? 3 : 7; s.done = true; [79, 83, 86].forEach((m, k) => chime(m, k * .12, .14, 1.4)); } }
+  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.ownSay = s.done ? pick(S().yum) : S().full; s.ownSayT = s.done ? 3 : 7; s.done = true; [79, 83, 86].forEach((m, k) => chime(m, k * .12, .14, 1.4)); } }
   s.seats.forEach((c, i) => {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
-    else if (c.state === 'wait') { c.wait += dt; if (c.wait > waitMax()) { c.state = 'leave'; c.t = 0; c.say = '下次再来吧…'; refreshUI(); } }
+    else if (c.state === 'wait') { c.wait += dt; if (c.wait > waitMax()) { c.state = 'leave'; c.t = 0; c.say = S().later; refreshUI(); } }
     else if (c.state === 'eat' && c.t > 4.2) { c.state = 'leave'; c.t = 0; }
     else if (c.state === 'leave' && c.t > 1.0) { s.seats[i] = null; }
   });
@@ -797,7 +896,7 @@ function drawStall(t) {
     const c = st.seats[i]; if (!c || a < .5) continue;
     const order = c.state === 'wait' || c.state === 'arrive', txt = order ? c.text : c.say; if (!txt) continue;
     ctx.font = FONT(fs, true);
-    const lines = order ? txt.split('，') : (txt.length > 6 ? [txt.slice(0, Math.ceil(txt.length / 2)), txt.slice(Math.ceil(txt.length / 2))] : [txt]);
+    const lines = order ? txt.split('\n') : wrapText(txt, LANG === 'en' ? fs * 7.5 : fs * 5.2);
     const cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 18, bh = lines.length * lh + 12, headY = hy0 + K * .72, fadeA = order ? clamp(1.25 - c.wait / waitMax() * .5) : 1;
     let bx, by, tail;
     if (i === 1) { bx = hx - cw / 2; by = hy0 - 6 - bh; tail = [[hx - 5, by + bh - 1], [hx + 5, by + bh - 1], [hx, by + bh + 7]]; }
@@ -806,7 +905,7 @@ function drawStall(t) {
     ctx.fillStyle = css([250, 246, 238], .96 * fadeA); rrect(bx, by, cw, bh, 10); ctx.fill(); poly(tail, [250, 246, 238], .96 * fadeA);
     lines.forEach((l, k) => text(l, bx + cw / 2, by + 6 + lh * (k + .5), fs, [50, 36, 70], 1, 'center', true));
   }
-  if (st.ownSayT > 0) { const fs2 = clamp(W * .036, 12, 15); ctx.font = FONT(fs2, true); const tw2 = ctx.measureText(st.ownSay).width + 22, ox = clamp(op[0], tw2 / 2 + 8, W - tw2 / 2 - 8), oy = op[1] - s * 2.35, al = clamp(st.ownSayT * 2); ctx.fillStyle = css([250, 246, 238], .96 * al); rrect(ox - tw2 / 2, oy - 15, tw2, 30, 12); ctx.fill(); poly([[op[0] - 6, oy + 14], [op[0] + 6, oy + 14], [op[0], oy + 23]], [250, 246, 238], .96 * al); text(st.ownSay, ox, oy, fs2, [50, 36, 70], al, 'center', true); }
+  if (st.ownSayT > 0) sayBubble(op[0], op[1] - s * 2.02, st.ownSay, clamp(W * .036, 12, 15), clamp(st.ownSayT * 2), Math.min(W * .62, 250));
 }
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]); ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, b.soup ? [226, 160, 84] : [248, 246, 240]);
@@ -851,25 +950,25 @@ async function playBotc() {
   const clean = () => { if (!g.alive[pi] && g.poisoned >= 0) { g.gonePoison = g.poisoned; g.poisoned = -1; } if (!g.alive[si] && g.drunk >= 0) { g.goneDrunk = g.drunk; g.drunk = -1; } };
   const recap = [], nm = i => stN(i) + '（' + RN[roles[i]] + '）'; g.recap = recap;
   const claim = [null, null, null], lastPick = [null, null, null], bluff = Math.random() < .5 ? 'sailor' : 'heretic';
-  await bsay(ST, '欢迎来到三人血染。');
+  await bsay(ST, S().welcome);
   g.showMine = true; if (!g.auto) { chime(74, 0, .16, 1.4); chime(81, .1, .14, 1.4); }
 
   let raw = null;
   while (run === g.run) {
     // ---- night
     g.night++; g.isNight = true; g.votes = null; g.drunk = -1; let died = -1, rec = '第 ' + g.night + ' 夜。'; const aud = { p0: g.poisoned, sailorPoisoned: g.alive[si] && poisonedNow(si) };
-    await bsay(ST, '天黑请闭眼。');
+    await bsay(ST, S().night);
     if (g.alive[si]) {
       const works = !poisonedNow(si);
-      const tgt = si === 0 ? await bpick(k => k !== ST && g.alive[k], '水手，选一个人。')
+      const tgt = si === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickSailor)
         : (Math.random() < .25 ? si : pick([0, 1, 2].filter(k => k !== si && g.alive[k])));
       lastPick[si] = tgt;
       if (works) g.drunk = tgt === si ? si : (Math.random() < .5 ? tgt : si);
       rec += works ? nm(si) + '选了' + (tgt === si ? '自己' : nm(tgt)) + '，醉的是' + nm(g.drunk) + '。' : nm(si) + '中着毒，能力没有生效。';
-      if (si === 0) await bsay(ST, '好的。');
+      if (si === 0) await bsay(ST, S().ok);
     }
     if (g.alive[pi]) {
-      const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], '普卡，选一个人。')
+      const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickPukka)
         : pick([0, 1, 2].filter(k => (k !== pi || (g.auto && Math.random() < .3)) && g.alive[k]));
       lastPick[pi] = tgt;
       if (g.drunk !== pi && g.poisoned !== pi) {
@@ -881,46 +980,46 @@ async function playBotc() {
         aud.self = tgt === pi; aud.prevAlive = prev >= 0 && prev !== pi;
       }
       else rec += nm(pi) + (g.drunk === pi ? '醉了' : '中着自己的毒') + '，没能下毒，也没有人毒发身亡。';
-      if (pi === 0) await bsay(ST, '好的。');
+      if (pi === 0) await bsay(ST, S().ok);
     }
 
     g.isNight = false; recap.push(rec); g.snaps.push({ night: true, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); aud.pukkaDrunk = g.alive[pi] && g.drunk === pi; aud.both = g.alive[si] && g.poisoned === si && g.drunk >= 0; aud.p1 = g.poisoned; aud.died = died; aud.drunk = g.drunk; (g.audit = g.audit || []).push(aud);
-    await bsay(ST, died >= 0 ? '天亮了。昨夜，' + stN(died) + '死了。' : '天亮了。昨夜平安，没有人死。');
+    await bsay(ST, died >= 0 ? S().dawnDied(died) : S().dawnQuiet);
     if ((raw = win())) break;
     if (g.night > 12) { raw = 'evil'; break; }
     // ---- day: the other two say who they are (the Pukka lies)
     for (const v of [1, 2]) if (g.alive[v]) {
       const r = roles[v] === 'pukka' ? bluff : roles[v]; claim[v] = r;
       const t = roles[v] === 'pukka' ? pick([0, 1, 2].filter(k => k !== v)) : lastPick[v];
-      await bsay(v, r === 'sailor' ? '我是水手。昨晚我选了' + (t === v ? '自己。' : npcN(v, t) + '。') : '我是异端分子。');
+      await bsay(v, r === 'sailor' ? S().sailorSay(v, t) : S().hereticSay);
     }
     const other = v => 3 - v, hereticOn = g.drunk !== hi && !poisonedNow(hi);
     const suspect = v => claim[other(v)] === roles[v] ? other(v) : (v + g.night) % 2 ? 0 : other(v);
     const wants = (v, nom) => roles[v] === 'sailor' ? nom === suspect(v) : roles[v] === 'heretic' ? nom !== suspect(v) : (hereticOn ? nom === v : nom !== v);
     // ---- nomination and vote
-    let nom = await bpick(k => k !== ST && g.alive[k], '点一个人提名。', 'none'), nominator = 0;
+    let nom = await bpick(k => k !== ST && g.alive[k], S().nomPrompt, 'none'), nominator = 0;
     if (nom === 'none') {
       nominator = [1, 2].find(v => g.alive[v] && [0, 1, 2].some(k => g.alive[k] && wants(v, k)));
-      if (nominator == null) nom = null; else { nom = [0, 1, 2].filter(k => g.alive[k] && wants(nominator, k)).sort((a, b) => (a === nominator) - (b === nominator))[0]; await bsay(nominator, '那我来。我提名' + (nom === nominator ? '我自己' : npcN(nominator, nom)) + '。'); }
+      if (nominator == null) nom = null; else { nom = [0, 1, 2].filter(k => g.alive[k] && wants(nominator, k)).sort((a, b) => (a === nominator) - (b === nominator))[0]; await bsay(nominator, S().iNominate(nominator, nom)); }
     }
     if (nom != null) {
       const votes = [null, null, null];
       for (const v of [0, 1, 2]) if (g.alive[v]) {
         if (v === nominator) votes[v] = true;
-        else if (v === 0) votes[v] = (await bpick(k => k === nom, stN(nominator) + '提名' + (nom === nominator ? '自己' : stN(nom)) + '。', 'no')) === nom;
+        else if (v === 0) votes[v] = (await bpick(k => k === nom, S().nominated(nominator, nom), 'no')) === nom;
         else votes[v] = wants(v, nom);
       }
       g.votes = votes; const yes = votes.filter(x => x === true).length, need = Math.ceil(live() / 2);
-      for (const v of [1, 2]) if (g.alive[v] && v !== nominator) await bsay(v, votes[v] ? '我举手。' : '我不举手。');
+      for (const v of [1, 2]) if (g.alive[v] && v !== nominator) await bsay(v, votes[v] ? S().iVote : S().iDont);
       const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
       const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
       if (yes >= need) {
-        if (roles[nom] === 'sailor' && sailorSafe()) { recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, yes + ' 票，够了。可是' + stN(nom) + '没有死。'); }
-        else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, yes + ' 票，够了。' + stN(nom) + '被处决了。'); }
-      } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, '只有 ' + yes + ' 票，需要 ' + need + ' 票。今天没有人被处决。'); }
+        if (roles[nom] === 'sailor' && sailorSafe()) { recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
+        else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, S().voteExec(yes, nom)); }
+      } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, S().voteFail(yes, need)); }
       g.votes = null;
       if ((raw = win())) break;
-    } else { g.snaps.push({ night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); recap.push('第 ' + g.night + ' 天。没有人被提名。'); await bsay(ST, '今天没有人被提名。'); }
+    } else { g.snaps.push({ night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); recap.push('第 ' + g.night + ' 天。没有人被提名。'); await bsay(ST, S().noNom); }
   }
   if (run !== g.run) return null;
   // ---- the end: apply the Heretic
@@ -929,8 +1028,8 @@ async function playBotc() {
   g.result = { raw, fin, hereticOn, nights: g.night, won: mine === fin };
   g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
   g.over = true; if (!g.auto) resultMusic(mine === fin);
-  await bsay(ST, (fin === 'good' ? '善良' : '邪恶') + '阵营获胜。');
-  await bsay(ST, '欢迎下次再玩。');
+  await bsay(ST, fin === 'good' ? S().goodWins : S().evilWins);
+  await bsay(ST, S().bye);
   await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
   if (!g.auto && run === g.run && mode === 'tower') leaveTower();
   return g.result;
@@ -1036,7 +1135,7 @@ function drawBotc(t, dt) {
   if (b && BHIT[b.who]) {
     // a speech bubble right beside whoever is talking
     const h = BHIT[b.who], fs = clamp(W * .04, 13.5, 17), maxw = Math.min(W - 60, 300); ctx.font = FONT(fs, true);
-    const lines = []; let cur = ''; for (const ch of b.text) { if (ctx.measureText(cur + ch).width > maxw && !'，。！？：；、】—'.includes(ch)) { lines.push(cur); cur = ''; } cur += ch; } lines.push(cur);
+    const lines = wrapText(b.text, maxw);
     const lh = fs * 1.45, cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 26, bh = lines.length * lh + 16;
     const top = b.who === 'st' ? h[1] - K * 1.12 : h[1] - K * .95, bx = clamp(h[0] - cw / 2, 8, W - cw - 8), by = top - bh - 9;
     ctx.fillStyle = css([250, 246, 238], .97); rrect(bx, by, cw, bh, 13); ctx.fill();
@@ -1057,7 +1156,7 @@ function lbfs(from, to) {
   return null;
 }
 function libGo(cell, pending) { const p = lbfs(cellOf(lib), cell); if (!p) return; lib.path = p.slice(1); lib.pending = pending; chime(69, 0, .07, .8); if (!lib.path.length) libArrive(); }
-function libArrive() { const p = lib.pending; lib.pending = null; if (p === 'exit') leaveLib(); else if (p === 'shelf') { lib.say = '图书管理员不在，不要乱动。'; lib.sayT = 3.2; chime(57, 0, .12, 1.2); chime(60, .12, .1, 1.2); } }
+function libArrive() { const p = lib.pending; lib.pending = null; if (p === 'exit') leaveLib(); else if (p === 'shelf') { lib.say = S().libAway; lib.sayT = 3.2; chime(57, 0, .12, 1.2); chime(60, .12, .1, 1.2); } }
 function updateLib(dt) { const had = lib.path.length; if (walk(lib, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !lib.path.length && lib.pending) libArrive(); if (lib.sayT > 0) lib.sayT -= dt; }
 function enterLib() { mode = 'lib'; $('zoom').style.display = 'none'; fade = 1; Object.assign(lib, { x: 1.4, y: 3.5, path: [], say: '', sayT: 0, pending: null }); chime(62, 0, .12); chime(69, .14, .1); }
 function leaveLib() { mode = 'world'; $('zoom').style.display = 'block'; player.x = LDOOR[0] + .5; player.y = LDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
@@ -1091,12 +1190,7 @@ function drawLib(t) {
   const lit = c => mix(tn(c), mix(c, lightC, .14), lib.lit);
   if (lib.lit > .02) glow(op[0], op[1] - K * .6, K * 1.1, lightC, .3 * lib.lit);
   fig(op[0], op[1] - hop, K, { kind: 'chef', apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) });
-  if (lib.sayT > 0) {
-    const fs = clamp(s * .3, 12.5, 15), al = clamp(lib.sayT * 2); ctx.font = FONT(fs, true);
-    const cw = ctx.measureText(lib.say).width + 22, bh = fs * 1.4 + 12, hx = op[0], top = op[1] - K * 1.5, bx = clamp(hx - cw / 2, 8, W - cw - 8), by = top - bh - 8;
-    ctx.fillStyle = css([250, 246, 238], .97 * al); rrect(bx, by, cw, bh, 11); ctx.fill(); poly([[hx - 6, by + bh - 1], [hx + 6, by + bh - 1], [hx, by + bh + 8]], [250, 246, 238], .97 * al);
-    text(lib.say, bx + cw / 2, by + bh / 2, fs, [50, 36, 70], al, 'center', true);
-  }
+  if (lib.sayT > 0) sayBubble(op[0], op[1] - K * 1.5, lib.say, clamp(s * .3, 12.5, 15), clamp(lib.sayT * 2), Math.min(W * .62, 250));
   TK = 0;
 }
 
@@ -1124,6 +1218,7 @@ function frame(now) {
   else if (mode === 'lib') { updateLib(dt); drawLib(T, dt); }
   else { if (mode === 'world') updateWorld(dt); drawWorld(T, dt); }
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
+  { const show = mode === 'world' && zoomTarget > .5, lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
   musicTick();
   requestAnimationFrame(frame);
 }
@@ -1133,9 +1228,12 @@ function start() {
   mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block'; bell(146.8, .18);
 }
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); start(); });
-cv.addEventListener('pointerdown', e => { if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { botcTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
+cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { botcTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
+$('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
+$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); chime(74, 0, .12, .8); }));
+setLang(langPref);
 const ZOOM_ICO = ['<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10h6M14 10V4M10 14H4M10 14v6M14 10l7-7M10 14l-7 7"/></svg>'];
 $('zoom').addEventListener('click', () => { zoomTarget = zoomTarget > 0.5 ? 0 : 1; $('zoom').innerHTML = ZOOM_ICO[zoomTarget]; });
 window.addEventListener('keydown', e => {
@@ -1144,6 +1242,7 @@ window.addEventListener('keydown', e => {
 });
 resize(); refreshUI();
 // debug entry points for automated checks: #world, #stall, #test
+{ const m = /[?&]lang=(hans|hant|en|auto)/.exec(location.search); if (m) setLang(m[1]); }
 if (location.hash) {
   $('title').style.display = 'none'; mode = 'world'; zoomOut = zoomTarget = 0; $('zoom').style.display = 'block';
   if (location.hash === '#audio') setTimeout(async () => { const log = []; restartGame = () => {}; try { initAudio(); log.push('ctx=' + !!AC + ' state=' + (AC && AC.state)); if (AC) { await AC.resume(); musicTick(); const b0 = barIdx; await AC.suspend(); log.push('suspended=' + AC.state); document.dispatchEvent(new Event('visibilitychange')); await new Promise(r => setTimeout(r, 300)); log.push('afterReturn=' + AC.state); nextBar = AC.currentTime - 30; musicTick(); log.push('barsScheduledAfterGap=' + (barIdx - b0) + ' nextBarAhead=' + (nextBar > AC.currentTime)); const old = AC; await AC.close(); window.dispatchEvent(new Event('pointerdown')); log.push('afterClosed newCtx=' + (AC && AC !== old) + ' state=' + (AC && AC.state)); } } catch (e) { log.push('ERR ' + e.message); } document.title = log.join(' ; '); }, 300);
@@ -1155,12 +1254,16 @@ if (location.hash) {
     const dead = AC; await dead.close(); returnCheck(); await wait(2000); log.push('closed-> newCtx=' + (AC !== dead) + ' ' + (AC && AC.state) + ' restarts=' + restarts);
     const real = initAudio; initAudio = () => {}; await AC.close(); returnCheck(); await wait(2000); log.push('cannotRebuild-> restarts=' + restarts); initAudio = real;
     document.title = log.join(' ; '); $('err').style.cssText += ';font-size:15px;line-height:1.5'; $('err').textContent = log.join('\n'); }, 300);
-  if (location.hash === '#bye') { enterTower(); fade = 0; const log = []; let n = 0; const step = () => { if (n++ > 600) { document.title = 'timeout'; return; } const w = BG.wait; if (BG.over && BG.bubble && BG.bubble.text === '欢迎下次再玩。') { botcTap(5, 5); setTimeout(() => { log.push('tap1 mode=' + mode + ' bubble=' + (BG.bubble ? 'shown' : 'gone')); botcTap(5, 5); setTimeout(() => { log.push('tap2 mode=' + mode); document.title = log.join(' ; '); }, 50); }, 50); return; } if (w) { w.type === 'say' ? botcTap(5, 5) : (BG.wait = null, w.res(w.blank !== undefined ? w.blank : [1, 2, 0].find(w.ok))); } setTimeout(step, 20); }; setTimeout(step, 100); }
+  if (location.hash === '#bye') { enterTower(); fade = 0; const log = []; let n = 0; const step = () => { if (n++ > 600) { document.title = 'timeout'; return; } const w = BG.wait; if (BG.over && BG.bubble && BG.bubble.text === S().bye) { botcTap(5, 5); setTimeout(() => { log.push('tap1 mode=' + mode + ' bubble=' + (BG.bubble ? 'shown' : 'gone')); botcTap(5, 5); setTimeout(() => { log.push('tap2 mode=' + mode); document.title = log.join(' ; '); }, 50); }, 50); return; } if (w) { w.type === 'say' ? botcTap(5, 5) : (BG.wait = null, w.res(w.blank !== undefined ? w.blank : [1, 2, 0].find(w.ok))); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#hold')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); const m = location.hash.slice(5); if (m === 'soup') grab('soup'); else { act('soup'); act('beef'); if (m === 'beef') { stall.bowl.beef = false; grab('beef'); } else grab('bowl'); } stall.owner.x = stall.owner.tx; stall.owner.y = stall.owner.ty; stall.owner.ptx = stall.owner.tx; stall.owner.pty = stall.owner.ty; stall.owner.path = []; }, 200);
   if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), .95], bar: [4.45, .95], bin: [3.8, 3.05], door: SHOP_DOOR, seat2: [SEATX[2], .95] }; let bad = 0;
     for (const k in spots) { o.tx = spots[k][0]; o.ty = spots[k][1]; let n = 0, hit = 0; for (; n < 300; n++) { stall.leaving = false; updateStall(0.03); if (shopBlocked(o.x, o.y)) hit++; if (Math.hypot(o.x - o.tx, o.y - o.ty) < .02) break; } if (hit || n >= 300) bad++; log.push(k + ':' + n + (hit ? '!hit' + hit : '') + (n >= 300 ? '!stuck' : '')); }
     document.title = 'bad=' + bad + ' ' + log.join(' '); }, 300);
   if (location.hash === '#world' || location.hash === '#far' || location.hash === '#day') { G.t = 0; G.n = 0; }
+  if (location.hash === '#i18n') setTimeout(() => { const log = [], keys = Object.keys(STR.hans); for (const l of ['hant', 'en']) { const miss = keys.filter(k => !(k in STR[l]) || typeof STR[l][k] !== typeof STR.hans[k] || (Array.isArray(STR.hans[k]) && STR[l][k].length !== STR.hans[k].length)); const hk = Object.keys(STR.hans.hello).filter(k => (STR[l].hello[k] || []).length !== STR.hans.hello[k].length); log.push(l + ' missing=' + miss.join(',') + ' hello=' + hk.join(',')); }
+    for (const l of ['hans', 'hant', 'en']) { setLang(l); log.push(l + ': ' + [S().title, orderText({ beef: true, chili: false, cilantro: true }).replace(/\n/g, '/'), S().dawnDied(1), S().sailorSay(1, 0), S().iNominate(2, 2), S().nominated(1, 0), S().voteExec(2, 0), S().voteSafe(2, 1), S().voteFail(1, 2), S().goodWins].join(' | ')); }
+    setLang('auto'); log.push('auto->' + LANG + ' nav=' + navigator.language); document.title = log.join(' ;; '); }, 300);
+  if (location.hash === '#langmenu') { zoomOut = zoomTarget = 1; setTimeout(() => $('langMenu').classList.add('open'), 300); }
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
   if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
