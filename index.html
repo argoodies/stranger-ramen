@@ -182,7 +182,7 @@ const STR = {
     welcome: 'Welcome to three-player Clocktower.', night: 'Night falls. Close your eyes.', pickSailor: 'Sailor, choose a player.', pickPukka: 'Pukka, choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
     sailorSay: (v, t) => 'I am the Sailor. Last night I chose ' + who(v, t) + '.', hereticSay: 'I am the Heretic.',
-    nomPrompt: 'Tap a player to nominate.', iNominate: (v, n) => 'Then I will. I nominate ' + who(v, n) + '.', nominated: (a, b) => cap(st[a]) + ' nominates ' + (a === b ? 'themself' : st[b]) + '.',
+    nomPrompt: 'Tap a player to nominate.', iNominate: (v, n) => 'Then I will. I nominate ' + who(v, n) + '.', nominated: (a, b) => a === 0 ? 'You nominate ' + (b === 0 ? 'yourself' : st[b]) + '.' : cap(st[a]) + ' nominates ' + (a === b ? 'themself' : st[b]) + '.',
     iVote: 'I vote.', iDont: "I don't vote.",
     myNom: n => 'I nominate ' + (n === 0 ? 'myself' : st[n]) + '.', myNoNom: 'I nominate no one.', myVote: 'I vote.', myNoVote: "I don't vote.",
     voteSafe: (y, i) => y + ' votes. Enough, yet ' + st[i] + (i === 0 ? ' do' : ' does') + ' not die.', voteExec: (y, i) => y + ' votes. Enough. ' + cap(st[i]) + (i === 0 ? ' are' : ' is') + ' executed.', voteFail: (y, n) => 'Only ' + y + (y === 1 ? ' vote; ' : ' votes; ') + n + ' needed. No one is executed today.',
@@ -1009,12 +1009,12 @@ async function playBotc() {
     if (nom != null) {
       const votes = [null, null, null];
       for (const v of [0, 1, 2]) if (g.alive[v]) {
-        if (v === nominator) votes[v] = true;
-        else if (v === 0) { votes[v] = (await bpick(k => k === nom, S().nominated(nominator, nom), 'no')) === nom; g.votes = votes.slice(); await bsay(0, votes[v] ? S().myVote : S().myNoVote); }
-        else votes[v] = wants(v, nom);
+        // everyone alive decides, the nominator included (a computer nominator always backs their own nomination)
+        if (v === 0) { votes[v] = (await bpick(k => k === nom, S().nominated(nominator, nom), 'no')) === nom; g.votes = votes.slice(); await bsay(0, votes[v] ? S().myVote : S().myNoVote); }
+        else votes[v] = v === nominator || wants(v, nom);
       }
       g.votes = votes; const yes = votes.filter(x => x === true).length, need = Math.ceil(live() / 2);
-      for (const v of [1, 2]) if (g.alive[v] && v !== nominator) await bsay(v, votes[v] ? S().iVote : S().iDont);
+      for (const v of [1, 2]) if (g.alive[v]) await bsay(v, votes[v] ? S().iVote : S().iDont);
       const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
       const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
       if (yes >= need) {
