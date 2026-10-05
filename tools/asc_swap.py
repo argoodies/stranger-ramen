@@ -2,7 +2,7 @@
 usage: asc_swap.py <buildNumber> [screenshotDir]"""
 import sys, json, time, os, hashlib, urllib.request
 sys.path.insert(0, '/root'); from asc_api import req
-APP = '6782641107'; VID = 'fed92070-816f-4540-a87c-128f9011c636'
+APP = '6782641107'; VID = os.environ.get('ASC_VID', 'fed92070-816f-4540-a87c-128f9011c636')
 def call(m, p, b=None):
     st, tx = req(m, p, b); return st, (json.loads(tx) if tx.strip().startswith('{') else {})
 def must(m, p, b=None):
