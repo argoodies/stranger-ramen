@@ -1187,7 +1187,7 @@ function drawLib(t) {
       const z0 = .22 + r * .76; let x = .66, k = r * 5 + 1;
       v.box(.6, .5, z0 - .06, 3.1, .17, .06, [166, 122, 100]);
       while (x < 3.5) {
-        k = (k * 7 + 3) % 31; const w = .15 + (k % 4) * .028, h = .4 + (k % 6) * .04;
+        k = (k * 7 + 3) % 31; const w = .13 + (k % 5) * .03, h = .56;
         if (k % 11 === 0) { x += .14; continue; }                                            // a gap now and then
         if (x + w > 3.66) break;
         v.box(x, .5, z0, w, .16, h, cs[(k + r) % cs.length]);
