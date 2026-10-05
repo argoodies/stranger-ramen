@@ -134,7 +134,7 @@ const STR = {
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了。今天就到这儿，可以出去走走了。',
     libAway: '图书管理员不在，不要乱动。',
     welcome: '欢迎来到三人血染。', night: '天黑请闭眼。', pickSailor: '水手，选一个人。', pickPukka: '普卡，选一个人。', ok: '好的。',
-    dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
+    dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
     sailorSay: (v, t) => '我是水手。昨晚我选了' + who(v, t) + '。', hereticSay: '我是异端分子。',
     nomPrompt: '点一个人提名。', iNominate: (v, n) => '那我来。我提名' + (n === v ? '我自己' : who(v, n)) + '。', nominated: (a, b) => st[a] + '提名' + (a === b ? '自己' : st[b]) + '。',
     iVote: '我举手。', iDont: '我不举手。',
@@ -157,7 +157,7 @@ const STR = {
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了。今天就到這兒，可以出去走走了。',
     libAway: '圖書館員不在，不要亂動。',
     welcome: '歡迎來到三人血染。', night: '天黑請閉眼。', pickSailor: '水手，選一個人。', pickPukka: '普卡，選一個人。', ok: '好的。',
-    dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
+    dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
     sailorSay: (v, t) => '我是水手。昨晚我選了' + who(v, t) + '。', hereticSay: '我是異端分子。',
     nomPrompt: '點一個人提名。', iNominate: (v, n) => '那我來。我提名' + (n === v ? '我自己' : who(v, n)) + '。', nominated: (a, b) => st[a] + '提名' + (a === b ? '自己' : st[b]) + '。',
     iVote: '我舉手。', iDont: '我不舉手。',
@@ -180,7 +180,7 @@ const STR = {
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. That's it for today, time for a walk.",
     libAway: "The librarian is out. Better not touch anything.",
     welcome: 'Welcome to three-player Clocktower.', night: 'Night falls. Close your eyes.', pickSailor: 'Sailor, choose a player.', pickPukka: 'Pukka, choose a player.', ok: 'Very well.',
-    dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
+    dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
     sailorSay: (v, t) => 'I am the Sailor. Last night I chose ' + who(v, t) + '.', hereticSay: 'I am the Heretic.',
     nomPrompt: 'Tap a player to nominate.', iNominate: (v, n) => 'Then I will. I nominate ' + who(v, n) + '.', nominated: (a, b) => a === 0 ? 'You nominate ' + (b === 0 ? 'yourself' : st[b]) + '.' : cap(st[a]) + ' nominates ' + (a === b ? 'themself' : st[b]) + '.',
     iVote: 'I raise my hand.', iDont: "I don't raise my hand.",
@@ -944,9 +944,11 @@ function botcTap(x, y) {
 async function playBotc() {
   const g = BG, run = ++g.run, ST = 'st', live = () => g.alive.filter(Boolean).length;
   const roles = ['sailor', 'pukka', 'heretic']; for (let i = 2; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [roles[i], roles[j]] = [roles[j], roles[i]]; }
-  Object.assign(g, { snaps: [], roles, alive: [true, true, true], drunk: -1, poisoned: -1, night: 0, isNight: false, votes: null, reveal: false, revealT: 0, showMine: false, deathBy: [null, null, null], gonePoison: -1, goneDrunk: -1, over: false, result: null, log: [] });
+  Object.assign(g, { snaps: [], roles, alive: [true, true, true], drunk: -1, poisoned: -1, night: 0, isNight: false, votes: null, reveal: false, revealT: 0, showMine: false, deathBy: [null, null, null], gonePoison: -1, goneDrunk: -1, deadPoison: -1, over: false, result: null, log: [] });
   const si = roles.indexOf('sailor'), pi = roles.indexOf('pukka'), hi = roles.indexOf('heretic');
-  const poisonedNow = i => g.poisoned === i && g.alive[pi] && g.drunk !== pi;      // the Pukka's poison only works while the Pukka is sober
+  // the Pukka's poison only works while the Pukka is sober. A player the Pukka kills is still poisoned at the time of death
+  // (deadPoison), so their ability stays off: a Heretic killed this way does not flip the result.
+  const poisonedNow = i => (g.poisoned === i || g.deadPoison === i) && g.alive[pi] && g.drunk !== pi;
   const sailorSafe = () => g.drunk !== si && !poisonedNow(si);
   const win = () => !g.alive[pi] ? 'good' : live() <= 2 ? 'evil' : null;
   // a dead character's tokens leave play: the Pukka's single poison token, the Sailor's drunk token
@@ -977,7 +979,7 @@ async function playBotc() {
       if (g.drunk !== pi && g.poisoned !== pi) {
         const prev = g.poisoned;
         // poisoning himself still lands, but a Pukka poisoned that night cannot make the last victim die
-        if (tgt !== pi && prev >= 0 && g.alive[prev]) { g.alive[prev] = false; g.deathBy[prev] = 'night'; died = prev; }
+        if (tgt !== pi && prev >= 0 && g.alive[prev]) { g.alive[prev] = false; g.deathBy[prev] = 'night'; g.deadPoison = prev; died = prev; }
         g.poisoned = tgt; if (tgt === si) g.drunk = -1;
         rec += nm(pi) + '让' + (tgt === pi ? '自己' : nm(tgt)) + '中了毒' + (died >= 0 ? '；上一个中毒的' + nm(died) + '毒发身亡。' : tgt === pi && prev >= 0 && prev !== pi ? '；自己中了毒，上一个中毒的人没有毒发。' : '。'); clean();
         aud.self = tgt === pi; aud.prevAlive = prev >= 0 && prev !== pi;
@@ -986,8 +988,11 @@ async function playBotc() {
       if (pi === 0) await bsay(ST, S().ok);
     }
 
-    g.isNight = false; recap.push(rec); g.snaps.push({ night: true, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); aud.pukkaDrunk = g.alive[pi] && g.drunk === pi; aud.both = g.alive[si] && g.poisoned === si && g.drunk >= 0; aud.p1 = g.poisoned; aud.died = died; aud.drunk = g.drunk; (g.audit = g.audit || []).push(aud);
-    await bsay(ST, died >= 0 ? S().dawnDied(died) : S().dawnQuiet);
+    recap.push(rec); g.snaps.push({ night: true, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); aud.pukkaDrunk = g.alive[pi] && g.drunk === pi; aud.both = g.alive[si] && g.poisoned === si && g.drunk >= 0; aud.p1 = g.poisoned; aud.died = died; aud.drunk = g.drunk; (g.audit = g.audit || []).push(aud);
+    // a death in the night ends a three-player game on the spot: the Storyteller announces it and the result while it is still night
+    if (died >= 0) { await bsay(ST, S().nightDied(died)); raw = win() || 'evil'; break; }
+    g.isNight = false;
+    await bsay(ST, S().dawnQuiet);
     if ((raw = win())) break;
     if (g.night > 12) { raw = 'evil'; break; }
     // ---- day: the other two say who they are (the Pukka lies)
@@ -1110,7 +1115,7 @@ function drawBotc(t, dt) {
       const bz = 1.9 + .08 * Math.sin(t * 1.6); v.box(.75, -.9, bz, .7, .55, .12, [72, 56, 104]); BHIT.st = [p[0], p[1] - K * .8, K * .95];
       return;
     }
-    const [x, y] = seat(i), p = P(x, y), dead = !g.alive[i], asleep = g.dark > .5 && !(i === 0 && w && w.type === 'pick');
+    const [x, y] = seat(i), p = P(x, y), dead = !g.alive[i], asleep = g.dark > .5 && !g.reveal && !(i === 0 && w && w.type === 'pick');
     if (canPick(i)) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * (1 + .06 * pulse), s * .35 * (1 + .06 * pulse), 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .5 + .4 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }
     if (g.pop && g.pop.who === i) { const u = g.pop.t / .45, k2 = 1 + .55 * eout(u); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * k2, s * .35 * k2, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .95 * (1 - u) * (1 - u)); ctx.lineWidth = 3.5 * (1 - u * .6); ctx.stroke(); g.pop.t += dt; if (g.pop.t >= .45) g.pop = null; }
     if (i === 0) glow(p[0], p[1] - K * .6, K * 1.2, [255, 240, 200], .3);
@@ -1132,7 +1137,7 @@ function drawBotc(t, dt) {
       if (!g.alive[i]) shroud(tx, ty, R * pp, clamp((g.revealT - 1.0 - i * .2) / .4));
       const ra = clamp((g.revealT - 1.5) / .4); let k = 0;
       if (g.drunk === i) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'sailor', ra);
-      if (g.poisoned === i && g.pukkaSober) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra);
+      if ((g.poisoned === i || g.deadPoison === i) && g.pukkaSober) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra);
       if (g.goneDrunk === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'sailor', ra); shroud(mx, my, R * .56, ra); }
       if (g.gonePoison === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'pukka', ra); shroud(mx, my, R * .56, ra); }
     } else if (i === 0 && g.showMine) roleToken(tx, ty, R, g.roles[0]);
@@ -1299,7 +1304,7 @@ if (location.hash) {
   if (location.hash === '#langmenu') { zoomOut = zoomTarget = 1; setTimeout(() => $('langMenu').classList.add('open'), 300); }
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
-  if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
+  if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let n = 0, maxN = 0, nightEnds = 0, killedHeretic = 0, killedHereticFlipped = 0, endedAtNight = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; if (BG.deadPoison >= 0) { nightEnds++; if (BG.isNight) endedAtNight++; if (BG.roles[BG.deadPoison] === 'heretic') { killedHeretic++; if (r.hereticOn) killedHereticFlipped++; } } maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'nightKills=' + nightEnds + ' endedAtNight=' + endedAtNight + ' killedHeretic=' + killedHeretic + ' flippedAnyway=' + killedHereticFlipped + ' ; nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
   if (location.hash === '#liblit') setTimeout(() => { goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); fade = 0; lib.x = 1.5; lib.y = 2.2; lib.lit = 1; }, 300);
   if (location.hash === '#libview2') setTimeout(() => { goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); fade = 0; drawLib(1); lib.x = 2.5; lib.y = 1.5; lib.pending = 'shelf'; libArrive(); }, 300);
   if (location.hash === '#botctap') { enterTower(); fade = 0; const log = []; let guard = 0; const step = () => { const w = BG.wait; if (guard++ > 400 || BG.over) { document.title = log.join(' ; ') + ' over=' + BG.over; return; } if (w) { if (w.type === 'say') botcTap(5, 5); else if (w.blank === 'none') { botcTap(5, H - 5); log.push('blankNominate->' + (BG.wait !== w)); setTimeout(() => log.push('say:' + (BG.bubble && BG.bubble.who === 0 ? BG.bubble.text : '?')), 5); } else if (w.blank === 'no') { log.push('prompt:' + BG.bubble.who + ':' + BG.bubble.text); const k = [0, 1, 2].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); setTimeout(() => log.push('tapNomineeVote->' + (BG.votes && BG.votes[0]) + ' say:' + (BG.bubble && BG.bubble.who === 0 ? BG.bubble.text : '?')), 5); } else { const k = [1, 2, 0].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); log.push('pick' + k); } } setTimeout(step, 25); }; setTimeout(step, 100); }
@@ -1307,6 +1312,7 @@ if (location.hash) {
   if (location.hash === '#botcorder') setTimeout(async () => { BG.auto = true; const log = []; let bad = 0, n = 0; for (let k = 0; k < 300; k++) { BG.voteOrder = null; await playBotc(); } document.title = 'ok'; }, 300);
   if (location.hash === '#botctap2') { enterTower(); fade = 0; const log = [], seen = new Set(); let guard = 0; const step = () => { const w = BG.wait; if (guard++ > 500 || BG.over) { document.title = log.join(' ; ') + ' over=' + BG.over; return; } if (w) { if (w.type === 'say') { const b = BG.bubble; if (b && b.who !== 'st' && BG.votes && BG.voteOrder && BG.voteOrder.length && !seen.has(BG.voteOrder.join()+b.who)) { seen.add(BG.voteOrder.join()+b.who); log.push('vote[' + BG.voteOrder.join('>') + '] ' + b.who + ':' + b.text); } botcTap(5, 5); } else if (w.blank === 'none') { drawBotc(1, .016); const k = [1, 2].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); setTimeout(() => log.push('nominate' + k + ' say:' + (BG.bubble && BG.bubble.who === 0 ? BG.bubble.text : '?')), 5); } else if (w.blank === 'no') { log.push('prompt:' + BG.bubble.who + ':' + BG.bubble.text); botcTap(5, H - 5); setTimeout(() => log.push('blankVote->' + (BG.votes && BG.votes[0]) + ' say:' + (BG.bubble && BG.bubble.who === 0 ? BG.bubble.text : '?')), 5); } else { const k = [1, 2, 0].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); } } setTimeout(step, 25); }; setTimeout(step, 100); }
   if (location.hash === '#botcvote') { enterTower(); fade = 0; let n = 0; const step = () => { const w = BG.wait; if (n++ > 500) return; if (w && w.blank === 'no') return; if (w) { if (w.type === 'say') botcTap(5, 5); else if (w.blank === 'none') { drawBotc(1, .016); const k = [1, 2].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); } else { const k = [1, 2, 0].find(w.ok), h = BHIT[k]; botcTap(h[0], h[1]); } } setTimeout(step, 25); }; setTimeout(step, 100); }
+  if (location.hash === '#botcnightend') setTimeout(async () => { mode = 'tower'; fade = 0; BG.auto = true; for (let k = 0; k < 400; k++) { const r = await playBotc(); if (BG.deadPoison >= 0 && (location.search.includes('her') ? BG.roles[BG.deadPoison] === 'heretic' : true)) { BG.revealT = 5; BG.dark = 1; BG.bubble = { who: 'st', text: r.fin === 'good' ? S().goodWins : S().evilWins }; document.title = 'killed=' + BG.roles[BG.deadPoison] + ' raw=' + r.raw + ' fin=' + r.fin + ' hereticOn=' + r.hereticOn; break; } } }, 300);
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#botcview')) { enterTower(); fade = 0; const n = +location.hash.slice(9) || 0; let k = 0; const step = () => { if (k++ < n && BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); setTimeout(step, 30); } }; setTimeout(step, 100); }
   if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode + ' leaving=' + stall.leaving); let hitFurn = 0, steps = 0; for (; steps < 200 && mode === 'stall'; steps++) { updateStall(0.05); if (shopBlocked(stall.owner.x, stall.owner.y)) hitFurn++; } log.push('walkedOut mode=' + mode + ' steps=' + steps + ' throughFurniture=' + hitFurn); document.title = log.join(' ; '); }, 500);
