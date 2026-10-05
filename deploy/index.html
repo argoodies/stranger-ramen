@@ -1181,19 +1181,21 @@ function drawLib(t) {
   // bookshelves along the back wall
   v.box(.5, .05, 0, 3.3, .6, 2.5, [140, 98, 84]);
   { // the shelf is hollow: a dark recess, three boards, and the books standing on them as little blocks (spine, top and side)
-    poly([P(.6, .651, .16), P(3.7, .651, .16), P(3.7, .651, 2.4), P(.6, .651, 2.4)], tn([84, 58, 56]));
+    const rec = [P(.6, .651, .16), P(3.7, .651, .16), P(3.7, .651, 2.4), P(.6, .651, 2.4)]; poly(rec, tn([84, 58, 56]));
+    ctx.save(); ctx.beginPath(); rec.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.clip();      // nothing may stick out of the opening
     const cs = [[90, 150, 230], [226, 106, 96], [240, 190, 110], [150, 200, 160], [200, 160, 220], [236, 226, 204]];
     for (let r = 0; r < 3; r++) {
-      const z0 = .22 + r * .76; let x = .66, k = r * 5 + 1;
+      const z0 = .22 + r * .76; let x = .78, k = r * 5 + 1;
       poly([P(.6, .651, z0 - .06), P(3.7, .651, z0 - .06), P(3.7, .651, z0), P(.6, .651, z0)], tn([166, 122, 100]));      // the board's front edge, flush with the frame
       while (x < 3.5) {
-        k = (k * 7 + 3) % 31; const w = .13 + (k % 5) * .03, h = .56;
+        k = (k * 7 + 3) % 31; const w = .13 + (k % 5) * .03, h = .5;
         if (k % 11 === 0) { x += .14; continue; }                                            // a gap now and then
         if (x + w > 3.6) break;
         v.box(x, .5, z0, w, .15, h, cs[(k + r) % cs.length]);
         x += w + .012;
       }
     }
+    ctx.restore();
   }
   { const a = P(.5, .65, 2.5), b = P(3.8, .65, 0); LHIT.shelf = [a[0], a[1] - s * .3, b[0], b[1]]; }
   if (lib.path.length) { const c = lib.path[lib.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
