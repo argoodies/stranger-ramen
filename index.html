@@ -1191,7 +1191,6 @@ function drawLib(t) {
         if (k % 11 === 0) { x += .14; continue; }                                            // a gap now and then
         if (x + w > 3.66) break;
         v.box(x, .5, z0, w, .16, h, cs[(k + r) % cs.length]);
-        { const a = P(x + w * .2, .661, z0 + h * .72), b = P(x + w * .8, .661, z0 + h * .72), c = P(x + w * .8, .661, z0 + h * .8), d = P(x + w * .2, .661, z0 + h * .8); poly([a, b, c, d], tn([250, 240, 220]), .55); }   // a label band on the spine
         x += w + .012;
       }
     }
