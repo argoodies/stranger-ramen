@@ -1009,12 +1009,13 @@ async function playBotc() {
     if (nom != null) {
       const votes = [null, null, null];
       for (const v of [0, 1, 2]) if (g.alive[v]) {
-        // everyone alive decides, the nominator included (a computer nominator always backs their own nomination)
-        if (v === 0) { votes[v] = (await bpick(k => k === nom, S().votePrompt, 'no')) === nom; g.votes = votes.slice(); await bsay(0, votes[v] ? S().myVote : S().myNoVote); }
-        else votes[v] = v === nominator || wants(v, nom);
+        // whoever nominated votes for it automatically; only the others are asked
+        if (v === nominator) votes[v] = true;
+        else if (v === 0) { votes[v] = (await bpick(k => k === nom, S().votePrompt, 'no')) === nom; g.votes = votes.slice(); await bsay(0, votes[v] ? S().myVote : S().myNoVote); }
+        else votes[v] = wants(v, nom);
       }
       g.votes = votes; const yes = votes.filter(x => x === true).length, need = Math.ceil(live() / 2);
-      for (const v of [1, 2]) if (g.alive[v]) await bsay(v, votes[v] ? S().iVote : S().iDont);
+      for (const v of [1, 2]) if (g.alive[v] && v !== nominator) await bsay(v, votes[v] ? S().iVote : S().iDont);
       const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
       const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
       if (yes >= need) {
