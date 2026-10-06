@@ -14,9 +14,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- Language setting: Simplified Chinese, Traditional Chinese, English, or follow the system (open the overview and tap the globe)\n- The game now opens at night, with a new title\n- Quieter when the app goes to the background\n- Small fixes",
-       'zh-Hant': "· 新增語言設定：簡體中文、繁體中文、English，或跟隨系統（拉到全景後點右上角的地球）\n· 遊戲改為從夜晚開始，換了新的標題\n· 切到背景時不再有雜音\n· 一些細節修正",
-       'zh-Hans': "· 新增语言设置：简体中文、繁體中文、English，或跟随系统（拉到全景后点右上角的地球）\n· 游戏改为从夜晚开始，换了新的标题\n· 切到后台时不再有杂音\n· 一些细节修正"}
+NEW = {'en-US': "- Ramen shop: every step is pick up, then put down, with a hint ring on the rim of what to touch next; add chili and cilantro as many times as you like\n- Clocktower game: you nominate, votes are called clockwise, and everyone answers out loud; several rule fixes for the Pukka\n- Library: a proper bookshelf\n- Language button on the start screen",
+       'zh-Hant': "· 拉麵店：每一步都是先拿起、再放下，下一步要碰的容器口沿會有提示光環；辣椒和香菜可以想加幾次加幾次\n· 鐘樓對局：由你提名，順時針唱票，每個人都會說出自己舉不舉手；修正了多處普卡的規則\n· 圖書館：書架重新畫過\n· 開始畫面也能切換語言",
+       'zh-Hans': "· 拉面店：每一步都是先拿起、再放下，下一步要碰的容器口沿会有提示光环；辣椒和香菜可以想加几次加几次\n· 钟楼对局：由你提名，顺时针唱票，每个人都会说出自己举不举手；修正了多处普卡的规则\n· 图书馆：书架重新画过\n· 开始画面也能切换语言"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
