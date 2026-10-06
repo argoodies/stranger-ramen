@@ -956,7 +956,7 @@ async function playBotc() {
   const sailorSafe = () => g.drunk !== si && !poisonedNow(si);
   const win = () => !g.alive[pi] ? 'good' : live() <= 2 ? 'evil' : null;
   // a dead character's tokens leave play: the Pukka's single poison token, the Sailor's drunk token
-  const clean = () => { if (!g.alive[pi] && g.poisoned >= 0) { if (g.drunk !== pi) g.gonePoison = g.poisoned; g.poisoned = -1; }      // a Pukka who dies drunk leaves no token behind: his tokens were already off the table if (!g.alive[si] && g.drunk >= 0) { g.goneDrunk = g.drunk; g.drunk = -1; } };
+  const clean = () => { if (!g.alive[pi] && g.poisoned >= 0) { if (g.drunk !== pi) g.gonePoison = g.poisoned; /* a Pukka who dies drunk leaves no token behind: his tokens were already off the table */ g.poisoned = -1; } if (!g.alive[si] && g.drunk >= 0) { g.goneDrunk = g.drunk; g.drunk = -1; } };
   const recap = [], nm = i => stN(i) + '（' + RN[roles[i]] + '）'; g.recap = recap;
   const claim = [null, null, null], lastPick = [null, null, null], bluff = Math.random() < .5 ? 'sailor' : 'heretic';
   await bsay(ST, S().welcome);
