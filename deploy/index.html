@@ -885,11 +885,13 @@ function drawStall(t) {
   hit('bin', 4.45, 3.0, .35, .42); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(4.45, 3.0, 0, .26, .55, [120, 132, 150]); v.disc(4.45, 3.0, .55, .21, 0, [50, 44, 70]); ctx.restore();
   // hanging lamps
   for (const lx of [1.5, 3.6]) { const a = P(lx, 1.3, Hh + .6), b = P(lx, 1.3, 3.2); line([a, b], [70, 52, 92], 1.5); glow(b[0], b[1] + s * .15, s * 1.7, [255, 214, 140], .5); poly([[b[0] - s * .22, b[1] + s * .16], [b[0] + s * .22, b[1] + s * .16], [b[0], b[1] - s * .12]], [226, 106, 96]); circ(b[0], b[1] + s * .18, s * .07, [255, 240, 190]); }
-  // a ring around the next thing to touch
+  // the hint: a pulsing ring lying on the rim of the container to touch next (same shape as the cooking-progress arc)
   {
-    const k = hintKey();
-    const o = k && HIT[k];
-    if (o) { ctx.beginPath(); ctx.ellipse(o[0], o[1], o[2] * (1 + .08 * Math.sin(t * 5)), o[2] * (.72 + .06 * Math.sin(t * 5)), 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .55 + .35 * Math.sin(t * 5)); ctx.lineWidth = 2.5; ctx.stroke(); }
+    const k = hintKey(), RIM = { pot: [.6, 1.6, 1.52, .46], soup: [.6, 2.6, 1.52, .46], bowl: [2.45, 2.07, 1.085, .36], chili: [3.3, 2.07, 1.34, .25], cilantro: [4.0, 2.07, 1.22, .25], beef: [4.7, 2.07, 1.09, .29], bin: [4.45, 3.0, .55, .26], bar: [4.5, .3, 1.045, .24] };
+    const rim = k && (RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], .3, 1.045, .22] : null)), pulse = Math.sin(t * 5);
+    ctx.strokeStyle = css([255, 236, 170], .6 + .35 * pulse); ctx.lineWidth = Math.max(2.5, s * .06); ctx.lineCap = 'round';
+    if (rim) { const c = P(rim[0], rim[1], rim[2]), g = 1.12 + .04 * pulse; ctx.beginPath(); ctx.ellipse(c[0], c[1], rim[3] * s * 1.2247 * g, rim[3] * s * .707 * g, 0, 0, TAU); ctx.stroke(); }
+    else if (k && HIT[k]) { const o = HIT[k]; ctx.beginPath(); ctx.ellipse(o[0], o[1], o[2] * (1 + .08 * pulse), o[2] * (.72 + .06 * pulse), 0, 0, TAU); ctx.stroke(); }
   }
   // things flying into the bowl
   for (const f of st.fly) { const u = ease(f.t), x = lerp(f.a[0], f.b[0], u), y = lerp(f.a[1], f.b[1], u) - Math.sin(u * Math.PI) * s * .9; circ(x, y, s * .11, f.c); }
@@ -1293,6 +1295,9 @@ if (location.hash) {
     const real = initAudio; initAudio = () => {}; await AC.close(); returnCheck(); await wait(2000); log.push('cannotRebuild-> restarts=' + restarts); initAudio = real;
     document.title = log.join(' ; '); $('err').style.cssText += ';font-size:15px;line-height:1.5'; $('err').textContent = log.join('\n'); }, 300);
   if (location.hash === '#bye') { enterTower(); fade = 0; const log = []; let n = 0; const step = () => { if (n++ > 600) { document.title = 'timeout'; return; } const w = BG.wait; if (BG.over && BG.bubble && BG.bubble.text === S().bye) { botcTap(5, 5); setTimeout(() => { log.push('tap1 mode=' + mode + ' bubble=' + (BG.bubble ? 'shown' : 'gone')); botcTap(5, 5); setTimeout(() => { log.push('tap2 mode=' + mode); document.title = log.join(' ; '); }, 50); }, 50); return; } if (w) { w.type === 'say' ? botcTap(5, 5) : (BG.wait = null, w.res(w.blank !== undefined ? w.blank : [1, 2, 0].find(w.ok))); } setTimeout(step, 20); }; setTimeout(step, 100); }
+  if (location.hash.startsWith('#hint')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); stall.seats.forEach(c => { if (c) { c.state = 'wait'; c.want = { chili: true, cilantro: true, beef: true }; } }); const st = +location.hash.slice(5), o = stall.owner; const cook = () => { act('boil'); stall.potT = 9; updateStall(.01); };
+    if (st >= 1) cook(); if (st >= 2) act('scoop'); if (st >= 3) act('put'); if (st >= 4) grab('soup'); if (st >= 5) intoBowl(); if (st >= 6) { act('chili'); } if (st >= 7) { act('cilantro'); } if (st >= 8) { act('beef'); } if (st >= 9) grab('bowl'); if (st === 10) { stall.bowl.soup = false; }
+    o.x = o.tx; o.y = o.ty; o.ptx = o.tx; o.pty = o.ty; o.path = []; document.title = 'hint=' + hintKey(); }, 200);
   if (location.hash.startsWith('#hold')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); const m = location.hash.slice(5); if (m === 'soup') grab('soup'); else { act('soup'); act('beef'); if (m === 'beef') { stall.bowl.beef = false; grab('beef'); } else grab('bowl'); } stall.owner.x = stall.owner.tx; stall.owner.y = stall.owner.ty; stall.owner.ptx = stall.owner.tx; stall.owner.pty = stall.owner.ty; stall.owner.path = []; }, 200);
   if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), .95], bar: [4.45, .95], bin: [3.8, 3.05], door: SHOP_DOOR, seat2: [SEATX[2], .95] }; let bad = 0;
     for (const k in spots) { o.tx = spots[k][0]; o.ty = spots[k][1]; let n = 0, hit = 0; for (; n < 300; n++) { stall.leaving = false; updateStall(0.03); if (shopBlocked(o.x, o.y)) hit++; if (Math.hypot(o.x - o.tx, o.y - o.ty) < .02) break; } if (hit || n >= 300) bad++; log.push(k + ':' + n + (hit ? '!hit' + hit : '') + (n >= 300 ? '!stuck' : '')); }
