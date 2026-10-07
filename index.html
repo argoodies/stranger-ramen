@@ -686,7 +686,7 @@ function hintKey() {
   if (h === 'bowl') { if (!b.soup) return 'bin'; if (self) return 'bar'; const m = w.find(k => same(b, s.seats[k].want)); return w.length ? 'spot' + (m != null ? m : w[0]) : null; }
   if (h) return 'bowl';
   if (s.myBowl) return s.eatT > 0 ? null : 'bar';
-  if (s.done) return 'exit';
+  if (s.done) return null;
   if (!b.noodle) return s.pot === 'cooking' ? null : 'pot';
   if (!b.soup) return 'soup';
   if (self) return 'bowl';
@@ -779,7 +779,7 @@ function updateStall(dt) {
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 10; refreshUI(); }
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = s.done && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
-  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; if (!save.badgeNew.length) { s.ownSay = s.done ? pick(S().yum) : S().full; s.ownSayT = s.done ? 3 : 7; } s.done = true; [79, 83, 86].forEach((m, k) => chime(m, k * .12, .14, 1.4)); } }
+  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; if (!save.badgeNew.length) { s.ownSay = s.done ? pick(S().yum) : S().full; s.ownSayT = s.done ? 3 : 7; } s.done = true; } }
   s.seats.forEach((c, i) => {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
@@ -843,7 +843,6 @@ function drawStall(t) {
     HIT.board = [c[0], c[1], s * .78]; }
   // the way out: a mat, then a few steps going down and out at the lower left
   { const ex = 1.3, ew = 1.0;
-    if (st.done) { const gp = P(ex + ew / 2, Y + .5, -.3); glow(gp[0], gp[1], s * (1.5 + .12 * Math.sin(t * 3)), [255, 226, 170], .8); }
     poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], [170, 128, 104]); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], [140, 102, 86]);
     for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, [200, 164, 134]);
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
