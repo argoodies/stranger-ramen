@@ -632,7 +632,10 @@ function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
 const SPOT = { boil: [1.6, 1.6], scoop: [1.6, 1.6], put: [2.45, 1.25], soup: [1.6, 2.6], chili: [3.3, 1.25], cilantro: [4.0, 1.25], beef: [4.7, 1.25], bowl: [2.45, 1.25] };
 const FLYC = { noodle: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
-const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; stall.leaving = false; } };
+const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; stall.leaving = false; stall.pend = null; } };
+// things done on arrival: walk over first, then open the board / drop what you carry in the bin
+const goDo = (what, x, y) => { const s = stall; s.owner.tx = x; s.owner.ty = y; s.leaving = false; s.pend = what; };
+const walkPend = () => { for (let k = 0; k < 400 && stall.pend; k++) updateStall(.05); };
 // pick something up
 function grab(k) {
   const s = stall, b = s.bowl;
@@ -733,13 +736,13 @@ function stallTap(x, y) {
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
   if (!best) return;
   const s = stall, h = s.hold; let ok = false;
-  if (best === 'exit') { if (h) { ok = false; } else { s.owner.tx = SHOP_DOOR[0]; s.owner.ty = SHOP_DOOR[1]; s.leaving = true; chime(69, 0, .1, .8); return; } }
+  if (best === 'exit') { if (h) { ok = false; } else { s.owner.tx = SHOP_DOOR[0]; s.owner.ty = SHOP_DOOR[1]; s.pend = null; s.leaving = true; chime(69, 0, .1, .8); return; } }
   else if (best === 'pot') ok = h === 'noodle' ? false : s.pot === 'empty' ? act('boil') : grab('noodle');
   else if (ING.includes(best)) { if (h === best) { setHold(null); chime(57, 0, .1, .6); ok = true; } else ok = grab(best); }
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
-  else if (best === 'bin') ok = dump();
+  else if (best === 'bin') { if (h) { goDo('dump', 3.8, 3.05); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') ok = barTap();
-  else if (best === 'board') { if (h) ok = false; else { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); return; } }
+  else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) ok = serve(+best[4]);
   if (!ok) { s.nope = best; s.nopeT = 0.35; chime(45, 0, .1, .3); }
 }
@@ -759,7 +762,7 @@ function dump() {
 }
 function enterStall() {
   mode = 'stall'; $('leave').style.display = 'block'; $('zoom').style.display = 'none'; $('enter').style.display = 'none';
-  setHold(null); $('bback').style.display = 'none'; stall.board = false; stall.drag = null; stall.tip = null; stall.glowOn = false; stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.fresh = save.badgeNew.length > 0; stall.toldWalk = false; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
+  setHold(null); $('bback').style.display = 'none'; stall.pend = null; stall.board = false; stall.drag = null; stall.tip = null; stall.glowOn = false; stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.fresh = save.badgeNew.length > 0; stall.toldWalk = false; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
 }
 function leaveStall() {
   $('leave').classList.remove('hint');
@@ -776,7 +779,8 @@ function updateStall(dt) {
     if (o.ptx !== o.tx || o.pty !== o.ty) { o.path = shopPath([o.x, o.y], [o.tx, o.ty]); o.ptx = o.tx; o.pty = o.ty; }
     let step = 5.2 * dt;
     while (o.path && o.path.length && step > 0) { const [px, py] = o.path[0], d = Math.hypot(px - o.x, py - o.y); if (d <= step) { o.x = px; o.y = py; o.path.shift(); step -= d; } else { o.x += (px - o.x) / d * step; o.y += (py - o.y) / d * step; step = 0; } }
-    if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; } }
+    if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; }
+    if (s.pend && !(o.path && o.path.length)) { const p = s.pend; s.pend = null; if (p === 'dump') dump(); else if (p === 'board' && !s.hold) { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); } } }
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 10; refreshUI(); }
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
@@ -1419,7 +1423,7 @@ if (location.hash) {
     cook(); act('chili'); act('cilantro'); log.push('twoToppings full=' + !!save.badges.full); act('beef'); log.push('allThree full=' + !!save.badges.full); dump(); grab('bowl'); dump();
     cook(); act('chili'); act('chili'); log.push('2chili spicy=' + !!save.badges.spicy); act('chili'); log.push('3chili spicy=' + !!save.badges.spicy + ' new=' + save.badgeNew.join(','));
     updateStall(.1); drawStall(1); log.push('glowBeforeEating=' + st.glowOn); grab('bowl'); dump(); st.sinceSelf = 3; cook(); grab('bowl'); barTap(); barTap(); updateStall(3); updateStall(.1); log.push('afterEating glow=' + st.glowOn + ' say=' + st.ownSay);
-    drawStall(1); stallTap(HIT.board[0], HIT.board[1]); log.push('boardOpen=' + st.board); drawStall(1); const B = st.BD, p0 = save.badges.full.slice(), px = B.x + p0[0] * B.w, py = B.y + p0[1] * B.h;
+    drawStall(1); stallTap(HIT.board[0], HIT.board[1]); log.push('openAtOnce=' + st.board); walkPend(); log.push('boardOpen=' + st.board + ' at=' + st.owner.x.toFixed(1) + ',' + st.owner.y.toFixed(1)); drawStall(1); const B = st.BD, p0 = save.badges.full.slice(), px = B.x + p0[0] * B.w, py = B.y + p0[1] * B.h;
     boardDown(px, py); boardUp(); log.push('tapTip=' + st.tip + ':' + S().badges.full.join('/')); boardDown(px, py); boardMove(px + 60, py + 90); boardMove(px + 80, py + 120); const held = st.drag && st.drag.moved; boardUp(); log.push('dragged=' + held + ' moved=' + (save.badges.full[0] !== p0[0]) + ' tipCleared=' + (st.tip === null));
     boardDown(B.back[0], B.back[1]); log.push('back board=' + st.board + ' newLeft=' + save.badgeNew.length + ' mode=' + mode + ' sayAfterBoard=' + st.ownSay); updateStall(.1); log.push('glowAfter=' + st.glowOn + ' stored=' + Object.keys(JSON.parse(localStorage.getItem('ctramen')).badges).join(','));
     BG.auto = true; BG.testBadges = true; const got = { pukka: 0, sailor: 0, heretic: 0 }, bad = []; for (let k = 0; k < 3000; k++) { delete save.badges.pukka; delete save.badges.sailor; delete save.badges.heretic; const r = await playBotc(), g = BG, me = g.roles[0];
@@ -1433,7 +1437,7 @@ if (location.hash) {
     const t0 = px('heretic'), b4 = save.badges.heretic.join(); drag('full', t0[0], t0[1]); log.push('dropOnAnother: pushedAway=' + (save.badges.heretic.join() !== b4) + ' draggedStaysNearTarget=' + (Math.hypot(px('full')[0] - t0[0], px('full')[1] - t0[1]) < B.r));
     let sd = 5; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647; for (let k = 0; k < 400; k++) { const id = BADGE_IDS[(rr() * 5) | 0], corner = rr() < .3; drag(id, corner ? (rr() < .5 ? B.x : B.x + B.w) : B.x + rr() * B.w, corner ? (rr() < .5 ? B.y : B.y + B.h) : B.y + rr() * B.h); }
     log.push('400 random drags (30% into corners): overlapAfterDrop=' + bad + ' overlapWhileDragging=' + worstDuring + ' onFrameOrOut=' + out); boardDown(B.x + B.w / 2, B.y + B.h / 2); boardUp(); log.push('tapInside board=' + stall.board + ' backShown=' + ($('bback').style.display !== 'none')); boardDown(B.x - 6, B.y + B.h / 2); log.push('tapOutside board=' + stall.board + ' backShown=' + ($('bback').style.display !== 'none')); stall.board = true; drawStall(1); $('bback').click(); log.push('backButton board=' + stall.board); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
-  if (location.hash === '#badgeenter') setTimeout(() => { const log = []; save.badges = {}; save.badgeNew = []; enterStall(); updateStall(.1); log.push('noNew glow=' + stall.glowOn + ' hintNoCustomer=' + hintKey()); spawnCustomer(); log.push('hintWithCustomer=' + hintKey()); unlockBadge('sailor'); enterStall(); updateStall(.1); log.push('enterWithNew glow=' + stall.glowOn + ' say=' + stall.ownSay); for (let k = 0; k < 20; k++) updateStall(.5); log.push('after10s glow=' + stall.glowOn + ' customers=' + stall.seats.filter(Boolean).length); drawStall(1); stallTap(HIT.board[0], HIT.board[1]); log.push('boardOpen=' + stall.board); closeBoard(); updateStall(.1); log.push('afterView glow=' + stall.glowOn + ' new=' + save.badgeNew.length); for (let k = 0; k < 10; k++) updateStall(.5); log.push('5sLater customers=' + stall.seats.filter(Boolean).length); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
+  if (location.hash === '#badgeenter') setTimeout(() => { const log = []; save.badges = {}; save.badgeNew = []; enterStall(); updateStall(.1); log.push('noNew glow=' + stall.glowOn + ' hintNoCustomer=' + hintKey()); spawnCustomer(); log.push('hintWithCustomer=' + hintKey()); unlockBadge('sailor'); enterStall(); updateStall(.1); log.push('enterWithNew glow=' + stall.glowOn + ' say=' + stall.ownSay); for (let k = 0; k < 20; k++) updateStall(.5); log.push('after10s glow=' + stall.glowOn + ' customers=' + stall.seats.filter(Boolean).length); drawStall(1); stallTap(HIT.board[0], HIT.board[1]); walkPend(); log.push('boardOpen=' + stall.board); closeBoard(); updateStall(.1); log.push('afterView glow=' + stall.glowOn + ' new=' + save.badgeNew.length); for (let k = 0; k < 10; k++) updateStall(.5); log.push('5sLater customers=' + stall.seats.filter(Boolean).length); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#botcview')) { enterTower(); fade = 0; const n = +location.hash.slice(9) || 0; let k = 0; const step = () => { if (k++ < n && BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); setTimeout(step, 30); } }; setTimeout(step, 100); }
   if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode + ' leaving=' + stall.leaving); let hitFurn = 0, steps = 0; for (; steps < 200 && mode === 'stall'; steps++) { updateStall(0.05); if (shopBlocked(stall.owner.x, stall.owner.y)) hitFurn++; } log.push('walkedOut mode=' + mode + ' steps=' + steps + ' throughFurniture=' + hitFurn); document.title = log.join(' ; '); }, 500);
@@ -1456,7 +1460,7 @@ if (location.hash) {
       document.title = log.join(' ; ');
     }
     if (location.hash === '#tap') setTimeout(() => {
-      const tap = k => { drawStall(1); const h = HIT[k]; if (!h) return 'NOHIT:' + k; stallTap(h[0], h[1]); return k; }, log = [], st = stall, hk = () => 'hint=' + hintKey();
+      const tap = k => { drawStall(1); const h = HIT[k]; if (!h) return 'NOHIT:' + k; stallTap(h[0], h[1]); walkPend(); return k; }, log = [], st = stall, hk = () => 'hint=' + hintKey();
       const i = waiting()[0], want = st.seats[i].want;
       log.push(hk()); tap('soup'); log.push('soupEarly hold=' + st.hold); tap('pot'); log.push('pot=' + st.pot + ' ' + hk()); st.potT = 9; updateStall(0.01);
       log.push(hk()); tap('pot'); log.push('hold=' + st.hold + ' ' + hk()); tap('bowl'); log.push('noodle=' + st.bowl.noodle + ' hold=' + st.hold + ' ' + hk());
@@ -1465,7 +1469,7 @@ if (location.hash) {
       { const before = JSON.stringify(st.bowl); let n = 0; for (let q = 0; q < 3; q++) { tap('chili'); if (st.hold === 'chili') { tap('bowl'); if (st.hold === null) n++; } } tap('cilantro'); const hc = st.hold; tap('bowl'); tap('beef'); const hb = st.hold; tap('soup'); const hs = st.hold; log.push('chiliAgain x' + n + ' chili=' + st.bowl.chili + ' cilantroAgainHold=' + hc + ' beefAgainHold=' + hb + ' soupAgainHold=' + hs); st.bowl = JSON.parse(before); setHold(null); }
       log.push(hk()); tap('seat' + i); log.push('serveNoBowlInHand=' + st.seats[i].state); tap('bowl'); log.push('hold=' + st.hold + ' ' + hk()); tap('spot' + i); log.push('served=' + st.seats[i].state + ':' + st.seats[i].say + ' hold=' + st.hold);
       tap('pot'); st.potT = 9; updateStall(0.01); tap('pot'); tap('bin'); log.push('binNoodle hold=' + st.hold + ' noodle=' + st.bowl.noodle);
-      tap('pot'); st.potT = 9; updateStall(0.01); tap('pot'); tap('bowl'); tap('bowl'); log.push('liftBowl hold=' + st.hold + ' ' + hk()); tap('bin'); log.push('binBowl noodle=' + st.bowl.noodle + ' hold=' + st.hold);
+      tap('pot'); st.potT = 9; updateStall(0.01); tap('pot'); tap('bowl'); tap('bowl'); log.push('liftBowl hold=' + st.hold + ' ' + hk()); { const o = st.owner; o.x = 2.45; o.y = 1.25; o.tx = 2.45; o.ty = 1.25; o.ptx = null; drawStall(1); const h = HIT.bin; stallTap(h[0], h[1]); updateStall(.02); log.push('binTapStillCarrying=' + st.hold + ' noodleStill=' + st.bowl.noodle); } tap('bin'); log.push('binBowl noodle=' + st.bowl.noodle + ' hold=' + st.hold);
       tap('chili'); log.push('toppingOnEmptyBowl hold=' + st.hold);
       document.title = log.join(' ; ');
     }, 500);
