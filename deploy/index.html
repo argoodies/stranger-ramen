@@ -608,7 +608,7 @@ const cookT = () => has('fast') ? 1.3 : 2.6, waitMax = () => has('calm') ? 110 :
 const BADGE_IDS = ['full', 'spicy', 'pukka', 'sailor', 'heretic'], BADGE_HOME = { full: [.27, .27], spicy: [.73, .25], pukka: [.28, .7], sailor: [.72, .68], heretic: [.5, .47] };
 save.badges = save.badges || {}; save.badgeNew = save.badgeNew || [];
 const saveNow = () => { try { localStorage.setItem('ctramen', JSON.stringify(save)); } catch (e) {} };
-function unlockBadge(id) { if (save.badges[id]) return false; save.badges[id] = BADGE_HOME[id].slice(); save.badgeNew.push(id); saveNow(); return true; }
+function unlockBadge(id) { if (save.badges[id]) return false; save.badges[id] = BADGE_HOME[id].slice(); settleBadges(id); settleBadges(null); save.badgeNew.push(id); saveNow(); return true; }
 function knock() { if (!AC) return; const t = AC.currentTime; tone(150, t, .1, .32, 'triangle'); tone(92, t, .16, .22); tone(620, t, .03, .06); }
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
 stall.bowl = emptyBowl();
@@ -951,6 +951,24 @@ function drawBoard(t) {
   const kx = 34, ky = 46; ctx.fillStyle = css([30, 24, 60], .7); ctx.beginPath(); ctx.arc(kx, ky, 20, 0, TAU); ctx.fill(); ctx.strokeStyle = css([255, 255, 255], .25); ctx.lineWidth = 1; ctx.stroke();
   line([[kx + 4, ky - 8], [kx - 5, ky], [kx + 4, ky + 8]], [244, 236, 220], 2.4); st.BD.back = [kx, ky, 26];
 }
+// badges never overlap: whatever is in the way is pushed aside at once (the one in your hand stays put while you hold it)
+function settleBadges(fixed) {
+  const R = .105, AS = 1.12, D = 2 * R * 1.04, ids = BADGE_IDS.filter(id => save.badges[id]);      // x in board widths, y scaled so distances are round
+  const P = {}; for (const id of ids) P[id] = [save.badges[id][0], save.badges[id][1] * AS];
+  const lim = p => { p[0] = clamp(p[0], .1, .9); p[1] = clamp(p[1], .09 * AS, .91 * AS); };
+  for (let it = 0; it < 60; it++) { let moved = false;
+    for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) {
+      const A = P[ids[a]], B = P[ids[b]]; let dx = B[0] - A[0], dy = B[1] - A[1], d = Math.hypot(dx, dy); if (d >= D) continue; moved = true;
+      if (d < 1e-4) { const q = (a * 2.4 + b * 1.3 + it); dx = Math.cos(q); dy = Math.sin(q); d = 1; }
+      const push = (D - d) + .002, ux = dx / d, uy = dy / d, fa = ids[a] === fixed, fb = ids[b] === fixed, wa = fa ? 0 : fb ? 1 : .5, wb = fb ? 0 : fa ? 1 : .5;
+      A[0] -= ux * push * wa; A[1] -= uy * push * wa; B[0] += ux * push * wb; B[1] += uy * push * wb;
+      // squeezed against the edge: slide along it instead of sticking
+      for (const [Q, w] of [[A, wa], [B, wb]]) { if (!w) continue; const bx = Q[0], by = Q[1]; lim(Q); if (Q[0] !== bx) Q[1] += (Q[1] >= .5 * AS ? -1 : 1) * Math.abs(bx - Q[0]) * 1.2; if (Q[1] !== by) Q[0] += (Q[0] >= .5 ? -1 : 1) * Math.abs(by - Q[1]) * 1.2; lim(Q); }
+    }
+    if (!moved) break; }
+  for (const id of ids) save.badges[id] = [P[id][0], P[id][1] / AS];
+}
+function badgesOverlap() { const ids = BADGE_IDS.filter(id => save.badges[id]); let worst = 9; for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) worst = Math.min(worst, Math.hypot(save.badges[ids[a]][0] - save.badges[ids[b]][0], (save.badges[ids[a]][1] - save.badges[ids[b]][1]) * 1.12)); return worst < .21 ? worst : 0; }
 function boardBadgeAt(x, y) { const st = stall, B = st.BD; if (!B) return null; let best = null, bd = 1e9; for (const id of BADGE_IDS) if (save.badges[id]) { const d = Math.hypot(x - (B.x + save.badges[id][0] * B.w), y - (B.y + save.badges[id][1] * B.h)); if (d < B.r * 1.15 && d < bd) { bd = d; best = id; } } return best; }
 function closeBoard() { stall.board = false; stall.drag = null; stall.tip = null; if (save.badgeNew.length) { save.badgeNew = []; saveNow(); } chime(69, 0, .12, .8); chime(62, .08, .1, .8); }
 function boardDown(x, y) {
@@ -963,11 +981,11 @@ function boardDown(x, y) {
 function boardMove(x, y) {
   const st = stall, B = st.BD, d = st.drag; if (!d || !B) return;
   if (!d.moved && Math.hypot(x - d.sx, y - d.sy) > 7) { d.moved = true; st.tip = null; }
-  if (d.moved) save.badges[d.id] = [clamp((x + d.ox - B.x) / B.w, .1, .9), clamp((y + d.oy - B.y) / B.h, .09, .91)];
+  if (d.moved) { save.badges[d.id] = [clamp((x + d.ox - B.x) / B.w, .1, .9), clamp((y + d.oy - B.y) / B.h, .09, .91)]; settleBadges(d.id); if (badgesOverlap()) settleBadges(null); }
 }
 function boardUp() {
   const st = stall, d = st.drag; if (!d) return; st.drag = null;
-  if (d.moved) { knock(); saveNow(); } else { st.tip = st.tip === d.id ? null : d.id; chime(76, 0, .12, .9); }
+  if (d.moved) { settleBadges(d.id); settleBadges(null); knock(); saveNow(); } else { st.tip = st.tip === d.id ? null : d.id; chime(76, 0, .12, .9); }
 }
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]); ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, b.soup ? [226, 160, 84] : [248, 246, 240]);
@@ -1406,6 +1424,12 @@ if (location.hash) {
       if (save.badges.pukka && !(r.won && g.deadPoison >= 0 && g.poisoned >= 0)) bad.push('pukka cond'); if (save.badges.heretic && !(r.won && !g.alive[0] && g.deathBy[0] === 'exec')) bad.push('heretic cond'); if (save.badges.sailor && !g.recap.some(x => x.includes('死不了'))) bad.push('sailor cond'); }
     BG.testBadges = false; log.push('3000 games: ' + JSON.stringify(got) + ' wrong=' + bad.length + (bad[0] ? ':' + bad[0] : '')); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
   if (location.hash === '#boardview' || location.hash === '#boardglow') setTimeout(() => { save.badges = {}; save.badgeNew = []; for (const id of BADGE_IDS) unlockBadge(id); if (location.hash === '#boardview') save.badgeNew = ['heretic']; enterStall(); fade = 0; stall.done = true; const o = stall.owner; o.x = o.tx; o.y = o.ty; o.ptx = o.tx; o.pty = o.ty; o.path = []; updateStall(.05); if (location.hash === '#boardview') { stall.board = true; stall.tip = 'full'; } localStorage.removeItem('ctramen'); }, 200);
+  if (location.hash === '#overlap') setTimeout(() => { const log = []; save.badges = {}; save.badgeNew = []; for (const id of BADGE_IDS) unlockBadge(id); enterStall(); stall.board = true; drawStall(1); const B = stall.BD; log.push('fresh overlap=' + badgesOverlap());
+    const px = id => [B.x + save.badges[id][0] * B.w, B.y + save.badges[id][1] * B.h]; let worstDuring = 0, bad = 0, out = 0;
+    const drag = (id, tx, ty) => { const p = px(id); boardDown(p[0], p[1]); for (let k = 1; k <= 12; k++) { boardMove(lerp(p[0], tx, k / 12), lerp(p[1], ty, k / 12)); if (badgesOverlap()) worstDuring++; } boardUp(); if (badgesOverlap()) bad++; for (const q of BADGE_IDS) { const v = save.badges[q]; if (v[0] < .099 || v[0] > .901 || v[1] < .089 || v[1] > .911) out++; } };
+    const t0 = px('heretic'), b4 = save.badges.heretic.join(); drag('full', t0[0], t0[1]); log.push('dropOnAnother: pushedAway=' + (save.badges.heretic.join() !== b4) + ' draggedStaysNearTarget=' + (Math.hypot(px('full')[0] - t0[0], px('full')[1] - t0[1]) < B.r));
+    let sd = 5; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647; for (let k = 0; k < 400; k++) { const id = BADGE_IDS[(rr() * 5) | 0], corner = rr() < .3; drag(id, corner ? (rr() < .5 ? B.x : B.x + B.w) : B.x + rr() * B.w, corner ? (rr() < .5 ? B.y : B.y + B.h) : B.y + rr() * B.h); }
+    log.push('400 random drags (30% into corners): overlapAfterDrop=' + bad + ' overlapWhileDragging=' + worstDuring + ' outOfBoard=' + out); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#botcview')) { enterTower(); fade = 0; const n = +location.hash.slice(9) || 0; let k = 0; const step = () => { if (k++ < n && BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); setTimeout(step, 30); } }; setTimeout(step, 100); }
   if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode + ' leaving=' + stall.leaving); let hitFurn = 0, steps = 0; for (; steps < 200 && mode === 'stall'; steps++) { updateStall(0.05); if (shopBlocked(stall.owner.x, stall.owner.y)) hitFurn++; } log.push('walkedOut mode=' + mode + ' steps=' + steps + ' throughFurniture=' + hitFurn); document.title = log.join(' ; '); }, 500);
