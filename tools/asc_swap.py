@@ -39,5 +39,6 @@ if shots:
         for s in must('GET', f'/v1/appStoreVersionLocalizations/{lid}/appScreenshotSets?limit=50')['data']: must('DELETE', f"/v1/appScreenshotSets/{s['id']}")
         for typ, pre in (('APP_IPHONE_67', 'iphone'), ('APP_IPAD_PRO_3GEN_129', 'ipad')):
             sid = must('POST', '/v1/appScreenshotSets', {'data': {'type': 'appScreenshotSets', 'attributes': {'screenshotDisplayType': typ}, 'relationships': {'appStoreVersionLocalization': {'data': {'type': 'appStoreVersionLocalizations', 'id': lid}}}}})['data']['id']
-            for i in range(1, 6): upload(sid, f'{shots}/{pre}_{i}.png')
+            src = f'{shots}/{lc}' if os.path.isdir(f'{shots}/{lc}') else shots      # per-language folders when present
+            for i in range(1, 6): upload(sid, f'{src}/{pre}_{i}.png')
         print('screenshots replaced', lc)
