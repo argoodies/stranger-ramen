@@ -122,10 +122,10 @@ const STR = {
   hans: (() => { const st = ['你', '左边那位', '右边那位'], who = (v, t) => t === v ? '自己' : t === 0 ? '你' : '他'; return {
     title: '拉面怪奇物语', auto: '跟随系统',
     hello: {
-      ida: ['今天天气真好。', '钟楼的钟好像又慢了五分钟。', '听说你家的面不错。', '我可是好人，真的。', '香菜多放点才好吃。', '晚上别乱走，小心恶魔。', '你看见说书人了吗？', '散步呢？一起走走。'],
-      ft: ['水晶球说，你今天会煮三碗面。', '我昨晚查了两个人……算了，不说了。', '你身上没有恶魔的气息。大概吧。'],
-      crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降临时，记得闭上眼睛。', '钟楼里正缺一个人，来玩一局？', '魔典里可没有写你的坏话。'],
-      demon: ['我真的只是路过。', '别这么看我，我是镇民。', '今晚……你睡得沉吗？'], scarlet: ['别怕，有姐姐在。', '小老板，面里别放香菜哦。', '你猜我是好人还是坏人？'] },
+      ida: ['今天天气真好。', '那口大钟好像又慢了五分钟。', '听说你家的面不错。', '我可是好人，真的。', '香菜多放点才好吃。', '晚上别乱走，小心着凉。', '今晚的月亮真圆。', '散步呢？一起走走。'],
+      ft: ['水晶球说，你今天会煮三碗面。', '我昨晚查了两个人……算了，不说了。', '你身上有面汤的味道。大概吧。'],
+      crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降临时，记得闭上眼睛。', '塔里正缺一个人，来玩一局？', '我的本子里可没有写你的坏话。'],
+      demon: ['我真的只是路过。', '别这么看我，我是好人。', '今晚……你睡得沉吗？'], scarlet: ['别怕，有姐姐在。', '小老板，面里别放香菜哦。', '你猜我是好人还是坏人？'] },
     beefY: ['牛肉面', '来碗牛肉面', '要牛肉面'], beefN: ['素面一碗', '来碗素面', '面不加肉'],
     chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '别放辣', '不吃辣'],
     cilY: ['加香菜', '放香菜', '多点香菜'], cilN: ['不要香菜', '别放香菜', '香菜不要'],
@@ -133,7 +133,7 @@ const STR = {
     hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了。今天就到这儿，可以出去走走了。',
     libAway: '图书管理员不在，不要乱动。',
-    welcome: '欢迎来到三人血染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
+    night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
     sailorSay: (v, t) => t === v ? '我自己喝了酒。' : '我和' + who(v, t) + '喝了酒。', hereticSay: '我能反转结果。',
     nomPrompt: '点一个人提名。', iNominate: (v, n) => '那我来。我提名' + (n === v ? '我自己' : who(v, n)) + '。', nominated: (a, b) => st[a] + '提名' + (a === b ? '自己' : st[b]) + '。',
@@ -145,10 +145,10 @@ const STR = {
   hant: (() => { const st = ['你', '左邊那位', '右邊那位'], who = (v, t) => t === v ? '自己' : t === 0 ? '你' : '他'; return {
     title: '拉麵怪奇物語', auto: '跟隨系統',
     hello: {
-      ida: ['今天天氣真好。', '鐘樓的鐘好像又慢了五分鐘。', '聽說你家的麵不錯。', '我可是好人，真的。', '香菜多放點才好吃。', '晚上別亂走，小心惡魔。', '你看見說書人了嗎？', '散步呢？一起走走。'],
-      ft: ['水晶球說，你今天會煮三碗麵。', '我昨晚查了兩個人……算了，不說了。', '你身上沒有惡魔的氣息。大概吧。'],
-      crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降臨時，記得閉上眼睛。', '鐘樓裡正缺一個人，來玩一局？', '魔典裡可沒有寫你的壞話。'],
-      demon: ['我真的只是路過。', '別這麼看我，我是鎮民。', '今晚……你睡得沉嗎？'], scarlet: ['別怕，有姐姐在。', '小老闆，麵裡別放香菜哦。', '你猜我是好人還是壞人？'] },
+      ida: ['今天天氣真好。', '那口大鐘好像又慢了五分鐘。', '聽說你家的麵不錯。', '我可是好人，真的。', '香菜多放點才好吃。', '晚上別亂走，小心著涼。', '今晚的月亮真圓。', '散步呢？一起走走。'],
+      ft: ['水晶球說，你今天會煮三碗麵。', '我昨晚查了兩個人……算了，不說了。', '你身上有麵湯的味道。大概吧。'],
+      crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降臨時，記得閉上眼睛。', '塔裡正缺一個人，來玩一局？', '我的本子裡可沒有寫你的壞話。'],
+      demon: ['我真的只是路過。', '別這麼看我，我是好人。', '今晚……你睡得沉嗎？'], scarlet: ['別怕，有姐姐在。', '小老闆，麵裡別放香菜哦。', '你猜我是好人還是壞人？'] },
     beefY: ['牛肉麵', '來碗牛肉麵', '要牛肉麵'], beefN: ['素麵一碗', '來碗素麵', '麵不加肉'],
     chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '別放辣', '不吃辣'],
     cilY: ['加香菜', '放香菜', '多點香菜'], cilN: ['不要香菜', '別放香菜', '香菜不要'],
@@ -156,7 +156,7 @@ const STR = {
     hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了。今天就到這兒，可以出去走走了。',
     libAway: '圖書館員不在，不要亂動。',
-    welcome: '歡迎來到三人血染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
+    night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
     sailorSay: (v, t) => t === v ? '我自己喝了酒。' : '我和' + who(v, t) + '喝了酒。', hereticSay: '我能反轉結果。',
     nomPrompt: '點一個人提名。', iNominate: (v, n) => '那我來。我提名' + (n === v ? '我自己' : who(v, n)) + '。', nominated: (a, b) => st[a] + '提名' + (a === b ? '自己' : st[b]) + '。',
@@ -168,10 +168,10 @@ const STR = {
   en: (() => { const st = ['you', 'the player on the left', 'the player on the right'], cap = x => x[0].toUpperCase() + x.slice(1), who = (v, t) => t === v ? 'myself' : t === 0 ? 'you' : 'them'; return {
     title: 'RAMEN PUZZLE', auto: 'System',
     hello: {
-      ida: ['Lovely weather today.', 'The clock seems five minutes slow again.', 'I hear your noodles are good.', "I'm good. Honestly.", 'Extra cilantro makes it better.', "Don't wander at night. Mind the Demon.", 'Have you seen the Storyteller?', 'Out for a walk? Join me.'],
-      ft: ['My crystal ball says three bowls today.', 'I checked two players last night… never mind.', 'No trace of the Demon on you. Probably.'],
-      crow: ['Caw.', 'Caw caw?', '…caw.'], teller: ['When night falls, remember to close your eyes.', 'The clocktower is one player short. Care for a game?', 'The Grimoire says nothing bad about you.'],
-      demon: ['Just passing through. Really.', "Don't look at me like that. I'm a Townsfolk.", 'Tonight… are you a heavy sleeper?'], scarlet: ["Don't worry, I'm right here.", 'No cilantro in mine, little chef.', 'Guess: am I good or evil?'] },
+      ida: ['Lovely weather today.', 'The big clock seems five minutes slow again.', 'I hear your noodles are good.', "I'm good. Honestly.", 'Extra cilantro makes it better.', "Don't wander at night. You'll catch a cold.", 'The moon is so round tonight.', 'Out for a walk? Join me.'],
+      ft: ['My crystal ball says three bowls today.', 'I checked two players last night… never mind.', 'You smell of noodle broth. Probably.'],
+      crow: ['Caw.', 'Caw caw?', '…caw.'], teller: ['When night falls, remember to close your eyes.', 'The tower is one player short. Care for a game?', 'My notebook says nothing bad about you.'],
+      demon: ['Just passing through. Really.', "Don't look at me like that. I'm one of the good ones.", 'Tonight… are you a heavy sleeper?'], scarlet: ["Don't worry, I'm right here.", 'No cilantro in mine, little chef.', 'Guess: am I good or evil?'] },
     beefY: ['Beef noodles', 'A beef noodle bowl', 'Beef noodles, please'], beefN: ['Plain noodles', 'Plain noodles, please', 'Noodles, no beef'],
     chiliY: ['with chili', 'extra chili', 'make it spicy'], chiliN: ['no chili', 'hold the chili', 'not spicy'],
     cilY: ['with cilantro', 'add cilantro', 'extra cilantro'], cilN: ['no cilantro', 'hold the cilantro', 'skip the cilantro'],
@@ -179,7 +179,7 @@ const STR = {
     hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. That's it for today, time for a walk.",
     libAway: "The librarian is out. Better not touch anything.",
-    welcome: 'Welcome to three-player Clocktower.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
+    night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
     sailorSay: (v, t) => t === v ? 'I had a drink by myself.' : 'I had a drink with ' + who(v, t) + '.', hereticSay: 'I can reverse the result.',
     nomPrompt: 'Tap a player to nominate.', iNominate: (v, n) => 'Then I will. I nominate ' + who(v, n) + '.', nominated: (a, b) => a === 0 ? 'You nominate ' + (b === 0 ? 'yourself' : st[b]) + '.' : cap(st[a]) + ' nominates ' + (a === b ? 'themself' : st[b]) + '.',
@@ -472,12 +472,6 @@ function walk(p, dt, speed, solid) {
   if (d <= st) { p.x = tx; p.y = ty; p.path.shift(); p.step++; return true; }
   p.x += dx / d * st; p.y += dy / d * st; return false;
 }
-const HELLO = {
-  ida: ['今天天气真好。', '钟楼的钟好像又慢了五分钟。', '听说你家的面不错。', '我可是好人，真的。', '香菜多放点才好吃。', '晚上别乱走，小心恶魔。', '你看见说书人了吗？', '散步呢？一起走走。'],
-  ft: ['水晶球说，你今天会煮三碗面。', '我昨晚查了两个人……算了，不说了。', '你身上没有恶魔的气息。大概吧。'],
-  crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降临时，记得闭上眼睛。', '钟楼里正缺一个人，来玩一局？', '魔典里可没有写你的坏话。'],
-  demon: ['我真的只是路过。', '别这么看我，我是镇民。', '今晚……你睡得沉吗？'], scarlet: ['别怕，有姐姐在。', '小老板，面里别放香菜哦。', '你猜我是好人还是坏人？'],
-};
 let wv = new View(0, 0, 40), zoomOut = 1, zoomTarget = 1, camX = 0, camY = 0;
 let starCache = null;
 function drawSky(top, mid, bot, t, starA = 1) {
