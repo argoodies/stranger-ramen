@@ -944,7 +944,7 @@ function drawBoard(t) {
   const ids = BADGE_IDS.filter(id => save.badges[id] && !(st.drag && st.drag.id === id)); if (st.drag) ids.push(st.drag.id);
   for (const id of ids) { const [nx, ny] = save.badges[id], x = bx + nx * bw, y = by + ny * bh, held = st.drag && st.drag.id === id && st.drag.moved;
     if (save.badgeNew.includes(id)) glow(x, y, r * (2 + .2 * Math.sin(t * 4)), [255, 236, 170], .8);
-    drawBadge(id, x, y, r * (held ? 1.08 : 1), held ? r * .22 : 0); }
+    drawBadge(id, x, y, r * (held ? 1.02 : 1), held ? r * .06 : 0); }
   if (st.tip && save.badges[st.tip]) { const [nx, ny] = save.badges[st.tip], b = S().badges[st.tip]; sayBubble(bx + nx * bw, by + ny * bh - r * 1.02, b[0] + '\n' + b[1], clamp(W * .038, 13, 16), 1, Math.min(W * .72, 280)); }
   // back button
   const kx = 34, ky = 46; ctx.fillStyle = css([30, 24, 60], .7); ctx.beginPath(); ctx.arc(kx, ky, 20, 0, TAU); ctx.fill(); ctx.strokeStyle = css([255, 255, 255], .25); ctx.lineWidth = 1; ctx.stroke();
