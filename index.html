@@ -132,7 +132,8 @@ const STR = {
     sayOk: ['好吃！', '就是这个味！', '暖和了～', '谢谢老板！'], sayBad: ['嗯…这不是我点的', '好像不太对？'], later: '下次再来吧…',
     hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了。今天就到这儿，可以出去走走了。',
-    libAway: '图书管理员不在，不要乱动。',
+    libAway: '图书管理员不在，不要乱动。', newBadge: '好像有新的徽章了。',
+    badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'] },
     welcome: '欢迎来玩三人染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
     sailorSay: (v, t) => t === v ? '我自己喝了酒。' : '我和' + who(v, t) + '喝了酒。', hereticSay: '我能反转结果。',
@@ -155,7 +156,8 @@ const STR = {
     sayOk: ['好吃！', '就是這個味！', '暖和了～', '謝謝老闆！'], sayBad: ['嗯…這不是我點的', '好像不太對？'], later: '下次再來吧…',
     hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了。今天就到這兒，可以出去走走了。',
-    libAway: '圖書館員不在，不要亂動。',
+    libAway: '圖書館員不在，不要亂動。', newBadge: '好像有新的徽章了。',
+    badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'] },
     welcome: '歡迎來玩三人染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
     sailorSay: (v, t) => t === v ? '我自己喝了酒。' : '我和' + who(v, t) + '喝了酒。', hereticSay: '我能反轉結果。',
@@ -178,7 +180,8 @@ const STR = {
     sayOk: ['Delicious!', 'Just right!', 'So warming~', 'Thanks, chef!'], sayBad: ["Hmm… that's not my order.", "That's not quite right?"], later: 'Maybe next time…',
     hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. That's it for today, time for a walk.",
-    libAway: "The librarian is out. Better not touch anything.",
+    libAway: "The librarian is out. Better not touch anything.", newBadge: 'Looks like there is a new badge.',
+    badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'] },
     welcome: 'Welcome to the three-player game.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
     sailorSay: (v, t) => t === v ? 'I had a drink by myself.' : 'I had a drink with ' + who(v, t) + '.', hereticSay: 'I can reverse the result.',
@@ -593,7 +596,7 @@ function worldTap(sx, sy) {
 }
 
 // ------------------------------------------------------------ stall
-const stall = { sinceSelf: 0, myBowl: null, eatT: 0, ownSay: '', ownSayT: 0, pot: 'empty', potT: 0, strainer: false, bowl: null, seats: [null, null, null], spawn: 1.2, owner: { x: 2.4, y: 1.2, tx: 2.4, ty: 1.2 }, fx: [], fly: [], bowlAnim: {}, nope: null, nopeT: 0 };
+const stall = { board: false, drag: null, tip: null, glowOn: false, BD: null, sinceSelf: 0, myBowl: null, eatT: 0, ownSay: '', ownSayT: 0, pot: 'empty', potT: 0, strainer: false, bowl: null, seats: [null, null, null], spawn: 1.2, owner: { x: 2.4, y: 1.2, tx: 2.4, ty: 1.2 }, fx: [], fly: [], bowlAnim: {}, nope: null, nopeT: 0 };
 const save = JSON.parse(localStorage.getItem('ctramen') || '{"coins":0,"served":0}');
 const has = () => false;
 const HALF = 180, G = { n: 1, late: false, t: HALF };      // the game always opens at night
@@ -601,6 +604,12 @@ function gameHour() { return (6 + 12 * (G.t % (2 * HALF)) / HALF) % 24; }
 function clockHands() { const h = gameHour(); return [(h % 12) / 12 * TAU, (h % 1) * TAU]; }
 function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = lerp(G.n, night ? 1 : 0, 1 - Math.pow(0.8, dt)); }
 const cookT = () => has('fast') ? 1.3 : 2.6, waitMax = () => has('calm') ? 110 : 70, speedK = () => has('swift') ? 1.5 : 1;
+// ---- achievements: round badges on the wooden board in the shop. save.badges[id] = [x, y] (0..1 on the board), save.badgeNew = ids not yet looked at
+const BADGE_IDS = ['full', 'spicy', 'pukka', 'sailor', 'heretic'], BADGE_HOME = { full: [.27, .27], spicy: [.73, .25], pukka: [.28, .7], sailor: [.72, .68], heretic: [.5, .47] };
+save.badges = save.badges || {}; save.badgeNew = save.badgeNew || [];
+const saveNow = () => { try { localStorage.setItem('ctramen', JSON.stringify(save)); } catch (e) {} };
+function unlockBadge(id) { if (save.badges[id]) return false; save.badges[id] = BADGE_HOME[id].slice(); save.badgeNew.push(id); saveNow(); return true; }
+function knock() { if (!AC) return; const t = AC.currentTime; tone(150, t, .1, .32, 'triangle'); tone(92, t, .16, .22); tone(620, t, .03, .06); }
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
 stall.bowl = emptyBowl();
 const SEATX = [1.2, 2.5, 3.8], CUSTY = -0.45;
@@ -639,7 +648,10 @@ function intoBowl() {
   if (!h || h === 'bowl') return false;
   let again = false;
   if (h === 'noodle') { if (b.noodle) return false; b.noodle = true; } else { if (!b.noodle || (b[h] && !MORE.includes(h))) return false; again = b[h]; b[h] = true; }
-  if (!again) s.bowlAnim[h] = 0;      // a second helping feels the same to do, but the bowl looks no different goTo('put'); chime(NOTE[h === 'noodle' ? 'put' : h], 0, .2, 1.4);
+  if (!again) s.bowlAnim[h] = 0;      /* a second helping feels the same to do, but the bowl looks no different */
+  goTo('put'); chime(NOTE[h === 'noodle' ? 'put' : h], 0, .2, 1.4);
+  if (h === 'chili') { b.chiliN = (b.chiliN || 0) + 1; if (b.chiliN >= 3) unlockBadge('spicy'); }
+  if (b.chili && b.cilantro && b.beef) unlockBadge('full');
   if (HIT.own && HIT.bowl) s.fly.push({ a: [HIT.own[0], HIT.own[1]], b: [HIT.bowl[0], HIT.bowl[1]], t: 0, c: FLYC[h] });
   setHold(null); return true;
 }
@@ -726,6 +738,7 @@ function stallTap(x, y) {
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
   else if (best === 'bin') ok = dump();
   else if (best === 'bar') ok = barTap();
+  else if (best === 'board') { if (h) ok = false; else { s.board = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) ok = serve(+best[4]);
   if (!ok) { s.nope = best; s.nopeT = 0.35; chime(45, 0, .1, .3); }
 }
@@ -745,7 +758,7 @@ function dump() {
 }
 function enterStall() {
   mode = 'stall'; $('leave').style.display = 'block'; $('zoom').style.display = 'none'; $('enter').style.display = 'none';
-  setHold(null); stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
+  setHold(null); stall.board = false; stall.drag = null; stall.tip = null; stall.glowOn = false; stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
 }
 function leaveStall() {
   $('leave').classList.remove('hint');
@@ -765,7 +778,8 @@ function updateStall(dt) {
     if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; } }
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 10; refreshUI(); }
   if (s.ownSayT > 0) s.ownSayT -= dt;
-  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.ownSay = s.done ? pick(S().yum) : S().full; s.ownSayT = s.done ? 3 : 7; s.done = true; [79, 83, 86].forEach((m, k) => chime(m, k * .12, .14, 1.4)); } }
+  { const on = s.done && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
+  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; if (!save.badgeNew.length) { s.ownSay = s.done ? pick(S().yum) : S().full; s.ownSayT = s.done ? 3 : 7; } s.done = true; [79, 83, 86].forEach((m, k) => chime(m, k * .12, .14, 1.4)); } }
   s.seats.forEach((c, i) => {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
@@ -818,16 +832,15 @@ function drawStall(t) {
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(4.5, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(4.5, 0, 2.8)], wallB);
   for (let i = 0; i < 6; i++) { const x0 = .56 + i * .66, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .6, 0, 2.8), P(x0 + .6, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); }
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
-  { const y0 = 1.35, y1 = 2.5, z0 = 2.15, z1 = 3.35, fr = [P(0, y0, z0), P(0, y1, z0), P(0, y1, z1), P(0, y0, z1)], g2 = .09, inn = [P(0, y0 + g2, z0 + g2), P(0, y1 - g2, z0 + g2), P(0, y1 - g2, z1 - g2), P(0, y0 + g2, z1 - g2)];
-    poly(fr.map(p => [p[0] + 2, p[1] + 3]), [60, 40, 60], .25); poly(fr, [150, 104, 84]); poly(inn, [250, 206, 150]);
-    ctx.save(); ctx.beginPath(); inn.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.clip();
-    const W2 = (u, w) => P(0, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w);
-    poly([W2(0, .45), W2(1, .45), W2(1, 1), W2(0, 1)], [252, 190, 130]); poly([W2(0, .7), W2(1, .7), W2(1, 1), W2(0, 1)], [246, 160, 120]);
-    const sn = W2(.66, .62); glow(sn[0], sn[1], s * .5, [255, 244, 200], .9); circ(sn[0], sn[1], s * .13, [255, 240, 196]);
-    poly([W2(0, 0), W2(1, 0), W2(1, .34), W2(.7, .46), W2(.4, .36), W2(.15, .48), W2(0, .4)], [226, 130, 100]);
-    poly([W2(0, 0), W2(1, 0), W2(1, .2), W2(.55, .3), W2(.25, .22), W2(0, .28)], [196, 100, 96]);
-    poly([W2(.3, .2), W2(.42, .2), W2(.42, .58), W2(.45, .58), W2(.36, .8), W2(.27, .58), W2(.3, .58)], [120, 64, 84]);
-    poly([W2(.12, .2), W2(.22, .2), W2(.22, .34), W2(.17, .42), W2(.12, .34)], [150, 76, 84]); ctx.restore(); }
+  { // the achievement board on the wall: planks, and a dot for every badge where you left it
+    const y0 = 1.3, y1 = 2.55, z0 = 2.1, z1 = 3.4, W2 = (u, w) => P(0, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w), fr = [W2(0, 0), W2(1, 0), W2(1, 1), W2(0, 1)], c = W2(.5, .5);
+    if (st.glowOn) glow(c[0], c[1], s * (1.5 + .18 * Math.sin(t * 4)), [255, 226, 150], .95);
+    poly(fr.map(p => [p[0] + 2, p[1] + 3]), [60, 40, 60], .25); poly(fr, [128, 88, 70]);
+    for (let k = 0; k < 4; k++) poly([W2(.04, .04 + k * .235), W2(.96, .04 + k * .235), W2(.96, .245 + k * .235), W2(.04, .245 + k * .235)], k % 2 ? [186, 136, 100] : [198, 148, 108]);
+    for (const [u, w] of [[.09, .1], [.91, .1], [.09, .9], [.91, .9]]) { const p = W2(u, w); circ(p[0], p[1], s * .018, [110, 80, 70]); }
+    for (const id of BADGE_IDS) if (save.badges[id]) { const [bx, by] = save.badges[id], p = W2(bx, 1 - by); circ(p[0], p[1], s * .085, [226, 180, 96]); circ(p[0], p[1], s * .06, id === 'pukka' ? [206, 40, 62] : id === 'spicy' ? [226, 80, 50] : id === 'full' ? [236, 190, 110] : [60, 130, 230]); }
+    if (st.glowOn) { ctx.beginPath(); fr.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.strokeStyle = css([255, 236, 170], .6 + .35 * Math.sin(t * 4)); ctx.lineWidth = 3; ctx.stroke(); }
+    HIT.board = [c[0], c[1], s * .78]; }
   // the way out: a mat, then a few steps going down and out at the lower left
   { const ex = 1.3, ew = 1.0;
     if (st.done) { const gp = P(ex + ew / 2, Y + .5, -.3); glow(gp[0], gp[1], s * (1.5 + .12 * Math.sin(t * 3)), [255, 226, 170], .8); }
@@ -906,7 +919,55 @@ function drawStall(t) {
     ctx.fillStyle = css([250, 246, 238], .96 * fadeA); rrect(bx, by, cw, bh, 10); ctx.fill(); poly(tail, [250, 246, 238], .96 * fadeA);
     lines.forEach((l, k) => text(l, bx + cw / 2, by + 6 + lh * (k + .5), fs, [50, 36, 70], 1, 'center', true));
   }
+  if (st.board) { drawBoard(t); return; }
   if (st.ownSayT > 0) sayBubble(op[0], op[1] - s * 2.02, st.ownSay, clamp(W * .036, 12, 15), clamp(st.ownSayT * 2), Math.min(W * .62, 250));
+}
+// a round badge: metal ring, cream face, a flat picture
+function drawBadge(id, x, y, r, lift = 0) {
+  ell(x, y + r * .12 + lift * .6, r * 1.02, r * .98, [30, 16, 20], .35);
+  circ(x, y - lift, r, [176, 128, 60]); circ(x, y - lift, r * .93, [236, 196, 110]); circ(x, y - lift, r * .8, [176, 128, 60]);
+  const cy = y - lift;
+  if (id === 'pukka' || id === 'sailor' || id === 'heretic') { roleToken(x, cy, r * .76, id); return; }
+  circ(x, cy, r * .76, [244, 232, 208]);
+  if (id === 'full') { bowlTopMini(x, cy + r * .06, r * .58, { noodle: true, soup: true, chili: true, cilantro: true, beef: true }); }
+  else { // three chilies
+    for (const [dx, rot] of [[-.3, -.5], [0, 0], [.3, .5]]) { ctx.save(); ctx.translate(x + dx * r, cy + r * .05); ctx.rotate(rot); ctx.beginPath(); ctx.moveTo(0, -r * .3); ctx.quadraticCurveTo(r * .2, -r * .05, 0, r * .42); ctx.quadraticCurveTo(-r * .2, -r * .05, 0, -r * .3); ctx.fillStyle = css([214, 48, 44]); ctx.fill(); ctx.beginPath(); ctx.moveTo(0, -r * .3); ctx.lineTo(r * .05, -r * .44); ctx.strokeStyle = css([70, 150, 84]); ctx.lineWidth = Math.max(1.5, r * .07); ctx.lineCap = 'round'; ctx.stroke(); ctx.restore(); }
+  }
+}
+function drawBoard(t) {
+  const st = stall; ctx.fillStyle = css([20, 14, 34], .72); ctx.fillRect(0, 0, W, H);
+  const bw = Math.min(W - 28, 460, (H - 190) / 1.12), bh = bw * 1.12, bx = (W - bw) / 2, by = Math.max(96, (H - bh) / 2), r = bw * .105; st.BD = { x: bx, y: by, w: bw, h: bh, r };
+  ctx.fillStyle = css([20, 12, 20], .4); rrect(bx + 4, by + 8, bw, bh, 14); ctx.fill();
+  ctx.fillStyle = css([120, 82, 64]); rrect(bx, by, bw, bh, 14); ctx.fill();
+  const n = 5, ph = (bh - 20) / n;
+  for (let k = 0; k < n; k++) { ctx.fillStyle = css(k % 2 ? [186, 136, 100] : [198, 148, 108]); rrect(bx + 10, by + 10 + k * ph + 1.5, bw - 20, ph - 3, 5); ctx.fill(); ctx.fillStyle = css([226, 180, 136], .35); ctx.fillRect(bx + 16, by + 10 + k * ph + 5, bw - 32, 2); }
+  for (const [u, w] of [[.06, .05], [.94, .05], [.06, .95], [.94, .95]]) circ(bx + bw * u, by + bh * w, bw * .012, [96, 68, 60]);
+  const ids = BADGE_IDS.filter(id => save.badges[id] && !(st.drag && st.drag.id === id)); if (st.drag) ids.push(st.drag.id);
+  for (const id of ids) { const [nx, ny] = save.badges[id], x = bx + nx * bw, y = by + ny * bh, held = st.drag && st.drag.id === id && st.drag.moved;
+    if (save.badgeNew.includes(id)) glow(x, y, r * (2 + .2 * Math.sin(t * 4)), [255, 236, 170], .8);
+    drawBadge(id, x, y, r * (held ? 1.08 : 1), held ? r * .22 : 0); }
+  if (st.tip && save.badges[st.tip]) { const [nx, ny] = save.badges[st.tip], b = S().badges[st.tip]; sayBubble(bx + nx * bw, by + ny * bh - r * 1.02, b[0] + '\n' + b[1], clamp(W * .038, 13, 16), 1, Math.min(W * .72, 280)); }
+  // back button
+  const kx = 34, ky = 46; ctx.fillStyle = css([30, 24, 60], .7); ctx.beginPath(); ctx.arc(kx, ky, 20, 0, TAU); ctx.fill(); ctx.strokeStyle = css([255, 255, 255], .25); ctx.lineWidth = 1; ctx.stroke();
+  line([[kx + 4, ky - 8], [kx - 5, ky], [kx + 4, ky + 8]], [244, 236, 220], 2.4); st.BD.back = [kx, ky, 26];
+}
+function boardBadgeAt(x, y) { const st = stall, B = st.BD; if (!B) return null; let best = null, bd = 1e9; for (const id of BADGE_IDS) if (save.badges[id]) { const d = Math.hypot(x - (B.x + save.badges[id][0] * B.w), y - (B.y + save.badges[id][1] * B.h)); if (d < B.r * 1.15 && d < bd) { bd = d; best = id; } } return best; }
+function closeBoard() { stall.board = false; stall.drag = null; stall.tip = null; if (save.badgeNew.length) { save.badgeNew = []; saveNow(); } chime(69, 0, .12, .8); chime(62, .08, .1, .8); }
+function boardDown(x, y) {
+  const st = stall, B = st.BD; if (!B) return;
+  if (Math.hypot(x - B.back[0], y - B.back[1]) < B.back[2]) { closeBoard(); return; }
+  const id = boardBadgeAt(x, y);
+  if (!id) { st.tip = null; return; }
+  st.drag = { id, sx: x, sy: y, ox: B.x + save.badges[id][0] * B.w - x, oy: B.y + save.badges[id][1] * B.h - y, moved: false };
+}
+function boardMove(x, y) {
+  const st = stall, B = st.BD, d = st.drag; if (!d || !B) return;
+  if (!d.moved && Math.hypot(x - d.sx, y - d.sy) > 7) { d.moved = true; st.tip = null; }
+  if (d.moved) save.badges[d.id] = [clamp((x + d.ox - B.x) / B.w, .1, .9), clamp((y + d.oy - B.y) / B.h, .09, .91)];
+}
+function boardUp() {
+  const st = stall, d = st.drag; if (!d) return; st.drag = null;
+  if (d.moved) { knock(); saveNow(); } else { st.tip = st.tip === d.id ? null : d.id; chime(76, 0, .12, .9); }
 }
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]); ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, b.soup ? [226, 160, 84] : [248, 246, 240]);
@@ -1021,7 +1082,7 @@ async function playBotc() {
       const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
       const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
       if (yes >= need) {
-        if (roles[nom] === 'sailor' && sailorSafe()) { recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
+        if (roles[nom] === 'sailor' && sailorSafe()) { if (nom === 0 && (!g.auto || g.testBadges)) unlockBadge('sailor'); recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
         else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, S().voteExec(yes, nom)); }
       } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, S().voteFail(yes, need)); }
       g.votes = null;
@@ -1033,6 +1094,10 @@ async function playBotc() {
   const hereticOn = g.drunk !== hi && !poisonedNow(hi), fin = hereticOn ? (raw === 'good' ? 'evil' : 'good') : raw, mine = roles[0] === 'pukka' ? 'evil' : 'good';
   g.reveal = true; g.revealT = 0; g.pukkaSober = g.alive[pi] && g.drunk !== pi; if (!g.auto) [62, 69, 74].forEach((m, k) => chime(m, k * .15, .16, 1.6));
   g.result = { raw, fin, hereticOn, nights: g.night, won: mine === fin };
+  if (!g.auto || g.testBadges) {
+    if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0) unlockBadge('pukka');      // won with two poison marks on the table
+    if (roles[0] === 'heretic' && mine === fin && g.deathBy[0] === 'exec') unlockBadge('heretic');                                                // nominated yourself, executed, and won
+  }
   g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
   g.over = true; if (!g.auto) resultMusic(mine === fin);
   await bsay(ST, fin === 'good' ? S().goodWins : S().evilWins);
@@ -1263,9 +1328,11 @@ function start() {
   mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block'; bell(146.8, .18);
 }
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
-cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { botcTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
+cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { botcTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
+cv.addEventListener('pointermove', e => { if (mode === 'stall' && stall.board) boardMove(e.clientX, e.clientY); });
+for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) cv.addEventListener(ev, () => { if (mode === 'stall' && stall.board) boardUp(); });
 $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
 // choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered
 $('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); chime(74, 0, .12, .8); }));
@@ -1327,6 +1394,18 @@ if (location.hash) {
       const key = steps + ' => ' + (r.hereticOn ? '颠倒' : '不颠倒') + ' => ' + (r.fin === 'good' ? '善良胜' : '邪恶胜') + ' || ' + toks; c[key] = (c[key] || 0) + 1; }
     const top = Object.entries(c).sort((a, b) => b[1] - a[1]); document.title = JSON.stringify({ N, kinds: top.length, top: top.slice(0, 16) }); }, 300);
   if (location.hash === '#shotgame') { mode = 'tower'; fade = 0; $('zoom').style.display = 'none'; Object.assign(BG, { roles: ['heretic', 'pukka', 'sailor'], alive: [true, true, true], showMine: true, isNight: false, dark: 0, votes: null, reveal: false, bubble: { who: 2, text: S().sailorSay(2, 1) }, wait: { type: 'say', res() {} } }); }
+  if (location.hash === '#badge') setTimeout(async () => { const log = []; save.badges = {}; save.badgeNew = []; enterStall(); const st = stall, cook = () => { act('boil'); st.potT = 9; updateStall(.01); act('scoop'); act('put'); act('soup'); };
+    cook(); act('chili'); act('cilantro'); log.push('twoToppings full=' + !!save.badges.full); act('beef'); log.push('allThree full=' + !!save.badges.full); dump(); grab('bowl'); dump();
+    cook(); act('chili'); act('chili'); log.push('2chili spicy=' + !!save.badges.spicy); act('chili'); log.push('3chili spicy=' + !!save.badges.spicy + ' new=' + save.badgeNew.join(','));
+    updateStall(.1); drawStall(1); log.push('glowBeforeEating=' + st.glowOn); grab('bowl'); dump(); st.sinceSelf = 3; cook(); grab('bowl'); barTap(); barTap(); updateStall(3); updateStall(.1); log.push('afterEating glow=' + st.glowOn + ' say=' + st.ownSay);
+    drawStall(1); stallTap(HIT.board[0], HIT.board[1]); log.push('boardOpen=' + st.board); drawStall(1); const B = st.BD, p0 = save.badges.full.slice(), px = B.x + p0[0] * B.w, py = B.y + p0[1] * B.h;
+    boardDown(px, py); boardUp(); log.push('tapTip=' + st.tip + ':' + S().badges.full.join('/')); boardDown(px, py); boardMove(px + 60, py + 90); boardMove(px + 80, py + 120); const held = st.drag && st.drag.moved; boardUp(); log.push('dragged=' + held + ' moved=' + (save.badges.full[0] !== p0[0]) + ' tipCleared=' + (st.tip === null));
+    boardDown(B.back[0], B.back[1]); log.push('back board=' + st.board + ' newLeft=' + save.badgeNew.length + ' mode=' + mode); updateStall(.1); log.push('glowAfter=' + st.glowOn + ' stored=' + Object.keys(JSON.parse(localStorage.getItem('ctramen')).badges).join(','));
+    BG.auto = true; BG.testBadges = true; const got = { pukka: 0, sailor: 0, heretic: 0 }, bad = []; for (let k = 0; k < 3000; k++) { delete save.badges.pukka; delete save.badges.sailor; delete save.badges.heretic; const r = await playBotc(), g = BG, me = g.roles[0];
+      for (const id of ['pukka', 'sailor', 'heretic']) if (save.badges[id]) { got[id]++; if (me !== id) bad.push(id + ' as ' + me); }
+      if (save.badges.pukka && !(r.won && g.deadPoison >= 0 && g.poisoned >= 0)) bad.push('pukka cond'); if (save.badges.heretic && !(r.won && !g.alive[0] && g.deathBy[0] === 'exec')) bad.push('heretic cond'); if (save.badges.sailor && !g.recap.some(x => x.includes('死不了'))) bad.push('sailor cond'); }
+    BG.testBadges = false; log.push('3000 games: ' + JSON.stringify(got) + ' wrong=' + bad.length + (bad[0] ? ':' + bad[0] : '')); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
+  if (location.hash === '#boardview' || location.hash === '#boardglow') setTimeout(() => { save.badges = {}; save.badgeNew = []; for (const id of BADGE_IDS) unlockBadge(id); if (location.hash === '#boardview') save.badgeNew = ['heretic']; enterStall(); fade = 0; stall.done = true; const o = stall.owner; o.x = o.tx; o.y = o.ty; o.ptx = o.tx; o.pty = o.ty; o.path = []; updateStall(.05); if (location.hash === '#boardview') { stall.board = true; stall.tip = 'full'; } localStorage.removeItem('ctramen'); }, 200);
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#botcview')) { enterTower(); fade = 0; const n = +location.hash.slice(9) || 0; let k = 0; const step = () => { if (k++ < n && BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); setTimeout(step, 30); } }; setTimeout(step, 100); }
   if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode + ' leaving=' + stall.leaving); let hitFurn = 0, steps = 0; for (; steps < 200 && mode === 'stall'; steps++) { updateStall(0.05); if (shopBlocked(stall.owner.x, stall.owner.y)) hitFurn++; } log.push('walkedOut mode=' + mode + ' steps=' + steps + ' throughFurniture=' + hitFurn); document.title = log.join(' ; '); }, 500);
