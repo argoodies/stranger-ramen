@@ -838,12 +838,12 @@ function drawStall(t) {
   for (let i = 0; i < 6; i++) { const x0 = .56 + i * .66, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .6, 0, 2.8), P(x0 + .6, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); }
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
   { // the achievement board on the wall: planks, and a dot for every badge where you left it
-    const y0 = 1.3, y1 = 2.55, z0 = 2.1, z1 = 3.4, W2 = (u, w) => P(0, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w), fr = [W2(0, 0), W2(1, 0), W2(1, 1), W2(0, 1)], c = W2(.5, .5);
+    const y0 = 1.3, y1 = 2.55, z0 = 2.05, z1 = 3.45, W2 = (u, w) => P(0, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w), fr = [W2(0, 0), W2(1, 0), W2(1, 1), W2(0, 1)], c = W2(.5, .5);
     if (st.glowOn) glow(c[0], c[1], s * (1.5 + .18 * Math.sin(t * 4)), [255, 226, 150], .95);
     poly(fr.map(p => [p[0] + 2, p[1] + 3]), [60, 40, 60], .25); poly(fr, [128, 88, 70]);
-    for (let k = 0; k < 4; k++) poly([W2(.04, .04 + k * .235), W2(.96, .04 + k * .235), W2(.96, .245 + k * .235), W2(.04, .245 + k * .235)], k % 2 ? [186, 136, 100] : [198, 148, 108]);
-    for (const [u, w] of [[.09, .1], [.91, .1], [.09, .9], [.91, .9]]) { const p = W2(u, w); circ(p[0], p[1], s * .018, [110, 80, 70]); }
-    for (const id of BADGE_IDS) if (save.badges[id]) { const [bx, by] = save.badges[id], p = W2(1 - bx, 1 - by); circ(p[0], p[1], s * .085, [226, 180, 96]); circ(p[0], p[1], s * .06, id === 'pukka' ? [206, 40, 62] : id === 'spicy' ? [226, 80, 50] : id === 'full' ? [236, 190, 110] : [60, 130, 230]); }
+    for (let k = 0; k < 5; k++) { const a = .03 + k * .188 + .006, b = .03 + (k + 1) * .188 - .006; poly([W2(.035, a), W2(.965, a), W2(.965, b), W2(.035, b)], k % 2 ? [198, 148, 108] : [186, 136, 100]); }
+    for (const [u, w] of [[.06, .05], [.94, .05], [.06, .95], [.94, .95]]) { const p = W2(u, w); circ(p[0], p[1], s * .014, [96, 68, 60]); }
+    for (const id of BADGE_IDS) if (save.badges[id]) { const [bx, by] = save.badges[id], disc = (q, c) => { const pts = []; for (let k = 0; k < 20; k++) pts.push(W2(1 - bx + .105 * q * Math.cos(TAU * k / 20), 1 - by + .105 / 1.12 * q * Math.sin(TAU * k / 20))); poly(pts, c); }; disc(1, [176, 128, 60]); disc(.92, [236, 196, 110]); disc(.72, [244, 236, 220]); disc(.42, id === 'pukka' ? [206, 40, 62] : id === 'spicy' ? [226, 80, 50] : id === 'full' ? [226, 150, 80] : [60, 130, 230]); }
     if (st.glowOn) { ctx.beginPath(); fr.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.strokeStyle = css([255, 236, 170], .6 + .35 * Math.sin(t * 4)); ctx.lineWidth = 3; ctx.stroke(); }
     HIT.board = [c[0], c[1], s * .78]; }
   // the way out: a mat, then a few steps going down and out at the lower left
