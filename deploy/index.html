@@ -928,11 +928,11 @@ function drawStall(t) {
 }
 // a round badge: metal ring, cream face, a flat picture
 function drawBadge(id, x, y, r, lift = 0) {
-  // a plain slice of pale wood with the picture burnt in, dark
-  const cy = y - lift, WH = [98, 62, 44];
+  // a plain slice of dark wood with the picture burnt in, darker still
+  const cy = y - lift, WH = [50, 28, 22];
   ell(x, y + r * .14 + lift * .6, r * 1.02, r * .98, [30, 16, 20], .35);
-  circ(x, cy + r * .09, r, [150, 110, 76]); circ(x, cy, r, [236, 208, 164]);
-  ctx.save(); ctx.beginPath(); ctx.arc(x, cy, r, 0, TAU); ctx.clip(); ctx.strokeStyle = css([208, 172, 124], .7); ctx.lineWidth = Math.max(1, r * .03);
+  circ(x, cy + r * .09, r, [74, 46, 34]); circ(x, cy, r, [128, 86, 58]);
+  ctx.save(); ctx.beginPath(); ctx.arc(x, cy, r, 0, TAU); ctx.clip(); ctx.strokeStyle = css([108, 70, 48], .7); ctx.lineWidth = Math.max(1, r * .03);
   for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.ellipse(x - r * 1.1, cy + r * .6, r * (.5 + k * .36), r * (.34 + k * .27), -.35, 0, TAU); ctx.stroke(); }
   ctx.restore();
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -1164,7 +1164,7 @@ function roleToken(x, y, r, role, a = 1, mono = null) {
       L([[0, -.56], [0, .34]], col, k); L([[-.34, -.1], [.34, -.1]], col, k);
       for (const [ex, ey, ux, uy] of ends) for (const [a1, b1] of [[.1, 0], [-.04, .14], [-.04, -.14]]) { ctx.beginPath(); ctx.arc((ex + ux * a1 - uy * b1) * q, (ey + uy * a1 + ux * b1) * q, bud * q, 0, TAU); ctx.fillStyle = css(col); ctx.fill(); }
     };
-    bar(c, 3.0, .125); bar(mono ? [236, 208, 164] : [244, 232, 208], 1.25, .06);
+    bar(c, 3.0, .125); bar(mono ? [128, 86, 58] : [244, 232, 208], 1.25, .06);
   }
   ctx.restore();
 }
