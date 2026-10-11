@@ -1757,6 +1757,7 @@ function drawChurch(t, dt) {
   { const left = c.foes.filter(e => e.hp > 0).length; if (left) thinText('× ' + left, W / 2, 97, 12.5, [255, 255, 255], .8, .3); }      // how many are still standing
   if (c.bannerT > 0) { const q = P(p.x, p.y); sayBubble(q[0], q[1] - K * 1.55, c.banner, clamp(s * .34, 12.5, 15), clamp(c.bannerT * 3), Math.min(W * .7, 260)); }      // what the chef has to say about it
   TK = 0;
+  if (bag.open) drawBag(t);
 }
 
 function drawIcon(t) {
@@ -1785,7 +1786,7 @@ function frame(now) {
   else { if (mode === 'world') updateWorld(dt); drawWorld(T, dt); }
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5), lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
-  { const show = mode === 'world' && zoomTarget < .5 && player.x >= 8, bb = $('bag'); if ((bb.style.display !== 'none') !== show) bb.style.display = show ? 'block' : 'none'; if (!show) bag.open = false; if (mode === 'world') { const z = $('zoom'), zd = show ? 'none' : 'block'; if (z.style.display !== zd) z.style.display = zd; } }      // on the church's island the backpack takes the zoom button's place
+  { const show = (mode === 'world' && zoomTarget < .5 && player.x >= 8) || (mode === 'church' && church.done && church.down <= 0), bb = $('bag'); if ((bb.style.display !== 'none') !== show) bb.style.display = show ? 'block' : 'none'; if (!show) bag.open = false; if (mode === 'world') { const z = $('zoom'), zd = show ? 'none' : 'block'; if (z.style.display !== zd) z.style.display = zd; } }      // the backpack is at hand on the church's island (where it takes the zoom button's place) and inside the church once the fight is won
   musicTick();
   requestAnimationFrame(frame);
 }
@@ -1795,7 +1796,7 @@ function start() {
   mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block'; bell(146.8, .18);
 }
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
-cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { botcTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'church') { churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
+cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { botcTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
 $('bag').addEventListener('click', () => { bag.open = !bag.open; bag.sel = null; chime(bag.open ? 74 : 62, 0, .12, .8); });
