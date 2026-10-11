@@ -1575,9 +1575,9 @@ function updateChurch(dt) {
       if (e.wind > 0) { e.wind -= dt; if (e.wind <= 0) { c.cones.push({ x: e.x, y: e.y, a: e.aim, t: 0, T: .5 }); const da = Math.atan2(Math.sin(Math.atan2(dy, dx) - e.aim), Math.cos(Math.atan2(dy, dx) - e.aim)); if (d < 6.6 && Math.abs(da) < .58) churchHurt(e); e.cd = 1.5; e.n = (e.n || 0) + 1; noise(.5, .4, 3000, 500); } }
       else { e.cd -= dt; if (d < 3) step(-dx / d, -dy / d, 1); else if (d > 5.2) step(dx / d, dy / d, .9); else wander();
         if (e.cd <= 0 && d < 8.5) { if ((e.n || 0) % 3 === 2) { for (let i = 0; i < 6; i++) lob(e, p.x + rnd(-1.8, 1.8), p.y + rnd(-1.8, 1.8), rnd(.9, 1.5)); e.n++; e.cd = 2.2; sfx(520, .12, .07); } else { e.wind = 1.1; e.aim = Math.atan2(dy, dx); sfx(180, .9, .06, 'sawtooth'); } } }
-    } else if (e.kind === 'whirl') {    // the whirlwind: winds up (the one moment it can be parried), then tears about at random, half as fast again as you can run
+    } else if (e.kind === 'whirl') {    // the whirlwind: winds up (the one moment it can be parried), then tears about at random, exactly as fast as you can run
       if (e.spin > 0) { e.spin -= dt; if ((e.turn -= dt) <= 0) { e.turn = rnd(.5, .9); const a = Math.random() < .45 ? Math.atan2(dy, dx) + rnd(-.5, .5) : rnd(0, TAU); e.ax = Math.cos(a); e.ay = Math.sin(a); }
-        step(e.ax, e.ay, 5.85); if (e.x <= Z[0] || e.x >= Z[1]) e.ax = -e.ax; if (e.y <= CY0 || e.y >= CY1) e.ay = -e.ay; if (Math.hypot(p.x - e.x, p.y - e.y) < .95) churchHurt(e); if (e.spin <= 0) e.cd = 2.6; }
+        step(e.ax, e.ay, 3.9); if (e.x <= Z[0] || e.x >= Z[1]) e.ax = -e.ax; if (e.y <= CY0 || e.y >= CY1) e.ay = -e.ay; if (Math.hypot(p.x - e.x, p.y - e.y) < .95) churchHurt(e); if (e.spin <= 0) e.cd = 2.6; }
       else if (e.wind > 0) { e.wind -= dt; if (e.wind <= 0) { e.spin = 3.6; e.turn = 0; noise(1.2, .3, 400, 1600); } }
       else { e.cd -= dt; if (d > 2.6) step(dx / d, dy / d, 1); if (e.cd <= 0) { e.wind = .8; noise(.8, .15, 300, 900); } }
     } else if (e.wind > 0) {            // the Poisoner
