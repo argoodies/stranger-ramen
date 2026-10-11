@@ -134,9 +134,9 @@ const STR = {
     sayOk: ['好吃！', '就是这个味！', '暖和了～', '谢谢老板！'], sayBad: ['嗯…这不是我点的', '好像不太对？'], later: '下次再来吧…',
     hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了，出去走走吧。',
-    libAway: '图书管理员不在，不要乱动。', newBadge: '好像有新的徽章了。',
+    libAway: '图书管理员不在，不要乱动。',
     churchDown: '不行了……',
-    thanks: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
+    askMore: '谢谢。还要再战吗？', again: '继续再战', nah: '算了', noMore: '谢谢。其他内容还在制作中。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品'], bagHint: '点一下，装备或卸下。', ringSave: '戒指把这一下弹回去了！',
     items: { twin: ['教父双刀', '一次出手砍两下。'], doom: ['末日项链', '戴着它振刀，会有一道闪电随机劈中场上一个敌人，伤害十点。'], flower: ['鲜花', '一朵花。什么用都没有。'], sleep: ['驱魔刀', '振刀是三倍伤害。每一刀有三成机会让对手沉睡三秒，怎么打都不醒。'], guard: ['守护十字架', '被打中时，有三成机会张开一面盾，这一下不算。'], knife: ['菜刀', '拉面师傅的老伙计。看准对方出手的一瞬砍过去，就是十倍伤害的振刀。'], ring: ['贞洁之戒', '戴着它，倒下之前会把那一下伤害弹回给对方。每次进关只有一次。'] },
     badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'], ring: ['贞洁之戒', '从教堂里救出了贞洁者。'] },
@@ -162,9 +162,9 @@ const STR = {
     sayOk: ['好吃！', '就是這個味！', '暖和了～', '謝謝老闆！'], sayBad: ['嗯…這不是我點的', '好像不太對？'], later: '下次再來吧…',
     hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了，出去走走吧。',
-    libAway: '圖書館員不在，不要亂動。', newBadge: '好像有新的徽章了。',
+    libAway: '圖書館員不在，不要亂動。',
     churchDown: '不行了……',
-    thanks: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
+    askMore: '謝謝。還要再戰嗎？', again: '繼續再戰', nah: '算了', noMore: '謝謝。其他內容還在製作中。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品'], bagHint: '點一下，裝備或卸下。', ringSave: '戒指把這一下彈回去了！',
     items: { twin: ['教父雙刀', '一次出手砍兩下。'], doom: ['末日項鍊', '戴著它振刀，會有一道閃電隨機劈中場上一個敵人，傷害十點。'], flower: ['鮮花', '一朵花。什麼用都沒有。'], sleep: ['驅魔刀', '振刀是三倍傷害。每一刀有三成機會讓對手沉睡三秒，怎麼打都不醒。'], guard: ['守護十字架', '被打中時，有三成機會張開一面盾，這一下不算。'], knife: ['菜刀', '拉麵師傅的老夥計。看準對方出手的一瞬砍過去，就是十倍傷害的振刀。'], ring: ['貞潔之戒', '戴著它，倒下之前會把那一下傷害彈回給對方。每次進關只有一次。'] },
     badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'], ring: ['貞潔之戒', '從教堂裡救出了貞潔者。'] },
@@ -190,9 +190,9 @@ const STR = {
     sayOk: ['Delicious!', 'Just right!', 'So warming~', 'Thanks, chef!'], sayBad: ["Hmm… that's not my order.", "That's not quite right?"], later: 'Maybe next time…',
     hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. Time for a walk.",
-    libAway: "The librarian is out. Better not touch anything.", newBadge: 'Looks like there is a new badge.',
+    libAway: "The librarian is out. Better not touch anything.",
     churchDown: 'I am done for…',
-    thanks: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
+    askMore: 'Thank you. Will you fight on?', again: 'Fight on', nah: 'No', noMore: 'Thank you. The rest is still being made.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm'], bagHint: 'Tap to equip or take off.', ringSave: 'The ring threw that one back!',
     items: { twin: ["Godfather's Twin Blades", 'Every attack cuts twice.'], doom: ['Doomsday Necklace', 'Parry while wearing it and lightning strikes one foe at random for ten.'], flower: ['Flower', 'A flower. It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry with it cuts three times as deep. Three cuts in ten put the foe to sleep for three seconds, and nothing wakes it.'], guard: ['Guardian Cross', 'When you are hit, three times in ten a shield opens and the blow does not count.'], knife: ['Kitchen Knife', "The chef's old friend. Strike just as a foe attacks and the parry cuts ten times as deep."], ring: ['Ring of Chastity', 'Before you fall, it throws that blow back at your attacker. Once per level.'] },
     badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'], ring: ['Ring of Chastity', 'Rescued the Virgin from the church.'] },
@@ -477,7 +477,7 @@ function nearestWalkable(x, y) {
 }
 const player = { x: -0.5, y: 3.5, path: [], enter: false, step: 0 };
 const npcs = [];
-for (let n = 0; n < 4; n++) { const c = nearestWalkable(rnd(-4, 4), rnd(-4, 4)); npcs.push({ x: c[0] + .5, y: c[1] + .5, path: [], wait: rnd(0, 4), look: randomLook(), step: 0 }); }
+for (let n = 0; n < 1; n++) { const c = nearestWalkable(rnd(-4, 4), rnd(-4, 4)); npcs.push({ x: c[0] + .5, y: c[1] + .5, path: [], wait: rnd(0, 4), look: randomLook(), step: 0 }); }
 function cellOf(p) { return [Math.floor(p.x), Math.floor(p.y)]; }
 const sameCell = (a, i, j) => Math.floor(a.x) === i && Math.floor(a.y) === j;
 function taken(i, j, self) {
@@ -636,11 +636,11 @@ function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = l
 const cookT = () => has('fast') ? 1.3 : 2.6, waitMax = () => has('calm') ? 110 : 70, speedK = () => has('swift') ? 1.5 : 1;
 // ---- achievements: round badges on the wooden board in the shop. save.badges[id] = [x, y] (0..1 on the board), save.badgeNew = ids not yet looked at
 const BADGE_IDS = ['full', 'spicy', 'pukka', 'sailor', 'heretic', 'ring'], BADGE_HOME = { full: [.27, .27], spicy: [.73, .25], pukka: [.28, .7], sailor: [.72, .68], heretic: [.5, .47], ring: [.5, .85] };
-save.badges = save.badges || {}; save.badgeNew = save.badgeNew || [];
+save.badges = save.badges || {}; save.badgeNew = [];
 save.equip = save.equip || { weapon: 'knife', acc: null };      // what you are wearing; the kitchen knife is yours from the start
 if (save.equip.relic) { if (!save.equip.acc) save.equip.acc = save.equip.relic; delete save.equip.relic; }      // there was once a third slot
 const saveNow = () => { try { localStorage.setItem('ctramen', JSON.stringify(save)); } catch (e) {} };
-function unlockBadge(id) { if (save.badges[id]) return false; save.badges[id] = BADGE_HOME[id].slice(); settleBadges(id); settleBadges(null); save.badgeNew.push(id); saveNow(); return true; }
+function unlockBadge(id) { return false; }      // the achievement board is gone: nothing is awarded any more
 function knock() { if (!AC) return; const t = AC.currentTime; tone(150, t, .1, .32, 'triangle'); tone(92, t, .16, .22); tone(620, t, .03, .06); }
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
 stall.bowl = emptyBowl();
@@ -868,16 +868,17 @@ function drawStall(t) {
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(4.5, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(4.5, 0, 2.8)], wallB);
   for (let i = 0; i < 6; i++) { const x0 = .56 + i * .66, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .6, 0, 2.8), P(x0 + .6, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); }
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
-  { // the achievement board on the wall: planks, and a dot for every badge where you left it
-    const y0 = 1.55, y1 = 2.3, z0 = 2.1, z1 = 2.94, TH = .09, W2 = (u, w) => P(TH, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w), fr = [W2(0, 0), W2(1, 0), W2(1, 1), W2(0, 1)], c = W2(.5, .5);
-    if (st.glowOn) glow(c[0], c[1], s * (1.25 + .16 * Math.sin(t * 4)), [255, 226, 150], 1);
+  { // the painting on the wall: a sunset over hills, in a wooden frame that stands a little proud of the plaster
+    const y0 = 1.35, y1 = 2.5, z0 = 2.15, z1 = 3.35, TH = .09, g2 = .09, W2 = (u, w) => P(TH, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w), fr = [P(TH, y0, z0), P(TH, y1, z0), P(TH, y1, z1), P(TH, y0, z1)], inn = [P(TH, y0 + g2, z0 + g2), P(TH, y1 - g2, z0 + g2), P(TH, y1 - g2, z1 - g2), P(TH, y0 + g2, z1 - g2)];
     poly([P(0, y0 - .06, z0 - .12), P(0, y1 - .02, z0 - .12), P(0, y1 - .02, z1 - .1), P(0, y0 - .06, z1 - .1)], [60, 40, 60], .22);      // its shadow on the wall
-    poly([P(0, y0, z1), P(0, y1, z1), P(TH, y1, z1), P(TH, y0, z1)], [150, 106, 82]); poly([P(0, y1, z0), P(0, y1, z1), P(TH, y1, z1), P(TH, y1, z0)], [92, 62, 50]); poly(fr, [120, 82, 64]);
-    for (let k = 0; k < 5; k++) { const a = .03 + k * .188 + .006, b = .03 + (k + 1) * .188 - .006; poly([W2(.035, a), W2(.965, a), W2(.965, b), W2(.035, b)], k % 2 ? [198, 148, 108] : [186, 136, 100]); }
-    for (const [u, w] of [[.06, .05], [.94, .05], [.06, .95], [.94, .95]]) { const p = W2(u, w); circ(p[0], p[1], s * .014, [96, 68, 60]); }
-    for (const id of BADGE_IDS) if (save.badges[id]) { const [bx, by] = save.badges[id], o = W2(1 - bx, 1 - by), o1 = W2(2 - bx, 1 - by), o2 = W2(1 - bx, 2 - by), q = .105 / 100; ctx.save(); ctx.transform(-(o1[0] - o[0]) * q, -(o1[1] - o[1]) * q, -(o2[0] - o[0]) * q / 1.12, -(o2[1] - o[1]) * q / 1.12, o[0], o[1]); drawBadge(id, 0, 0, 100, 0, true); ctx.restore(); }
-    if (st.glowOn) { poly(fr, [255, 240, 190], .1 + .1 * Math.sin(t * 4)); glow(c[0], c[1], s * (.9 + .1 * Math.sin(t * 4)), [255, 244, 200], .25); }
-    HIT.board = [c[0], c[1], s * .6]; }
+    poly([P(0, y0, z1), P(0, y1, z1), P(TH, y1, z1), P(TH, y0, z1)], [176, 128, 104]); poly([P(0, y1, z0), P(0, y1, z1), P(TH, y1, z1), P(TH, y1, z0)], [112, 76, 62]); poly(fr, [150, 104, 84]); poly(inn, [250, 206, 150]);
+    ctx.save(); ctx.beginPath(); inn.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.clip();
+    poly([W2(0, .45), W2(1, .45), W2(1, 1), W2(0, 1)], [252, 190, 130]); poly([W2(0, .7), W2(1, .7), W2(1, 1), W2(0, 1)], [246, 160, 120]);
+    const sn = W2(.66, .62); glow(sn[0], sn[1], s * .5, [255, 244, 200], .9); circ(sn[0], sn[1], s * .13, [255, 240, 196]);
+    poly([W2(0, 0), W2(1, 0), W2(1, .34), W2(.7, .46), W2(.4, .36), W2(.15, .48), W2(0, .4)], [226, 130, 100]);
+    poly([W2(0, 0), W2(1, 0), W2(1, .2), W2(.55, .3), W2(.25, .22), W2(0, .28)], [196, 100, 96]);
+    poly([W2(.3, .2), W2(.42, .2), W2(.42, .58), W2(.45, .58), W2(.36, .8), W2(.27, .58), W2(.3, .58)], [120, 64, 84]);
+    poly([W2(.12, .2), W2(.22, .2), W2(.22, .34), W2(.17, .42), W2(.12, .34)], [150, 76, 84]); ctx.restore(); delete HIT.board; }
   // the way out: a mat, then a few steps going down and out at the lower left
   { const ex = 1.3, ew = 1.0;
     poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], [170, 128, 104]); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], [140, 102, 86]);
@@ -1393,7 +1394,7 @@ function mvBack(t, title) {
 }
 // ---- the backpack: opened from the button that shows while you are on the church's island
 const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc' }, LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
-const have = id => id === 'knife' || (id === 'ring' ? !!save.badges.ring : !!save[id]), owned = () => Object.keys(ITEMS).filter(have), wearing = id => save.equip[ITEMS[id]] === id && have(id);
+const have = id => id === 'knife' || !!save[id] || (id === 'ring' && !!save.badges.ring), owned = () => Object.keys(ITEMS).filter(have), wearing = id => save.equip[ITEMS[id]] === id && have(id);
 const armed = () => ITEMS[save.equip.weapon] === 'weapon' && have(save.equip.weapon), sleepy = () => wearing('sleep'), ringOn = () => wearing('ring'), guardOn = () => wearing('guard');
 function drawItem(id, x, y, r) {
   if (id === 'ring') drawRing(x, y + r * .1, r * .62); else if (id === 'guard') drawGuard(x, y, r);
@@ -1427,9 +1428,10 @@ function bagTap(x, y) {      // a tap on a thing puts it on, or takes it off; a 
 }
 
 // Inside the church: one bright room (x along it, y across), drawn mirrored so that it runs from the lower left to the upper right, with the Holy Cross at the far end.
-// Every time you come in the lights are out and five foes picked at random and one boss are waiting. Beat them and the lights come up, and one of the good folk slowly appears before the cross.
+// Every time you come in the lights are out and five foes picked at random and one boss are waiting. Beat them and the lights come up, and one of the good folk slowly appears before the cross
+// with a chest. Speak to them and you may fight on: the lights go out again on twice as many, then three times; after the third round there is nothing more.
 const CL = 14, CW = 9, CX0 = 2.4, CX1 = CL - .8, CY0 = .8, CY1 = CW - .8, CEXIT = [12, 4];
-const MINIONS = ['poi', 'ass', 'witch'], BOSSES = ['whirl'], MINHP = 3, BOSSHP = 100, HEIRHP = 30;      // a small foe takes three plain cuts, a boss a hundred; every hit on you, the boss's too, costs one heart
+const MINIONS = ['ass', 'witch'], BOSSES = ['whirl'], TIERS = 3, MINHP = 3, BOSSHP = 100, HEIRHP = 30;      // a small foe takes three plain cuts, a boss a hundred; every hit on you, the boss's too, costs one heart
 const zoneOf = () => [3, CX1];          // the foes keep off the steps of the cross
 const POI = { body: [62, 46, 88] }, IMP = { kind: 'demon', body: [222, 52, 66], head: [246, 170, 150] };
 const church = { p: {}, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [] };
@@ -1444,11 +1446,11 @@ function noise(dur, vol, f0, f1, when = 0, dest) {      // a burst of filtered h
   f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
   n.connect(f); f.connect(g); g.connect(dest || master); n.start(t); n.stop(t + dur + .03);
 }
-function churchSpawn() {
-  const c = church, Z = zoneOf(), add = (kind, boss) => { let x, y, tries = 0;
-    do { x = boss ? 5.5 : rnd(Z[0] + .3, CX1 - 3.4); y = boss ? CW / 2 : rnd(CY0, CY1); } while (!boss && tries++ < 60 && c.foes.some(f => Math.hypot(f.x - x, f.y - y) < 1.15));
-    const hp = boss ? BOSSHP : MINHP; c.foes.push({ kind, wave: 0, boss, x, y, hx: x, hy: y, wx: x, wy: y, wt: rnd(0, 2), hp, max: hp, cd: rnd(1.2, 3.4) + c.foes.length * .2, wind: 0, dash: 0, spin: 0, stun: 0, hit: 0, dead: 0, ax: -1, ay: 0 }); };
-  add(pick(BOSSES), true); for (let i = 0; i < 5; i++) add(pick(MINIONS), false);
+function churchSpawn(tier = 1) {      // round n: n bosses and 5n small foes
+  const c = church, Z = zoneOf(), add = (kind, boss, i) => { let x, y, tries = 0;
+    do { x = boss ? 5.5 : rnd(Z[0] + .3, CX1 - 3.4); y = boss ? CW / 2 + (i - (tier - 1) / 2) * 2.3 : rnd(CY0, CY1); } while (!boss && tries++ < 60 && c.foes.some(f => Math.hypot(f.x - x, f.y - y) < 1.15));
+    const hp = boss ? BOSSHP : MINHP; c.foes.push({ kind, wave: 0, boss, x, y, hx: x, hy: y, wx: x, wy: y, wt: rnd(0, 2), hp, max: hp, cd: rnd(1.2, 3.4) + c.foes.length * .2 + (boss ? i * 1.3 : 0), wind: 0, dash: 0, spin: 0, stun: 0, hit: 0, dead: 0, ax: -1, ay: 0 }); };
+  for (let i = 0; i < tier; i++) add(pick(BOSSES), true, i); for (let i = 0; i < 5 * tier; i++) add(pick(MINIONS), false, i);
   c.passes = 2; c.pass = null;
 }
 const churchXmin = () => CX0, churchXmax = () => CX1;
@@ -1456,7 +1458,7 @@ function churchBanner(txt, sec = 3) { church.banner = txt; church.bannerT = sec;
 function enterChurch() {
   mode = 'church'; $('zoom').style.display = 'none'; $('bag').style.display = 'none'; $('bback').style.display = 'none'; fade = 1; bag.open = false;      // no way out until the fight is won
   const c = church, p = c.p;
-  Object.assign(c, { wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, done: false, lit: 0, say: null, fly: null, pass: null, cam: null });
+  Object.assign(c, { wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, tier: 1, ask: null, done: false, lit: 0, say: null, fly: null, pass: null, cam: null });
   Object.assign(p, { x: CEXIT[0] - 1.5, y: CW / 2, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y;
   churchSpawn(); bell(196, .12);
 }
@@ -1478,7 +1480,7 @@ function churchPoof(e, col) { church.fx.push({ k: 'poof', x: e.x, y: e.y, t: 0, 
 function churchClear() { const c = church; c.shots = []; c.waves = []; c.cones = []; c.p.target = null; }
 function churchCleared() {      // the fight is over: the lights come up, and one of the good folk, picked at random, takes shape before the cross
   const c = church; if (c.done) return; c.done = true; $('bback').style.display = ''; churchClear(); bell(196, .14); bell(293.7, .08);
-  c.npcs.push({ who: pick(['saint', 'virgin', 'exorcist', 'flower']), x: 2.6, y: CW / 2 - 1.9, a: 0 });
+  c.npcs.push({ who: pick(['saint', 'virgin', 'exorcist', 'flower']), x: 2.6, y: CW / 2 - 1.9, a: 0, mark: true });
   const left = LOOT.filter(id => !have(id)); c.chest = { id: pick(left.length ? left : LOOT), x: 3.3, y: CW / 2, a: 0, open: false, at: null };      // there is always a chest: something you lack while there is any, then whatever comes
 }
 function churchBossDown() {      // the boss falls, and everything it brought with it goes too
@@ -1488,7 +1490,7 @@ function churchBossDown() {      // the boss falls, and everything it brought wi
 }
 function churchKill(e) {
   const c = church, p = c.p; e.hp = 0; e.dead = .5; churchPoof(e); sfx(330, .2, .22, 'triangle', .05); sfx(165, .25, .2, 'sine', .05); if (p.target === e) { p.target = null; p.tx = p.x; p.ty = p.y; }
-  if (e.boss) return churchBossDown();
+  if (e.boss && !c.foes.some(f => f.boss && f.hp > 0)) return churchBossDown();      // the last boss standing takes the rest with it
   if (!c.foes.some(f => f.hp > 0)) churchCleared();
 }
 function churchDamage(e, n) {
@@ -1514,12 +1516,20 @@ function churchHit(e) {      // one stroke: the knife you carry, or a bare fist
   if (wearing('twin') && e.hp > 0) { p.sw2 = .32; churchDamage(e, 1); noise(.1, .4, 3000, 900, .1); sfx(230, .12, .35, 'triangle', .12); }      // the Godfather's twin blades: the second blade follows the first
   if (parry && wearing('doom')) { const live = c.foes.filter(f => f.hp > 0 && !f.inv); if (live.length) { const z = pick(live); c.fx.push({ k: 'zap', x: z.x, y: z.y, t: 0, T: .45 }); noise(.35, .5, 5000, 300); sfx(90, .4, .3, 'sawtooth'); const sp = z.spin; z.spin = 0; churchDamage(z, 10); if (z.hp > 0) z.spin = sp; } }      // the Doomsday Necklace: lightning on one foe at random, whatever it is doing
 }
-function churchTalk(n) { church.say = { n, text: S().thanks, t: 2.4 }; chime(n.who === 'saint' ? 74 : 78, 0, .12); }      // whoever appears has one thing to say
+function churchTalk(n) {      // whoever appears thanks you and asks whether you will fight on; after the last round there is nothing more to offer
+  const c = church, L = S(); n.mark = false; chime(n.who === 'saint' ? 74 : 78, 0, .12);
+  if (c.tier >= TIERS) { c.say = { n, text: L.noMore, t: 3.2 }; return; }
+  c.say = { n, text: L.askMore, t: 1e9 }; c.ask = { n, hit: null };
+}
+function churchAgain() {      // fight on: healed where you stand, the floor clean, the lights out, the good soul and the chest gone, and a bigger crowd
+  const c = church; c.tier++; Object.assign(c, { hp: 6, hurt: 0, ringUsed: false, stains: [], npcs: [], chest: null, fly: null, say: null, ask: null, done: false, lit: 0, shots: [], waves: [], cones: [], foes: [] });
+  $('bback').style.display = 'none'; churchSpawn(c.tier); bell(110, .14); noise(.4, .25, 900, 200);
+}
 function churchOpen() {      // the chest before the cross: one thing you do not have yet, picked at random
   const c = church, ch = c.chest; if (!ch || ch.open || ch.a < 1) return; ch.open = true; c.fly = { id: ch.id, n: ch, t: 0 }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12);
 }
 function churchGift(id) {      // out of the chest and into the backpack; it goes straight on only if nothing is in that place
-  const k = ITEMS[id]; if (id === 'ring') unlockBadge('ring'); else save[id] = true;
+  const k = ITEMS[id]; save[id] = true;
   if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id;
   churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14));
 }
@@ -1566,9 +1576,9 @@ function updateChurch(dt) {
       if (e.wind > 0) { e.wind -= dt; if (e.wind <= 0) { c.cones.push({ x: e.x, y: e.y, a: e.aim, t: 0, T: .5 }); const da = Math.atan2(Math.sin(Math.atan2(dy, dx) - e.aim), Math.cos(Math.atan2(dy, dx) - e.aim)); if (d < 6.6 && Math.abs(da) < .58) churchHurt(e); e.cd = 1.5; e.n = (e.n || 0) + 1; noise(.5, .4, 3000, 500); } }
       else { e.cd -= dt; if (d < 3) step(-dx / d, -dy / d, 1); else if (d > 5.2) step(dx / d, dy / d, .9); else wander();
         if (e.cd <= 0 && d < 8.5) { if ((e.n || 0) % 3 === 2) { for (let i = 0; i < 6; i++) lob(e, p.x + rnd(-1.8, 1.8), p.y + rnd(-1.8, 1.8), rnd(.9, 1.5)); e.n++; e.cd = 2.2; sfx(520, .12, .07); } else { e.wind = 1.1; e.aim = Math.atan2(dy, dx); sfx(180, .9, .06, 'sawtooth'); } } }
-    } else if (e.kind === 'whirl') {    // the whirlwind: winds up (the one moment it can be parried), then tears about at random
+    } else if (e.kind === 'whirl') {    // the whirlwind: winds up (the one moment it can be parried), then tears about at random, half as fast again as you can run
       if (e.spin > 0) { e.spin -= dt; if ((e.turn -= dt) <= 0) { e.turn = rnd(.5, .9); const a = Math.random() < .45 ? Math.atan2(dy, dx) + rnd(-.5, .5) : rnd(0, TAU); e.ax = Math.cos(a); e.ay = Math.sin(a); }
-        step(e.ax, e.ay, 4.2); if (e.x <= Z[0] || e.x >= Z[1]) e.ax = -e.ax; if (e.y <= CY0 || e.y >= CY1) e.ay = -e.ay; if (Math.hypot(p.x - e.x, p.y - e.y) < .95) churchHurt(e); if (e.spin <= 0) e.cd = 2.6; }
+        step(e.ax, e.ay, 5.85); if (e.x <= Z[0] || e.x >= Z[1]) e.ax = -e.ax; if (e.y <= CY0 || e.y >= CY1) e.ay = -e.ay; if (Math.hypot(p.x - e.x, p.y - e.y) < .95) churchHurt(e); if (e.spin <= 0) e.cd = 2.6; }
       else if (e.wind > 0) { e.wind -= dt; if (e.wind <= 0) { e.spin = 3.6; e.turn = 0; noise(1.2, .3, 400, 1600); } }
       else { e.cd -= dt; if (d > 2.6) step(dx / d, dy / d, 1); if (e.cd <= 0) { e.wind = .8; noise(.8, .15, 300, 900); } }
     } else if (e.wind > 0) {            // the Poisoner
@@ -1597,6 +1607,7 @@ function churchTap(sx, sy) {
   let best = null, bd = K * 1.05;
   for (const e of c.foes) if (e.hp > 0 && e.wave === c.wave) { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
   if (best) { p.target = best; if (parryable(best)) p.cd = 0; return; }      // a tap on a foe that is just striking cuts at once, whatever the rhythm of your blows
+  if (c.ask) { const h = c.ask.hit, k = h ? h.findIndex(r => sx > r[0] && sx < r[0] + r[2] && sy > r[1] && sy < r[1] + r[3]) : -1; if (k === 0) return churchAgain(); c.ask = null; c.say = null; chime(62, 0, .1, .8); if (k === 1) return; }      // the two answers; a tap anywhere else also means no
   if (c.chest && !c.chest.open && c.chest.at && Math.hypot(sx - c.chest.at[0], sy - (c.chest.at[1] - K * .3)) < K) return churchOpen();
   for (const n of c.npcs) if (n.a > .7 && n.at && Math.hypot(sx - n.at[0], sy - (n.at[1] - K * .6)) < K) return churchTalk(n);
   const [x, y] = v.inv(sx, sy); p.target = null; p.tx = clamp(x, churchXmin(), churchXmax()); p.ty = clamp(y, CY0, CY1); chime(69, 0, .05, .6);
@@ -1739,6 +1750,8 @@ function drawChurch(t, dt) {
   if (c.fly && c.fly.n.at) { const u = ease(c.fly.t / 1.1), a = c.fly.n.at, b = P(p.x, p.y); drawItem(c.fly.id, lerp(a[0], b[0], u), lerp(a[1] - K * 1.2, b[1] - K * 1.3, u) - Math.sin(Math.PI * u) * s * 1.2, s * .3); }
   for (const n of c.npcs) if (n.mark && n.a >= 1 && n.at && !(c.say && c.say.n === n)) { const a = n.at, y = a[1] - K * 1.75 - Math.abs(Math.sin(t * 3)) * s * .12, r = s * .11; glow(a[0], y, r * 4, [255, 236, 170], .7); poly([[a[0], y - r * 1.3], [a[0] + r, y], [a[0], y + r * 1.3], [a[0] - r, y]], [255, 236, 170]); }      // a small light over someone who has something for you
   if (c.say && c.say.n.at) { const a = c.say.n.at; sayBubble(a[0], a[1] - K * 1.5, c.say.text, clamp(s * .34, 12.5, 15), clamp(c.say.t * 3), Math.min(W * .74, 290)); }
+  if (c.ask && c.ask.n.at) { const L = S(), a = c.ask.n.at, bw = 104, bh = 38, gap = 10, x0 = clamp(a[0] - bw - gap / 2, 10, W - 2 * bw - gap - 10), y0 = a[1] + 16; c.ask.hit = [];      // the two answers, under whoever asked
+    [[L.again, [228, 96, 88]], [L.nah, [240, 226, 198]]].forEach(([txt, col], k) => { const x = x0 + k * (bw + gap); ctx.fillStyle = css([40, 28, 60], .3); rrect(x, y0 + 3, bw, bh, bh / 2); ctx.fill(); ctx.fillStyle = css(col); rrect(x, y0, bw, bh, bh / 2); ctx.fill(); text(txt, x + bw / 2, y0 + bh / 2 + 1, 15, k ? [43, 33, 64] : [255, 248, 240], 1, 'center', true); c.ask.hit.push([x, y0, bw, bh]); }); }
   // hearts, how many foes are left, and the chef's own remarks
   for (let i = 0; i < 6; i++) drawHeart(W / 2 + (i - 2.5) * 22, 74, 7.5, i < c.hp ? [236, 96, 110] : [70, 58, 100], i < c.hp ? 1 : .8);
   { const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && c.ringUsed) ctx.globalAlpha = .3; drawItem(id, W / 2 + 3.5 * 22 + 4, 73, id === 'ring' ? 9.5 : 8); ctx.restore(); } }      // what you are wearing, beside the hearts
@@ -1851,29 +1864,10 @@ if (location.hash) {
       const key = steps + ' => ' + (r.hereticOn ? '颠倒' : '不颠倒') + ' => ' + (r.fin === 'good' ? '善良胜' : '邪恶胜') + ' || ' + toks; c[key] = (c[key] || 0) + 1; }
     const top = Object.entries(c).sort((a, b) => b[1] - a[1]); document.title = JSON.stringify({ N, kinds: top.length, top: top.slice(0, 16) }); }, 300);
   if (location.hash === '#shotgame') { mode = 'tower'; fade = 0; $('zoom').style.display = 'none'; Object.assign(BG, { roles: ['heretic', 'pukka', 'sailor'], alive: [true, true, true], showMine: true, isNight: false, dark: 0, votes: null, reveal: false, bubble: { who: 2, text: S().sailorSay(2, 1) }, wait: { type: 'say', res() {} } }); }
-  if (location.hash === '#badge') setTimeout(async () => { const log = []; save.badges = {}; save.badgeNew = []; enterStall(); const st = stall, cook = () => { act('boil'); st.potT = 9; updateStall(.01); act('scoop'); act('put'); act('soup'); };
-    cook(); act('chili'); act('cilantro'); log.push('twoToppings full=' + !!save.badges.full); act('beef'); log.push('allThree full=' + !!save.badges.full); dump(); grab('bowl'); dump();
-    cook(); act('chili'); act('chili'); log.push('2chili spicy=' + !!save.badges.spicy); act('chili'); log.push('3chili spicy=' + !!save.badges.spicy + ' new=' + save.badgeNew.join(','));
-    updateStall(.1); drawStall(1); log.push('glowBeforeEating=' + st.glowOn); grab('bowl'); dump(); st.sinceSelf = 3; cook(); grab('bowl'); barTap(); barTap(); updateStall(3); updateStall(.1); log.push('afterEating glow=' + st.glowOn + ' say=' + st.ownSay);
-    drawStall(1); stallTap(HIT.board[0], HIT.board[1]); log.push('openAtOnce=' + st.board); walkPend(); log.push('boardOpen=' + st.board + ' at=' + st.owner.x.toFixed(1) + ',' + st.owner.y.toFixed(1)); drawStall(1); const B = st.BD, p0 = save.badges.full.slice(), px = B.x + p0[0] * B.w, py = B.y + p0[1] * B.h;
-    boardDown(px, py); boardUp(); log.push('tapTip=' + st.tip + ':' + S().badges.full.join('/')); boardDown(px, py); boardMove(px + 60, py + 90); boardMove(px + 80, py + 120); const held = st.drag && st.drag.moved; boardUp(); log.push('dragged=' + held + ' moved=' + (save.badges.full[0] !== p0[0]) + ' tipCleared=' + (st.tip === null));
-    boardDown(B.back[0], B.back[1]); log.push('back board=' + st.board + ' newLeft=' + save.badgeNew.length + ' mode=' + mode + ' sayAfterBoard=' + st.ownSay); updateStall(.1); log.push('glowAfter=' + st.glowOn + ' stored=' + Object.keys(JSON.parse(localStorage.getItem('ctramen')).badges).join(','));
-    BG.auto = true; BG.testBadges = true; const got = { pukka: 0, sailor: 0, heretic: 0 }, bad = []; for (let k = 0; k < 3000; k++) { delete save.badges.pukka; delete save.badges.sailor; delete save.badges.heretic; const r = await playBotc(), g = BG, me = g.roles[0];
-      for (const id of ['pukka', 'sailor', 'heretic']) if (save.badges[id]) { got[id]++; if (me !== id) bad.push(id + ' as ' + me); }
-      if (save.badges.pukka && !(r.won && g.deadPoison >= 0 && g.poisoned >= 0)) bad.push('pukka cond'); if (save.badges.heretic && !(r.won && !g.alive[0] && g.deathBy[0] === 'exec')) bad.push('heretic cond'); if (save.badges.sailor && !g.recap.some(x => x.includes('死不了'))) bad.push('sailor cond'); }
-    BG.testBadges = false; log.push('3000 games: ' + JSON.stringify(got) + ' wrong=' + bad.length + (bad[0] ? ':' + bad[0] : '')); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
-  if (location.hash === '#boardview' || location.hash === '#boardglow') setTimeout(() => { save.badges = {}; save.badgeNew = []; for (const id of BADGE_IDS) unlockBadge(id); if (location.hash === '#boardview') save.badgeNew = ['heretic']; enterStall(); fade = 0; stall.done = true; const o = stall.owner; o.x = o.tx; o.y = o.ty; o.ptx = o.tx; o.pty = o.ty; o.path = []; updateStall(.05); if (location.hash === '#boardview') { stall.board = true; stall.tip = 'full'; } localStorage.removeItem('ctramen'); }, 200);
-  if (location.hash === '#overlap') setTimeout(() => { const log = []; save.badges = {}; save.badgeNew = []; for (const id of BADGE_IDS) unlockBadge(id); enterStall(); stall.board = true; drawStall(1); const B = stall.BD; log.push('fresh overlap=' + badgesOverlap());
-    const px = id => [B.x + save.badges[id][0] * B.w, B.y + save.badges[id][1] * B.h]; let worstDuring = 0, bad = 0, out = 0;
-    const drag = (id, tx, ty) => { const p = px(id); boardDown(p[0], p[1]); for (let k = 1; k <= 12; k++) { boardMove(lerp(p[0], tx, k / 12), lerp(p[1], ty, k / 12)); if (badgesOverlap()) worstDuring++; } boardUp(); if (badgesOverlap()) bad++; for (const q of BADGE_IDS) { const v = save.badges[q]; const L = badgeLim(); if (v[0] < L[0] - .001 || v[0] > L[1] + .001 || v[1] < L[2] - .001 || v[1] > L[3] + .001 || (v[0] * B.w - B.r < 10) || ((1 - v[0]) * B.w - B.r < 10) || (v[1] * B.h - B.r < 10) || ((1 - v[1]) * B.h - B.r < 10)) out++; } };
-    const t0 = px('heretic'), b4 = save.badges.heretic.join(); drag('full', t0[0], t0[1]); log.push('dropOnAnother: pushedAway=' + (save.badges.heretic.join() !== b4) + ' draggedStaysNearTarget=' + (Math.hypot(px('full')[0] - t0[0], px('full')[1] - t0[1]) < B.r));
-    let sd = 5; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647; for (let k = 0; k < 400; k++) { const id = BADGE_IDS[(rr() * 5) | 0], corner = rr() < .3; drag(id, corner ? (rr() < .5 ? B.x : B.x + B.w) : B.x + rr() * B.w, corner ? (rr() < .5 ? B.y : B.y + B.h) : B.y + rr() * B.h); }
-    log.push('400 random drags (30% into corners): overlapAfterDrop=' + bad + ' overlapWhileDragging=' + worstDuring + ' onFrameOrOut=' + out); boardDown(B.x + B.w / 2, B.y + B.h / 2); boardUp(); log.push('tapInside board=' + stall.board + ' backShown=' + ($('bback').style.display !== 'none')); boardDown(B.x - 6, B.y + B.h / 2); log.push('tapOutside board=' + stall.board + ' backShown=' + ($('bback').style.display !== 'none')); stall.board = true; drawStall(1); $('bback').click(); log.push('backButton board=' + stall.board); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
-  if (location.hash === '#badgeenter') setTimeout(() => { const log = []; save.badges = {}; save.badgeNew = []; enterStall(); updateStall(.1); log.push('noNew glow=' + stall.glowOn + ' hintNoCustomer=' + hintKey()); spawnCustomer(); log.push('hintWithCustomer=' + hintKey()); unlockBadge('sailor'); enterStall(); updateStall(.1); log.push('enterWithNew glow=' + stall.glowOn + ' say=' + stall.ownSay); for (let k = 0; k < 20; k++) updateStall(.5); log.push('after10s glow=' + stall.glowOn + ' customers=' + stall.seats.filter(Boolean).length); drawStall(1); stallTap(HIT.board[0], HIT.board[1]); walkPend(); log.push('boardOpen=' + stall.board); closeBoard(); updateStall(.1); log.push('afterView glow=' + stall.glowOn + ' new=' + save.badgeNew.length); for (let k = 0; k < 10; k++) updateStall(.5); log.push('5sLater customers=' + stall.seats.filter(Boolean).length); localStorage.removeItem('ctramen'); document.title = log.join(' ; '); }, 300);
   if (location.hash === '#botcend') { enterTower(); fade = 0; const step = () => { if (BG.over) { BG.revealT = 5; document.title = 'snaps=' + JSON.stringify(BG.snaps); return; } if (BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); } setTimeout(step, 20); }; setTimeout(step, 100); }
   if (location.hash.startsWith('#botcview')) { enterTower(); fade = 0; const n = +location.hash.slice(9) || 0; let k = 0; const step = () => { if (k++ < n && BG.wait) { const w = BG.wait; BG.wait = null; w.type === 'say' ? w.res() : w.res([1, 2, 0, 'st'].find(w.ok)); setTimeout(step, 30); } }; setTimeout(step, 100); }
   if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode + ' leaving=' + stall.leaving); let hitFurn = 0, steps = 0; for (; steps < 200 && mode === 'stall'; steps++) { updateStall(0.05); if (shopBlocked(stall.owner.x, stall.owner.y)) hitFurn++; } log.push('walkedOut mode=' + mode + ' steps=' + steps + ' throughFurniture=' + hitFurn); document.title = log.join(' ; '); }, 500);
-  if (location.hash === '#bump') setTimeout(() => { const log = []; npcs.forEach((n, k) => { n.path = []; n.wait = 999; n.x = 8.5 + k % 3; n.y = -.5 + (k / 3 | 0); }); const a = npcs[0]; a.x = .5; a.y = 3.5; player.x = -.5; player.y = 3.5; player.path = bfs([-1, 3], [2, 3]).slice(1); let overlap = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (Math.floor(player.x) === 0 && Math.floor(player.y) === 3) overlap++; } log.push('walkAround overlap=' + overlap + ' at=' + cellOf(player)); const b = npcs[1]; b.x = 4.5; b.y = 3.5; b.wait = 0; b.path = bfs([4, 3], [1, 3]).slice(1); let ov2 = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (cellOf(b) + '' === cellOf(player) + '' || cellOf(b) + '' === cellOf(a) + '') ov2++; } log.push('npc overlap=' + ov2); drawWorld(1, 0.01); const p = wv.P(a.x, a.y); worldTap(p[0], p[1] - wv.s * .5); log.push('hello=' + a.say); enterStall(); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); act('soup'); log.push('barEarly=' + barTap() + ' say=' + stall.ownSay); document.title = log.join(' ; '); }, 500);
+  if (location.hash === '#bump') setTimeout(() => { const log = []; while (npcs.length < 2) npcs.push({ x: 8.5, y: 1.5, path: [], wait: 999, look: randomLook(), step: 0 }); npcs.forEach((n, k) => { n.path = []; n.wait = 999; n.x = 8.5 + k % 3; n.y = -.5 + (k / 3 | 0); }); const a = npcs[0]; a.x = .5; a.y = 3.5; player.x = -.5; player.y = 3.5; player.path = bfs([-1, 3], [2, 3]).slice(1); let overlap = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (Math.floor(player.x) === 0 && Math.floor(player.y) === 3) overlap++; } log.push('walkAround overlap=' + overlap + ' at=' + cellOf(player)); const b = npcs[1]; b.x = 4.5; b.y = 3.5; b.wait = 0; b.path = bfs([4, 3], [1, 3]).slice(1); let ov2 = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (cellOf(b) + '' === cellOf(player) + '' || cellOf(b) + '' === cellOf(a) + '') ov2++; } log.push('npc overlap=' + ov2); drawWorld(1, 0.01); const p = wv.P(a.x, a.y); worldTap(p[0], p[1] - wv.s * .5); log.push('hello=' + a.say); enterStall(); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); act('soup'); log.push('barEarly=' + barTap() + ' say=' + stall.ownSay); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#lib') setTimeout(() => { const log = []; goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); log.push('enter=' + mode); fade = 0; drawLib(1); const fp = lv.P(3.5, 2.5); libTap(fp[0], fp[1]); for (let k = 0; k < 200 && lib.path.length; k++) updateLib(0.05); log.push('walk=' + cellOf(lib)); const sh = LHIT.shelf; libTap((sh[0] + sh[2]) / 2, (sh[1] + sh[3]) / 2); for (let k = 0; k < 200 && (lib.path.length || lib.pending); k++) updateLib(0.05); log.push('shelf at ' + cellOf(lib) + ' say=' + lib.say + ' ' + (lib.sayT > 0)); drawLib(1); libTap(LHIT.exit[0], LHIT.exit[1]); for (let k = 0; k < 200 && mode === 'lib'; k++) updateLib(0.05); log.push('exit=' + mode + ' at ' + cellOf(player)); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#stairs') setTimeout(() => { const log = []; player.x = 3.5; player.y = 1.5; drawWorld(1, .01); { const tp = wv.P(0, 0, 6); worldTap(tp[0], tp[1]); for (let k = 0; k < 200; k++) updateWorld(0.05); log.push('tapTowerBody mode=' + mode); player.path = bfs(cellOf(player), TDOOR).slice(1); player.enter = false; for (let k = 0; k < 200; k++) updateWorld(0.05); log.push('walkToDoorCell at=' + cellOf(player) + ' mode=' + mode); drawWorld(1, .01); } const sp = wv.P(2.1, 0, .6); worldTap(sp[0], sp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapStairs mode=' + mode); leaveTower(); player.x = 3.5; player.y = 1.5; drawWorld(1, .01); { const dp = wv.F('R', [1, 0, 1.2], 0, .65); worldTap(dp[0], dp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapDoor mode=' + mode); const wp = wv.F('R', [1, 0, 3.6], 0, .3); leaveTower(); player.x = 3.5; player.y = 1.5; drawWorld(1, .01); worldTap(wp[0], wp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapUpperWindow mode=' + mode); if (mode === 'tower') leaveTower(); } player.x = -3.5; player.y = 3.5; drawWorld(1, .01); const hp = wv.P(-4.17, 2.15, 1.6); worldTap(hp[0], hp[1]); for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); log.push('tapShopRoof mode=' + mode); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#night') { G.t = 200; G.n = 1; }
