@@ -891,7 +891,8 @@ function drawStall(t) {
   if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); iso_bowl(v, 4.5, .3, 1.02, .24, st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl); ctx.restore(); }
   // stove with the noodle pot and the soup pot
   v.box(0, 1.0, 0, 1.2, 2.2, 1.0, [120, 104, 124]);
-  const fire = P(1.2, 2.1, .45); glow(fire[0], fire[1], s * .9, [255, 140, 70], .7 + .2 * Math.sin(t * 9));
+  v.arch('R', [1.2, 2.1, .1], .62, .36, [70, 54, 76]); v.arch('R', [1.2, 2.1, .14], .46, .28, [255, 176, 96]); v.arch('R', [1.2, 2.1, .14], .26, .14, [255, 226, 160]);      // the fire door: a steady glow behind it, no flicker
+  { const fire = P(1.2, 2.1, .4); glow(fire[0], fire[1], s * .5, [255, 150, 80], .4); }
   const potp = hit('pot', .6, 1.6, 1.3, .62), dxp = wob('pot'); ctx.save(); ctx.translate(dxp, 0);
   v.disc(.6, 1.6, 1.0, .46, .5, [170, 176, 196]); v.disc(.6, 1.6, 1.5, .4, 0, [232, 206, 150]);      // always full of cooking broth; the noodles are only in it while they cook
   { const c = P(.6, 1.6, 1.51); ell(c[0] - s * .12, c[1] - s * .06, s * .2, s * .07, [246, 228, 186], .6); }      // a sheen on the broth
