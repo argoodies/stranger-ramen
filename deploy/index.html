@@ -138,7 +138,7 @@ const STR = {
     churchDown: '不行了……',
     askMore: '谢谢。还要再战吗？', again: '继续再战', nah: '算了', noMore: '谢谢。其他内容还在制作中。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品'], bagHint: '点一下，装备或卸下。', ringSave: '戒指把这一下弹回去了！',
-    items: { twin: ['教父双刀', '一次出手砍两下。'], doom: ['末日项链', '戴着它振刀，会有一道闪电随机劈中场上一个敌人，伤害十点。'], flower: ['鲜花', '一朵花。什么用都没有。'], sleep: ['驱魔刀', '振刀是三倍伤害。每一刀有三成机会让对手沉睡三秒，怎么打都不醒。'], guard: ['守护十字架', '被打中时，有三成机会张开一面盾，这一下不算。'], knife: ['菜刀', '拉面师傅的老伙计。看准对方出手的一瞬砍过去，就是十倍伤害的振刀。'], ring: ['贞洁之戒', '戴着它，倒下之前会把那一下伤害弹回给对方。每次进关只有一次。'] },
+    items: { twin: ['教父双刀', '一次出手砍两下。振刀是三倍伤害。'], doom: ['末日项链', '戴着它振刀，会有一道闪电随机劈中场上一个敌人，伤害十点。'], flower: ['鲜花', '一朵花。什么用都没有。'], sleep: ['驱魔刀', '振刀是三倍伤害。每一刀有三成机会让对手沉睡三秒，怎么打都不醒。'], guard: ['守护十字架', '被打中时，有三成机会张开一面盾，这一下不算。'], knife: ['菜刀', '拉面师傅的老伙计。看准对方出手的一瞬砍过去，就是十倍伤害的振刀。'], ring: ['贞洁之戒', '戴着它，倒下之前会把那一下伤害弹回给对方。每次进关只有一次。'] },
     badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'], ring: ['贞洁之戒', '从教堂里救出了贞洁者。'] },
     welcome: '欢迎来玩三人染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
@@ -166,7 +166,7 @@ const STR = {
     churchDown: '不行了……',
     askMore: '謝謝。還要再戰嗎？', again: '繼續再戰', nah: '算了', noMore: '謝謝。其他內容還在製作中。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品'], bagHint: '點一下，裝備或卸下。', ringSave: '戒指把這一下彈回去了！',
-    items: { twin: ['教父雙刀', '一次出手砍兩下。'], doom: ['末日項鍊', '戴著它振刀，會有一道閃電隨機劈中場上一個敵人，傷害十點。'], flower: ['鮮花', '一朵花。什麼用都沒有。'], sleep: ['驅魔刀', '振刀是三倍傷害。每一刀有三成機會讓對手沉睡三秒，怎麼打都不醒。'], guard: ['守護十字架', '被打中時，有三成機會張開一面盾，這一下不算。'], knife: ['菜刀', '拉麵師傅的老夥計。看準對方出手的一瞬砍過去，就是十倍傷害的振刀。'], ring: ['貞潔之戒', '戴著它，倒下之前會把那一下傷害彈回給對方。每次進關只有一次。'] },
+    items: { twin: ['教父雙刀', '一次出手砍兩下。振刀是三倍傷害。'], doom: ['末日項鍊', '戴著它振刀，會有一道閃電隨機劈中場上一個敵人，傷害十點。'], flower: ['鮮花', '一朵花。什麼用都沒有。'], sleep: ['驅魔刀', '振刀是三倍傷害。每一刀有三成機會讓對手沉睡三秒，怎麼打都不醒。'], guard: ['守護十字架', '被打中時，有三成機會張開一面盾，這一下不算。'], knife: ['菜刀', '拉麵師傅的老夥計。看準對方出手的一瞬砍過去，就是十倍傷害的振刀。'], ring: ['貞潔之戒', '戴著它，倒下之前會把那一下傷害彈回給對方。每次進關只有一次。'] },
     badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'], ring: ['貞潔之戒', '從教堂裡救出了貞潔者。'] },
     welcome: '歡迎來玩三人染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
@@ -194,7 +194,7 @@ const STR = {
     churchDown: 'I am done for…',
     askMore: 'Thank you. Will you fight on?', again: 'Fight on', nah: 'No', noMore: 'Thank you. The rest is still being made.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm'], bagHint: 'Tap to equip or take off.', ringSave: 'The ring threw that one back!',
-    items: { twin: ["Godfather's Twin Blades", 'Every attack cuts twice.'], doom: ['Doomsday Necklace', 'Parry while wearing it and lightning strikes one foe at random for ten.'], flower: ['Flower', 'A flower. It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry with it cuts three times as deep. Three cuts in ten put the foe to sleep for three seconds, and nothing wakes it.'], guard: ['Guardian Cross', 'When you are hit, three times in ten a shield opens and the blow does not count.'], knife: ['Kitchen Knife', "The chef's old friend. Strike just as a foe attacks and the parry cuts ten times as deep."], ring: ['Ring of Chastity', 'Before you fall, it throws that blow back at your attacker. Once per level.'] },
+    items: { twin: ["Godfather's Twin Blades", 'Every attack cuts twice. A parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'Parry while wearing it and lightning strikes one foe at random for ten.'], flower: ['Flower', 'A flower. It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry with it cuts three times as deep. Three cuts in ten put the foe to sleep for three seconds, and nothing wakes it.'], guard: ['Guardian Cross', 'When you are hit, three times in ten a shield opens and the blow does not count.'], knife: ['Kitchen Knife', "The chef's old friend. Strike just as a foe attacks and the parry cuts ten times as deep."], ring: ['Ring of Chastity', 'Before you fall, it throws that blow back at your attacker. Once per level.'] },
     badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'], ring: ['Ring of Chastity', 'Rescued the Virgin from the church.'] },
     welcome: 'Welcome to the three-player game.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
@@ -1511,8 +1511,8 @@ function churchHit(e) {      // one stroke: the knife you carry, or a bare fist
   // caught in the very act of attacking: the knife bites three times as deep
   if (parry) { e.parried = true; c.flash = .3; sfx(1900, .25, .16, 'triangle'); sfx(2850, .18, .08); sfx(620, .1, .14, 'square'); }
   if (sleepy() && Math.random() < .3 && !(e.noSleep > 0)) { e.stun = 3; e.noSleep = 6; e.wind = 0; e.dash = 0; e.combo = 0; sfx(523, .5, .08, 'sine'); sfx(392, .7, .07, 'sine', .15); }      // the Exorcist's Knife: three cuts in ten put the foe to sleep for three seconds; no blow wakes it (and it cannot be put under again straight away)
-  churchDamage(e, parry ? (sleepy() ? 3 : wearing('twin') ? 1 : 10) : 1);      // a parry: ten with the kitchen knife, three with the Exorcist's Knife; the twin blades just land their two cuts
-  if (wearing('twin') && e.hp > 0) { p.sw2 = .32; churchDamage(e, 1); noise(.1, .4, 3000, 900, .1); sfx(230, .12, .35, 'triangle', .12); }      // the Godfather's twin blades: the second blade follows the first
+  churchDamage(e, parry ? (sleepy() || wearing('twin') ? 3 : 10) : 1);      // a parry: ten with the kitchen knife, three with the Exorcist's Knife or the twin blades
+  if (wearing('twin') && e.hp > 0) { p.sw2 = .32; churchDamage(e, parry ? 3 : 1); noise(.1, .4, 3000, 900, .1); sfx(230, .12, .35, 'triangle', .12); }      // the Godfather's twin blades: the second blade follows the first
   if (parry && wearing('doom')) { const live = c.foes.filter(f => f.hp > 0 && !f.inv); if (live.length) { const z = pick(live); c.fx.push({ k: 'zap', x: z.x, y: z.y, t: 0, T: .45 }); noise(.35, .5, 5000, 300); sfx(90, .4, .3, 'sawtooth'); const sp = z.spin; z.spin = 0; churchDamage(z, 10); if (z.hp > 0) z.spin = sp; } }      // the Doomsday Necklace: lightning on one foe at random, whatever it is doing
 }
 function churchTalk(n) {      // whoever appears thanks you and asks whether you will fight on; after the last round there is nothing more to offer
