@@ -1406,10 +1406,11 @@ function drawLib(t) {
   poly([P(0, 0, 0), P(N, 0, 0), P(N, 0, Hh), P(0, 0, Hh)], tn([226, 206, 176])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([206, 184, 156]));
   wallThick(v, N, N, Hh, -.34, tn([240, 224, 198]), tn([184, 162, 140]), tn([170, 148, 130]));
   // the only light: the window, and the patch it throws across the floor
-  poly([P(.05, 1.0, 0), P(.05, 2.0, 0), P(2.7, 3.3, 0), P(2.7, 2.0, 0)], lightC, .3); poly([P(.05, 1.1, 0), P(.05, 1.9, 0), P(2.2, 2.95, 0), P(2.2, 2.05, 0)], lightC, .22);
-  { const wp = P(0, 1.5, 2.0), y0 = 1.0, y1 = 2.0, z0 = 1.4, z1 = 2.6, D = .09, B = .09, wood = [150, 104, 84]; glow(wp[0], wp[1], s * 2.2, lightC, .7);      // the window: one clear pane in a wooden frame that stands proud of the wall on all four sides
-    poly([P(0, y0, z0), P(0, y1, z0), P(0, y1, z1), P(0, y0, z1)], mix(lightC, [255, 255, 255], .25));
-    v.box(0, y0, z1 - B, D, y1 - y0, B, wood); v.box(0, y0, z0 + B, D, B, z1 - z0 - 2 * B, wood); v.box(0, y1 - B, z0 + B, D, B, z1 - z0 - 2 * B, wood); v.box(0, y0, z0, D, y1 - y0, B, wood); }
+  { // the window: a plain arched opening, no frame, like the ones on the tower; and the patch of light it throws across the floor has the same arched shape
+    const yc = 1.5, z0 = 1.4, ww = .9, hh = .75, top = hh + ww / 2, out = [[-ww / 2, 0], [ww / 2, 0], [ww / 2, hh]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; out.push([ww / 2 * Math.cos(q), hh + ww / 2 * Math.sin(q)]); }
+    const fall = k => out.map(([u, w]) => { const f = w / top; return P(.05 + f * 2.65 * (k < 1 ? .86 : 1), yc - u * k * (1 + .35 * f) + f * 1.15 * (k < 1 ? .9 : 1)); });      // where each point of the opening lands on the floor
+    poly(fall(1), lightC, .3); poly(fall(.8), lightC, .2);
+    const wp = P(0, yc, z0 + top * .55); glow(wp[0], wp[1], s * 2.2, lightC, .7); v.arch('R', [0, yc, z0], ww, hh, mix(lightC, [255, 255, 255], .25)); }
   { const ex = .9, ew = 1.0;   // steps going down and out at the lower left
     poly([P(0, N, 0), P(N, N, 0), P(N, N, -.34), P(0, N, -.34)], tn([160, 120, 96])); poly([P(N, 0, 0), P(N, N, 0), P(N, N, -.34), P(N, 0, -.34)], tn([132, 98, 82]));
     for (let k = 0; k < 3; k++) v.box(ex, N + k * .32, -1.1, ew, .32, 1.1 - .26 * k, [200, 164, 134]);
