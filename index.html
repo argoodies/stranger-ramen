@@ -1407,7 +1407,7 @@ function drawLib(t) {
   wallThick(v, N, N, Hh, -.34, tn([240, 224, 198]), tn([184, 162, 140]), tn([170, 148, 130]));
   // the only light: the window, and the patch it throws across the floor
   { // the window: a plain arched opening with no frame, like the ones on the tower, set into the thickness of the wall; the patch of light it throws across the floor has the same arched shape
-    const yc = 1.5, z0 = 1.4, ww = .9, hh = .75, LX0 = .05, LLEN = 2.65, LY0 = 0, top = hh + ww / 2, out = [[-ww / 2, 0], [ww / 2, 0], [ww / 2, hh]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; out.push([ww / 2 * Math.cos(q), hh + ww / 2 * Math.sin(q)]); }
+    const yc = 1.5, z0 = 1.4, ww = .9, hh = .75, LX0 = 0, LLEN = 2.7, LY0 = 0, top = hh + ww / 2, out = [[-ww / 2, 0], [ww / 2, 0], [ww / 2, hh]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; out.push([ww / 2 * Math.cos(q), hh + ww / 2 * Math.sin(q)]); }
     const fall = k => out.map(([u, w]) => { const f = w / top; return P(LX0 + f * LLEN * (k < 1 ? .86 : 1), yc + LY0 - u * k * (1 + .35 * f) + f * 1.15 * (k < 1 ? .9 : 1)); });      // where each point of the opening lands on the floor: the light starts at the foot of the wall
     poly(fall(1), lightC, .3); poly(fall(.8), lightC, .2);
     const wp = P(0, yc, z0 + top * .55), T = .24, rim = out.map(([u, w]) => v.F('R', [0, yc, z0], u, w)); glow(wp[0], wp[1], s * 2.2, lightC, .7);
@@ -1452,7 +1452,7 @@ function drawLib(t) {
   if (lib.path.length) { const c = lib.path[lib.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
   // you
   const K = s * 1.1, op = P(lib.x, lib.y), hop = lib.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
-  { const u = (lib.x - .05) / 2.65, inX = u >= 0 && u <= 1, mid = 1.5 + 1.15 * u, hw = .45 * (1 + .35 * u), lo = mid - hw, hi = mid + hw, edge = Math.min(lib.y - lo, hi - lib.y, lib.x - .05, 2.7 - lib.x);      // the same patch of light, for lighting the chef
+  { const u = lib.x / 2.7, inX = u >= 0 && u <= 1, mid = 1.5 + 1.15 * u, hw = .45 * (1 + .35 * u), lo = mid - hw, hi = mid + hw, edge = Math.min(lib.y - lo, hi - lib.y, lib.x + .2, 2.7 - lib.x);      // the same patch of light, for lighting the chef
     lib.lit = lerp(lib.lit || 0, inX ? clamp(edge / .3 + .5) : 0, .18); }
   const lit = c => mix(tn(c), mix(c, lightC, .14), lib.lit);
   if (lib.lit > .02) glow(op[0], op[1] - K * .6, K * 1.1, lightC, .3 * lib.lit);
