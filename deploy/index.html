@@ -1218,8 +1218,8 @@ function resultMusic(won) {
   else { [69, 65, 62, 60, 57, 53, 50].forEach((m, k) => chime(m, k * .42, .18, 2.8)); pad([38, 45, 53, 57, 60], AC.currentTime + .1, 7); setTimeout(() => bell(73.4, .2), 2600); }
 }
 // ---- inside the clocktower: a small dim slab of floor, a torch standing on it and the man who keeps it. Ask him, and he shows you the view from the top:
-// fifteen seconds of the whole town from above — with a shooting star if it is night — then two strokes of the bell.
-const TN = 4, TTORCH = [.55, .55], TMAN = [1.55, .62], TEXIT = [TN - .45, TN - .9];
+// a few seconds of the whole town from above, going about its business — with a shooting star if it is night — then two strokes of the bell.
+const TN = 4, TTORCH = [.55, .55], TMAN = [1.55, .62], TEXIT = [TN - .45, TN - .9], TVIEW = 8, TSTAR = 2.8;      // seconds of looking before the bell; when the shooting star goes
 const tw = { x: 0, y: 0, tx: 0, ty: 0, moving: false, hopT: 0, pend: null, say: null, msay: null, view: null, seen: false, HIT: {} };
 let twv = new View(0, 0, 40), hideChef = false;
 function enterTower() {
@@ -1237,10 +1237,11 @@ function towerShow() {      // up to the top: by night one shooting star crosses
 function updateTower(dt) {
   const V = tw.view;
   if (V) { const t0 = V.t; V.t += dt; const at = s => t0 < s && V.t >= s;
-    if (V.kind === 'meteor' && at(5.2)) { noise(.7, .06, 5000, 1500); chime(96, .55, .06, 2.6); }
-    if (at(15)) bell(146.8, .2); if (at(16.8)) bell(146.8, .2);      // two strokes of the clock end it
-    if (at(19.6)) fade = .55;
-    if (V.t >= 19.6) { tw.view = null; hideChef = false; zoomTarget = 0; zoomOut = 0; tw.seen = true; tw.say = { text: S().towerDone, t: 4 }; }
+    if (V.kind === 'meteor' && at(TSTAR)) { noise(.7, .06, 5000, 1500); chime(96, .55, .06, 2.6); }
+    updateWorld(dt);      // down below, life goes on: whoever is out walking keeps walking
+    if (at(TVIEW)) bell(146.8, .2); if (at(TVIEW + 1.8)) bell(146.8, .2);      // two strokes of the clock end it
+    if (at(TVIEW + 4)) fade = .55;
+    if (V.t >= TVIEW + 4) { tw.view = null; hideChef = false; zoomTarget = 0; zoomOut = 0; tw.seen = true; tw.say = { text: S().towerDone, t: 4 }; }
     return; }
   if (tw.say && (tw.say.t -= dt) <= 0) tw.say = null;
   if (tw.msay && (tw.msay.t -= dt) <= 0) { const go = tw.msay.go; tw.msay = null; if (go) return towerShow(); }
@@ -1286,7 +1287,7 @@ function drawTowerRoom(t) {
 function drawTowerView(t, front) {      // called twice a frame: behind the town for the shooting star, in front of it for the glow of the bell
   const V = tw.view, u = V.t, R = V.R, r = k => R[k % R.length];
   if (!front && V.kind === 'meteor') {      // one shooting star: a quick thin streak that brightens, burns out with a small flare, and leaves a faint train hanging for a moment
-    const T0 = 5.2, DUR = .7, d = (u - T0) / DUR; if (d >= 0 && d < 3.2) {
+    const DUR = .7, d = (u - TSTAR) / DUR; if (d >= 0 && d < 3.2) {
       const x0 = W * .2, y0 = H * .07, x1 = W * .66, y1 = H * .27, h = clamp(d), hx = lerp(x0, x1, h), hy = lerp(y0, y1, h), L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L, nx = -uy, ny = ux;
       const bright = d < 1 ? Math.sin(Math.PI * Math.pow(h, .7)) * .5 + .5 * h : 0, tail = L * .3 * Math.min(1, h * 2.2), wd = clamp(W * .006, 1.6, 3);
       { const a = d < 1 ? .28 * h : .28 * clamp(1 - (d - 1) / 2.2), g = ctx.createLinearGradient(x0, y0, hx, hy); g.addColorStop(0, css([190, 220, 255], 0)); g.addColorStop(.5, css([190, 220, 255], a * .5)); g.addColorStop(1, css([214, 234, 255], a)); ctx.strokeStyle = g; ctx.lineWidth = wd * .6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(hx, hy); ctx.stroke(); }      // the train it leaves
@@ -1294,7 +1295,7 @@ function drawTowerView(t, front) {      // called twice a frame: behind the town
         ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx + nx * wd, hy + ny * wd); ctx.lineTo(hx + ux * wd * 1.5, hy + uy * wd * 1.5); ctx.lineTo(hx - nx * wd, hy - ny * wd); ctx.closePath(); ctx.fillStyle = g; ctx.fill();      // the streak itself: a needle, widest at the head
         glow(hx, hy, wd * (3 + 5 * bright), [200, 230, 255], .9 * bright); circ(hx, hy, wd * (.8 + .5 * bright), [255, 255, 255], bright); }
       else if (d < 1.35) { const f = (d - 1) / .35; glow(x1, y1, wd * (16 - 8 * f), [226, 240, 255], 1 - f); for (let i = 0; i < 4; i++) { const q = .5 + i * .45, e = f * wd * (6 + 3 * r(i)); circ(x1 + (ux * Math.cos(q) - nx * Math.sin(q)) * e + ux * e, y1 + (uy * Math.cos(q) - ny * Math.sin(q)) * e + uy * e, wd * .45 * (1 - f), [255, 244, 220], 1 - f); } } } }
-  if (front && V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
+  if (front && V.t > TVIEW) { const d = V.t - TVIEW, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
 }
 
 // ---- what follows down to the library is the old three-player table game: nothing leads to it any more
