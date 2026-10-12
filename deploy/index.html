@@ -876,7 +876,7 @@ function drawStall(t) {
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
   // floor + walls
-  for (let i = 0; i < X; i++) for (let j = 0; j < 5; j++) v.quad(i, j, 0, 1, Math.min(1, Y - j), (i + j) % 2 ? [196, 150, 120] : [210, 166, 132]);
+  for (let i = 0; i < X; i++) for (let j = 0; j < 4; j++) v.quad(i, j * Y / 4, 0, 1, Y / 4, (i + j) % 2 ? [196, 150, 120] : [210, 166, 132]);      // four whole rows across the room's depth, so no sliver of a fifth row is left along the front edge
   const wallB = [232, 204, 170], wallA = [214, 180, 150];
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(4.5, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(4.5, 0, 2.8)], wallB);
