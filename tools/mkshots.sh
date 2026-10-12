@@ -4,7 +4,7 @@ HS=/root/.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell
 OUT=/dev/shm/botc/shots3; rm -rf $OUT
 for pair in "en-US:en" "zh-Hans:hans" "zh-Hant:hant"; do
   lc=${pair%%:*}; lg=${pair##*:}; mkdir -p $OUT/$lc; i=1
-  for h in day stall towermeteor shotchurch shotchurch2; do
+  for h in day stall shottower shotchurch shotchurch2; do
     timeout 150 $HS --no-sandbox --disable-gpu --hide-scrollbars --window-size=430,932 --force-device-scale-factor=3 --virtual-time-budget=7000 --screenshot=$OUT/$lc/iphone_$i.png "file:///root/clocktower-ramen/index.html?lang=$lg#$h" >/dev/null 2>&1
     timeout 100 $HS --no-sandbox --disable-gpu --hide-scrollbars --window-size=1024,1366 --force-device-scale-factor=1 --virtual-time-budget=7000 --screenshot=$OUT/$lc/ipad_s$i.png "file:///root/clocktower-ramen/index.html?lang=$lg#$h" >/dev/null 2>&1
     i=$((i+1))
