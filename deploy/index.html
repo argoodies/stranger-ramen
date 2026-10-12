@@ -1218,7 +1218,7 @@ function resultMusic(won) {
   else { [69, 65, 62, 60, 57, 53, 50].forEach((m, k) => chime(m, k * .42, .18, 2.8)); pad([38, 45, 53, 57, 60], AC.currentTime + .1, 7); setTimeout(() => bell(73.4, .2), 2600); }
 }
 // ---- inside the clocktower: a small dim slab of floor, a torch standing on it and the man who keeps it. Ask him, and he shows you the view from the top:
-// fifteen seconds of the whole town from above — a shooting star if it is night, leaves on the wind if it is day — then two strokes of the bell.
+// fifteen seconds of the whole town from above — with a shooting star if it is night — then two strokes of the bell.
 const TN = 4, TTORCH = [.55, .55], TMAN = [1.55, .62], TEXIT = [TN - .45, TN - .9];
 const tw = { x: 0, y: 0, tx: 0, ty: 0, moving: false, hopT: 0, pend: null, say: null, msay: null, view: null, seen: false, HIT: {} };
 let twv = new View(0, 0, 40), hideChef = false;
@@ -1230,15 +1230,14 @@ function leaveTower() {
   hideChef = false; tw.view = null; mode = 'world'; $('leave').style.display = 'none'; $('zoom').style.display = 'block'; zoomTarget = 0; zoomOut = 0;
   player.x = TDOOR[0] + .5; player.y = TDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
-function towerShow() {      // up to the top: a shooting star by night, leaves on the wind by day
+function towerShow() {      // up to the top: by night one shooting star crosses the sky; by day there is simply the view
   const night = G.n > .5, R = []; for (let i = 0; i < 60; i++) R.push(Math.random());
-  tw.view = { kind: night ? 'meteor' : 'leaves', night, t: 0, R }; tw.msay = null; tw.say = null; hideChef = true; zoomTarget = 1; zoomOut = 1; fade = .55;      // a quick cut, not a slow fade
+  tw.view = { kind: night ? 'meteor' : 'day', night, t: 0, R }; tw.msay = null; tw.say = null; hideChef = true; zoomTarget = 1; zoomOut = 1; fade = .55;      // a quick cut, not a slow fade
 }
 function updateTower(dt) {
   const V = tw.view;
   if (V) { const t0 = V.t; V.t += dt; const at = s => t0 < s && V.t >= s;
     if (V.kind === 'meteor' && at(5.2)) { noise(.7, .06, 5000, 1500); chime(96, .55, .06, 2.6); }
-    if (V.kind === 'leaves' && at(.4)) noise(6, .12, 500, 1100); if (V.kind === 'leaves' && at(6)) noise(5, .12, 1000, 400);
     if (at(15)) bell(146.8, .2); if (at(16.8)) bell(146.8, .2);      // two strokes of the clock end it
     if (at(19.6)) fade = .55;
     if (V.t >= 19.6) { tw.view = null; hideChef = false; zoomTarget = 0; zoomOut = 0; tw.seen = true; tw.say = { text: S().towerDone, t: 4 }; }
@@ -1284,7 +1283,7 @@ function drawTowerRoom(t) {
   if (tw.say && tw.at) sayBubble(tw.at[0], tw.at[1] - K * 1.5, tw.say.text, fs, clamp(tw.say.t * 3), mw);
   TK = 0;
 }
-function drawTowerView(t, front) {      // called twice a frame: behind the town for the shooting star, in front of it for the leaves and the glow of the bell
+function drawTowerView(t, front) {      // called twice a frame: behind the town for the shooting star, in front of it for the glow of the bell
   const V = tw.view, u = V.t, R = V.R, r = k => R[k % R.length];
   if (!front && V.kind === 'meteor') {      // one shooting star: a quick thin streak that brightens, burns out with a small flare, and leaves a faint train hanging for a moment
     const T0 = 5.2, DUR = .7, d = (u - T0) / DUR; if (d >= 0 && d < 3.2) {
@@ -1295,10 +1294,6 @@ function drawTowerView(t, front) {      // called twice a frame: behind the town
         ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx + nx * wd, hy + ny * wd); ctx.lineTo(hx + ux * wd * 1.5, hy + uy * wd * 1.5); ctx.lineTo(hx - nx * wd, hy - ny * wd); ctx.closePath(); ctx.fillStyle = g; ctx.fill();      // the streak itself: a needle, widest at the head
         glow(hx, hy, wd * (3 + 5 * bright), [200, 230, 255], .9 * bright); circ(hx, hy, wd * (.8 + .5 * bright), [255, 255, 255], bright); }
       else if (d < 1.35) { const f = (d - 1) / .35; glow(x1, y1, wd * (16 - 8 * f), [226, 240, 255], 1 - f); for (let i = 0; i < 4; i++) { const q = .5 + i * .45, e = f * wd * (6 + 3 * r(i)); circ(x1 + (ux * Math.cos(q) - nx * Math.sin(q)) * e + ux * e, y1 + (uy * Math.cos(q) - ny * Math.sin(q)) * e + uy * e, wd * .45 * (1 - f), [255, 244, 220], 1 - f); } } } }
-  if (front && V.kind === 'leaves') { const gust = clamp(Math.sin(Math.PI * clamp(u / 13)) * 1.6);
-    for (let i = 0; i < 9; i++) { const y = H * (.08 + .8 * r(i)), ph = (u * (.25 + .2 * r(i + 3)) + r(i + 5)) % 1, x = -W * .3 + ph * W * 1.6, w = W * (.12 + .2 * r(i + 8)); line([[x, y], [x + w * .5, y + 8 * Math.sin(u * 2 + i)], [x + w, y]], [255, 255, 255], 1.5, .32 * gust * Math.sin(Math.PI * ph)); }
-    for (let i = 0; i < 28; i++) { const sp = .09 + .1 * r(i + 2), ph = (u * sp + r(i)) % 1, x = -W * .1 + ph * W * 1.2, y = H * (.12 + .7 * r(i + 13)) + Math.sin(u * (2 + 2 * r(i + 4)) + i) * H * .05 + ph * H * .08, q = u * (3 + 4 * r(i + 6)) + i, z = clamp(W * .016, 5, 9) * (.7 + .7 * r(i + 9)), col = [[226, 130, 70], [236, 180, 80], [150, 190, 110], [210, 96, 80]][i % 4];
-      ctx.save(); ctx.translate(x, y); ctx.rotate(q); ctx.beginPath(); ctx.ellipse(0, 0, z, z * .45 * Math.abs(Math.cos(q * .7)) + z * .12, 0, 0, TAU); ctx.fillStyle = css(col, .95 * gust * clamp(Math.sin(Math.PI * ph) * 3)); ctx.fill(); ctx.restore(); } }
   if (front && V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
 }
 
@@ -1995,7 +1990,7 @@ if (location.hash) {
   if (location.hash === '#night') { G.t = 200; G.n = 1; }
   if (location.hash === '#isle') setTimeout(() => { player.x = 8.5; player.y = 1.5; player.path = []; }, 200);
   if (location.hash.startsWith('#church')) setTimeout(() => { enterChurch(); fade = 0; }, 200);
-  if (location.hash.startsWith('#tower')) setTimeout(() => { enterTower(); fade = 0; const k = location.hash.slice(6); if (k) { towerShow(); fade = 0; if (k !== 'view') { tw.view.kind = k; tw.view.night = k === 'meteor'; G.n = tw.view.night ? 1 : 0; G.t = tw.view.night ? HALF + 20 : 20; } } }, 200);      // #tower, #towerview, #towermeteor, #towerleaves
+  if (location.hash.startsWith('#tower')) setTimeout(() => { enterTower(); fade = 0; const k = location.hash.slice(6); if (k) { towerShow(); fade = 0; if (k !== 'view') { tw.view.kind = k; tw.view.night = k === 'meteor'; G.n = tw.view.night ? 1 : 0; G.t = tw.view.night ? HALF + 20 : 20; } } }, 200);      // #tower, #towerview, #towermeteor, #towerday
   if (location.hash === '#shotchurch' || location.hash === '#shotchurch2') setTimeout(() => {      // two fixed scenes for the store screenshots: the fight in the dark, and the lit church afterwards
     enterChurch(); fade = 0; const c = church, p = c.p, my = CW / 2, foe = (kind, x, y, o) => Object.assign({ kind, wave: 0, boss: kind === 'whirl', x, y, hx: x, hy: y, wx: x, wy: y, wt: 9, hp: kind === 'whirl' ? BOSSHP : MINHP, max: kind === 'whirl' ? BOSSHP : MINHP, cd: 99, app: 0, wind: 0, dash: 0, spin: 0, stun: 0, hit: 0, dead: 0, ax: -1, ay: 0 }, o);
     if (location.hash === '#shotchurch') { c.fight = true; c.torchOn = true; c.torchF = 1; c.bannerT = 0; p.x = p.tx = 10.8; p.y = p.ty = my + .3; p.sw = .1; p.sa = -2.4;
