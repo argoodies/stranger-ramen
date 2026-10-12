@@ -555,11 +555,13 @@ function drawWorld(t, dt) {
   skyNow(t);
   const mx = W * 0.8, my = H * 0.13, sunc = mix([255, 216, 150], [252, 244, 220], G.n); glow(mx, my, 150, sunc, .5); circ(mx, my, 26, sunc);
   for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], [200, 190, 220], 2, .7); }
+  if (hideChef && tw.view) drawTowerView(t, false);      // what happens in the sky, behind everything that stands on the ground
   zoomOut = lerp(zoomOut, zoomTarget, 1 - Math.pow(0.02, dt));
-  const sNear = clamp(Math.min(W, H) / 10.5, 28, 60), sFar = Math.min(W / 21, H / 26), s = lerp(sNear, sFar, zoomOut);
+  const sNear = clamp(Math.min(W, H) / 10.5, 28, 60), sFar = Math.min(W / 21, H / 26), s = hideChef ? Math.min(W * .036, H * .03) : lerp(sNear, sFar, zoomOut);
   const fx = lerp(player.x, 1.5, zoomOut), fy = lerp(player.y, -1.5, zoomOut);
   camX = lerp(camX, fx, 1 - Math.pow(0.01, dt)); camY = lerp(camY, fy, 1 - Math.pow(0.01, dt));
   const v = wv; v.s = s; v.cx = W / 2 - (camX - camY) * s * C30; v.cy = H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut) + lerp(0, 0, 0);
+  if (hideChef) { v.cx = W / 2 - .9 * s; v.cy = H * .7; }      // the view from the top of the tower: the whole town small and low in the frame, most of the picture sky
   // ground
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
@@ -1289,14 +1291,17 @@ function drawTowerRoom(t) {
   if (tw.say && tw.at) sayBubble(tw.at[0], tw.at[1] - K * 1.5, tw.say.text, fs, clamp(tw.say.t * 3), mw);
   TK = 0;
 }
-function drawTowerView(t) {      // laid over the far view of the town: the one thing that happens in the sky
+function drawTowerView(t, front) {      // the one thing that happens in the sky. Called twice a frame: behind the town (stars, lightning, shooting star, geese, clouds) and in front of it (leaves on the wind, the flash and gloom of the storm, the bell)
   const V = tw.view, u = V.t, R = V.R, A = clamp(u * 2) * clamp((15.4 - u) * 1.2), r = k => R[k % R.length];
+  if (front) {
+    if (V.kind === 'storm') { ctx.fillStyle = css([10, 10, 30], .3 * A); ctx.fillRect(0, 0, W, H); for (const s0 of [2.6, 6.4, 7.1, 11.2]) { const d = u - s0; if (d < 0 || d > .7) continue; const a = (d < .1 ? 1 : 1 - (d - .1) / .6) * (Math.sin(d * 50) > -.3 ? 1 : .35); ctx.fillStyle = css([226, 232, 255], .34 * a); ctx.fillRect(0, 0, W, H); } }
+    if (V.kind !== 'leaves') { if (V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); } return; }
+  } else if (V.kind === 'leaves') return;
   if (V.kind === 'stars') { for (let i = 0; i < 46; i++) { const x = r(i) * W, y = r(i + 7) * H * .62, tw2 = .5 + .5 * Math.sin(u * (2 + 4 * r(i + 3)) + i * 1.7), a = A * (.3 + .7 * tw2 * tw2), z = 1.2 + 2.2 * r(i + 11) * tw2;
       glow(x, y, z * 5, [255, 250, 230], .5 * a); circ(x, y, z, [255, 252, 236], a); if (i % 5 === 0) { line([[x - z * 3.2, y], [x + z * 3.2, y]], [255, 252, 236], 1, a * tw2); line([[x, y - z * 3.2], [x, y + z * 3.2]], [255, 252, 236], 1, a * tw2); } } }
-  else if (V.kind === 'storm') { ctx.fillStyle = css([10, 10, 30], .32 * A); ctx.fillRect(0, 0, W, H);
+  else if (V.kind === 'storm') {
     for (let i = 0; i < 6; i++) { const x = ((r(i) * 1.4 - .2) * W + u * (10 + 14 * r(i + 4))) % (W * 1.3) - W * .15, y = H * (.05 + .22 * r(i + 9)), w = W * (.3 + .25 * r(i + 2)); for (let k = 0; k < 4; k++) ell(x + (k - 1.5) * w * .24, y + (k % 2) * w * .05, w * .2, w * .1, [50, 50, 84], .8 * A); }
     for (const [s0, k] of [[2.6, 0], [6.4, 1], [7.1, 2], [11.2, 3]]) { const d = u - s0; if (d < 0 || d > .7) continue; const a = (d < .1 ? 1 : 1 - (d - .1) / .6) * (Math.sin(d * 50) > -.3 ? 1 : .35);
-      ctx.fillStyle = css([226, 232, 255], .5 * a); ctx.fillRect(0, 0, W, H);
       const pts = []; let x = W * (.18 + .64 * r(k * 5 + 1)), y = 0; pts.push([x, y]); while (y < H * (.38 + .2 * r(k * 5 + 2))) { y += H * (.035 + .03 * r(pts.length + k * 3)); x += W * (.16 * r(pts.length * 2 + k) - .08); pts.push([x, y]); }
       line(pts, [200, 190, 255], 7, .5 * a); line(pts, [255, 255, 255], 2.5, a); const m = pts[(pts.length * .55) | 0]; line([m, [m[0] + W * .08, m[1] + H * .06], [m[0] + W * .06, m[1] + H * .12]], [255, 255, 255], 1.6, a); glow(pts[pts.length - 1][0], pts[pts.length - 1][1], W * .3, [226, 232, 255], a); } }
   else if (V.kind === 'meteor') { for (const [s0, k, len] of [[5.2, 0, 1.3], [10.6, 1, .8]]) { const d = (u - s0) / len; if (d < 0 || d > 1.5) continue; const x0 = W * (k ? .95 : .08), y0 = H * (k ? .06 : .1), x1 = W * (k ? .35 : .9), y1 = H * (k ? .3 : .4), h = clamp(d), a = d < 1 ? 1 : 1 - (d - 1) * 2, hx = lerp(x0, x1, h), hy = lerp(y0, y1, h), tl = clamp(h - .32), tx = lerp(x0, x1, tl), ty = lerp(y0, y1, tl);
@@ -1311,7 +1316,7 @@ function drawTowerView(t) {      // laid over the far view of the town: the one 
       ctx.save(); ctx.translate(x, y); ctx.rotate(q); ctx.beginPath(); ctx.ellipse(0, 0, z, z * .45 * Math.abs(Math.cos(q * .7)) + z * .12, 0, 0, TAU); ctx.fillStyle = css(col, .95 * gust * clamp(Math.sin(Math.PI * ph) * 3)); ctx.fill(); ctx.restore(); } }
   else { for (let i = 0; i < 12; i++) { const sp = .05 + .05 * r(i + 2), x = -W * .5 + ((u * sp + r(i) * .9) % 1.25) * W * 1.7, y = H * (.05 + .5 * r(i + 5)), w = W * (.3 + .3 * r(i + 8)), a = clamp(u * .5) * clamp((13.5 - u) / 4) * (.5 + .4 * r(i + 3));
       for (let k = 0; k < 5; k++) ell(x + (k - 2) * w * .2, y - (k % 2 ? w * .05 : 0) - (k === 2 ? w * .04 : 0), w * (.17 + (k === 2 ? .05 : 0)), w * (.085 + (k === 2 ? .03 : 0)), [255, 250, 246], a); ell(x, y + w * .05, w * .5, w * .06, [255, 250, 246], a); } }
-  if (V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0); const tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
+  if (front && V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0); const tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
 }
 
 // ---- what follows down to the library is the old three-player table game: nothing leads to it any more
@@ -1919,7 +1924,7 @@ function frame(now) {
   if (mode === 'icon') { drawIcon(T); return; }
   if (mode !== 'title') tick(dt);
   if (mode === 'stall') { updateStall(dt); drawStall(T); }
-  else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T); } else drawTowerRoom(T); }
+  else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); } else drawTowerRoom(T); }
   else if (mode === 'lib') { updateLib(dt); drawLib(T, dt); }
   else if (mode === 'church') { updateChurch(dt); drawChurch(T, dt); }
   else { if (mode === 'world') updateWorld(dt); drawWorld(T, dt); }
