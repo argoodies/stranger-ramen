@@ -281,6 +281,14 @@ class View {
   }
 }
 
+// The two back walls of a room are slabs, not sheets: draw their top faces and the two ends that face you.
+// The room's floor is X by Y, the walls stand on x = 0 and y = 0, Hh high; z0 is how far the ends run down past the floor.
+function wallThick(v, X, Y, Hh, z0, top, endX, endY, T = .24) {
+  const P = v.P.bind(v);
+  poly([P(-T, -T, Hh), P(X, -T, Hh), P(X, 0, Hh), P(0, 0, Hh), P(0, Y, Hh), P(-T, Y, Hh)], top);
+  poly([P(X, -T, z0), P(X, 0, z0), P(X, 0, Hh), P(X, -T, Hh)], endX); poly([P(-T, Y, z0), P(0, Y, z0), P(0, Y, Hh), P(-T, Y, Hh)], endY);
+}
+
 // ------------------------------------------------------------ figures
 function fig(x, y, k, o = {}) {
   const body = o.body || WHITE, head = o.head || SKIN, a = o.a == null ? 1 : o.a, kind = o.kind || 'ida', lean = o.lean || 0, shade = [70, 50, 110];
@@ -871,6 +879,7 @@ function drawStall(t) {
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(4.5, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(4.5, 0, 2.8)], wallB);
   for (let i = 0; i < 6; i++) { const x0 = .56 + i * .66, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .6, 0, 2.8), P(x0 + .6, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); }
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
+  wallThick(v, X, Y, Hh, -.34, [246, 226, 198], [190, 156, 128], [176, 142, 118]); poly([P(.5, -.24, 1), P(4.5, -.24, 1), P(4.5, 0, 1), P(.5, 0, 1)], [246, 226, 198]); poly([P(.5, -.24, 1), P(.5, 0, 1), P(.5, 0, 2.38), P(.5, -.24, 2.38)], [190, 156, 128]);      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
   { // the painting on the wall: a sunset over hills, in a wooden frame that stands a little proud of the plaster
     const y0 = 1.35, y1 = 2.5, z0 = 2.15, z1 = 3.35, TH = .09, g2 = .09, W2 = (u, w) => P(TH, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w), fr = [P(TH, y0, z0), P(TH, y1, z0), P(TH, y1, z1), P(TH, y0, z1)], inn = [P(TH, y0 + g2, z0 + g2), P(TH, y1 - g2, z0 + g2), P(TH, y1 - g2, z1 - g2), P(TH, y0 + g2, z1 - g2)];
     poly([P(0, y0 - .06, z0 - .12), P(0, y1 - .02, z0 - .12), P(0, y1 - .02, z1 - .1), P(0, y0 - .06, z1 - .1)], [60, 40, 60], .22);      // its shadow on the wall
@@ -1391,6 +1400,7 @@ function drawLib(t) {
   const lightC = mix([255, 232, 180], [170, 190, 255], G.n);
   for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) v.quad(i, j, 0, 1, 1, tn((i + j) % 2 ? [186, 140, 110] : [200, 156, 122]));
   poly([P(0, 0, 0), P(N, 0, 0), P(N, 0, Hh), P(0, 0, Hh)], tn([226, 206, 176])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([206, 184, 156]));
+  wallThick(v, N, N, Hh, -.34, tn([240, 224, 198]), tn([184, 162, 140]), tn([170, 148, 130]));
   // the only light: the window, and the patch it throws across the floor
   poly([P(.05, 1.0, 0), P(.05, 2.0, 0), P(2.7, 3.3, 0), P(2.7, 2.0, 0)], lightC, .3); poly([P(.05, 1.1, 0), P(.05, 1.9, 0), P(2.2, 2.95, 0), P(2.2, 2.05, 0)], lightC, .22);
   { const wp = P(0, 1.5, 2.0); glow(wp[0], wp[1], s * 2.2, lightC, .7); poly([P(0, 1.0, 1.4), P(0, 2.0, 1.4), P(0, 2.0, 2.6), P(0, 1.0, 2.6)], tn([150, 104, 84])); poly([P(0, 1.08, 1.48), P(0, 1.92, 1.48), P(0, 1.92, 2.52), P(0, 1.08, 2.52)], mix(lightC, [255, 255, 255], .25)); line([P(0, 1.5, 1.48), P(0, 1.5, 2.52)], tn([150, 104, 84]), s * .04); line([P(0, 1.08, 2.0), P(0, 1.92, 2.0)], tn([150, 104, 84]), s * .04); }
@@ -1752,6 +1762,7 @@ function drawChurch(t, dt) {
   poly([P(2.2, my - .6), P(CL, my - .6), P(CL, my + .6), P(2.2, my + .6)], tn([214, 128, 140]), .92); for (const y of [my - .5, my + .5]) line([P(2.2, y), P(CL, y)], GOLD, s * .03, .9);
   // the two walls: cream stone, a gold cornice, tall stained glass between slim pilasters
   poly([P(0, 0, 0), P(CL, 0, 0), P(CL, 0, Hh), P(0, 0, Hh)], tn([250, 238, 224])); poly([P(0, 0, 0), P(0, CW, 0), P(0, CW, Hh), P(0, 0, Hh)], tn([234, 218, 212]));
+  wallThick(v, CL, CW, Hh, -1, tn([255, 250, 240]), tn([226, 208, 200]), tn([210, 192, 190]), .3);
   poly([P(0, 0, 0), P(CL, 0, 0), P(CL, 0, .5), P(0, 0, .5)], tn([236, 220, 208])); poly([P(0, 0, 0), P(0, CW, 0), P(0, CW, .5), P(0, 0, .5)], tn([220, 202, 198]));
   line([P(0, 0, Hh - .35), P(CL, 0, Hh - .35)], GOLD, s * .05, .9); line([P(0, 0, Hh - .35), P(0, CW, Hh - .35)], GOLD, s * .05, .8);
   for (let k = 0; k < 4; k++) { const x = 2.2 + 3.2 * k, g = GLASS[k % 4], o = [x, 0, 1.2];
