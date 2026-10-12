@@ -1,0 +1,4 @@
+<resources>
+    <!-- the game's night-sky background, so nothing shows as a black bar before or around the page -->
+    <color name="night">#0E0C24</color>
+</resources>
