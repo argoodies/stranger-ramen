@@ -1407,9 +1407,9 @@ function drawLib(t) {
   wallThick(v, N, N, Hh, -.34, tn([240, 224, 198]), tn([184, 162, 140]), tn([170, 148, 130]));
   // the only light: the window, and the patch it throws across the floor
   { // the window: a plain arched opening with no frame, like the ones on the tower, set into the thickness of the wall. Light comes in as a shaft that drops down the wall and spreads out across the floor in a soft-edged patch, widening as it goes (angles taken from MELO's reference picture)
-    const yc = 1.5, z0 = 1.4, ww = .9, hh = .75, LX0 = .15, LLEN = 2.5, LY0 = -.05, LSL = .65, LW = .75, top = hh + ww / 2, out = [[-ww / 2, 0], [ww / 2, 0], [ww / 2, hh]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; out.push([ww / 2 * Math.cos(q), hh + ww / 2 * Math.sin(q)]); }
-    const cxp = LX0 + LLEN / 2, cyp = yc + LY0 + LSL / 2, fall = k => out.map(([u, w]) => { const f = w / top, x = LX0 + f * LLEN, y = yc + LY0 - u * (1 + LW * f) + f * LSL; return P(cxp + (x - cxp) * k, cyp + (y - cyp) * k); });      // the opening as it lands on the floor, scaled about its middle by k
-    for (let i = 0; i < 12; i++) poly(fall(1.2 - i * .075), lightC, .065);      // many thin layers: soft at the edges, brightest in the middle
+    const yc = 1.5, z0 = 1.4, ww = .9, hh = .75, top = hh + ww / 2, out = [[-ww / 2, 0], [ww / 2, 0], [ww / 2, hh]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; out.push([ww / 2 * Math.cos(q), hh + ww / 2 * Math.sin(q)]); }
+    const Q = [[.2, 1.05], [2.45, 1.35], [2.8, 2.8], [.2, 1.85]], cxp = 1.45, cyp = 1.75, fall = k => Q.map(([x, y]) => P(cxp + (x - cxp) * k, cyp + (y - cyp) * k));      // the patch on the floor, corners measured off MELO's reference picture: it starts under the window and fans out toward the front of the room; k scales it about its middle
+    for (let i = 0; i < 11; i++) poly(fall(1.16 - i * .075), mix(lightC, [255, 255, 255], .25), .075);      // many thin layers: soft at the edges, bright in the middle
     const wp = P(0, yc, z0 + top * .55), T = .24, rim = out.map(([u, w]) => v.F('R', [0, yc, z0], u, w)); glow(wp[0], wp[1], s * 2.2, lightC, .7);
     { const pts = rim.concat(fall(1)).sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];      // the shaft itself: everything between the opening and its patch, fading as it falls
       for (const q of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); } for (const q of pts.slice().reverse()) { while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
@@ -1456,7 +1456,7 @@ function drawLib(t) {
   if (lib.path.length) { const c = lib.path[lib.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
   // you
   const K = s * 1.1, op = P(lib.x, lib.y), hop = lib.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
-  { const u = (lib.x - .15) / 2.5, inX = u >= -.1 && u <= 1.1, mid = 1.45 + .65 * u, hw = .45 * (1 + .75 * u), lo = mid - hw, hi = mid + hw, edge = Math.min(lib.y - lo, hi - lib.y, lib.x + .1, 2.8 - lib.x);      // the same patch of light, for lighting the chef
+  { const u = (lib.x - .2) / 2.4, inX = u >= -.1 && u <= 1.1, lo = lerp(1.05, 1.35, u), hi = lerp(1.85, 2.8, u), edge = Math.min(lib.y - lo, hi - lib.y, lib.x + .1, 2.75 - lib.x);      // the same patch of light, for lighting the chef
     lib.lit = lerp(lib.lit || 0, inX ? clamp(edge / .3 + .5) : 0, .18); }
   const lit = c => mix(tn(c), mix(c, lightC, .14), lib.lit);
   if (lib.lit > .02) glow(op[0], op[1] - K * .6, K * 1.1, lightC, .3 * lib.lit);
