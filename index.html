@@ -776,7 +776,9 @@ const HIT = {};
 function stallTap(x, y) {
   let best = null, bd = 1e9;
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
-  if (!best) return;
+  if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
+    const s = stall, v = s.V; if (!v) return; const [fx, fy] = v.inv(x, y); if (fx < -.4 || fy < -.4 || fx > 5.4 || fy > 4.7) return;
+    const g = shopBlocked(fx, fy) ? sgNearest([fx, fy]) : null, o = s.owner; o.tx = g ? g[0] * SG : fx; o.ty = g ? g[1] * SG : fy; s.pend = null; s.leaving = false; chime(69, 0, .08, .8); return; }
   const s = stall, h = s.hold; let ok = false;
   if (best === 'exit') { if (h) { ok = false; } else { s.owner.tx = SHOP_DOOR[0]; s.owner.ty = SHOP_DOOR[1]; s.pend = null; s.leaving = true; chime(69, 0, .1, .8); return; } }
   else if (best === 'pot') ok = h === 'noodle' ? false : s.pot === 'empty' ? act('boil') : grab('noodle');
@@ -858,6 +860,7 @@ function drawStall(t) {
   const st = stall, X = 5, Y = 4.2, Hh = 3.8, top = 104;
   const bowlR = 0;
   const s = Math.min(W / (9.5 * C30), (H - top - 40) / 8.4), v = new View(W / 2 - 0.5 * C30 * s, Math.max(top, (H - 8.4 * s) * .42) + Hh * s, s), P = v.P.bind(v);
+  st.V = v;      // kept for taps on the bare floor
   for (const k in HIT) delete HIT[k];
   const hit = (k, x, y, z, r) => { const p = P(x, y, z); HIT[k] = [p[0], p[1], r * s]; return p; };
   const wob = k => st.nope === k && st.nopeT > 0 ? Math.sin(st.nopeT * 60) * s * .04 : 0;
