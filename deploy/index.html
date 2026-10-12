@@ -1217,8 +1217,8 @@ function resultMusic(won) {
   if (won) { [62, 66, 69, 74, 78, 81, 86, 90].forEach((m, k) => chime(m, k * .11, .2, 2.2)); pad([50, 57, 62, 66, 69, 74], AC.currentTime + .1, 6); [74, 78, 81].forEach(m => chime(m, 1.1, .16, 3)); bell(293.6, .14); }
   else { [69, 65, 62, 60, 57, 53, 50].forEach((m, k) => chime(m, k * .42, .18, 2.8)); pad([38, 45, 53, 57, 60], AC.currentTime + .1, 7); setTimeout(() => bell(73.4, .2), 2600); }
 }
-// ---- inside the clocktower: a small dim square room, a torch in the corner and the man who keeps it. Ask him, and he shows you the view from the top:
-// fifteen seconds of the whole town from above with one thing happening in the sky (which thing depends on whether it is night or day), then two strokes of the bell.
+// ---- inside the clocktower: a small dim slab of floor, a torch standing on it and the man who keeps it. Ask him, and he shows you the view from the top:
+// fifteen seconds of the whole town from above — a shooting star if it is night, leaves on the wind if it is day — then two strokes of the bell.
 const TN = 4, TTORCH = [.55, .55], TMAN = [1.55, .62], TEXIT = [TN - .45, TN - .9];
 const tw = { x: 0, y: 0, tx: 0, ty: 0, moving: false, hopT: 0, pend: null, say: null, msay: null, view: null, seen: false, HIT: {} };
 let twv = new View(0, 0, 40), hideChef = false;
@@ -1230,20 +1230,15 @@ function leaveTower() {
   hideChef = false; tw.view = null; mode = 'world'; $('leave').style.display = 'none'; $('zoom').style.display = 'block'; zoomTarget = 0; zoomOut = 0;
   player.x = TDOOR[0] + .5; player.y = TDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
-function towerShow() {      // up to the top: what there is to see is drawn by lot, three things by night and three by day
-  const night = G.n > .5, kind = pick(night ? ['stars', 'storm', 'meteor'] : ['geese', 'leaves', 'clouds']), R = [];
-  for (let i = 0; i < 60; i++) R.push(Math.random());
-  tw.view = { kind, night, t: 0, R, rung: 0, cue: {} }; tw.msay = null; tw.say = null; hideChef = true; zoomTarget = 1; zoomOut = 1; fade = 1;
+function towerShow() {      // up to the top: a shooting star by night, leaves on the wind by day
+  const night = G.n > .5, R = []; for (let i = 0; i < 60; i++) R.push(Math.random());
+  tw.view = { kind: night ? 'meteor' : 'leaves', night, t: 0, R }; tw.msay = null; tw.say = null; hideChef = true; zoomTarget = 1; zoomOut = 1; fade = 1;
 }
 function updateTower(dt) {
   const V = tw.view;
   if (V) { const t0 = V.t; V.t += dt; const at = s => t0 < s && V.t >= s;
-    if (V.kind === 'storm') for (const s of [2.6, 6.4, 7.1, 11.2]) if (at(s)) { noise(1.8, .5, 900, 60, .25); noise(.25, .5, 3000, 400); sfx(55, 1.6, .3, 'sawtooth', .3); }
     if (V.kind === 'meteor' && at(5.2)) { chime(93, 0, .1, 2); chime(88, .25, .08, 2); chime(84, .5, .07, 2.4); }
-    if (V.kind === 'stars') for (const s of [1.5, 4, 6.2, 8.8, 11, 13]) if (at(s)) chime(pick([86, 88, 91, 93, 96]), 0, .05, 2.4);
-    if (V.kind === 'geese') for (const s of [2.5, 5.5, 8.2, 10.4]) if (at(s)) { sfx(392, .16, .07, 'sawtooth'); sfx(330, .2, .06, 'sawtooth', .16); }
-    if ((V.kind === 'leaves' && at(.4)) || (V.kind === 'clouds' && at(.4))) noise(V.kind === 'leaves' ? 6 : 8, .12, 500, 1100);
-    if (V.kind === 'leaves' && at(6)) noise(5, .12, 1000, 400);
+    if (V.kind === 'leaves' && at(.4)) noise(6, .12, 500, 1100); if (V.kind === 'leaves' && at(6)) noise(5, .12, 1000, 400);
     if (at(15)) bell(146.8, .2); if (at(16.8)) bell(146.8, .2);      // two strokes of the clock end it
     if (at(19.6)) fade = 1;
     if (V.t >= 19.6) { tw.view = null; hideChef = false; zoomTarget = 0; zoomOut = 0; tw.seen = true; tw.say = { text: S().towerDone, t: 4 }; }
@@ -1267,13 +1262,11 @@ function towerTap(sx, sy) {
 }
 function drawTowerRoom(t) {
   TK = .42; TINT = [20, 18, 56]; SHADOW = [34, 26, 64]; skyNow(t, .45);
-  const N = TN, Hh = 3.6, s = Math.min(W / (9.4 * C30), (H - 300) / (Hh + N + 1.2)), v = twv; v.s = s; v.cx = W / 2; v.cy = Math.max(230, (H - (Hh + N) * s) * .5) + Hh * s; const P = v.P.bind(v), tn = c => tint(c), K = s * 1.1, fl = .85 + .15 * Math.sin(t * 12) * Math.sin(t * 5.3);
-  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) v.quad(i, j, 0, 1, 1, tn((i + j) % 2 ? [150, 140, 150] : [164, 152, 160]));
-  poly([P(0, 0, 0), P(N, 0, 0), P(N, 0, Hh), P(0, 0, Hh)], tn([170, 158, 162])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([150, 138, 148]));
-  for (let k = 1; k < 4; k++) { line([P(0, 0, k * .9), P(N, 0, k * .9)], tn([140, 128, 140]), 1, .5); line([P(0, 0, k * .9), P(0, N, k * .9)], tn([124, 112, 128]), 1, .5); }      // courses of stone
-  poly([P(0, N, 0), P(N, N, 0), P(N, N, -.34), P(0, N, -.34)], tn([120, 108, 124])); poly([P(N, 0, 0), P(N, N, 0), P(N, N, -.34), P(N, 0, -.34)], tn([100, 90, 110]));
-  { const g = P(TTORCH[0], TTORCH[1]); ell(g[0], g[1], s * 2.5 * 1.22 * fl, s * 2.5 * .7 * fl, [255, 170, 90], .16); ell(g[0], g[1], s * 1.4 * 1.22, s * 1.4 * .7, [255, 190, 110], .14); }      // the pool of light on the floor
-  for (let k = 0; k < 3; k++) v.box(N + k * .32, N - 1.4, -1.1, .32, 1.0, 1.1 - .26 * k, [164, 152, 160]);      // the way out: steps going down at the lower right
+  const N = TN, s = Math.min(W / (9.4 * C30), (H - 300) / (N + 3)), v = twv; v.s = s; v.cx = W / 2; v.cy = H * .5 - N * s * .5 + s * .6; const P = v.P.bind(v), tn = c => tint(c), K = s * 1.1, fl = .85 + .15 * Math.sin(t * 12) * Math.sin(t * 5.3);
+  v.box(1.1, 1.1, -1.9, N - 2.2, N - 2.2, .7, [96, 88, 118]); v.box(.5, .5, -1.2, N - 1, N - 1, .7, [116, 106, 132]); v.box(0, 0, -.5, N, N, .5, [150, 140, 150]);      // a bare slab of stone floating in the dark: no walls
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if ((i + j) % 2) v.quad(i, j, 0, 1, 1, tn([164, 152, 160]));
+  { const g = P(TTORCH[0], TTORCH[1]); ctx.save(); ctx.beginPath(); [[0, 0], [N, 0], [N, N], [0, N]].forEach((c, k) => { const q = P(c[0], c[1]); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath(); ctx.clip(); ell(g[0], g[1], s * 2.5 * 1.22 * fl, s * 2.5 * .7 * fl, [255, 170, 90], .16); ell(g[0], g[1], s * 1.4 * 1.22, s * 1.4 * .7, [255, 190, 110], .14); ctx.restore(); }      // the pool of light on the floor
+  for (let k = 0; k < 3; k++) v.box(N + k * .32, N - 1.4, -.5 - .26 * k, .32, 1.0, .5, [164, 152, 160]);      // the way out: steps going down at the lower right
   { const e = P(N + .4, N - .9, -.3); tw.HIT.exit = [e[0], e[1]]; }
   if (tw.moving && !tw.pend) { const q = P(tw.tx, tw.ty); ell(q[0], q[1], s * .3, s * .15, [255, 240, 200], .35); }
   const objs = [];
@@ -1291,32 +1284,16 @@ function drawTowerRoom(t) {
   if (tw.say && tw.at) sayBubble(tw.at[0], tw.at[1] - K * 1.5, tw.say.text, fs, clamp(tw.say.t * 3), mw);
   TK = 0;
 }
-function drawTowerView(t, front) {      // the one thing that happens in the sky. Called twice a frame: behind the town (stars, lightning, shooting star, geese, clouds) and in front of it (leaves on the wind, the flash and gloom of the storm, the bell)
-  const V = tw.view, u = V.t, R = V.R, A = clamp(u * 2) * clamp((15.4 - u) * 1.2), r = k => R[k % R.length];
-  if (front) {
-    if (V.kind === 'storm') { ctx.fillStyle = css([10, 10, 30], .3 * A); ctx.fillRect(0, 0, W, H); for (const s0 of [2.6, 6.4, 7.1, 11.2]) { const d = u - s0; if (d < 0 || d > .7) continue; const a = (d < .1 ? 1 : 1 - (d - .1) / .6) * (Math.sin(d * 50) > -.3 ? 1 : .35); ctx.fillStyle = css([226, 232, 255], .34 * a); ctx.fillRect(0, 0, W, H); } }
-    if (V.kind !== 'leaves') { if (V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); } return; }
-  } else if (V.kind === 'leaves') return;
-  if (V.kind === 'stars') { for (let i = 0; i < 46; i++) { const x = r(i) * W, y = r(i + 7) * H * .62, tw2 = .5 + .5 * Math.sin(u * (2 + 4 * r(i + 3)) + i * 1.7), a = A * (.3 + .7 * tw2 * tw2), z = 1.2 + 2.2 * r(i + 11) * tw2;
-      glow(x, y, z * 5, [255, 250, 230], .5 * a); circ(x, y, z, [255, 252, 236], a); if (i % 5 === 0) { line([[x - z * 3.2, y], [x + z * 3.2, y]], [255, 252, 236], 1, a * tw2); line([[x, y - z * 3.2], [x, y + z * 3.2]], [255, 252, 236], 1, a * tw2); } } }
-  else if (V.kind === 'storm') {
-    for (let i = 0; i < 6; i++) { const x = ((r(i) * 1.4 - .2) * W + u * (10 + 14 * r(i + 4))) % (W * 1.3) - W * .15, y = H * (.05 + .22 * r(i + 9)), w = W * (.3 + .25 * r(i + 2)); for (let k = 0; k < 4; k++) ell(x + (k - 1.5) * w * .24, y + (k % 2) * w * .05, w * .2, w * .1, [50, 50, 84], .8 * A); }
-    for (const [s0, k] of [[2.6, 0], [6.4, 1], [7.1, 2], [11.2, 3]]) { const d = u - s0; if (d < 0 || d > .7) continue; const a = (d < .1 ? 1 : 1 - (d - .1) / .6) * (Math.sin(d * 50) > -.3 ? 1 : .35);
-      const pts = []; let x = W * (.18 + .64 * r(k * 5 + 1)), y = 0; pts.push([x, y]); while (y < H * (.38 + .2 * r(k * 5 + 2))) { y += H * (.035 + .03 * r(pts.length + k * 3)); x += W * (.16 * r(pts.length * 2 + k) - .08); pts.push([x, y]); }
-      line(pts, [200, 190, 255], 7, .5 * a); line(pts, [255, 255, 255], 2.5, a); const m = pts[(pts.length * .55) | 0]; line([m, [m[0] + W * .08, m[1] + H * .06], [m[0] + W * .06, m[1] + H * .12]], [255, 255, 255], 1.6, a); glow(pts[pts.length - 1][0], pts[pts.length - 1][1], W * .3, [226, 232, 255], a); } }
-  else if (V.kind === 'meteor') { for (const [s0, k, len] of [[5.2, 0, 1.3], [10.6, 1, .8]]) { const d = (u - s0) / len; if (d < 0 || d > 1.5) continue; const x0 = W * (k ? .95 : .08), y0 = H * (k ? .06 : .1), x1 = W * (k ? .35 : .9), y1 = H * (k ? .3 : .4), h = clamp(d), a = d < 1 ? 1 : 1 - (d - 1) * 2, hx = lerp(x0, x1, h), hy = lerp(y0, y1, h), tl = clamp(h - .32), tx = lerp(x0, x1, tl), ty = lerp(y0, y1, tl);
+function drawTowerView(t, front) {      // called twice a frame: behind the town for the shooting star, in front of it for the leaves and the glow of the bell
+  const V = tw.view, u = V.t, R = V.R, r = k => R[k % R.length];
+  if (!front && V.kind === 'meteor') { for (const [s0, k, len] of [[5.2, 0, 1.3], [10.6, 1, .8]]) { const d = (u - s0) / len; if (d < 0 || d > 1.5) continue; const x0 = W * (k ? .95 : .08), y0 = H * (k ? .06 : .1), x1 = W * (k ? .35 : .9), y1 = H * (k ? .3 : .4), h = clamp(d), a = d < 1 ? 1 : 1 - (d - 1) * 2, hx = lerp(x0, x1, h), hy = lerp(y0, y1, h), tl = clamp(h - .32), tx = lerp(x0, x1, tl), ty = lerp(y0, y1, tl);
       const g = ctx.createLinearGradient(tx, ty, hx, hy); g.addColorStop(0, css([255, 244, 210], 0)); g.addColorStop(1, css([255, 250, 230], .95 * a)); ctx.strokeStyle = g; ctx.lineWidth = k ? 2 : 3.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx, hy); ctx.stroke();
       glow(hx, hy, k ? 16 : 26, [255, 246, 214], a); circ(hx, hy, k ? 2 : 3, [255, 255, 250], a); } }
-  else if (V.kind === 'geese') { const x0 = -W * .25 + (W * 1.5) * u / 14, y0 = H * (.2 + .03 * Math.sin(u * .7)), sz = clamp(W * .03, 9, 16);
-    for (let i = 0; i < 9; i++) { const row = (i + 1) >> 1, sd = i % 2 ? 1 : -1, x = x0 - row * sz * 2.1, y = y0 + (i ? sd * row * sz * 1.05 : 0) + sz * .2 * Math.sin(u * 2 + i), f = sz * .55 * Math.sin(u * 8.5 + i * .9);
-      line([[x - sz, y - f], [x - sz * .15, y], [x + sz * .5, y - sz * .06]], [70, 60, 80], 2.2, .85 * A); line([[x - sz * .15, y], [x - sz * .9, y + f * .4 + sz * .5]], [70, 60, 80], 2.2, .85 * A); circ(x + sz * .56, y - sz * .08, 1.8, [70, 60, 80], .85 * A); } }
-  else if (V.kind === 'leaves') { const gust = clamp(Math.sin(Math.PI * clamp(u / 13)) * 1.6);
+  if (front && V.kind === 'leaves') { const gust = clamp(Math.sin(Math.PI * clamp(u / 13)) * 1.6);
     for (let i = 0; i < 9; i++) { const y = H * (.08 + .8 * r(i)), ph = (u * (.25 + .2 * r(i + 3)) + r(i + 5)) % 1, x = -W * .3 + ph * W * 1.6, w = W * (.12 + .2 * r(i + 8)); line([[x, y], [x + w * .5, y + 8 * Math.sin(u * 2 + i)], [x + w, y]], [255, 255, 255], 1.5, .32 * gust * Math.sin(Math.PI * ph)); }
     for (let i = 0; i < 28; i++) { const sp = .09 + .1 * r(i + 2), ph = (u * sp + r(i)) % 1, x = -W * .1 + ph * W * 1.2, y = H * (.12 + .7 * r(i + 13)) + Math.sin(u * (2 + 2 * r(i + 4)) + i) * H * .05 + ph * H * .08, q = u * (3 + 4 * r(i + 6)) + i, z = clamp(W * .016, 5, 9) * (.7 + .7 * r(i + 9)), col = [[226, 130, 70], [236, 180, 80], [150, 190, 110], [210, 96, 80]][i % 4];
       ctx.save(); ctx.translate(x, y); ctx.rotate(q); ctx.beginPath(); ctx.ellipse(0, 0, z, z * .45 * Math.abs(Math.cos(q * .7)) + z * .12, 0, 0, TAU); ctx.fillStyle = css(col, .95 * gust * clamp(Math.sin(Math.PI * ph) * 3)); ctx.fill(); ctx.restore(); } }
-  else { for (let i = 0; i < 12; i++) { const sp = .05 + .05 * r(i + 2), x = -W * .5 + ((u * sp + r(i) * .9) % 1.25) * W * 1.7, y = H * (.05 + .5 * r(i + 5)), w = W * (.3 + .3 * r(i + 8)), a = clamp(u * .5) * clamp((13.5 - u) / 4) * (.5 + .4 * r(i + 3));
-      for (let k = 0; k < 5; k++) ell(x + (k - 2) * w * .2, y - (k % 2 ? w * .05 : 0) - (k === 2 ? w * .04 : 0), w * (.17 + (k === 2 ? .05 : 0)), w * (.085 + (k === 2 ? .03 : 0)), [255, 250, 246], a); ell(x, y + w * .05, w * .5, w * .06, [255, 250, 246], a); } }
-  if (front && V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0); const tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
+  if (front && V.t > 15) { const d = V.t - 15, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
 }
 
 // ---- what follows down to the library is the old three-player table game: nothing leads to it any more
@@ -2012,7 +1989,7 @@ if (location.hash) {
   if (location.hash === '#night') { G.t = 200; G.n = 1; }
   if (location.hash === '#isle') setTimeout(() => { player.x = 8.5; player.y = 1.5; player.path = []; }, 200);
   if (location.hash.startsWith('#church')) setTimeout(() => { enterChurch(); fade = 0; }, 200);
-  if (location.hash.startsWith('#tower')) setTimeout(() => { enterTower(); fade = 0; const k = location.hash.slice(6); if (k) { towerShow(); fade = 0; if (k !== 'view') { tw.view.kind = k; tw.view.night = ['stars', 'storm', 'meteor'].includes(k); G.n = tw.view.night ? 1 : 0; G.t = tw.view.night ? HALF + 20 : 20; } } }, 200);      // #tower, #towerview, #towerstars / storm / meteor / geese / leaves / clouds
+  if (location.hash.startsWith('#tower')) setTimeout(() => { enterTower(); fade = 0; const k = location.hash.slice(6); if (k) { towerShow(); fade = 0; if (k !== 'view') { tw.view.kind = k; tw.view.night = k === 'meteor'; G.n = tw.view.night ? 1 : 0; G.t = tw.view.night ? HALF + 20 : 20; } } }, 200);      // #tower, #towerview, #towermeteor, #towerleaves
   if (location.hash === '#shotchurch' || location.hash === '#shotchurch2') setTimeout(() => {      // two fixed scenes for the store screenshots: the fight in the dark, and the lit church afterwards
     enterChurch(); fade = 0; const c = church, p = c.p, my = CW / 2, foe = (kind, x, y, o) => Object.assign({ kind, wave: 0, boss: kind === 'whirl', x, y, hx: x, hy: y, wx: x, wy: y, wt: 9, hp: kind === 'whirl' ? BOSSHP : MINHP, max: kind === 'whirl' ? BOSSHP : MINHP, cd: 99, app: 0, wind: 0, dash: 0, spin: 0, stun: 0, hit: 0, dead: 0, ax: -1, ay: 0 }, o);
     if (location.hash === '#shotchurch') { c.fight = true; c.torchOn = true; c.torchF = 1; c.bannerT = 0; p.x = p.tx = 10.8; p.y = p.ty = my + .3; p.sw = .1; p.sa = -2.4;
