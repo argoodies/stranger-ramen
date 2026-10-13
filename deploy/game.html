@@ -547,7 +547,7 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
   line([v.F('L', o, -.42, .84), v.F('L', o, .42, .84)], tint([70, 52, 60]), Math.max(1.5, v.s * .035));
   for (let i = 0; i < 3; i++) { const u0 = -.38 + i * .26, len = .34 + .05 * (i % 2) + .03 * Math.sin(t * 2 + i); poly([v.F('L', o, u0, .84), v.F('L', o, u0 + .23, .84), v.F('L', o, u0 + .23, .84 - len + .02 * Math.sin(t * 2.3 + i)), v.F('L', o, u0, .84 - len)], tint([214, 52, 60])); }
   // the arched window in the side wall
-  { const wz = h / 2 - .2, wo = [x1, ym, wz], g = v.F('R', wo, 0, .25); glow(g[0], g[1], v.s * .8, lit, .6); v.arch('R', [x1, ym, wz - .04], .44, .36, tint([226, 200, 160])); v.arch('R', wo, .34, .3, lit); }      // centred on the wall, across and up
+  { const wz = h / 2 - .2, wo = [x1, ym, wz], g = v.F('R', wo, 0, .25); glow(g[0], g[1], v.s * .8, lit, .6); v.arch('R', wo, .34, .3, lit); }      // centred on the wall, across and up
   // a spire like the clocktower's on its own thin red eave, then the chimney
   v.box(x0 - ov, y0 - ov, h, w + 2 * ov, w + 2 * ov, .08, mix(PAL.roof, [60, 20, 40], .25)); v.pyramid(x0 - ov, y0 - ov, h + .08, w + 2 * ov, SP, PAL.roof);
   { const zr = x => h + .08 + SP * (1 - (x - x0 - w / 2) / (w / 2 + ov)), a = cx, b = cx + .28, c = cy, d = cy + .28, T = zr(a) + .34, [kt, kl, kr] = v.sh([250, 232, 200]);      // the chimney stands on the slope facing right, its foot cut to the pitch
