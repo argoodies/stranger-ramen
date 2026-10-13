@@ -911,7 +911,7 @@ function drawStall(t) {
   // counter under the window, with the bowls already served
   v.box(.5, 0, 0, 4.5, .6, 1.0, [176, 124, 96]);
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') iso_bowl(v, SEATX[i], .3, 1.02, .33, c.dish); });
-  hit('bar', 4.5, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3) { const p = P(4.5, .3, 1.02); ell(p[0], p[1] - s * .04, s * .42, s * .24, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
+  hit('bar', 4.5, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done) { const p = P(4.5, .3, 1.02); ell(p[0], p[1] - s * .04, s * .42, s * .24, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
   if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); iso_bowl(v, 4.5, .3, 1.02, .33, st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl); ctx.restore(); }
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
   // stove with the noodle pot and the soup pot
