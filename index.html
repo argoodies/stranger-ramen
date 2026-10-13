@@ -1925,7 +1925,6 @@ function drawIcon(t) {
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css([24, 22, 60])); g.addColorStop(1, css([46, 26, 62])); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   let sd = 7; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 46; i++) circ(rr() * W, rr() * H * .62, W * (.0022 + .0034 * rr()), [255, 250, 230], .35 + .5 * rr());
-  circ(W * .8, H * .2, W * .062, [252, 244, 220]); glow(W * .8, H * .2, W * .22, [255, 240, 200], .5);
   G.n = 1; TINT = [34, 26, 80]; TK = .42; SHADOW = [58, 40, 96];
   const s = W / 5.9, hx = -4.17, hy = 2.15, hz = 1.38, v = new View(0, 0, s); v.cx = W / 2 - (hx - hy) * s * C30; v.cy = H * (.5 + .008 * Math.sin(1)) - ((hx + hy) * .5 - hz) * s;
   { const q = v.P(hx, hy, .6); glow(q[0], q[1], s * 2.6, [255, 190, 120], .3); }
