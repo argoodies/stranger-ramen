@@ -753,7 +753,7 @@ function hintKey() {
 const SG = 0.2, SGX = 26, SGY = 22, SM = 0.2;
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > 5 - SM * .5 || y > 4.2 - SM * .5) return true;
-  if (x > .5 - SM && y < .6 + SM) return true;                                   // counter under the window
+  if (y < .6 + SM) return true;                                                  // counter under the window, wall to wall
   if (x < 1.2 + SM && y > 1.0 - SM && y < 3.2 + SM) return true;                 // stove
   if (x > 1.9 - SM && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
   if (Math.hypot(x - 4.45, y - 3.0) < .26 + SM) return true;                     // bin
@@ -909,7 +909,7 @@ function drawStall(t) {
     for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, [200, 164, 134]);
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   // counter under the window, with the bowls already served
-  v.box(.5, 0, 0, 4.5, .6, 1.0, [176, 124, 96]);
+  v.box(0, 0, 0, 5, .6, 1.0, [176, 124, 96]);
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') iso_bowl(v, SEATX[i], .3, 1.02, .2, c.dish); });
   hit('bar', 4.5, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3) { const p = P(4.5, .3, 1.02); ell(p[0], p[1], s * .3, s * .17, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
   if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); iso_bowl(v, 4.5, .3, 1.02, .24, st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl); ctx.restore(); }
