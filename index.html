@@ -556,7 +556,7 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls on a
     poly([v.F('R', wo, -.26, -.06), v.F('R', wo, .26, -.06), v.F('R', wo, .26, 0), v.F('R', wo, -.26, 0)], tint([232, 214, 190])); }
   // the roof: the far slope, the slope facing you, its eave, and the edge of the overhang along the gable
   poly([P(x0 - ov, ym, H), P(x1 + ov, ym, H), P(x1 + ov, y0 - ov, zb), P(x0 - ov, y0 - ov, zb)], mix(rl, rt, .3));      // at so low a pitch the far slope is seen from above too
-  poly([P(x1 + ov, ym, H), P(x1 + ov, y0 - ov, zb), P(x1 + ov, y0 - ov, zb - .12), P(x1 + ov, ym, H - .12)], rr); poly([P(x1 + ov, y1 + ov, ze), P(x1 + ov, ym, H), P(x1 + ov, ym, H - .1), P(x1 + ov, y1 + ov, ze - .1)], rr);
+  poly([P(x1 + ov, ym, H), P(x1 + ov, y0 - ov, zb), P(x1 + ov, y0 - ov, zb - .1), P(x1 + ov, ym, H - .1)], rr); poly([P(x1 + ov, y1 + ov, ze), P(x1 + ov, ym, H), P(x1 + ov, ym, H - .1), P(x1 + ov, y1 + ov, ze - .1)], rr);
   poly([P(x0 - ov, y1 + ov, ze), P(x1 + ov, y1 + ov, ze), P(x1 + ov, ym, H), P(x0 - ov, ym, H)], rl);
   poly([P(x0 - ov, y1 + ov, ze), P(x1 + ov, y1 + ov, ze), P(x1 + ov, y1 + ov, ze - .1), P(x0 - ov, y1 + ov, ze - .1)], mix(rr, [60, 20, 40], .25));
   v.box(cx, cy, H - (ym - cy - .14) * (H - h) / (w / 2), .28, .28, .4, [226, 196, 164]);      // the chimney stands on the far slope just behind the ridge
