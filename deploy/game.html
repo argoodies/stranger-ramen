@@ -537,7 +537,7 @@ function drawTower(v, t) {
   const p0 = v.P(0, 0, 11.9), p1 = v.P(0, 0, 12.8); line([p0, p1], tint([246, 200, 120]), v.s * .05); circ(p1[0], p1[1], v.s * .09, tint([246, 200, 120]));
 }
 function drawHouse(v, t) {      // the ramen shop from outside: cream walls on a stone footing, a red gabled roof with a chimney, a lit doorway under three red door-cloths, a paper lantern, an arched window in the gable end
-  const x0 = -4.92, y0 = 1.4, w = 1.5, x1 = x0 + w, y1 = y0 + w, ym = y0 + w / 2, h = 1.42, H = h + w / 2 * Math.tan(Math.PI / 9), ov = .16, cx = x0 + .86, cy = ym - .46, ze = h - ov * (H - h) / (w / 2), hb = h, zb = hb - ov * (H - hb) / (w / 2), P = v.P.bind(v);
+  const x0 = -4.92, y0 = 1.4, w = 1.5, x1 = x0 + w, y1 = y0 + w, ym = y0 + w / 2, h = 1.42, H = h + w / 2 * Math.tan(Math.PI / 9), ov = .16, cx = x0 + .72, cy = ym - .64, ze = h - ov * (H - h) / (w / 2), hb = h, zb = hb - ov * (H - hb) / (w / 2), P = v.P.bind(v);
   const [, wl, wr] = v.sh([250, 232, 200]), [rt, rl, rr] = v.sh(PAL.roof), lit = [255, 220, 150], wood = tint([176, 120, 84]);
   v.box(x0 - .05, y0 - .05, 0, w + .1, w + .1, .14, [214, 198, 176]);
   poly([P(x0, y1, .14), P(x1, y1, .14), P(x1, y1, h), P(x0, y1, h)], wl); poly([P(x1, y0, .14), P(x1, y1, .14), P(x1, y1, h), P(x1, ym, H), P(x1, y0, hb)], wr);
