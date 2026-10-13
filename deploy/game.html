@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>拉面怪奇物语</title>
 <style>
-:root{--serif:"Noto Serif SC","Songti SC","STSong","Source Han Serif SC",serif}
-html,body{margin:0;height:100%;background:#0e0c24;overflow:hidden;touch-action:none;font-family:var(--serif);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+:root{--serif:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif}
+html,body{margin:0;height:100%;background:#0e0c24;overflow:hidden;touch-action:none;font-family:var(--serif);font-weight:300;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #top{position:fixed;top:calc(10px + max(env(safe-area-inset-top), var(--sat, 0px)));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none;z-index:6}
 #top>*{pointer-events:auto}
-.pill{background:rgba(30,24,60,.62);color:#f4ecdc;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 14px;font:15px var(--serif);letter-spacing:.12em;backdrop-filter:blur(4px)}
+.pill{background:rgba(30,24,60,.62);color:#f4ecdc;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 14px;font:300 15px var(--serif);letter-spacing:.12em;backdrop-filter:blur(4px)}
 button.pill{cursor:pointer}
 button.pill:active{transform:scale(.96)}
 button.pill.hint{animation:pillpulse 1.2s ease-in-out infinite;border-color:rgba(255,236,170,.9)}
@@ -39,7 +39,7 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
 #leave,#enter{display:none!important}
 #langMenu{display:none;position:absolute;right:0;top:46px;flex-direction:column;gap:6px;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
 #langMenu.open{display:flex}
-#langMenu button{appearance:none;border:0;border-radius:11px;padding:9px 18px;font:15px var(--serif);letter-spacing:.08em;color:#f4ecdc;background:transparent;white-space:nowrap;text-align:left;cursor:pointer}
+#langMenu button{appearance:none;border:0;border-radius:11px;padding:9px 18px;font:300 15px var(--serif);letter-spacing:.08em;color:#f4ecdc;background:transparent;white-space:nowrap;text-align:left;cursor:pointer}
 #langMenu button.on{background:rgba(255,236,170,.2);color:#ffe9b0}
 #err{position:fixed;left:0;top:0;right:0;color:#ff8;background:#600;font:12px monospace;z-index:9;white-space:pre-wrap}
 </style>
@@ -114,7 +114,9 @@ function rrect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
-const FONT = (px, bold) => `${bold ? '700 ' : ''}${px}px "Noto Serif SC","Songti SC","STSong",serif`;
+// One face everywhere: the thin sans of the title. Ordinary text is light (300), emphasis is regular (400), the big titles are extra light (200, see thinText).
+const THINF = '"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif';
+const FONT = (px, bold) => `${bold ? 400 : 300} ${px}px ${THINF}`;
 function text(t, x, y, px, c = [255, 255, 255], a = 1, align = 'center', bold = false) {
   ctx.font = FONT(px, bold); ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = css(c, a); ctx.fillText(t, x, y);
 }
@@ -1490,7 +1492,6 @@ function drawHud(hp, ringUsed) {      // across the top during a fight: six hear
 }
 function drawHeart(x, y, r, c, a = 1) { circ(x - r * .5, y - r * .25, r * .56, c, a); circ(x + r * .5, y - r * .25, r * .56, c, a); poly([[x - r * .98, y], [x + r * .98, y], [x, y + r * 1.05]], c, a); }
 // The backpack is drawn in the Monument Valley manner: a dusk gradient, thin widely spaced lettering, little isometric plinths.
-const THINF = '"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif';
 function thinText(str, x, y, px, c = [255, 255, 255], a = 1, wide = 1) {
   ctx.font = `200 ${px}px ${THINF}`; const chars = [...str], gap = px * (LANG === 'en' ? .14 : .5) * wide, ws = chars.map(ch => ctx.measureText(ch).width); let cx = x - (ws.reduce((p, w) => p + w, 0) + gap * (chars.length - 1)) / 2;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = css(c, a); chars.forEach((ch, k) => { ctx.fillText(ch, cx, y); cx += ws[k] + gap; });
