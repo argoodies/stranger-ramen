@@ -726,7 +726,8 @@ function serve(i) {
 // whole steps in one go, for the automated checks: act('soup') = pick the ladle up + pour it in, act('serve', i) = lift the bowl + hand it over
 function act(a, seat) {
   const s = stall;
-  if (a === 'boil') { if (s.pot !== 'empty' || s.hold) return false; s.pot = 'cooking'; s.potT = 0; goTo('boil'); chime(NOTE.boil, 0, .2, 1.4); return true; }
+  if (a === 'boil') { if (s.pot !== 'empty' || s.hold) return false; if (s.done) { s.done = false; s.sinceSelf = 0; s.spawn = 1.2; }      // noodles on again after your own bowl: a new round, three more customers
+    s.pot = 'cooking'; s.potT = 0; goTo('boil'); chime(NOTE.boil, 0, .2, 1.4); return true; }
   if (a === 'scoop') return grab('noodle');
   if (a === 'put') return s.hold === 'noodle' && intoBowl();
   if (ING.includes(a)) return grab(a) && intoBowl();
@@ -795,7 +796,7 @@ function stallTap(x, y) {
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
   else if (best === 'bin') { if (h) { goDo('dump', 3.8, 3.05); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 4.45, .95); chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }
-  else if (best === 'jars') { s.jarAt = performance.now(); chime(96, 0, .05, .5); chime(100, .07, .04, .4); chime(93, .15, .04, .4); return; }      // empty jars: they only rattle
+  else if (best === 'jars') { s.jarAt = performance.now(); return; }      // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.soup && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), .95); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
   if (!ok) { s.nope = best; s.nopeT = 0.35; chime(45, 0, .1, .3); }
@@ -835,7 +836,7 @@ function updateStall(dt) {
     while (o.path && o.path.length && step > 0) { const [px, py] = o.path[0], d = Math.hypot(px - o.x, py - o.y); if (d <= step) { o.x = px; o.y = py; o.path.shift(); step -= d; } else { o.x += (px - o.x) / d * step; o.y += (py - o.y) / d * step; step = 0; } }
     if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; }
     if (s.pend && !(o.path && o.path.length)) { const p = s.pend; s.pend = null; if (p === 'dump') dump(); else if (p === 'bar') barTap(); else if (p.startsWith('serve')) serve(+p[5]); else if (p === 'board' && !s.hold) { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); } } }
-  if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 10; refreshUI(); }
+  if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
   if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }
@@ -915,7 +916,7 @@ function drawStall(t) {
   const potp = hit('pot', .6, 1.6, 1.3, .62), dxp = wob('pot'); ctx.save(); ctx.translate(dxp, 0);
   v.disc(.6, 1.6, 1.0, .46, .5, [170, 176, 196]); v.disc(.6, 1.6, 1.5, .4, 0, [232, 206, 150]);      // always full of cooking broth; the noodles are only in it while they cook
   { const c = P(.6, 1.6, 1.51); ell(c[0] - s * .12, c[1] - s * .06, s * .2, s * .07, [246, 228, 186], .6); }      // a sheen on the broth
-  if (st.pot !== 'empty') { const c = P(.6, 1.6, 1.52); for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.ellipse(c[0], c[1], s * (.1 + .07 * i), s * (.05 + .035 * i), t * (i % 2 ? 2 : -2) + i, 0, TAU * .8); ctx.strokeStyle = css([250, 232, 170]); ctx.lineWidth = s * .045; ctx.stroke(); } }
+  if (st.pot !== 'empty') { const c = P(.6, 1.6, 1.52); for (let i = 0; i < 4; i++) { ctx.beginPath(); { const r = .1 + .07 * i, a0 = t * (i % 2 ? 2 : -2) + i; ctx.ellipse(c[0], c[1], s * 1.2247 * r, s * .7071 * r, 0, a0, a0 + TAU * .8); } ctx.strokeStyle = css([250, 232, 170]); ctx.lineWidth = s * .045; ctx.stroke(); } }
   ctx.restore();
   const soupp = hit('soup', .6, 2.6, 1.3, .62); ctx.save(); ctx.translate(wob('soup'), 0);
   v.disc(.6, 2.6, 1.0, .46, .5, [170, 176, 196]); v.disc(.6, 2.6, 1.5, .4, 0, [226, 160, 84]);
@@ -2042,7 +2043,7 @@ if (location.hash) {
     c.cam = null; updateChurch = () => {}; }, 200);
   if (location.hash === '#walk') setTimeout(() => { const hp = wv.P(-4.17, 2.15, 1.1); worldTap(hp[0], hp[1]); const n0 = player.path.length; for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); document.title = 'pathLen=' + n0 + ' mode=' + mode + ' pos=' + cellOf(player); }, 600);
   if (location.hash === '#stall' || location.hash === '#test' || location.hash === '#tap') {
-    enterStall(); fade = 0; for (let i = 0; i < 3; i++) { spawnCustomer(); } stall.seats.forEach(c => { if (c) { c.state = 'wait'; } });
+    enterStall(); fade = 0; for (let i = 0; i < (location.hash === '#stall' ? 1 : 3); i++) { spawnCustomer(); } stall.seats.forEach(c => { if (c) { c.state = 'wait'; } });
     if (location.hash === '#test') {
       const want = stall.seats[waiting()[0]].want; const log = [];
       act('boil'); stall.potT = 9; updateStall(0.01); ['scoop', 'put', 'soup'].forEach(a => act(a));
