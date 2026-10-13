@@ -332,9 +332,9 @@ function fig(x, y, k, o = {}) {
     poly([[hx - .16 * k, hy - .15 * k], [hx, hy - .15 * k], [hx, hy - .50 * k], [hx - .16 * k, hy - .50 * k]], hl, a);
     poly([[hx, hy - .15 * k], [hx + .16 * k, hy - .15 * k], [hx + .16 * k, hy - .50 * k], [hx, hy - .50 * k]], hd, a);
   } else if (kind === 'chef') {
-    ctx.fillStyle = css([250, 250, 255], a);
+    ctx.fillStyle = css(o.body ? mix(body, [255, 255, 255], .1) : [250, 250, 255], a);
     for (const [dx, dy, r] of [[-.11, -.3, .11], [.11, -.3, .11], [0, -.37, .13]]) { ctx.beginPath(); ctx.arc(hx + dx * k, hy + dy * k, r * k, 0, TAU); ctx.fill(); }
-    poly([[hx - .15 * k, hy - .28 * k], [hx + .15 * k, hy - .28 * k], [hx + .14 * k, hy - .1 * k], [hx - .14 * k, hy - .1 * k]], [226, 228, 244], a);
+    poly([[hx - .15 * k, hy - .28 * k], [hx + .15 * k, hy - .28 * k], [hx + .14 * k, hy - .1 * k], [hx - .14 * k, hy - .1 * k]], o.body ? mix(body, shade, .12) : [226, 228, 244], a);
     poly([[hx - .19 * k, hy - .14 * k], [hx + .19 * k, hy - .14 * k], [hx + .19 * k, hy - .08 * k], [hx - .19 * k, hy - .08 * k]], [220, 80, 80], a);
   }
 }
@@ -568,7 +568,7 @@ function drawWorld(t, dt) {
   TINT = [40, 30, 96]; TK = lerp(0.03, 0.2, G.n); SHADOW = [58, 40, 96];
   skyNow(t);
   const mx = W * 0.8, my = H * 0.13, sunc = mix([255, 216, 150], [252, 244, 220], G.n); glow(mx, my, 150, sunc, .5); circ(mx, my, 26, sunc);
-  for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], [200, 190, 220], 2, .7); }
+  for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], G.n), 2, lerp(.95, .7, G.n)); }
   if (hideChef && tw.view) drawTowerView(t, false);      // what happens in the sky, behind everything that stands on the ground
   zoomOut = lerp(zoomOut, zoomTarget, 1 - Math.pow(0.02, dt));
   const sNear = clamp(Math.min(W, H) / 10.5, 28, 60), sFar = Math.min(W / 21, H / 26), s = hideChef ? Math.min(W * .036, H * .03) : lerp(sNear, sFar, zoomOut);
@@ -890,17 +890,12 @@ function drawStall(t) {
   for (let i = 0; i < 6; i++) { const x0 = .56 + i * .66, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .6, 0, 2.8), P(x0 + .6, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); }
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
   wallThick(v, X, Y, Hh, -.34, [246, 226, 198], [190, 156, 128], [176, 142, 118]); poly([P(.5, -.24, 1), P(4.5, -.24, 1), P(4.5, 0, 1), P(.5, 0, 1)], [246, 226, 198]); poly([P(.5, -.24, 1), P(.5, 0, 1), P(.5, 0, 2.38), P(.5, -.24, 2.38)], [190, 156, 128]);      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
-  { // the painting on the wall: a sunset over hills, in a wooden frame that stands a little proud of the plaster
-    const y0 = 1.35, y1 = 2.5, z0 = 2.15, z1 = 3.35, TH = .09, g2 = .09, W2 = (u, w) => P(TH, y0 + (y1 - y0) * u, z0 + (z1 - z0) * w), fr = [P(TH, y0, z0), P(TH, y1, z0), P(TH, y1, z1), P(TH, y0, z1)], inn = [P(TH, y0 + g2, z0 + g2), P(TH, y1 - g2, z0 + g2), P(TH, y1 - g2, z1 - g2), P(TH, y0 + g2, z1 - g2)];
-    poly([P(0, y0 - .06, z0 - .12), P(0, y1 - .02, z0 - .12), P(0, y1 - .02, z1 - .1), P(0, y0 - .06, z1 - .1)], [60, 40, 60], .22);      // its shadow on the wall
-    poly([P(0, y0, z1), P(0, y1, z1), P(TH, y1, z1), P(TH, y0, z1)], [176, 128, 104]); poly([P(0, y1, z0), P(0, y1, z1), P(TH, y1, z1), P(TH, y1, z0)], [112, 76, 62]); poly(fr, [150, 104, 84]); poly(inn, [250, 206, 150]);
-    ctx.save(); ctx.beginPath(); inn.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.clip();
-    poly([W2(0, .45), W2(1, .45), W2(1, 1), W2(0, 1)], [252, 190, 130]); poly([W2(0, .7), W2(1, .7), W2(1, 1), W2(0, 1)], [246, 160, 120]);
-    const sn = W2(.66, .62); glow(sn[0], sn[1], s * .5, [255, 244, 200], .9); circ(sn[0], sn[1], s * .13, [255, 240, 196]);
-    poly([W2(0, 0), W2(1, 0), W2(1, .34), W2(.7, .46), W2(.4, .36), W2(.15, .48), W2(0, .4)], [226, 130, 100]);
-    poly([W2(0, 0), W2(1, 0), W2(1, .2), W2(.55, .3), W2(.25, .22), W2(0, .28)], [196, 100, 96]);
-    poly([W2(.3, .2), W2(.42, .2), W2(.42, .58), W2(.45, .58), W2(.36, .8), W2(.27, .58), W2(.3, .58)], [120, 64, 84]);
-    poly([W2(.12, .2), W2(.22, .2), W2(.22, .34), W2(.17, .42), W2(.12, .34)], [150, 76, 84]); ctx.restore(); delete HIT.board; }
+  { // a window where the painting used to hang: a plain arched opening with no frame, like the library's, set into the thickness of the wall. No shaft of light: the room is bright already
+    const yc = 1.92, z0 = 2.2, ww = .8, hh = .62, T = .24, out = [[-ww / 2, 0], [ww / 2, 0], [ww / 2, hh]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; out.push([ww / 2 * Math.cos(q), hh + ww / 2 * Math.sin(q)]); }
+    const rim = out.map(([u, w]) => v.F('R', [0, yc, z0], u, w)), sky = mix(mix(SKYD[0], [255, 255, 255], .2), SKYN[1], G.n);
+    ctx.save(); ctx.beginPath(); rim.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();
+    poly(rim, [176, 142, 118]); poly([P(0, yc - ww / 2 - .1, z0), P(0, yc + ww / 2 + .1, z0), P(-T, yc + ww / 2 + .1, z0), P(-T, yc - ww / 2 - .1, z0)], [250, 236, 212]);
+    v.arch('R', [-T, yc, z0], ww, hh, sky); ctx.restore(); delete HIT.board; }
   // the way out: a mat, then a few steps going down and out at the lower left
   { const ex = 1.3, ew = 1.0;
     poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], [170, 128, 104]); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], [140, 102, 86]);
