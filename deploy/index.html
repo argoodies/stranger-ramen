@@ -957,19 +957,17 @@ function drawStall(t) {
   }
   // things flying into the bowl
   for (const f of st.fly) { const u = ease(f.t), x = lerp(f.a[0], f.b[0], u), y = lerp(f.a[1], f.b[1], u) - Math.sin(u * Math.PI) * s * .9; circ(x, y, s * .11, f.c); }
-  // speech: a small bubble right beside each customer's head
-  const fs = clamp(s * .3, 10, 14), lh = fs * 1.38;
-  for (const [i, hx, hy0, a] of heads) {
+  // speech: each customer's bubble sits straight above their own head; where two would collide, the later one is lifted clear and its tail grows to reach
+  const fs = clamp(s * .3, 10, 14), lh = fs * 1.38, placed = [];
+  for (const [i, hx, hy0, a] of heads.slice().sort((p, q) => q[2] - p[2])) {      // lowest head on screen first, so the ones behind stack upward
     const c = st.seats[i]; if (!c || a < .5) continue;
     const order = c.state === 'wait' || c.state === 'arrive', txt = order ? c.text : c.say; if (!txt) continue;
     ctx.font = FONT(fs, true);
     const lines = order ? txt.split('\n') : wrapText(txt, LANG === 'en' ? fs * 7.5 : fs * 5.2);
-    const cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 18, bh = lines.length * lh + 12, headY = hy0 + K * .72, fadeA = order ? clamp(1.25 - c.wait / waitMax() * .5) : 1;
-    let bx, by, tail;
-    if (i === 1) { bx = hx - cw / 2; by = hy0 - 6 - bh; tail = [[hx - 5, by + bh - 1], [hx + 5, by + bh - 1], [hx, by + bh + 7]]; }
-    else { const sg = i === 0 ? -1 : 1, ex = hx + sg * K * .3; bx = sg < 0 ? ex - cw - 7 : ex + 7; by = headY - bh * .7; tail = [[ex + sg * 8, headY - 5], [ex + sg * 8, headY + 5], [ex, headY]]; }
-    bx = clamp(bx, 6, W - cw - 6);
-    ctx.fillStyle = css([250, 246, 238], .96 * fadeA); rrect(bx, by, cw, bh, 10); ctx.fill(); poly(tail, [250, 246, 238], .96 * fadeA);
+    const cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 18, bh = lines.length * lh + 12, fadeA = order ? clamp(1.25 - c.wait / waitMax() * .5) : 1, bx = clamp(hx - cw / 2, 6, W - cw - 6);
+    let by = hy0 - 8 - bh; for (let n = 0; n < 60 && placed.some(r => bx < r[0] + r[2] + 4 && bx + cw + 4 > r[0] && by < r[1] + r[3] + 4 && by + bh + 4 > r[1]); n++) by -= 5;
+    placed.push([bx, by, cw, bh]);
+    const tx = clamp(hx, bx + 12, bx + cw - 12); ctx.fillStyle = css([250, 246, 238], .96 * fadeA); rrect(bx, by, cw, bh, 10); ctx.fill(); poly([[tx - 5, by + bh - 1], [tx + 5, by + bh - 1], [hx, hy0 - 1]], [250, 246, 238], .96 * fadeA);
     lines.forEach((l, k) => text(l, bx + cw / 2, by + 6 + lh * (k + .5), fs, [50, 36, 70], 1, 'center', true));
   }
   if (st.board) { drawBoard(t); return; }
