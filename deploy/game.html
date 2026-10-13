@@ -1927,7 +1927,7 @@ function drawIcon(t) {
   for (let i = 0; i < 46; i++) circ(rr() * W, rr() * H * .62, W * (.0022 + .0034 * rr()), [255, 250, 230], .35 + .5 * rr());
   circ(W * .8, H * .2, W * .062, [252, 244, 220]); glow(W * .8, H * .2, W * .22, [255, 240, 200], .5);
   G.n = 1; TINT = [34, 26, 80]; TK = .42; SHADOW = [58, 40, 96];
-  const s = W / 5.0, hx = -4.17, hy = 2.15, hz = 1.2, v = new View(0, 0, s); v.cx = W / 2 - (hx - hy) * s * C30; v.cy = H * (.5 + .008 * Math.sin(1)) - ((hx + hy) * .5 - hz) * s;
+  const s = W / 5.9, hx = -4.17, hy = 2.15, hz = 1.38, v = new View(0, 0, s); v.cx = W / 2 - (hx - hy) * s * C30; v.cy = H * (.5 + .008 * Math.sin(1)) - ((hx + hy) * .5 - hz) * s;
   { const q = v.P(hx, hy, .6); glow(q[0], q[1], s * 2.6, [255, 190, 120], .3); }
   TK = .06; drawHouse(v, 1.3);
   TK = 0;
