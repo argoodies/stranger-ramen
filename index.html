@@ -910,10 +910,10 @@ function drawStall(t) {
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   // counter under the window, with the bowls already served
   v.box(0, 0, 0, 5, .6, 1.0, [176, 124, 96]);
-  { // glass bottles of orange soda at the far left end of the counter: a tap only rattles them, as with the jars on the shelf
-    const jk = clamp(1 - (performance.now() - (st.jar2At || -1e9)) / 650), B = (x, y0, c) => { const y = y0 + .03 * jk * Math.sin(performance.now() / 22 + x * 40 + y0 * 30), g = mix(c, [236, 246, 240], .5);      // round, with a waist, sloping shoulders, a long neck and a crown cap
+  { // glass bottles of cola at the far left end of the counter: a tap only rattles them, as with the jars on the shelf
+    const jk = clamp(1 - (performance.now() - (st.jar2At || -1e9)) / 650), B = (x, y0, c) => { const y = y0 + .03 * jk * Math.sin(performance.now() / 22 + x * 40 + y0 * 30), g = mix(c, [206, 232, 222], .62);      // round, with a waist, sloping shoulders, a long neck and a crown cap
       v.disc(x, y, 1, .078, .07, c); v.disc(x, y, 1.07, .068, .05, c); v.disc(x, y, 1.12, .078, .09, c); v.disc(x, y, 1.21, .066, .03, c); v.disc(x, y, 1.24, .052, .03, c); v.disc(x, y, 1.27, .04, .03, g); v.disc(x, y, 1.3, .03, .13, g); v.disc(x, y, 1.43, .036, .02, g); v.disc(x, y, 1.45, .04, .03, [206, 62, 68]); };
-    for (const [x, y] of [[.13, .12], [.37, .16], [.15, .4], [.39, .43]]) B(x, y, [240, 150, 60]);
+    for (const [x, y] of [[.13, .12], [.37, .16], [.15, .4], [.39, .43]]) B(x, y, [84, 46, 40]);
     const q = P(.25, .3, 1.2); HIT.jars2 = [q[0], q[1], s * .42]; }
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') iso_bowl(v, SEATX[i], .3, 1.02, .2, c.dish); });
   hit('bar', 4.5, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3) { const p = P(4.5, .3, 1.02); ell(p[0], p[1], s * .3, s * .17, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
