@@ -1682,7 +1682,8 @@ function churchGift(id) {      // out of the chest and into the backpack; it goe
 function updateChurch(dt) {
   const c = church, p = c.p;
   p.cd -= dt; p.sw -= dt; p.sw2 = (p.sw2 || 0) - dt; c.hurt -= dt;
-  if (p.second && (p.second.t -= dt) <= 0) { const q = p.second; p.second = null; if (c.fight && c.down <= 0 && q.e.hp > 0 && !q.e.inv && !(q.e.spin > 0)) { p.sw2 = .2; noise(.1, .4, 3000, 900); churchStrike(q.e, q.parry); } }      // the second of the twin blades c.flash -= dt; if (c.bannerT > 0) c.bannerT -= dt;
+  if (p.second && (p.second.t -= dt) <= 0) { const q = p.second; p.second = null; if (c.fight && c.down <= 0 && q.e.hp > 0 && !q.e.inv && !(q.e.spin > 0)) { p.sw2 = .2; noise(.1, .4, 3000, 900); churchStrike(q.e, q.parry); } }      // the second of the twin blades
+  c.flash -= dt; if (c.bannerT > 0) c.bannerT -= dt;
   if (c.down > 0) { c.down -= dt; if (c.down <= 0) return leaveChurch(); }      // you wake up back outside
   else {
     if (p.target && p.target.hp <= 0) p.target = null;
