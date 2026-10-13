@@ -554,11 +554,11 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls on a
   // the arched window in the side wall, on its sill
   { const wz = (.14 + h) / 2 - .23, wo = [x1, ym, wz], g = v.F('R', wo, 0, .25); glow(g[0], g[1], v.s * .8, lit, .6); v.arch('R', [x1, ym, wz - .04], .44, .36, tint([226, 200, 160])); v.arch('R', wo, .34, .3, lit);      // centred on the wall, across and up
     poly([v.F('R', wo, -.26, -.06), v.F('R', wo, .26, -.06), v.F('R', wo, .26, 0), v.F('R', wo, -.26, 0)], tint([232, 214, 190])); }
-  // a spire like the clocktower's on a thin eave, then the chimney
-  v.box(x0 - ov, y0 - ov, h, w + 2 * ov, w + 2 * ov, .08, mix(PAL.roof, [60, 20, 40], .25)); v.pyramid(x0 - ov, y0 - ov, h + .08, w + 2 * ov, SP, PAL.roof);
-  { const zr = x => h + .08 + SP * (1 - (x - x0 - w / 2) / (w / 2 + ov)), a = cx, b = cx + .28, c = cy, d = cy + .28, T = zr(a) + .34, [kt, kl, kr] = v.sh([226, 196, 164]);      // the chimney stands on the slope facing right, its foot cut to the pitch
+  // a spire like the clocktower's on a stone eave, then the chimney
+  v.box(x0 - ov, y0 - ov, h, w + 2 * ov, w + 2 * ov, .12, [214, 198, 176]); v.pyramid(x0 - ov + .07, y0 - ov + .07, h + .12, w + 2 * ov - .14, SP, PAL.roof);
+  { const zr = x => h + .12 + SP * (1 - (x - x0 - w / 2) / (w / 2 + ov - .07)), a = cx, b = cx + .28, c = cy, d = cy + .28, T = zr(a) + .34, [kt, kl, kr] = v.sh([226, 196, 164]);      // the chimney stands on the slope facing right, its foot cut to the pitch
     poly([P(a, d, zr(a)), P(b, d, zr(b)), P(b, d, T), P(a, d, T)], kl); poly([P(b, d, zr(b)), P(b, c, zr(b)), P(b, c, T), P(b, d, T)], kr); poly([P(a, c, T), P(b, c, T), P(b, d, T), P(a, d, T)], kt); }
-  for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, h + .08 + SP * (1 - (cx - x0 - w / 2) / (w / 2 + ov)) + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
+  for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, h + .12 + SP * (1 - (cx - x0 - w / 2) / (w / 2 + ov - .07)) + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
 }
 function drawChapel(v, t) {      // the church on the little island: a stone nave, a steep red roof, a thin spire with a cross
   const st = PAL.stone, lit = [255, 214, 140], o = [10, .92, 0];
