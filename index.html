@@ -911,8 +911,12 @@ function drawStall(t) {
   // counter under the window, with the bowls already served
   v.box(0, 0, 0, 5, .6, 1.0, [176, 124, 96]);
   { // glass bottles of cola at the far left end of the counter: a tap only rattles them, as with the jars on the shelf
-    const jk = clamp(1 - (performance.now() - (st.jar2At || -1e9)) / 650), B = (x, y0, c) => { const y = y0 + .03 * jk * Math.sin(performance.now() / 22 + x * 40 + y0 * 30), g = mix(c, [206, 232, 222], .62);      // round, with a waist, sloping shoulders, a long neck and a crown cap
-      v.disc(x, y, 1, .078, .07, c); v.disc(x, y, 1.07, .068, .05, c); v.disc(x, y, 1.12, .078, .09, c); v.disc(x, y, 1.21, .066, .03, c); v.disc(x, y, 1.24, .052, .03, c); v.disc(x, y, 1.27, .04, .03, g); v.disc(x, y, 1.3, .03, .13, g); v.disc(x, y, 1.43, .036, .02, g); v.disc(x, y, 1.45, .04, .03, [206, 62, 68]); };
+    const jk = clamp(1 - (performance.now() - (st.jar2At || -1e9)) / 650), D = Math.PI / 180;
+    // each bottle is one smooth turned shape (a waist, sloping shoulders, a long neck), not a stack of rings: two shaded halves swept up the profile, then the glass neck and the crown cap
+    const lathe = (x, y, prof, c) => { const [, cl, cr] = v.sh(c), pt = (q, [z, r]) => P(x + r * Math.cos(q), y + r * Math.sin(q), z), n = prof.length - 1;
+      for (const [a0, a1, col] of [[-45, 45, cr], [45, 135, cl]]) { const pts = []; for (let k = 0; k <= 8; k++) pts.push(pt((a0 + (a1 - a0) * k / 8) * D, prof[0])); for (let k = 1; k <= n; k++) pts.push(pt(a1 * D, prof[k])); for (let k = 7; k >= 0; k--) pts.push(pt((a0 + (a1 - a0) * k / 8) * D, prof[n])); for (let k = n - 1; k >= 1; k--) pts.push(pt(a0 * D, prof[k])); poly(pts, col); } };
+    const B = (x, y0, c) => { const y = y0 + .03 * jk * Math.sin(performance.now() / 22 + x * 40 + y0 * 30), g = mix(c, [206, 232, 222], .62);
+      lathe(x, y, [[1, .07], [1.03, .08], [1.08, .074], [1.13, .07], [1.18, .076], [1.22, .078], [1.26, .066], [1.3, .046], [1.33, .034]], c); lathe(x, y, [[1.33, .034], [1.45, .03]], g); v.disc(x, y, 1.45, .04, .03, [206, 62, 68]); };
     for (const [x, y] of [[.13, .12], [.37, .16], [.15, .4], [.39, .43]]) B(x, y, [84, 46, 40]);
     const q = P(.25, .3, 1.2); HIT.jars2 = [q[0], q[1], s * .42]; }
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') iso_bowl(v, SEATX[i], .3, 1.02, .2, c.dish); });
