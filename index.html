@@ -946,7 +946,7 @@ function drawStall(t) {
   };
   const inFront = st.owner.y > 2.4; if (!inFront) drawOwner();
   // prep table: the bowl and the three toppings
-  v.box(1.9, 1.6, 0, 3.3, .95, 1.0, [150, 108, 88]);
+  v.box(1.9, 1.6, 0, 3.1, .95, 1.0, [150, 108, 88]);
   hit('bowl', 2.45, 2.07, 1.1, .55); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(2.45, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .4, s * .22, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else iso_bowl(v, 2.45, 2.07, 1.03, .36, st.bowl); ctx.restore();
   hit('chili', 3.3, 2.07, 1.2, .46); ctx.save(); ctx.translate(wob('chili'), 0);
   v.disc(3.3, 2.07, 1.0, .25, .34, [236, 232, 240]); v.disc(3.3, 2.07, 1.34, .2, 0, [214, 48, 44]); { const p = P(3.3, 2.07, 1.36); for (let i = 0; i < 5; i++) circ(p[0] + Math.cos(i * 1.9) * s * .1, p[1] + Math.sin(i * 1.9) * s * .05, s * .03, [255, 150, 90]); } ctx.restore();
