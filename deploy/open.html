@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>拉面怪奇物语 · Android 下载</title>
+<style>
+html,body{margin:0;height:100%;background:#0e0c24;color:#f4ecdc;font-family:"Noto Serif SC","Songti SC","STSong",serif}
+main{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;box-sizing:border-box;text-align:center}
+img{width:96px;height:96px;border-radius:22px}
+h1{font-size:24px;letter-spacing:.14em;margin:18px 0 6px}
+p{font-size:15px;line-height:1.7;opacity:.85;margin:6px 0}
+a.btn{display:inline-block;margin-top:22px;padding:13px 30px;border-radius:999px;background:#e46058;color:#fff;text-decoration:none;font-size:17px;letter-spacing:.12em}
+#mask{display:none;position:fixed;inset:0;background:rgba(8,6,24,.93);padding:18px 22px;box-sizing:border-box;text-align:right}
+#mask svg{width:86px;height:86px;margin-right:6px}
+#mask div{text-align:center;margin-top:26px;font-size:19px;line-height:2;letter-spacing:.06em}
+#mask b{color:#ffe9b0}
+#mask small{display:block;margin-top:18px;font-size:13px;opacity:.7;letter-spacing:.02em;word-break:break-all}
+</style>
+</head>
+<body>
+<main>
+  <img src="/icon.png" alt="">
+  <h1>拉面怪奇物语</h1>
+  <p id="msg">正在前往下载页…</p>
+  <a class="btn" id="go" href="/download">打开下载页</a>
+</main>
+<!-- shown inside chat apps, whose built-in browsers refuse to download an APK -->
+<div id="mask">
+  <svg viewBox="0 0 100 100" fill="none" stroke="#ffe9b0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 88C24 54 46 30 78 16"/><path d="M56 12l24 3-9 22"/></svg>
+  <div>请点右上角 <b>···</b><br>选择 <b>在浏览器打开</b><br>再下载 Android 安装包<small id="url"></small></div>
+</div>
+<script>
+// A landing page to share in chat apps. In an ordinary browser it goes straight on to the download page.
+// Inside WeChat, QQ, Weibo and the like it cannot download an APK, so it first tries to hand the link to the
+// system browser (an Android intent link), and shows how to open it in a browser by hand.
+(function () {
+  var ua = navigator.userAgent, dest = location.origin + '/download';
+  var inApp = /MicroMessenger|WeChat|QQ\/|MQQBrowser.*QQ|Weibo|DingTalk|AliApp|Alipay|Lark|Feishu|BytedanceWebview|aweme|NewsArticle|FBAN|FBAV|Instagram|Line\//i.test(ua);
+  var android = /Android/i.test(ua);
+  document.getElementById('url').textContent = dest;
+  if (!inApp) { location.replace(dest); return; }
+  document.getElementById('msg').textContent = '这里没法直接下载，请在浏览器里打开。';
+  document.getElementById('mask').style.display = 'block';
+  if (android) {
+    var intent = 'intent://' + location.host + '/download#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end';
+    document.getElementById('go').href = intent;
+    setTimeout(function () { location.href = intent; }, 300);      // works in some in-app browsers; where it is blocked the instructions stay on screen
+  }
+  document.getElementById('mask').addEventListener('click', function () { this.style.display = 'none'; });
+})();
+</script>
+</body>
+</html>
