@@ -537,7 +537,7 @@ function drawTower(v, t) {
   const p0 = v.P(0, 0, 11.9), p1 = v.P(0, 0, 12.8); line([p0, p1], tint([246, 200, 120]), v.s * .05); circ(p1[0], p1[1], v.s * .09, tint([246, 200, 120]));
 }
 function drawHouse(v, t) {      // the ramen shop from outside: cream walls on a stone footing, a red gabled roof with a chimney, a lit doorway under three red door-cloths, a paper lantern, an arched window in the gable end
-  const x0 = -4.92, y0 = 1.4, w = 1.5, x1 = x0 + w, y1 = y0 + w, ym = y0 + w / 2, h = 1.42, H = h + w / 2 * Math.tan(Math.PI / 6), ov = .16, cx = x0 + .86, cy = ym - .46, ze = h - ov * (H - h) / (w / 2), hb = h, zb = hb - ov * (H - hb) / (w / 2), P = v.P.bind(v);
+  const x0 = -4.92, y0 = 1.4, w = 1.5, x1 = x0 + w, y1 = y0 + w, ym = y0 + w / 2, h = 1.42, H = h + w / 2 * Math.tan(Math.PI / 12), ov = .16, cx = x0 + .86, cy = ym - .46, ze = h - ov * (H - h) / (w / 2), hb = h, zb = hb - ov * (H - hb) / (w / 2), P = v.P.bind(v);
   const [, wl, wr] = v.sh([250, 232, 200]), [rt, rl, rr] = v.sh(PAL.roof), lit = [255, 220, 150], wood = tint([176, 120, 84]);
   v.box(x0 - .05, y0 - .05, 0, w + .1, w + .1, .14, [214, 198, 176]);
   poly([P(x0, y1, .14), P(x1, y1, .14), P(x1, y1, h), P(x0, y1, h)], wl); poly([P(x1, y0, .14), P(x1, y1, .14), P(x1, y1, h), P(x1, ym, H), P(x1, y0, hb)], wr);
@@ -554,12 +554,13 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls on a
   // the arched window in the gable end, on its sill
   { const wz = (.14 + H) / 2 - .29, wo = [x1, ym, wz], g = v.F('R', wo, 0, .25); glow(g[0], g[1], v.s * .8, lit, .6); v.arch('R', [x1, ym, wz - .04], .44, .36, tint([226, 200, 160])); v.arch('R', wo, .34, .3, lit);      // centred on the gable wall, across and up
     poly([v.F('R', wo, -.26, -.06), v.F('R', wo, .26, -.06), v.F('R', wo, .26, 0), v.F('R', wo, -.26, 0)], tint([232, 214, 190])); }
-  // chimney first (the front slope hides its foot), then the roof: the slope facing you, its eave, and the edge of the overhang along the gable
-  v.box(cx, cy, h + (H - h) * .3, .28, .28, (H - h) * .7 + .34, [226, 196, 164]);      // it stands on the far slope just behind the ridge, its foot sunk into the roof
+  // the roof: the far slope, the slope facing you, its eave, and the edge of the overhang along the gable
+  poly([P(x0 - ov, ym, H), P(x1 + ov, ym, H), P(x1 + ov, y0 - ov, zb), P(x0 - ov, y0 - ov, zb)], rt);      // at so low a pitch the far slope is seen from above too
   poly([P(x1 + ov, ym, H), P(x1 + ov, y0 - ov, zb), P(x1 + ov, y0 - ov, zb - .12), P(x1 + ov, ym, H - .12)], rr); poly([P(x1 + ov, y1 + ov, ze), P(x1 + ov, ym, H), P(x1 + ov, ym, H - .1), P(x1 + ov, y1 + ov, ze - .1)], rr);
   poly([P(x0 - ov, y1 + ov, ze), P(x1 + ov, y1 + ov, ze), P(x1 + ov, ym, H), P(x0 - ov, ym, H)], rl);
   poly([P(x0 - ov, y1 + ov, ze), P(x1 + ov, y1 + ov, ze), P(x1 + ov, y1 + ov, ze - .1), P(x0 - ov, y1 + ov, ze - .1)], mix(rr, [60, 20, 40], .25));
   line([P(x0 - ov, ym, H + .02), P(x1 + ov, ym, H + .02)], rt, Math.max(2, v.s * .07));
+  v.box(cx, cy, H - (ym - cy - .14) * (H - h) / (w / 2), .28, .28, .4, [226, 196, 164]);      // the chimney stands on the far slope just behind the ridge
   for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, H + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
 }
 function drawChapel(v, t) {      // the church on the little island: a stone nave, a steep red roof, a thin spire with a cross
