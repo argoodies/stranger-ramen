@@ -135,7 +135,7 @@ const STR = {
     chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '别放辣', '不吃辣'],
     cilY: ['加香菜', '放香菜', '多点香菜'], cilN: ['不要香菜', '别放香菜', '香菜不要'],
     sayOk: ['好吃！', '就是这个味！', '暖和了～', '谢谢老板！'], sayBad: ['嗯…这不是我点的', '好像不太对？'], later: '下次再来吧…',
-    jars: '这就是一些空罐。', hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
+    hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了，出去走走吧。',
     libAway: '图书管理员不在，不要乱动。',
     churchDown: '不行了……',
@@ -163,7 +163,7 @@ const STR = {
     chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '別放辣', '不吃辣'],
     cilY: ['加香菜', '放香菜', '多點香菜'], cilN: ['不要香菜', '別放香菜', '香菜不要'],
     sayOk: ['好吃！', '就是這個味！', '暖和了～', '謝謝老闆！'], sayBad: ['嗯…這不是我點的', '好像不太對？'], later: '下次再來吧…',
-    jars: '這就是一些空罐。', hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
+    hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了，出去走走吧。',
     libAway: '圖書館員不在，不要亂動。',
     churchDown: '不行了……',
@@ -191,7 +191,7 @@ const STR = {
     chiliY: ['with chili', 'extra chili', 'make it spicy'], chiliN: ['no chili', 'hold the chili', 'not spicy'],
     cilY: ['with cilantro', 'add cilantro', 'extra cilantro'], cilN: ['no cilantro', 'hold the cilantro', 'skip the cilantro'],
     sayOk: ['Delicious!', 'Just right!', 'So warming~', 'Thanks, chef!'], sayBad: ["Hmm… that's not my order.", "That's not quite right?"], later: 'Maybe next time…',
-    jars: 'Just some empty jars.', hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
+    hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. Time for a walk.",
     libAway: "The librarian is out. Better not touch anything.",
     churchDown: 'I am done for…',
@@ -791,7 +791,7 @@ function stallTap(x, y) {
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
   else if (best === 'bin') { if (h) { goDo('dump', 3.8, 3.05); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 4.45, .95); chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }
-  else if (best === 'jars') { s.ownSay = S().jars; s.ownSayT = 3; chime(69, 0, .08, .7); return; }
+  else if (best === 'jars') { s.jarAt = performance.now(); chime(96, 0, .05, .5); chime(100, .07, .04, .4); chime(93, .15, .04, .4); return; }      // empty jars: they only rattle
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.soup && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), .95); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
   if (!ok) { s.nope = best; s.nopeT = 0.35; chime(45, 0, .1, .3); }
@@ -890,8 +890,8 @@ function drawStall(t) {
   for (let i = 0; i < 6; i++) { const x0 = .56 + i * .66, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .6, 0, 2.8), P(x0 + .6, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); }
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
   wallThick(v, X, Y, Hh, -.34, [246, 226, 198], [190, 156, 128], [176, 142, 118]); poly([P(.5, -.24, 1), P(4.5, -.24, 1), P(4.5, 0, 1), P(.5, 0, 1)], [246, 226, 198]); poly([P(.5, -.24, 1), P(.5, 0, 1), P(.5, 0, 2.38), P(.5, -.24, 2.38)], [190, 156, 128]);      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
-  { // a little shelf on the wall where the painting used to hang, with a row of bottles and jars on it
-    const yc = 1.92, z0 = 2.5, J = (y, w, h, c, nk, cap) => { v.box(.06, yc + y - w / 2, z0 + .06, w, w, h, c); if (nk) v.box(.06 + w / 2 - .035, yc + y - .035, z0 + .06 + h, .07, .07, nk, c); if (cap) v.box(.06 + (nk ? w / 2 - .045 : -.01), yc + y - (nk ? .045 : w / 2 + .01), z0 + .06 + h + (nk || 0), nk ? .09 : w + .02, nk ? .09 : w + .02, .04, cap); };
+  { // a little shelf on the wall where the painting used to hang, with a row of bottles and jars on it. They are empty: tap them and they rattle
+    const yc = 1.92, z0 = 2.5, jk = clamp(1 - (performance.now() - (st.jarAt || -1e9)) / 650), J = (y0, w, h, c, nk, cap) => { const y = y0 + .035 * jk * Math.sin(performance.now() / 22 + y0 * 40); v.box(.06, yc + y - w / 2, z0 + .06, w, w, h, c); if (nk) v.box(.06 + w / 2 - .035, yc + y - .035, z0 + .06 + h, .07, .07, nk, c); if (cap) v.box(.06 + (nk ? w / 2 - .045 : -.01), yc + y - (nk ? .045 : w / 2 + .01), z0 + .06 + h + (nk || 0), nk ? .09 : w + .02, nk ? .09 : w + .02, .04, cap); };
     v.box(0, yc - .46, z0, .3, .92, .06, [176, 128, 96]);
     J(-.34, .16, .2, [236, 226, 206], 0, [176, 110, 90]); J(-.13, .12, .24, [96, 150, 120], .12, [120, 84, 70]); J(.06, .15, .15, [214, 96, 90], 0, [236, 226, 206]); J(.25, .11, .2, [150, 104, 84], .1, [226, 196, 140]); J(.39, .1, .12, [240, 200, 120], 0, [150, 104, 84]);
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
