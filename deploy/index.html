@@ -7,7 +7,7 @@
 <title>拉面怪奇物语</title>
 <style>
 :root{--serif:"Noto Serif SC","Songti SC","STSong","Source Han Serif SC",serif}
-html,body{margin:0;height:100%;background:#0e0c24;overflow:hidden;touch-action:none;font-family:var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0e0c24;overflow:hidden;touch-action:none;font-family:var(--serif);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #top{position:fixed;top:calc(10px + max(env(safe-area-inset-top), var(--sat, 0px)));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none;z-index:6}
 #top>*{pointer-events:auto}
@@ -1601,7 +1601,7 @@ function enterChurch() {
   mode = 'church'; $('zoom').style.display = 'none'; $('bag').style.display = 'none'; $('bback').style.display = 'none'; fade = 1; bag.open = false;      // no button leads out: you walk down the steps at the door, any time there is no fight on
   const c = church, p = c.p;
   Object.assign(c, { wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
-  Object.assign(p, { x: CX1 - 1.2, y: CW / 2, exit: false, second: null, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y;
+  Object.assign(p, { x: CX1 - 1.2, y: CW / 2, exit: false, second: null, pend: null, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y;
   churchBanner(S().lightTorch, 5); bell(196, .12);
 }
 function churchIgnite() {      // the torch is lit: the fight is on. Round 1 opens with the small foes; later rounds go straight to the bosses
@@ -1692,6 +1692,7 @@ function updateChurch(dt) {
     if (p.moving) { const sp = p.exit ? 7 : 3.9, st = Math.min(d - reach, sp * dt); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += dx / d * st; p.y += dy / d * st; p.face = dy - dx; p.hopT = (p.hopT || 0) + dt; }
     p.x = clamp(p.x, churchXmin(), churchXmax()); p.y = clamp(p.y, CY0, CY1); churchBump(p);
     if (e && Math.hypot(e.x - p.x, e.y - p.y) <= (e.dash > 0 ? 1.5 : .92) && p.cd <= 0) churchHit(e);      // a charging foe can be met a little further out
+    if (p.pend === 'torch' && (!p.moving || Math.hypot(p.x - TORCH[0], p.y - TORCH[1]) < .7)) { p.pend = null; p.tx = p.x; p.ty = p.y; churchIgnite(); }      // arrived beside the torch
     if (!c.fight && p.exit && p.x >= CX1 - 1.3 && Math.abs(p.y - CW / 2) < 1.2) return leaveChurch();      // heading for the steps when there is no fight on: he hurries, and is out as soon as he is near the door
   }
   const lob = (e, tx, ty, T) => c.shots.push({ x0: e.x, y0: e.y, x1: clamp(tx, churchXmin(), churchXmax()), y1: clamp(ty, CY0, CY1), t: 0, T, src: e });
@@ -1752,10 +1753,12 @@ function updateChurch(dt) {
 }
 function churchTap(sx, sy) {
   const c = church, p = c.p, v = chv, K = v.s * .8; if (c.down > 0) return;
+  p.pend = null;
   let best = null, bd = K * 1.05;
   for (const e of c.foes) if (e.hp > 0 && !(e.app > 0)) { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
   if (best) { p.target = best; if (parryable(best)) p.cd = 0; return; }      // a tap on a foe that is just striking cuts at once, whatever the rhythm of your blows
-  if (!c.fight && !c.done) { const q = v.P(TORCH[0], TORCH[1]); if (Math.hypot(sx - q[0], sy - (q[1] - K * .8)) < K * 1.1) return churchIgnite(); }      // the unlit torch
+  if (!c.fight && !c.done) { const q = v.P(TORCH[0], TORCH[1]);      // the unlit torch: walk up to it first, then light it
+    if (Math.hypot(sx - q[0], sy - (q[1] - K * .8)) < K * 1.1) { const dx = p.x - TORCH[0], dy = p.y - TORCH[1], d = Math.hypot(dx, dy) || 1; p.target = null; p.exit = false; p.tx = TORCH[0] + dx / d * .62; p.ty = TORCH[1] + dy / d * .62; p.pend = 'torch'; chime(69, 0, .05, .6); return; } }
   if (c.chest && !c.chest.open && c.chest.at && Math.hypot(sx - c.chest.at[0], sy - (c.chest.at[1] - K * .3)) < K) return churchOpen();
   for (const n of c.npcs) if (n.a > .7 && n.at && Math.hypot(sx - n.at[0], sy - (n.at[1] - K * .6)) < K) return churchTalk(n);
   const [x, y] = v.inv(sx, sy); p.target = null; p.tx = clamp(x, churchXmin(), churchXmax()); p.ty = clamp(y, CY0, CY1); chime(69, 0, .05, .6);
@@ -1959,6 +1962,10 @@ $('bclose').addEventListener('click', () => { bag.open = false; bag.drag = null;
 $('bback').addEventListener('click', () => { if (stall.board) closeBoard(); });
 cv.addEventListener('pointermove', e => { if (mode === 'stall' && stall.board) boardMove(e.clientX, e.clientY); else if (bag.open) bagMove(e.clientX, e.clientY); });
 for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) cv.addEventListener(ev, () => { if (mode === 'stall' && stall.board) boardUp(); else if (bag.open) bagUp(); });
+// A long press must not start a text selection, a callout or the magnifying loupe (iOS shows it over a canvas unless the touch itself is cancelled).
+// Buttons are left alone so that they still get their click.
+document.addEventListener('touchstart', e => { if (!(e.target.closest && e.target.closest('button'))) e.preventDefault(); }, { passive: false });
+for (const ev of ['contextmenu', 'selectstart', 'gesturestart', 'dblclick']) document.addEventListener(ev, e => e.preventDefault());
 $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
 // choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered
 $('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); chime(74, 0, .12, .8); }));
