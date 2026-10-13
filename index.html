@@ -339,11 +339,12 @@ function fig(x, y, k, o = {}) {
   }
 }
 const HATS = [[90, 150, 230], [240, 190, 110], [150, 200, 160], [200, 160, 220], [236, 130, 120], [90, 200, 180], [120, 180, 220]];
-function randomLook() {      // the four kinds of people who live in the town
+function randomLook() {      // the five kinds of people who live in the town
   const r = Math.random();
-  if (r < 0.25) return { kind: 'crow', body: [52, 44, 86], name: '乌鸦' };
-  if (r < 0.5) return { kind: 'scarlet', body: [196, 30, 64], hat: [222, 52, 66], name: '红唇女郎' };
-  if (r < 0.75) return { kind: 'ft', hat: [70, 100, 220], name: '占卜师' };
+  if (r < 0.2) return { kind: 'crow', body: [52, 44, 86], name: '乌鸦' };
+  if (r < 0.4) return { kind: 'scarlet', body: [196, 30, 64], hat: [222, 52, 66], name: '红唇女郎' };
+  if (r < 0.6) return { kind: 'ft', hat: [70, 100, 220], name: '占卜师' };
+  if (r < 0.8) return { kind: 'teller', body: [132, 100, 172], hat: [70, 52, 100], name: '说书人' };
   return { kind: 'drunk', body: [226, 212, 186], hat: [150, 108, 84], name: '酒鬼' };
 }
 
