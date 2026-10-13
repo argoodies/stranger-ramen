@@ -799,7 +799,7 @@ function stallTap(x, y) {
   else if (best === 'jars') { s.jarAt = performance.now(); return; }      // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.soup && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), .95); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
-  if (!ok) { s.nope = best; s.nopeT = 0.35; chime(45, 0, .1, .3); }
+  if (!ok) { s.nope = s.hold === 'bowl' ? 'own' : best; s.nopeT = 0.35; chime(45, 0, .1, .3); }      // a bowl that cannot go there: it is the bowl in your hands that trembles
 }
 function barTap() {
   const s = stall, b = s.bowl;
@@ -929,7 +929,7 @@ function drawStall(t) {
   const drawOwner = () => {
     fig(op[0], op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0), s * 1.15, { kind: 'chef', apron: [220, 80, 80] });
     HIT.own = [op[0] + s * .45, op[1] - s * 1.0, 0];
-    const hp = HIT.own, hd = st.hold;
+    const hp = [HIT.own[0] + wob('own'), HIT.own[1]], hd = st.hold;
     if (hd === 'noodle') { line([[hp[0], hp[1]], [hp[0] + s * .3, hp[1] - s * .3]], [150, 110, 90], s * .05); circ(hp[0], hp[1], s * .17, [190, 196, 214]); circ(hp[0], hp[1], s * .13, [250, 232, 170]); }
     else if (hd === 'soup') { line([[hp[0], hp[1]], [hp[0] + s * .28, hp[1] - s * .34]], [150, 110, 90], s * .05); ell(hp[0], hp[1], s * .17, s * .12, [190, 196, 214]); ell(hp[0], hp[1] - s * .02, s * .13, s * .08, [226, 160, 84]); }
     else if (hd === 'chili') { ell(hp[0], hp[1], s * .13, s * .09, [236, 232, 240]); for (let i = 0; i < 4; i++) circ(hp[0] + Math.cos(i * 1.7) * s * .06, hp[1] - s * .03 + Math.sin(i * 1.7) * s * .03, s * .035, [220, 40, 40]); }
