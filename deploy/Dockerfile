@@ -1,4 +1,5 @@
 FROM nginx:1.27-alpine
+# the base image ships its own welcome page; there is to be nothing at the root
+RUN rm -f /usr/share/nginx/html/index.html /usr/share/nginx/html/50x.html
 COPY default.conf /etc/nginx/conf.d/default.conf
-COPY index.html game.html download.html privacy.html support.html icon.png 7663a57c94668ec621bbd2abd3736e3d.txt ramen-puzzle.apk /usr/share/nginx/html/
-COPY shots /usr/share/nginx/html/shots
+COPY game.html download.html privacy.html support.html icon.png 7663a57c94668ec621bbd2abd3736e3d.txt ramen-puzzle.apk /usr/share/nginx/html/
