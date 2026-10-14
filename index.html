@@ -557,23 +557,12 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
     poly([P(a, d, zr(a)), P(b, d, zr(b)), P(b, d, T), P(a, d, T)], kl); poly([P(b, d, zr(b)), P(b, c, zr(b)), P(b, c, T), P(b, d, T)], kr); poly([P(a, c, T), P(b, c, T), P(b, d, T), P(a, d, T)], kt); }
   for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, h + .08 + SP * (1 - (cx - x0 - w / 2) / (w / 2 + ov)) + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
 }
-// A doorway into an unlit room, on a wall that faces the lower left: not a flat black shape. You see the thickness of the wall at its near side, a little of the floor just inside catching the light from outdoors (and a carpet down its middle, if there is one), and above that the dark deepening.
-function doorway(v, o, dw, dh, wallC, floorC, carpetC) {
-  const T = .1, x0 = o[0] - dw / 2, x1 = o[0] + dw / 2, y = o[1], z = o[2], P = v.P.bind(v), pts = [[-dw / 2, 0], [dw / 2, 0], [dw / 2, dh]]; for (let i = 0; i <= 10; i++) { const q = Math.PI * i / 10; pts.push([dw / 2 * Math.cos(q), dh + dw / 2 * Math.sin(q)]); }
-  const rim = pts.map(q => v.F('L', o, q[0], q[1])), top = v.F('L', o, 0, dh + dw / 2), bot = v.F('L', o, 0, 0);
-  const fade = (x, w, c, a) => { const f = [P(x, y, z), P(x + w, y, z), P(x + w, y - 1.1, z), P(x, y - 1.1, z)], g = ctx.createLinearGradient(f[0][0], f[0][1], f[3][0], f[3][1]); g.addColorStop(0, css(tint(c), a)); g.addColorStop(1, css(tint(c), 0)); ctx.fillStyle = g; ctx.beginPath(); f.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fill(); };
-  ctx.save(); ctx.beginPath(); rim.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();
-  { const g = ctx.createLinearGradient(0, top[1], 0, bot[1]); g.addColorStop(0, css(tint([38, 30, 60]))); g.addColorStop(.55, css(tint([58, 46, 84]))); g.addColorStop(1, css(tint([92, 78, 116]))); ctx.fillStyle = g; ctx.fillRect(top[0] - v.s, top[1] - v.s, v.s * 2, bot[1] - top[1] + v.s * 2); }
-  fade(x0, dw, floorC, .85); if (carpetC) fade(o[0] - .09, .18, carpetC, .9);
-  poly([P(x0, y, z), P(x0, y - T, z), P(x0, y - T, z + 2), P(x0, y, z + 2)], mix(tint(wallC), tint(DARK), .62));
-  ctx.restore();
-}
 function drawChapel(v, t) {      // the church on the little island: a stone nave, a steep red roof, a thin spire with a cross
   const st = PAL.stone, lit = [255, 214, 140], o = [10, .92, 0];
   v.box(9.08, -.92, 0, 1.84, 1.84, 1.7, st);
-  doorway(v, o, .42, .64, st, [150, 138, 160], [176, 70, 84]);
-  v.arch('L', [9.45, .92, .76], .16, .26, tint(DARK)); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // a dark door between two small dark windows: no light shows from inside until the torch is lit
-  for (const y of [-.55, .55]) v.arch('R', [10.92, y, .76], .16, .26, tint(DARK));      // the side wall's pair: same size (the belfry window's), height and spacing as the pair beside the door, and evenly placed either side of the wall's middle
+  { const dp = v.F('L', o, 0, .45); glow(dp[0], dp[1], v.s * (1.1 + .14 * Math.sin(t * 3)), lit, .75); } v.arch('L', o, .42, .64, lit);
+  v.arch('L', [9.45, .92, .76], .16, .26, lit); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // the lit door between two small windows; here and there a window is lit too
+  for (const y of [-.55, .55]) v.arch('R', [10.92, y, .76], .16, .26, y < 0 ? lit : tint(DARK));      // the side wall's pair: same size (the belfry window's), height and spacing as the pair beside the door, and evenly placed either side of the wall's middle
   v.pyramid(8.95, -1.05, 1.7, 2.1, 1.25, PAL.roof);
   v.box(9.78, -.22, 2.2, .44, .44, 1.5, mix(st, [255, 255, 255], .15)); v.arch('L', [10, .22, 3.0], .16, .26, tint(DARK)); v.pyramid(9.7, -.3, 3.7, .6, 1.0, PAL.roof);
   const a = v.P(10, 0, 4.7), b = v.P(10, 0, 5.35), m = v.P(10, 0, 5.1), w = v.s * .05; line([a, b], tint([246, 200, 120]), w); line([[m[0] - v.s * .16, m[1]], [m[0] + v.s * .16, m[1]]], tint([246, 200, 120]), w);
@@ -599,7 +588,7 @@ function drawWorld(t, dt) {
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
-  objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); doorway(v, [2.85, -3.1, 0], .4, .56, PAL.stone, [176, 134, 108]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
+  objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
   objs.push({ k: 0, d: () => drawTower(v, t) });
   objs.push({ k: 9.6, d: () => drawChapel(v, t) });
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
