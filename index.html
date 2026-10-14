@@ -2041,11 +2041,16 @@ function frame(now) {
   musicTick();
   requestAnimationFrame(frame);
 }
+// A small welcome: a soft bell and a rising run of chimes, with a breath of air. It plays as the game opens, on the title, wherever sound may start
+// without a tap (the iOS and Android apps allow it); in a browser, which does not, it waits for the first tap instead.
+let helloDone = false;
+function hello() { if (helloDone || !AC || AC.state !== 'running') return; helloDone = true; bell(196, .2); [67, 71, 74, 79, 83].forEach((m, i) => chime(m, .12 + i * .11, .17, 1.8)); noise(.9, .06, 900, 3200, .05); }
+function helloAtLaunch() { try { initAudio(); if (!AC) return; if (AC.state === 'running') hello(); else AC.resume().then(() => { if (AC && AC.state === 'running') hello(); }, () => {}); } catch (e) {} }
+setTimeout(helloAtLaunch, 350);
 function start() {
   if (mode !== 'title') return;
   initAudio();
-  const hello = () => { bell(196, .2); [67, 71, 74, 79, 83].forEach((m, i) => chime(m, .12 + i * .11, .17, 1.8)); noise(.9, .06, 900, 3200, .05); };      // a small welcome as you step in: a soft bell and a rising run of chimes, with a breath of air
-  if (AC && AC.state === 'suspended') AC.resume().then(hello, hello); else hello();      // played once the sound is really running, so the first notes are not lost
+  if (!helloDone) { if (AC && AC.state === 'suspended') AC.resume().then(hello, hello); else hello(); }      // if it could not sound at launch, it sounds now
   mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block';
 }
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
