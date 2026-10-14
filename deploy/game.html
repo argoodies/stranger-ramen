@@ -138,7 +138,7 @@ const STR = {
     hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了，出去走走吧。',
     libAway: '图书管理员不在，不要乱动。',
-    churchDown: '不行了……',
+    churchDown: '不行了……', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '手牌'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
     gotCard: '占卜师留下了一张牌。', items: { stop: ['时间静止', '战斗中点上方的牌，全场敌人静止十秒，用完即消失。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
@@ -166,7 +166,7 @@ const STR = {
     hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了，出去走走吧。',
     libAway: '圖書館員不在，不要亂動。',
-    churchDown: '不行了……',
+    churchDown: '不行了……', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '手牌'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
     gotCard: '占卜師留下了一張牌。', items: { stop: ['時間靜止', '戰鬥中點上方的牌，全場敵人靜止十秒，用完即消失。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
@@ -194,7 +194,7 @@ const STR = {
     hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. Time for a walk.",
     libAway: "The librarian is out. Better not touch anything.",
-    churchDown: 'I am done for…',
+    churchDown: 'I am done for…', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Card'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
     gotCard: 'The fortune teller left a card.', items: { stop: ['Time Stop', 'Tap the card at the top in a fight: every foe stands still for ten seconds. Used up after one go.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
@@ -1587,9 +1587,10 @@ function bagUp() {      // finger up: without a drag it was only a look; with on
 // You come in to a dark, empty church with an unlit torch in the middle of the floor; you may walk about, use the backpack, or leave by the steps.
 // Light the torch and the fight begins: five small foes, then a boss. Win and the lights come up, a chest stands before the cross, and once it is opened
 // one of the good folk appears to say thanks. After that they and the chest are gone, the lights and the torch go out, and lighting it again
-// starts the next round: two bosses, then three, and three from then on.
+// starts the next round. Rounds 1–3: small foes then a whirlwind, two whirlwinds, three. Round 4: the Imp among five small foes. Round 5: the Imp, shielded by the
+// Devil's Advocate who sits on the cross. Round 6: the same, but the Imp, about to die, passes its blade to the Advocate, who jumps down to be fought in its place.
 const CL = 14, CW = 9, CX0 = 2.4, CX1 = CL - .8, CY0 = .8, CY1 = CW - .8;
-const MINIONS = ['ass', 'witch'], BOSSES = ['whirl'], TIERS = 3, MINHP = 3, BOSSHP = 100, HEIRHP = 30;      // a small foe takes three plain cuts, a boss a hundred; every hit on you, the boss's too, costs one heart
+const MINIONS = ['ass', 'witch'], BOSSES = ['whirl'], TIERS = 6, MINHP = 3, BOSSHP = 100, HEIRHP = 30;      // a small foe takes three plain cuts, a boss a hundred; every hit on you, the boss's too, costs one heart
 const TORCH = [8, CW / 2];      // the torch in the middle of the floor: lighting it starts a fight
 const CANDLES = [[CX0 + 1.1, CY0 + 1.1], [CX0 + 1.1, CY1 - 1.1], [CX1 - 1.1, CY0 + 1.1], [CX1 - 1.1, CY1 - 1.1]];      // the four tall candlesticks, a pace in from each corner: nobody walks through them, anybody can walk round behind
 function churchBump(o) { for (const [x, y] of [TORCH, ...CANDLES]) { const dx = o.x - x, dy = o.y - y, d = Math.hypot(dx, dy); if (d < .42) { const k = d > .001 ? .42 / d : 0, q = Math.atan2(dy, dx) + (y < CW / 2 ? 1 : -1) * (dx >= 0 ? 1 : -1) * .05; o.x = x + (k ? Math.cos(q) * .42 : .42); o.y = y + (k ? Math.sin(q) * .42 : 0); } } }      // pushed back out, and a little round it on the side away from the wall, so walking straight at one slides past
@@ -1607,14 +1608,20 @@ function noise(dur, vol, f0, f1, when = 0, dest) {      // a burst of filtered h
   f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
   n.connect(f); f.connect(g); g.connect(dest || master); n.start(t); n.stop(t + dur + .03);
 }
-function churchSpawn(tier = 1, bosses = false) {      // either the 5n small foes of a round, or its n bosses slowly taking shape
-  const c = church, Z = zoneOf(), add = (kind, boss, i) => { let x, y, tries = 0;
-    do { x = boss ? 5.5 : rnd(Z[0] + .3, CX1 - 3.4); y = boss ? CW / 2 + (i - (tier - 1) / 2) * 2.3 : rnd(CY0, CY1); } while (!boss && tries++ < 60 && c.foes.some(f => Math.hypot(f.x - x, f.y - y) < 1.15));
+function churchSpawn(tier = 1, bosses = false) {      // the foes of a round: see above
+  const c = church, Z = zoneOf(), add = (kind, boss, i, n = tier) => { let x, y, tries = 0;
+    do { x = boss ? 5.5 : rnd(Z[0] + .3, CX1 - 3.4); y = boss ? CW / 2 + (i - (n - 1) / 2) * 2.3 : rnd(CY0, CY1); } while (!boss && tries++ < 60 && c.foes.some(f => Math.hypot(f.x - x, f.y - y) < 1.15));
     const hp = boss ? BOSSHP : MINHP; c.foes.push({ kind, wave: 0, boss, x, y, hx: x, hy: y, wx: x, wy: y, wt: rnd(0, 2), hp, max: hp, cd: rnd(1.2, 3.4) + c.foes.length * .2 + (boss ? i * 1.3 : 0), app: boss ? 2.4 : .8, wind: 0, dash: 0, spin: 0, stun: 0, hit: 0, dead: 0, ax: -1, ay: 0 }); };
+  c.adv = null; c.passes = tier === 6 ? 1 : 0; c.pass = null;
+  if (tier >= 4) {
+    add('imp', true, 0, 1);
+    if (tier === 4) for (let i = 0; i < 5; i++) add(pick(MINIONS), false, i);
+    else { const a = { kind: 'adv', wave: 0, boss: false, x: .95, y: CW / 2 + .55, z: 2.92, hp: 1, max: 1, inv: true, app: 2.4, cast: 1.2, wind: 0, dash: 0, spin: 0, stun: 0, hit: 0, dead: 0, ax: 0, ay: 0 }; c.foes.push(a); c.adv = a; }      // the Devil's Advocate, sitting on the right arm of the cross
+    c.bossOut = true; bell(110, .14); noise(1.6, .2, 300, 1200); return; }
   if (bosses) { for (let i = 0; i < tier; i++) add(pick(BOSSES), true, i); c.bossOut = true; bell(110, .14); noise(1.6, .2, 300, 1200); }
   else { for (let i = 0; i < 5 * tier; i++) add(pick(MINIONS), false, i); c.bossOut = false; }
-  c.passes = 2; c.pass = null;
 }
+const shielded = e => e.kind === 'imp' && e.hp > 0 && !(e.dash > 0) && !!church.adv && church.adv.kind === 'adv' && church.adv.hp > 0;      // while the Advocate sits on the cross, the Imp can be hurt only in the middle of a charge
 const churchXmin = () => CX0, churchXmax = () => CX1;
 function churchBanner(txt, sec = 3) { church.banner = txt; church.bannerT = sec; }      // news is not posted on the screen: the chef says it, in a bubble
 function enterChurch() {
@@ -1665,13 +1672,14 @@ function churchKill(e) {
 }
 function churchDamage(e, n) {
   const c = church, p = c.p; if (e.inv || e.hp <= 0 || e.spin > 0 || e.app > 0) return;      // nothing bites on a whirlwind, or on one that is still taking shape
+  if (shielded(e)) { c.fx.push({ k: 'shield', x: e.x, y: e.y, t: 0, T: .5 }); sfx(880, .2, .1, 'triangle'); sfx(1320, .25, .06, 'sine', .03); return; }
+  if (e.kind === 'imp' && c.passes > 0 && c.adv && c.adv.hp > 0 && e.hp - n <= 10) {      // round 6: rather than die, the Imp kills itself and the Advocate takes up its blade
+    e.hp = Math.max(1, e.hp - n); e.hit = .18; c.passes--; const h = c.adv; h.inv = e.inv = true; e.wind = 0; e.dash = 0; c.pass = { from: e, to: h, t: 0 }; p.target = null; p.tx = p.x; p.ty = p.y; churchBanner(S().passed, 2.8); sfx(220, .5, .14, 'sawtooth'); return; }
   e.hp -= n; e.hit = .18; if (e.hp <= 0) return churchKill(e);
-  // an Imp that is nearly dead kills itself instead, and one of its Poisoners becomes the Imp
-  if (e.kind === 'imp' && e.hp <= 10 && c.passes > 0) { const heirs = c.foes.filter(f => f.kind === 'poi' && f.hp > 0 && f.wave === e.wave); if (heirs.length) { c.passes--; const h = pick(heirs); h.inv = e.inv = true; e.wind = 0; e.dash = 0; h.wind = 0; c.pass = { from: e, to: h, t: 0 }; p.target = null; p.tx = p.x; p.ty = p.y; sfx(220, .5, .14, 'sawtooth'); } }
 }
 // the opening for a parry: the moment a foe commits to its attack — a flask or a spell raised, a blade drawn back, a charge chosen or under way, a whirl winding up.
 // It can be taken once per attack, and it does not stop the attack: you still have to get out of the way.
-const parryable = e => !e.inv && !e.parried && !(e.app > 0) && e.hp > 0 && !(e.stun > 0) && !(e.spin > 0) && (e.dash > 0 || (e.wind > 0 && e.wind <= ({ imp: .5, ass: .4, pukka: .6 }[e.kind] || 9)));
+const parryable = e => !e.inv && !e.parried && !(e.app > 0) && e.hp > 0 && !(e.stun > 0) && !(e.spin > 0) && (e.dash > 0 || (e.wind > 0 && e.wind <= ({ imp: 0, ass: .4, pukka: .6 }[e.kind] || 9)));
 function churchStrike(e, parry) {      // one blade landing on a foe
   const c = church, p = c.p, knife = armed();
   noise(.08, .55, 700, 180, .03); sfx(knife ? 210 : 130, .14, .45, 'triangle', .03); if (knife) sfx(1650, .07, .14, 'triangle', .03);
@@ -1681,6 +1689,7 @@ function churchStrike(e, parry) {      // one blade landing on a foe
   if (parry) { e.parried = true; c.flash = .3; sfx(1900, .25, .16, 'triangle'); sfx(2850, .18, .08); sfx(620, .1, .14, 'square'); }
   if (parry && e.boss && sleepy() && Math.random() < .3) { e.stun = 3; e.wind = 0; e.dash = 0; e.combo = 0; sfx(523, .5, .08, 'sine'); sfx(392, .7, .07, 'sine', .15); }      // the Exorcist's Knife: three parries in ten put a boss (and only a boss) to sleep for three seconds, and no blow wakes it
   churchDamage(e, parry ? (sleepy() || wearing('twin') ? 3 : 10) : 1);
+  if (parry && e.kind === 'imp') { e.dash = 0; e.cd = 1.9; }      // the Imp, caught mid-charge, is thrown back and stops there (after the blow lands: the shield only covers it once the charge is over)
   if (parry && wearing('doom')) { const live = c.foes.filter(f => f.hp > 0 && !f.inv); if (live.length) { const z = pick(live); c.fx.push({ k: 'zap', x: z.x, y: z.y, t: 0, T: .45 }); noise(.35, .5, 5000, 300); sfx(90, .4, .3, 'sawtooth'); const sp = z.spin; z.spin = 0; churchDamage(z, 10); if (z.hp > 0) z.spin = sp; } }      // the Doomsday Necklace: lightning on one foe at random, whatever it is doing
 }
 function churchHit(e) {      // one attack: the knife you carry, or a bare fist. The Godfather's twin blades land twice, the second a moment after the first, and if the first is a parry so is the second
@@ -1722,6 +1731,7 @@ function updateChurch(dt) {
     if (c.freeze > 0) continue;      // time stands still for them
     if (!(e.wind > 0) && !(e.dash > 0)) e.parried = false;
     if (e.app > 0) { e.app -= dt; continue; }
+    if (e.kind === 'adv') { if (!(c.pass && c.pass.to === e) && (e.cast -= dt) <= 0) { e.cast = 10; const m = c.foes.find(f => f.kind === 'imp' && f.hp > 0); if (m) { c.fx.push({ k: 'cast', x: e.x, y: e.y, z: e.z, x1: m.x, y1: m.y, t: 0, T: 1 }); sfx(520, .6, .07, 'sine'); sfx(780, .7, .05, 'sine', .1); } } continue; }      // the Advocate never leaves the cross: every ten seconds it throws its shield over the Imp again
     if (c.down > 0 || e.inv) continue;
     if (e.stun > 0) { e.stun -= dt; continue; }
     const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy) || 1, Z = zoneOf(e.wave), step = (ux, uy, sp) => { e.x += ux * sp * dt; e.y += uy * sp * dt; };
@@ -1767,7 +1777,8 @@ function updateChurch(dt) {
   for (const f of c.fx) f.t += dt; c.fx = c.fx.filter(f => f.t < f.T);
   if (c.pass) { const q = c.pass, t0 = q.t; q.t += dt;
     if (t0 < .9 && q.t >= .9) { q.from.hp = 0; q.from.dead = .5; churchPoof(q.from); sfx(110, .4, .2, 'sawtooth'); }
-    if (q.t >= 1.6) { Object.assign(q.to, { kind: 'imp', boss: true, hp: HEIRHP, max: BOSSHP, inv: false, cd: 1.2, wind: 0, dash: 0, hit: .3 }); churchPoof(q.to, [240, 80, 90]); bell(110, .12); c.pass = null; } }
+    if (q.to.kind === 'adv') { const u = clamp((q.t - .9) / .7); q.to.x = lerp(.95, 3.6, u); q.to.z = lerp(2.92, 0, u) + Math.sin(u * Math.PI) * 1.1; }      // the Advocate leaps down from the cross
+    if (q.t >= 1.6) { Object.assign(q.to, { kind: 'imp', boss: true, hp: BOSSHP, max: BOSSHP, inv: false, z: 0, x: 3.6, hx: 3.6, hy: q.to.y, cd: 1.2, wind: 0, dash: 0, hit: .3 }); if (c.adv === q.to) c.adv = null; churchPoof(q.to, [240, 80, 90]); bell(110, .12); c.pass = null; } }
   if (c.say && (c.say.t -= dt) <= 0) { const bye = c.say.bye; c.say = null; if (bye && c.done) churchRest(); }
   if (c.fly && (c.fly.t += dt) > 1.1) { const id = c.fly.id; c.fly = null; churchGift(id); }
   for (const b of c.stains) b.t += dt;
@@ -1778,13 +1789,23 @@ function playCard() {      // Time Stop: every foe, and everything they have thr
   c.freeze = 10; save.stop = (save.stop | 0) - 1; if (save.stop <= 0) { save.stop = 0; save.equip.card = null; } saveNow();
   bell(220, .16); sfx(660, .6, .1, 'sine'); sfx(990, .8, .06, 'sine');
 }
+function debugAsk(msg, val, done) {      // a small input box over the game (window.prompt is not shown inside the app's web view)
+  if (document.getElementById('dbg')) return;
+  const d = document.createElement('div'); d.id = 'dbg'; d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,8,30,.55);z-index:99';
+  d.innerHTML = `<div style="background:#2a2450;color:#fff;padding:18px 20px;border-radius:14px;font:300 15px ${THINF};text-align:center;min-width:220px"><div style="margin-bottom:12px">${msg}</div><input id="dbgv" type="number" inputmode="numeric" value="${val}" style="width:90px;font-size:20px;text-align:center;border-radius:8px;border:0;padding:6px"><div style="margin-top:14px"><button id="dbgno" style="margin-right:10px">✕</button><button id="dbgok">OK</button></div></div>`;
+  document.body.appendChild(d); const inp = document.getElementById('dbgv'); inp.focus(); inp.select();
+  const close = ok => { const v2 = inp.value; d.remove(); if (ok) done(v2); };
+  document.getElementById('dbgok').onclick = () => close(true); document.getElementById('dbgno').onclick = () => close(false); inp.onkeydown = ev => { if (ev.key === 'Enter') close(true); };
+}
 function churchTap(sx, sy) {
   const c = church, p = c.p, v = chv, K = v.s * .8; if (c.down > 0) return;
   if (c.fight && hudCard && Math.hypot(sx - hudCard[0], sy - hudCard[1]) < 22) { playCard(); return; }
   p.pend = null;
   let best = null, bd = K * 1.05;
-  for (const e of c.foes) if (e.hp > 0 && !(e.app > 0)) { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
+  for (const e of c.foes) if (e.hp > 0 && !(e.app > 0) && e.kind !== 'adv') { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
   if (best) { p.target = best; if (parryable(best)) p.cd = 0; return; }      // a tap on a foe that is just striking cuts at once, whatever the rhythm of your blows
+  if (!c.fight && !c.done) { const q = v.P(.95, CW / 2, 2.2), now = performance.now();      // debug: the cross, tapped ten times running while the church is dark, asks which round to jump to
+    if (Math.hypot(sx - q[0], sy - q[1]) < K * 1.5) { c.crossN = now - (c.crossAt || 0) < 1500 ? (c.crossN || 0) + 1 : 1; c.crossAt = now; if (c.crossN >= 10) { c.crossN = 0; debugAsk(S().debugAsk, c.tier, v2 => { const n = parseInt(v2, 10); if (n >= 1 && n <= TIERS) { c.tier = n; churchBanner(S().lightTorch, 3); chime(81, 0, .1); } }); } return; } }
   if (!c.fight && !c.done) { const q = v.P(TORCH[0], TORCH[1]);      // the unlit torch: walk up to it first, then light it
     if (Math.hypot(sx - q[0], sy - (q[1] - K * .8)) < K * 1.1) { const dx = p.x - TORCH[0], dy = p.y - TORCH[1], d = Math.hypot(dx, dy) || 1; p.target = null; p.exit = false; p.tx = TORCH[0] + dx / d * .62; p.ty = TORCH[1] + dy / d * .62; p.pend = 'torch'; chime(69, 0, .05, .6); return; } }
   if (c.chest && !c.chest.open && c.chest.at && Math.hypot(sx - c.chest.at[0], sy - (c.chest.at[1] - K * .3)) < K) return churchOpen();
@@ -1883,7 +1904,11 @@ function drawChurch(t, dt) {
     if (e.app > 0) glow(x, y - k * .7, k * (1.2 + 1.6 * e.app / 2.4), [200, 226, 236], .8 * Math.min(1, e.app));      // taking shape out of the dark
     if (dying || heir) glow(x, y - k * .6, k * (1 + 1.4 * Math.max(dying, heir)), [255, 60, 70], .9);
     let top = 1.72;      // how tall it stands, in k: the glint and the health bar sit above that
-    if (e.kind === 'imp') fig(x, y, k, { kind: 'demon', body: col(IMP.body), head: flash(IMP.head, e), lean: e.wind > 0 ? toP * .08 : 0, a });
+    if (e.kind === 'imp') { fig(x, y, k, { kind: 'demon', body: col(IMP.body), head: flash(IMP.head, e), lean: e.wind > 0 ? toP * .08 : 0, a });
+      if (shielded(e)) { const cy = y - k * .75, r = k * (.92 + .03 * Math.sin(t * 4)); ctx.beginPath(); ctx.arc(x, cy, r, 0, TAU); ctx.fillStyle = css([200, 170, 255], .16); ctx.fill(); ctx.strokeStyle = css([226, 206, 255], .6 + .2 * Math.sin(t * 4)); ctx.lineWidth = Math.max(1.5, k * .04); ctx.stroke(); } }      // the Advocate's shield, there whenever it is not charging
+    else if (e.kind === 'adv') {      // the Devil's Advocate: top hat, black coat, a red tie, sitting on the arm of the cross
+      const z = P(e.x, e.y, e.z || 0); fig(z[0], z[1], k * .95, { kind: 'teller', body: col([44, 30, 44]), hat: col([24, 18, 28]), head: [236, 214, 200], a });
+      ctx.save(); ctx.globalAlpha = a; poly([[z[0] - .04 * k, z[1] - .86 * k], [z[0] + .04 * k, z[1] - .86 * k], [z[0] + .05 * k, z[1] - .62 * k], [z[0], z[1] - .55 * k], [z[0] - .05 * k, z[1] - .62 * k]], [214, 40, 60]); ctx.restore(); }
     else if (e.kind === 'poi') { fig(x, y, k, { kind: 'crow', body: col(POI.body), a });
       if (e.hp > 0) { const fx = x + k * .3, fy = y - k * (e.wind > 0 ? 1.15 : .5); const w = k * .05; glow(fx, fy, k * .35, [255, 70, 80], .7); ctx.fillStyle = css([232, 236, 246]); ctx.fillRect(fx - w, fy - k * .22, w * 2, k * .26); circ(fx, fy + k * .04, w, [232, 44, 60]); ctx.fillStyle = css([232, 44, 60]); ctx.fillRect(fx - w, fy - k * .1, w * 2, k * .14); ctx.fillStyle = css([250, 250, 255]); ctx.fillRect(fx - w * 1.4, fy - k * .24, w * 2.8, k * .035); } }
     else if (e.kind === 'ass') {      // hooded, a red scarf, a short blade held low
@@ -1931,6 +1956,7 @@ function drawChurch(t, dt) {
     else if (f.k === 'ring') { const r = s * (.4 + 2.2 * eout(u)) * 1.22; ctx.beginPath(); ctx.ellipse(q[0], q[1], r, r * .577, 0, 0, TAU); ctx.strokeStyle = css([255, 232, 150], 1 - u); ctx.lineWidth = s * .12 * (1 - u) + 1; ctx.stroke(); glow(q[0], q[1] - K * .6, K * 2.2, [255, 236, 170], 1 - u); }
     else if (f.k === 'zap') { const pts = [[q[0], q[1]]]; let zx = q[0], zy = q[1]; for (let i = 1; i <= 7; i++) { zy -= s * 1.3; zx += Math.sin(i * 12.9898 + f.x * 78.233) * s * .5; pts.push([zx, zy]); } line(pts, [200, 180, 255], s * .22 * (1 - u) + 1, .6 * (1 - u)); line(pts, [255, 255, 255], s * .09 * (1 - u) + 1, 1 - u); glow(q[0], q[1] - K * .5, K * 2.4, [190, 170, 255], 1 - u); if (u < .25) { ctx.fillStyle = css([220, 210, 255], .25 * (1 - u * 4)); ctx.fillRect(0, 0, W, H); } }
     else if (f.k === 'shield') { const cy = q[1] - K * .6, r = K * (1 + .25 * eout(u)); ctx.beginPath(); ctx.arc(q[0], cy, r, 0, TAU); ctx.fillStyle = css([170, 214, 255], .35 * (1 - u)); ctx.fill(); ctx.strokeStyle = css([226, 240, 255], 1 - u); ctx.lineWidth = Math.max(2, K * .08); ctx.stroke(); drawGuard(q[0], cy - r * 1.1, K * .28, 1 - u); }
+    else if (f.k === 'cast') { const a = P(f.x, f.y, (f.z || 0) + 1.1), b = P(f.x1, f.y1, .8); line([a, b], [220, 180, 255], s * .12 * (1 - u) + 1, .8 * (1 - u)); glow(b[0], b[1], s * (.6 + 1.2 * u), [210, 170, 255], .8 * (1 - u)); }
     else if (f.k === 'bolt') { const a = P(f.x, f.y, .6), b = P(f.x1, f.y1, .6); line([a, b], [255, 236, 170], s * .14 * (1 - u) + 1, 1 - u); glow(b[0], b[1], s * .9, [255, 236, 170], 1 - u); } }
   if (c.flash > 0) { ctx.fillStyle = css([255, 226, 90], .6 * clamp(c.flash / .3)); ctx.fillRect(0, 0, W, H); }
   if (c.pass && c.pass.t > .9) { const ps = c.pass, u = clamp((ps.t - .9) / .7), q = P(lerp(ps.from.x, ps.to.x, u), lerp(ps.from.y, ps.to.y, u), 1 + 1.6 * Math.sin(Math.PI * u)); glow(q[0], q[1], s * .8, [255, 60, 70], 1); circ(q[0], q[1], s * .13, [255, 200, 200]); }
@@ -1993,7 +2019,7 @@ cv.addEventListener('pointermove', e => { if (mode === 'stall' && stall.board) b
 for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) cv.addEventListener(ev, () => { if (mode === 'stall' && stall.board) boardUp(); else if (bag.open) bagUp(); });
 // A long press must not start a text selection, a callout or the magnifying loupe (iOS shows it over a canvas unless the touch itself is cancelled).
 // Buttons are left alone so that they still get their click.
-document.addEventListener('touchstart', e => { if (!(e.target.closest && e.target.closest('button'))) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchstart', e => { if (!(e.target.closest && e.target.closest('button, input'))) e.preventDefault(); }, { passive: false });
 for (const ev of ['contextmenu', 'selectstart', 'gesturestart', 'dblclick']) document.addEventListener(ev, e => e.preventDefault());
 $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
 // choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered
