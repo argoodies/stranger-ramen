@@ -1691,7 +1691,7 @@ function churchDamage(e, n) {
 }
 // the opening for a parry: the moment a foe commits to its attack — a flask or a spell raised, a blade drawn back, a charge chosen or under way, a whirl winding up.
 // It can be taken once per attack, and it does not stop the attack: you still have to get out of the way.
-const parryable = e => !e.inv && !e.parried && !(e.app > 0) && e.hp > 0 && !(e.stun > 0) && !(e.spin > 0) && (e.dash > 0 || (e.wind > 0 && e.wind <= ({ imp: 0, ass: .4, pukka: .6 }[e.kind] || 9)));
+const parryable = e => !e.inv && !shielded(e) && !e.parried && !(e.app > 0) && e.hp > 0 && !(e.stun > 0) && !(e.spin > 0) && (e.dash > 0 || (e.wind > 0 && e.wind <= ({ imp: 0, ass: .4, pukka: .6 }[e.kind] || 9)));
 function churchStrike(e, parry) {      // one blade landing on a foe
   const c = church, p = c.p, knife = armed();
   noise(.08, .55, 700, 180, .03); sfx(knife ? 210 : 130, .14, .45, 'triangle', .03); if (knife) sfx(1650, .07, .14, 'triangle', .03);
