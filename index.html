@@ -2043,8 +2043,10 @@ function frame(now) {
 }
 function start() {
   if (mode !== 'title') return;
-  initAudio(); if (AC && AC.state === 'suspended') AC.resume();
-  mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block'; bell(146.8, .18);
+  initAudio();
+  const hello = () => { bell(196, .2); [67, 71, 74, 79, 83].forEach((m, i) => chime(m, .12 + i * .11, .17, 1.8)); noise(.9, .06, 900, 3200, .05); };      // a small welcome as you step in: a soft bell and a rising run of chimes, with a breath of air
+  if (AC && AC.state === 'suspended') AC.resume().then(hello, hello); else hello();      // played once the sound is really running, so the first notes are not lost
+  mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block';
 }
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
 cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
