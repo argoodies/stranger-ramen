@@ -484,14 +484,14 @@ function bfs(from, to, avoid) {
   }
   return null;
 }
-function nearestWalkable(x, y) {
+function nearestWalkable(x, y, offPath) {      // offPath: only grass, never the paved path (where the townsfolk like to stroll)
   let best = null, bd = 1e9;
-  for (let i = -5; i < 11; i++) for (let j = -5; j < 5; j++) if (walkable(i, j)) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
+  for (let i = -5; i < 11; i++) for (let j = -5; j < 5; j++) if (walkable(i, j) && !(offPath && PATH.has(key(i, j)))) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
   return best;
 }
 const player = { x: -0.5, y: 3.5, path: [], enter: false, step: 0 };
 const npcs = [];
-for (let n = 0; n < 1; n++) { const c = nearestWalkable(rnd(-4, 4), rnd(-4, 4)); npcs.push({ x: c[0] + .5, y: c[1] + .5, path: [], wait: rnd(0, 4), look: randomLook(), step: 0 }); }
+for (let n = 0; n < 1; n++) { const c = nearestWalkable(rnd(-4, 4), rnd(-4, 4), true); npcs.push({ x: c[0] + .5, y: c[1] + .5, path: [], wait: rnd(0, 4), look: randomLook(), step: 0 }); }
 function cellOf(p) { return [Math.floor(p.x), Math.floor(p.y)]; }
 const sameCell = (a, i, j) => Math.floor(a.x) === i && Math.floor(a.y) === j;
 function taken(i, j, self) {
@@ -630,7 +630,7 @@ function updateWorld(dt) {
     n.hop = (n.hop || 0) + (n.path.length ? dt * 10 : 0);
     if (n.sayT > 0) n.sayT -= dt;
     if (n.path.length) { walk(n, dt, 1.6, true); if (n.blocked) { n.path = []; n.wait = rnd(.4, 1.6); } }
-    else if ((n.wait -= dt) < 0) { const to = nearestWalkable(rnd(-5, 11), rnd(-5, 5)), isDoor = d => to[0] === d[0] && to[1] === d[1]; const p = isDoor(DOOR) || isDoor(TDOOR) || isDoor(LDOOR) || isDoor(CDOOR) ? null : bfs(cellOf(n), to); if (p) n.path = p.slice(1); n.wait = rnd(2, 7); }
+    else if ((n.wait -= dt) < 0) { const to = nearestWalkable(rnd(-5, 11), rnd(-5, 5), true), isDoor = d => to[0] === d[0] && to[1] === d[1]; const p = isDoor(DOOR) || isDoor(TDOOR) || isDoor(LDOOR) || isDoor(CDOOR) ? null : bfs(cellOf(n), to, PATH); if (p) n.path = p.slice(1); n.wait = rnd(2, 7); }      // the townsfolk keep to the grass and never step on the path
   }
   worldHint -= dt;
 }
@@ -1733,6 +1733,8 @@ function updateChurch(dt) {
     p.vx = p.vy = 0; p.moving = d > reach;
     if (p.moving) { const sp = p.exit ? 7 : 3.9, st = Math.min(d - reach, sp * dt); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += dx / d * st; p.y += dy / d * st; p.face = dy - dx; p.hopT = (p.hopT || 0) + dt; }
     p.x = clamp(p.x, churchXmin(), churchXmax()); p.y = clamp(p.y, CY0, CY1); churchBump(p);
+    for (const f of c.foes) { if (f.hp <= 0 || f.app > 0 || f.spin > 0 || f.inv) continue; const dx = p.x - f.x, dy = p.y - f.y, dd = Math.hypot(dx, dy), R = .62; if (dd < R) { const k = dd > .001 ? R / dd : 0; p.x = f.x + (k ? dx * k : R); p.y = f.y + (k ? dy * k : 0); } }      // the chef cannot walk through a foe: he is pushed back out round it
+    p.x = clamp(p.x, churchXmin(), churchXmax()); p.y = clamp(p.y, CY0, CY1);
     if (e && Math.hypot(e.x - p.x, e.y - p.y) <= (e.dash > 0 ? 1.5 : .92) && p.cd <= 0) churchHit(e);      // a charging foe can be met a little further out
     if (p.pend === 'torch' && (!p.moving || Math.hypot(p.x - TORCH[0], p.y - TORCH[1]) < .7)) { p.pend = null; p.tx = p.x; p.ty = p.y; churchIgnite(); }      // arrived beside the torch
     if (!c.fight && p.exit && p.x >= CX1 - 1.3 && Math.abs(p.y - CW / 2) < 1.2) return leaveChurch();      // heading for the steps when there is no fight on: he hurries, and is out as soon as he is near the door
