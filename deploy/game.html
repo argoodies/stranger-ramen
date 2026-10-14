@@ -1821,6 +1821,7 @@ function churchTap(sx, sy) {
   let best = null, bd = K * 1.05;
   for (const e of c.foes) if (e.hp > 0 && !(e.app > 0)) { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
   if (best) { p.target = best; if (parryable(best)) p.cd = 0; return; }      // a tap on a foe that is just striking cuts at once, whatever the rhythm of your blows
+  { const q = v.P(.95, CW / 2, 2.2); if (Math.hypot(sx - q[0], sy - q[1]) < K * 1.5) { c.crossWob = performance.now(); sfx(330, .25, .06, 'triangle'); } }      // a tap on the cross rocks it a little
   if (!c.fight && !c.done) { const q = v.P(.95, CW / 2, 2.2), now = performance.now();      // debug: the cross, tapped ten times running while the church is dark, asks which round to jump to
     if (Math.hypot(sx - q[0], sy - q[1]) < K * 1.5) { c.crossN = now - (c.crossAt || 0) < 1500 ? (c.crossN || 0) + 1 : 1; c.crossAt = now; if (c.crossN >= 10) { c.crossN = 0; debugAsk(S().debugAsk, c.tier, v2 => { const n = parseInt(v2, 10); if (n >= 1 && n <= TIERS) { c.tier = n; churchBanner(S().lightTorch, 3); chime(81, 0, .1); } }); } return; } }
   if (!c.fight && !c.done) { const q = v.P(TORCH[0], TORCH[1]);      // the unlit torch: walk up to it first, then light it
@@ -1886,7 +1887,8 @@ function drawChurch(t, dt) {
   const objs = [], flash = (col, e) => e.hit > 0 ? mix(col, [255, 255, 255], .7) : col;
   objs.push({ k: 1 + my + .2, d: () => {      // the Holy Cross on its steps, under the rose window
     { const q = P(.95, my, 2.6); glow(q[0], q[1], s * (3 + .18 * Math.sin(t * 2)), [255, 236, 180], .75 * LIT); }
-    v.box(.55, my - .5, .4, .8, 1, .22, [246, 236, 226]); v.box(.84, my - .11, .62, .22, .22, 3.2, GOLD); v.box(.84, my - .8, 2.7, .22, 1.6, .22, GOLD);
+    v.box(.55, my - .5, .4, .8, 1, .22, [246, 236, 226]);
+    { const wk = clamp(1 - (performance.now() - (c.crossWob || -1e9)) / 700), b = P(.95, my, .62), ang = .07 * wk * Math.sin(performance.now() / 45); ctx.save(); ctx.translate(b[0], b[1]); ctx.rotate(ang); ctx.translate(-b[0], -b[1]); v.box(.84, my - .11, .62, .22, .22, 3.2, GOLD); v.box(.84, my - .8, 2.7, .22, 1.6, .22, GOLD); ctx.restore(); }      // it rocks on its foot when tapped
     for (const y of [my - 1.1, my + 1.1]) { v.box(.96, y - .05, .4, .1, .1, .7, [250, 244, 232]); const q = P(1.01, y, 1.22); glow(q[0], q[1], s * (.8 + .08 * Math.sin(t * 9 + y)), [255, 214, 140], .85 * LIT); circ(q[0], q[1], s * .055, [255, 240, 190], LIT); } } });
   objs.push({ k: TORCH[0] + TORCH[1], d: () => { const [x, y] = TORCH, f = c.torchF, top = P(x, y, 1.5), fl = .85 + .15 * Math.sin(t * 13);      // the torch: a brazier on a post, cold until you light it
     v.box(x - .2, y - .2, 0, .4, .4, .12, GOLD); v.box(x - .06, y - .06, .12, .12, .12, 1.05, [150, 104, 84]); v.box(x - .22, y - .22, 1.17, .44, .44, .16, GOLD);
