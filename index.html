@@ -883,7 +883,7 @@ function drawStall(t) {
     if (!c) return; let off = 0, a = 1;
     if (c.state === 'arrive') { off = (1 - eout(c.t / .8)) * 2.4; a = clamp(c.t / .4); }
     if (c.state === 'leave') { off = -ease(c.t / 1.0) * 2.4; a = 1 - clamp(c.t / 1.0); }
-    const p = P(SEATX[i] + CUSTY + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
+    const p = P(SEATX[i] + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
     fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
