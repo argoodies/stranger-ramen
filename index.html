@@ -1478,15 +1478,14 @@ function drawLib(t) {
 
 // ------------------------------------------------------------ the church on the little island: small things drawn in several places, the backpack, then the long aisle inside
 // The chef going down (u: 0 → 1 over the 2.2 s before he wakes up outside). He staggers and his knees give; he topples sideways, the knife skidding away
-// and his tall hat tumbling off; then he lies flat on the stone with little stars wheeling over his head, and the world fades out.
+// and his tall hat tumbling off; then he lies flat on the stone, and the world fades out.
 function drawFallen(x, y, K, u, dir, t) {
-  const st = clamp(u / .22), fall = eout(clamp((u - .18) / .22)), lie = clamp((u - .4) / .6), ang = dir * (st * .18 + fall * 1.32), sink = st * K * .12 * (1 - fall);
+  const st = clamp(u / .22), fall = eout(clamp((u - .18) / .22)), ang = dir * (st * .18 + fall * 1.32), sink = st * K * .12 * (1 - fall);
   ell(x + dir * fall * K * .45, y + K * .02, K * (.36 + .5 * fall), K * (.1 + .06 * fall), [20, 12, 40], .3);      // the shadow spreads as he lies down
   { const kx = x + dir * K * (.5 + 1.1 * fall), ky = y + K * (.1 + .12 * fall) - Math.sin(Math.min(1, fall * 1.4) * Math.PI) * K * .35; if (u > .2) drawKnifeFlat(kx, ky, K * .34, dir * (1.4 + fall * 3)); }      // the knife, dropped, skids away across the floor
   ctx.save(); ctx.translate(x, y + sink); ctx.rotate(ang); fig(0, 0, K, { kind: 'plain', body: WHITE, head: SKIN, apron: [220, 80, 80] }); ctx.restore();      // the body, toppling about its feet
   { const hu = clamp((u - .2) / .35), a0 = dir * (Math.min(st, 1) * .18 + eout(clamp((Math.min(u, .2) - .18) / .22)) * 1.32), sx0 = x + Math.sin(a0) * K * 1.11, sy0 = y + sink - Math.cos(a0) * K * 1.11, ex = x + dir * K * 1.75, ey = y + K * .06, hx = lerp(sx0, ex, eout(hu)), hy = lerp(sy0, ey, hu) - Math.sin(hu * Math.PI) * K * .5, rot = a0 + dir * hu * 4.2;      // the hat sits on his head until he topples, then flies off and rolls to a stop
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(rot); ctx.fillStyle = css([250, 250, 255]); for (const [dx, dy, r] of [[-.11, -.2, .11], [.11, -.2, .11], [0, -.27, .13]]) { ctx.beginPath(); ctx.arc(dx * K, dy * K, r * K, 0, TAU); ctx.fill(); } poly([[-.15 * K, -.18 * K], [.15 * K, -.18 * K], [.14 * K, 0], [-.14 * K, 0]], [226, 228, 244]); poly([[-.15 * K, -.06 * K], [.15 * K, -.06 * K], [.15 * K, 0], [-.15 * K, 0]], [220, 80, 80]); ctx.restore(); }
-  if (lie > 0) { const hx = x + dir * K * 1.0, hy = y - K * .22; for (let i = 0; i < 3; i++) { const g = t * 4 + i * TAU / 3, sx = hx + Math.cos(g) * K * .28, sy = hy - K * .3 + Math.sin(g) * K * .09; drawStar(sx, sy, K * .07, [255, 230, 140], clamp(lie * 3) * (1 - clamp((u - .85) / .15))); } }      // seeing stars
   if (u > .6) { ctx.fillStyle = css([8, 6, 20], .75 * clamp((u - .6) / .4)); ctx.fillRect(0, 0, W, H); }      // and the lights go out
 }
 function drawStar(x, y, r, c, a = 1) { const pts = []; for (let i = 0; i < 10; i++) { const q = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; pts.push([x + Math.cos(q) * rr, y + Math.sin(q) * rr]); } poly(pts, c, a); }
