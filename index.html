@@ -560,7 +560,16 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
 function drawChapel(v, t) {      // the church on the little island: a stone nave, a steep red roof, a thin spire with a cross
   const st = PAL.stone, lit = [255, 214, 140], o = [10, .92, 0];
   v.box(9.08, -.92, 0, 1.84, 1.84, 1.7, st);
-  v.arch('L', o, .42, .64, tint(DARK)); v.arch('L', [9.45, .92, .76], .16, .26, tint(DARK)); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // a dark door between two small dark windows: no light shows from inside until the torch is lit
+  { // the doorway is not a flat black shape but a way into an unlit room: you see the thickness of the wall at its near side, a little of the floor and the red carpet just inside catching the light from outdoors, and above that the dark deepening
+    const dw = .42, dh = .64, T = .1, x0 = 10 - dw / 2, x1 = 10 + dw / 2, P = v.P.bind(v), pts = [[-dw / 2, 0], [dw / 2, 0], [dw / 2, dh]]; for (let i = 0; i <= 10; i++) { const q = Math.PI * i / 10; pts.push([dw / 2 * Math.cos(q), dh + dw / 2 * Math.sin(q)]); }
+    const rim = pts.map(q => v.F('L', o, q[0], q[1])), top = v.F('L', o, 0, dh + dw / 2), bot = v.F('L', o, 0, 0);
+    ctx.save(); ctx.beginPath(); rim.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();
+    { const g = ctx.createLinearGradient(0, top[1], 0, bot[1]); g.addColorStop(0, css(tint([38, 30, 60]))); g.addColorStop(.55, css(tint([58, 46, 84]))); g.addColorStop(1, css(tint([92, 78, 116]))); ctx.fillStyle = g; ctx.fillRect(top[0] - v.s, top[1] - v.s, v.s * 2, bot[1] - top[1] + v.s * 2); }
+    { const f = [P(x0, .92, 0), P(x1, .92, 0), P(x1, .92 - 1.1, 0), P(x0, .92 - 1.1, 0)], g = ctx.createLinearGradient(f[0][0], f[0][1], f[3][0], f[3][1]); g.addColorStop(0, css(tint([150, 138, 160]), .85)); g.addColorStop(1, css(tint([150, 138, 160]), 0)); ctx.fillStyle = g; ctx.beginPath(); f.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fill();      // the floor inside, fading into the dark
+      const c = [P(10 - .09, .92, 0), P(10 + .09, .92, 0), P(10 + .09, .92 - 1.1, 0), P(10 - .09, .92 - 1.1, 0)], g2 = ctx.createLinearGradient(c[0][0], c[0][1], c[3][0], c[3][1]); g2.addColorStop(0, css(tint([176, 70, 84]), .9)); g2.addColorStop(1, css(tint([176, 70, 84]), 0)); ctx.fillStyle = g2; ctx.beginPath(); c.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fill(); }      // and the carpet down its middle
+    poly([P(x0, .92, 0), P(x0, .92 - T, 0), P(x0, .92 - T, 2), P(x0, .92, 2)], mix(tint(st), tint(DARK), .62));      // the near jamb: the wall is thick
+    ctx.restore(); }
+  v.arch('L', [9.45, .92, .76], .16, .26, tint(DARK)); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // a dark door between two small dark windows: no light shows from inside until the torch is lit
   for (const y of [-.55, .55]) v.arch('R', [10.92, y, .76], .16, .26, tint(DARK));      // the side wall's pair: same size (the belfry window's), height and spacing as the pair beside the door, and evenly placed either side of the wall's middle
   v.pyramid(8.95, -1.05, 1.7, 2.1, 1.25, PAL.roof);
   v.box(9.78, -.22, 2.2, .44, .44, 1.5, mix(st, [255, 255, 255], .15)); v.arch('L', [10, .22, 3.0], .16, .26, tint(DARK)); v.pyramid(9.7, -.3, 3.7, .6, 1.0, PAL.roof);
