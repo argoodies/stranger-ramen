@@ -560,8 +560,7 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
 function drawChapel(v, t) {      // the church on the little island: a stone nave, a steep red roof, a thin spire with a cross
   const st = PAL.stone, lit = [255, 214, 140], o = [10, .92, 0];
   v.box(9.08, -.92, 0, 1.84, 1.84, 1.7, st);
-  { const dp = v.F('L', o, 0, .5); glow(dp[0], dp[1], v.s * (1.2 + .14 * Math.sin(t * 3)), lit, .75); }
-  v.arch('L', o, .56, .66, lit); v.arch('L', [9.45, .92, .76], .16, .26, tint(DARK)); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // the lit door between two small dark windows, like the ones in the side wall
+  v.arch('L', o, .56, .66, tint(DARK)); v.arch('L', [9.45, .92, .76], .16, .26, tint(DARK)); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // a dark door between two small dark windows: no light shows from inside until the torch is lit
   for (const y of [-.55, .55]) v.arch('R', [10.92, y, .76], .16, .26, tint(DARK));      // the side wall's pair: same size (the belfry window's), height and spacing as the pair beside the door, and evenly placed either side of the wall's middle
   v.pyramid(8.95, -1.05, 1.7, 2.1, 1.25, PAL.roof);
   v.box(9.78, -.22, 2.2, .44, .44, 1.5, mix(st, [255, 255, 255], .15)); v.arch('L', [10, .22, 3.0], .16, .26, tint(DARK)); v.pyramid(9.7, -.3, 3.7, .6, 1.0, PAL.roof);
