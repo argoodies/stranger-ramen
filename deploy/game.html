@@ -840,7 +840,7 @@ function updateStall(dt) {
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
-  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; save.fed = true; saveNow(); if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }
+  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }
   s.seats.forEach((c, i) => {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
@@ -1645,7 +1645,6 @@ function enterChurch() {
 }
 function churchIgnite() {      // the torch is lit: the fight is on. Round 1 opens with the small foes; later rounds go straight to the bosses
   const c = church; if (c.fight || c.done) return; c.fight = true; c.torchOn = true; c.bannerT = 0; c.p.exit = false; bag.open = false;
-  if (save.fed) { c.hp = 7; c.bonus = true; save.fed = false; saveNow(); }      // you came in with a bowl of your own ramen inside you: one more heart, for this fight
   churchSpawn(c.tier, c.tier > 1); noise(.5, .35, 300, 1600); sfx(220, .5, .12, 'triangle'); bell(110, .14);
 }
 function churchRest() {      // thanks have been said: the good soul and the chest are gone, you are whole again, the floor is clean, and the lights and the torch go out
