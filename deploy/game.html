@@ -561,8 +561,8 @@ function drawChapel(v, t) {      // the church on the little island: a stone nav
   const st = PAL.stone, lit = [255, 214, 140], o = [10, .92, 0];
   v.box(9.08, -.92, 0, 1.84, 1.84, 1.7, st);
   { const dp = v.F('L', o, 0, .5); glow(dp[0], dp[1], v.s * (1.2 + .14 * Math.sin(t * 3)), lit, .75); }
-  v.arch('L', o, .56, .66, lit); v.arch('L', [9.45, .92, .7], .2, .34, [120, 180, 230]); v.arch('L', [10.55, .92, .7], .2, .34, [226, 106, 120]);
-  for (const y of [-.45, .45]) v.arch('R', [10.92, y, .6], .24, .44, tint(DARK));
+  v.arch('L', o, .56, .66, lit); v.arch('L', [9.45, .92, .76], .16, .26, tint(DARK)); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // the lit door between two small dark windows, like the ones in the side wall
+  for (const y of [-.55, .55]) v.arch('R', [10.92, y, .76], .16, .26, tint(DARK));      // the side wall's pair: same size (the belfry window's), height and spacing as the pair beside the door, and evenly placed either side of the wall's middle
   v.pyramid(8.95, -1.05, 1.7, 2.1, 1.25, PAL.roof);
   v.box(9.78, -.22, 2.2, .44, .44, 1.5, mix(st, [255, 255, 255], .15)); v.arch('L', [10, .22, 3.0], .16, .26, tint(DARK)); v.pyramid(9.7, -.3, 3.7, .6, 1.0, PAL.roof);
   const a = v.P(10, 0, 4.7), b = v.P(10, 0, 5.35), m = v.P(10, 0, 5.1), w = v.s * .05; line([a, b], tint([246, 200, 120]), w); line([[m[0] - v.s * .16, m[1]], [m[0] + v.s * .16, m[1]]], tint([246, 200, 120]), w);
@@ -883,7 +883,7 @@ function drawStall(t) {
     if (!c) return; let off = 0, a = 1;
     if (c.state === 'arrive') { off = (1 - eout(c.t / .8)) * 2.4; a = clamp(c.t / .4); }
     if (c.state === 'leave') { off = -ease(c.t / 1.0) * 2.4; a = 1 - clamp(c.t / 1.0); }
-    const p = P(SEATX[i] + CUSTY + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
+    const p = P(SEATX[i] + CUSTY * .5 + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
     fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
