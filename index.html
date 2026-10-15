@@ -55,6 +55,7 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
     <button class="pill" id="bag" style="display:none;padding:8px 11px;line-height:0" aria-label="背包"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM9 9V6a3 3 0 0 1 6 0v3M9 14h6"/></svg></button>
   </div>
   <div style="display:flex;gap:8px;position:relative">
+    <button class="pill" id="gear" style="display:none;padding:8px 11px;line-height:0" aria-label="debug"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     <button class="pill" id="lang" style="display:none;padding:8px 11px;line-height:0" aria-label="Language"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></button>
     <div id="langMenu"><button data-l="hans">简体中文</button><button data-l="hant">繁體中文</button><button data-l="en">English</button><button data-l="auto">跟随系统</button></div>
   </div>
@@ -138,7 +139,7 @@ const STR = {
     hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了，出去走走吧。',
     libAway: '图书管理员不在，不要乱动。',
-    churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）',
+    churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）', devOn: '进入开发者模式。',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '卡片'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
     gotCard: '占卜师留下了一张牌。', items: { stop: ['时间静止', '战斗中点上方的牌，全场敌人静止十秒，用完即消失。'], h7: ['红桃7', '一张普通的扑克牌，没什么用。'], cq: ['梅花Q', '一张普通的扑克牌，没什么用。'], d4: ['方片4', '一张普通的扑克牌，没什么用。'], sa: ['黑桃A', '一张普通的扑克牌，没什么用。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
@@ -166,7 +167,7 @@ const STR = {
     hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了，出去走走吧。',
     libAway: '圖書館員不在，不要亂動。',
-    churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）',
+    churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）', devOn: '進入開發者模式。',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '卡片'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
     gotCard: '占卜師留下了一張牌。', items: { stop: ['時間靜止', '戰鬥中點上方的牌，全場敵人靜止十秒，用完即消失。'], h7: ['紅桃7', '一張普通的撲克牌，沒什麼用。'], cq: ['梅花Q', '一張普通的撲克牌，沒什麼用。'], d4: ['方片4', '一張普通的撲克牌，沒什麼用。'], sa: ['黑桃A', '一張普通的撲克牌，沒什麼用。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
@@ -194,7 +195,7 @@ const STR = {
     hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. Time for a walk.",
     libAway: "The librarian is out. Better not touch anything.",
-    churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)',
+    churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)', devOn: 'Developer mode on.',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Card'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
     gotCard: 'The fortune teller left a card.', items: { stop: ['Time Stop', 'Tap the card at the top in a fight: every foe stands still for ten seconds. Used up after one go.'], h7: ['Seven of Hearts', 'An ordinary playing card. No use at all.'], cq: ['Queen of Clubs', 'An ordinary playing card. No use at all.'], d4: ['Four of Diamonds', 'An ordinary playing card. No use at all.'], sa: ['Ace of Spades', 'An ordinary playing card. No use at all.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
@@ -1836,8 +1837,8 @@ function churchTap(sx, sy) {
   for (const e of c.foes) if (e.hp > 0 && !(e.app > 0)) { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
   if (best) { p.target = best; if (parryable(best)) p.cd = 0; return; }      // a tap on a foe that is just striking cuts at once, whatever the rhythm of your blows
   { const q = v.P(.95, CW / 2, 2.2); if (Math.hypot(sx - q[0], sy - q[1]) < K * 1.5) { c.crossWob = performance.now(); sfx(330, .25, .06, 'triangle'); } }      // a tap on the cross rocks it a little
-  if (!c.fight && !c.done) { const q = v.P(.95, CW / 2, 2.2), now = performance.now();      // debug: the cross, tapped ten times running while the church is dark, asks which round to jump to
-    if (Math.hypot(sx - q[0], sy - q[1]) < K * 1.5) { c.crossN = now - (c.crossAt || 0) < 1500 ? (c.crossN || 0) + 1 : 1; c.crossAt = now; if (c.crossN >= 10) { c.crossN = 0; debugAsk(S().debugAsk, c.tier, v2 => { const n = parseInt(v2, 10); if (n >= 1 && n <= TIERS) { c.tier = n; churchBanner(S().lightTorch, 3); chime(81, 0, .1); } }); } return; } }
+  if (!c.fight && !c.done) { const q = v.P(.95, CW / 2, 2.2), now = performance.now();      // the cross, tapped ten times running while the church is dark, turns on developer mode
+    if (Math.hypot(sx - q[0], sy - q[1]) < K * 1.5) { c.crossN = now - (c.crossAt || 0) < 1500 ? (c.crossN || 0) + 1 : 1; c.crossAt = now; if (c.crossN >= 10) { c.crossN = 0; save.dev = true; saveNow(); churchBanner(S().devOn, 2.5); chime(81, 0, .1); chime(88, .1, .1); } return; } }      // ten taps: developer mode, and a gear button for choosing the round
   if (!c.fight && !c.done) { const q = v.P(TORCH[0], TORCH[1]);      // the unlit torch: walk up to it first, then light it
     if (Math.hypot(sx - q[0], sy - (q[1] - K * .8)) < K * 1.1) { const dx = p.x - TORCH[0], dy = p.y - TORCH[1], d = Math.hypot(dx, dy) || 1; p.target = null; p.exit = false; p.tx = TORCH[0] + dx / d * .62; p.ty = TORCH[1] + dy / d * .62; p.pend = 'torch'; chime(69, 0, .05, .6); return; } }
   if (c.chest && !c.chest.open && c.chest.at && Math.hypot(sx - c.chest.at[0], sy - (c.chest.at[1] - K * .3)) < K) return churchOpen();
@@ -1874,12 +1875,12 @@ function drawChurch(t, dt) {
     line([v.F('L', o, 0, 0), v.F('L', o, 0, 2.68)], tn(FR), s * .04); for (const z of [.55, 1.3, 2.2]) line([v.F('L', o, -.5, z), v.F('L', o, .5, z)], tn(FR), s * .035);
     poly([P(x - .5, .1), P(x + .5, .1), P(x + 2.3, 4.2), P(x + 1.0, 4.2)], g, .05 + .11 * LIT); poly([v.F('L', o, -.5, 2.4), v.F('L', o, .5, 2.4), P(x + 2.3, 4.2), P(x + 1.0, 4.2)], [255, 244, 220], .06 * LIT); }      // each window lays its colour across the floor
   for (let k = 0; k < 5; k++) { const x = .6 + 3.2 * k; v.box(x - .2, 0, 0, .4, .2, Hh - .5, [255, 248, 238]); v.box(x - .28, 0, Hh - .5, .56, .26, .16, GOLD); v.box(x - .28, 0, 0, .56, .26, .2, [240, 228, 218]); }
-  { const o = [0, my, 3.4], ring = (r, n = 32) => { const a = []; for (let k = 0; k < n; k++) { const q = TAU * k / n; a.push(v.F('R', o, r * Math.cos(q), r * Math.sin(q))); } return a; }, m = v.F('R', o, 0, 0);
-    glow(m[0], m[1], s * 3.4, [255, 232, 190], .1 + .5 * LIT); poly(ring(1.36), tn(FR)); poly(ring(1.26), GOLD);
-    for (let k = 0; k < 12; k++) { const q0 = TAU * k / 12, q1 = TAU * (k + 1) / 12, qm = (q0 + q1) / 2; poly([m, v.F('R', o, 1.16 * Math.cos(q0), 1.16 * Math.sin(q0)), v.F('R', o, 1.2 * Math.cos(qm), 1.2 * Math.sin(qm)), v.F('R', o, 1.16 * Math.cos(q1), 1.16 * Math.sin(q1))], mix(GLASS[k % 4], [255, 255, 255], .25)); }
-    for (let k = 0; k < 12; k++) { const q = TAU * k / 12; line([m, v.F('R', o, 1.16 * Math.cos(q), 1.16 * Math.sin(q))], tn(FR), s * .03); } poly(ring(.3, 14), GOLD);
+  { const o = [0, my, 3.05], RS = .8, ring = (r, n = 32) => { const a = []; for (let k = 0; k < n; k++) { const q = TAU * k / n; a.push(v.F('R', o, r * Math.cos(q), r * Math.sin(q))); } return a; }, m = v.F('R', o, 0, 0);
+    glow(m[0], m[1], s * 3.4 * RS, [255, 232, 190], .1 + .5 * LIT); poly(ring(1.36 * RS), tn(FR)); poly(ring(1.26 * RS), GOLD);
+    for (let k = 0; k < 12; k++) { const q0 = TAU * k / 12, q1 = TAU * (k + 1) / 12, qm = (q0 + q1) / 2; poly([m, v.F('R', o, 1.16 * RS * Math.cos(q0), 1.16 * RS * Math.sin(q0)), v.F('R', o, 1.2 * RS * Math.cos(qm), 1.2 * RS * Math.sin(qm)), v.F('R', o, 1.16 * RS * Math.cos(q1), 1.16 * RS * Math.sin(q1))], mix(GLASS[k % 4], [255, 255, 255], .25)); }
+    for (let k = 0; k < 12; k++) { const q = TAU * k / 12; line([m, v.F('R', o, 1.16 * RS * Math.cos(q), 1.16 * RS * Math.sin(q))], tn(FR), s * .03); } poly(ring(.3 * RS, 14), GOLD);
     for (const y of [1.6, CW - 1.6]) { const w = [0, y, 1.2]; v.arch('R', [0, y, 1.1], .84, 2.0, tn(FR)); v.arch('R', w, .64, 1.9, mix(GLASS[1], [255, 255, 255], .35)); v.arch('R', w, .64, .9, mix(GLASS[2], [255, 255, 255], .3)); }
-    poly([v.F('R', o, -1, -.6), v.F('R', o, 1, -.6), P(6.5, my - 1.7), P(6.5, my + 1.7)], [255, 240, 206], (.1 + .02 * Math.sin(t * .8)) * LIT); }      // light falling from the rose window down the nave
+    poly([v.F('R', o, -.8, -.5), v.F('R', o, .8, -.5), P(6.5, my - 1.7), P(6.5, my + 1.7)], [255, 240, 206], (.1 + .02 * Math.sin(t * .8)) * LIT); }      // light falling from the rose window down the nave
   v.box(0, my - 2, 0, 2.1, 4, .2, [252, 246, 238]); v.box(0, my - 1.4, .2, 1.6, 2.8, .2, [255, 250, 244]);      // the steps of the cross
   if (!c.fight) for (let k = 0; k < 4; k++) v.box(CL + k * .32, my - .7, -1.2, .32, 1.4, 1.2 - .26 * k, [240, 230, 220]);      // the way out, there whenever no fight is on: steps going down from the door, as at the library
   if (!c.fight) { const q = P(CL + .5, my, -.3), a = (.5 + .3 * Math.sin(t * 3)) * (.4 + .6 * LIT); glow(q[0], q[1], s * 1.3, [255, 236, 190], .6 * a); }
@@ -1902,7 +1903,7 @@ function drawChurch(t, dt) {
   objs.push({ k: 1 + my + .2, d: () => {      // the Holy Cross on its steps, under the rose window
     { const q = P(.95, my, 2.6); glow(q[0], q[1], s * (3 + .18 * Math.sin(t * 2)), [255, 236, 180], .75 * LIT); }
     v.box(.55, my - .5, .4, .8, 1, .22, [246, 236, 226]);
-    { const wk = clamp(1 - (performance.now() - (c.crossWob || -1e9)) / 700), b = P(.95, my, .62), ang = .07 * wk * Math.sin(performance.now() / 45); ctx.save(); ctx.translate(b[0], b[1]); ctx.rotate(ang); ctx.translate(-b[0], -b[1]); v.box(.84, my - .11, .62, .22, .22, 3.2, GOLD); v.box(.84, my - .8, 2.7, .22, 1.6, .22, GOLD); ctx.restore(); }      // it rocks on its foot when tapped
+    { const wk = clamp(1 - (performance.now() - (c.crossWob || -1e9)) / 700), b = P(.95, my, .62), ang = .025 * wk * Math.sin(performance.now() / 45); ctx.save(); ctx.translate(b[0], b[1]); ctx.rotate(ang); ctx.translate(-b[0], -b[1]); v.box(.84, my - .11, .62, .22, .22, 3.2, GOLD); v.box(.84, my - .8, 2.7, .22, 1.6, .22, GOLD); ctx.restore(); }      // it rocks on its foot when tapped
     for (const y of [my - 1.1, my + 1.1]) { v.box(.96, y - .05, .4, .1, .1, .7, [250, 244, 232]); const q = P(1.01, y, 1.22); glow(q[0], q[1], s * (.8 + .08 * Math.sin(t * 9 + y)), [255, 214, 140], .85 * LIT); circ(q[0], q[1], s * .055, [255, 240, 190], LIT); } } });
   objs.push({ k: TORCH[0] + TORCH[1], d: () => { const [x, y] = TORCH, f = c.torchF, top = P(x, y, 1.5), fl = .85 + .15 * Math.sin(t * 13);      // the torch: a brazier on a post, cold until you light it
     v.box(x - .2, y - .2, 0, .4, .4, .12, GOLD); v.box(x - .06, y - .06, .12, .12, .12, 1.05, [150, 104, 84]); v.box(x - .22, y - .22, 1.17, .44, .44, .16, GOLD);
@@ -2037,6 +2038,7 @@ function frame(now) {
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5), lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
   { const can = mode === 'church' && !church.fight && church.down <= 0, set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };
     if (!can) bag.open = false; set('bag', can && !bag.open, 'block');      // the backpack is at hand inside the church whenever there is no fight on
+    set('gear', mode === 'church' && !!save.dev && !church.fight && !bag.open && church.down <= 0, 'block');      // developer mode: a gear for choosing the round
     set('bclose', bag.open, 'block'); if (mode === 'world') set('zoom', !bag.open, 'block'); }      // with the backpack open the only button is a cross, and all it does is close the backpack
   musicTick();
   requestAnimationFrame(frame);
@@ -2049,6 +2051,7 @@ function start() {
   initAudio(); if (AC && AC.state === 'suspended') AC.resume();
   mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block'; bell(146.8, .18);
 }
+$('gear').addEventListener('click', () => { const c = church; if (c.fight) return; debugAsk(S().debugAsk, c.tier, v2 => { const n = parseInt(v2, 10); if (n >= 1 && n <= TIERS) { if (c.done) churchRest(); c.tier = n; churchBanner(S().lightTorch, 3); chime(81, 0, .1); } }); });
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
 cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
