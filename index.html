@@ -139,6 +139,7 @@ const STR = {
     hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了，出去走走吧。',
     libAway: '图书管理员不在，不要乱动。',
+    barDay: ['早上好，来杯咖啡吗？', '今天的豆子烤得正好。'], barNight: ['晚上好，喝点什么？', '今晚来杯麦酒吧。'], barServeDay: '您的咖啡。', barServeNight: '您的酒。', barPatron: { sailor: ['起雾的时候，听钟楼的钟声认路。', '海上可没有拉面吃。'], drunk: ['嗝……老板，再来一杯。', '我就坐一会儿……'], bard: ['想听一首关于钟楼的歌吗？', '这间酒馆，适合写一首慢歌。'] },
     churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）', devOn: '进入开发者模式。', devOff: '离开开发者模式。', devTitle: '开发者', devJump: '跳关', devItems: '获得物品', drySay: '怎么是拌面？',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '卡片'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
@@ -167,6 +168,7 @@ const STR = {
     hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了，出去走走吧。',
     libAway: '圖書館員不在，不要亂動。',
+    barDay: ['早安，來杯咖啡嗎？', '今天的豆子烘得正好。'], barNight: ['晚上好，喝點什麼？', '今晚來杯麥酒吧。'], barServeDay: '您的咖啡。', barServeNight: '您的酒。', barPatron: { sailor: ['起霧的時候，聽鐘樓的鐘聲認路。', '海上可沒有拉麵吃。'], drunk: ['嗝……老闆，再來一杯。', '我就坐一會兒……'], bard: ['想聽一首關於鐘樓的歌嗎？', '這間酒館，適合寫一首慢歌。'] },
     churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）', devOn: '進入開發者模式。', devOff: '離開開發者模式。', devTitle: '開發者', devJump: '跳關', devItems: '獲得物品', drySay: '怎麼是拌麵？',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '卡片'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
@@ -195,6 +197,7 @@ const STR = {
     hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. Time for a walk.",
     libAway: "The librarian is out. Better not touch anything.",
+    barDay: ['Morning! Coffee?', 'The beans are roasted just right today.'], barNight: ['Evening. What will it be?', 'An ale tonight, perhaps.'], barServeDay: 'Your coffee.', barServeNight: 'Your drink.', barPatron: { sailor: ['In the fog I steer by the clocktower bell.', 'No ramen out at sea.'], drunk: ['Hic… one more, barkeep.', 'Just sitting a while…'], bard: ['Shall I sing you a song of the clocktower?', 'This little bar wants a slow song.'] },
     churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)', devOn: 'Developer mode on.', devOff: 'Developer mode off.', devTitle: 'Developer', devJump: 'Jump to round', devItems: 'Get an item', drySay: 'Dry noodles? Where is the soup?',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Card'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
@@ -464,12 +467,13 @@ const key = (i, j) => i + ',' + j;
 for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) blocked.add(key(i, j));
 [[2, -1], [2, 0], [2, -5], [3, -5], [2, -4], [3, -4], [-5, 1], [-4, 1], [-5, 2], [-4, 2]].forEach(c => blocked.add(key(c[0], c[1])));
 const TREES = [[-5, -5], [-3, -4], [4, 2], [3, 4], [-1, 4], [-5, 4]];
-const CDOOR = [9, 1];      // the church stands on the little island; this is the cell in front of its door
-[[9, -1], [10, -1], [9, 0], [10, 0]].forEach(c => blocked.add(key(c[0], c[1])));
+const CDOOR = [9, 1], BDOOR = [1, 8];      // BDOOR: the cell in front of the bar's door, on the islet off the lower-left side
+      // the church stands on the little island; this is the cell in front of its door
+[[9, -1], [10, -1], [9, 0], [10, 0], [-1, 8], [0, 8], [-1, 9], [0, 9]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
 TREES.forEach(c => blocked.add(key(c[0], c[1])));
 const LAMPS = [[-4, 4], [4, -1], [8, -1]];
 LAMPS.forEach(c => blocked.add(key(c[0], c[1])));
-const onLand = (i, j) => (i >= -5 && i < 5 && j >= -5 && j < 5) || (j === 0 && i >= 5 && i < 8) || (i >= 8 && i < 11 && j >= -1 && j < 2);
+const onLand = (i, j) => (i >= -5 && i < 5 && j >= -5 && j < 5) || (j === 0 && i >= 5 && i < 8) || (i >= 8 && i < 11 && j >= -1 && j < 2) || (i === 1 && j >= 5 && j < 8) || (i >= -1 && i < 2 && j >= 8 && j < 11);      // the bar's islet and its bridge too
 const walkable = (i, j) => onLand(i, j) && !blocked.has(key(i, j));
 const PATH = new Set();
 for (let j = 3; j <= 3; j++) for (let i = -4; i <= 4; i++) PATH.add(key(i, j));
@@ -488,7 +492,7 @@ function bfs(from, to, avoid) {
 }
 function nearestWalkable(x, y, offPath) {      // offPath: only grass, never the paved path (where the townsfolk like to stroll)
   let best = null, bd = 1e9;
-  for (let i = -5; i < 11; i++) for (let j = -5; j < 5; j++) if (walkable(i, j) && !(offPath && PATH.has(key(i, j)))) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
+  for (let i = -5; i < 11; i++) for (let j = -5; j < (offPath ? 5 : 11); j++) if (walkable(i, j) && !(offPath && PATH.has(key(i, j)))) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
   return best;
 }
 const player = { x: -0.5, y: 3.5, path: [], enter: false, step: 0 };
@@ -560,6 +564,76 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
     poly([P(a, d, zr(a)), P(b, d, zr(b)), P(b, d, T), P(a, d, T)], kl); poly([P(b, d, zr(b)), P(b, c, zr(b)), P(b, c, T), P(b, d, T)], kr); poly([P(a, c, T), P(b, c, T), P(b, d, T), P(a, d, T)], kt); }
   for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, h + .08 + SP * (1 - (cx - x0 - w / 2) / (w / 2 + ov)) + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
 }
+function drawBarHouse(v, t) {      // the little bar on its islet: dark timber walls, a low slate roof, a lit doorway on the side facing the bridge, a hanging sign with a cup by day and a glass by night
+  const x0 = -1, y0 = 8, w = 2, h = 1.35, wood = [120, 86, 70], lit = [255, 214, 140], o = [1, 8.55, 0];
+  v.box(x0, y0, 0, w, w, h, wood); v.box(x0 - .12, y0 - .12, h, w + .24, w + .24, .12, [70, 58, 72]); v.pyramid(x0 - .05, y0 - .05, h + .12, w + .1, .45, [84, 74, 96]);
+  { const dp = v.F('R', o, 0, .45); glow(dp[0], dp[1], v.s * (1.1 + .12 * Math.sin(t * 3)), lit, .7); } v.arch('R', o, .42, .6, lit);
+  v.arch('L', [-.25, 10, .55], .34, .3, lit); v.arch('L', [.45, 10, .55], .34, .3, lit);      // two warm windows on the front
+  { const a = v.F('R', [1, 9.25, 1.05], 0, 0), b = v.F('R', [1, 9.25, 1.05], .32, 0); line([a, [a[0], a[1] + v.s * .12]], [60, 46, 50], 1.5); const sx = a[0] + v.s * .05, sy = a[1] + v.s * .12; poly([[sx - v.s * .2, sy], [sx + v.s * .2, sy - v.s * .1], [sx + v.s * .2, sy + v.s * .2], [sx - v.s * .2, sy + v.s * .3]], [214, 180, 120]);
+    if (G.n > .5) { line([[sx - v.s * .06, sy + v.s * .02], [sx + v.s * .06, sy - v.s * .01]], [120, 60, 70], 1.6); line([[sx, sy + v.s * .01], [sx, sy + v.s * .17]], [120, 60, 70], 1.4); } else ell(sx, sy + v.s * .08, v.s * .07, v.s * .05, [120, 70, 50]); }      // the sign: a glass or a cup
+}
+// ------------------------------------------------------------ the bar: a small square room. The door is in the upper-left wall, the counter runs along the lower right.
+// By day a barista makes coffee; at night a barkeep pours drinks. One other customer sits at the counter — a sailor, a drunk or a bard — and the chef can take a stool.
+const BN = 4, bar = { x: .5, y: 1.5, path: [], step: 0, say: '', sayT: 0, pending: null, seat: -1, who: null, whoSay: '', whoSayT: 0, keepSay: '', keepSayT: 0, cup: 0 }, BARHIT = {};
+let bv = new View(0, 0, 40);
+const barBlocked = (i, j) => i < 0 || j < 0 || i >= BN || j >= BN || i === 3;      // the counter takes the last column
+const BSTOOL = [1, 2, 3];      // stools at cells (2, j)
+function barGo(cell, pending) { const p = (function () { const from = cellOf(bar), q = [from], prev = new Map([[key(from[0], from[1]), null]]); while (q.length) { const c = q.shift(); if (c[0] === cell[0] && c[1] === cell[1]) { const r = []; let k = c; while (k) { r.unshift(k); k = prev.get(key(k[0], k[1])); } return r; } for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = [c[0] + dx, c[1] + dy], kk = key(n[0], n[1]); if (!barBlocked(n[0], n[1]) && !prev.has(kk)) { prev.set(kk, c); q.push(n); } } } return null; })();
+  if (!p) return; bar.seat = -1; bar.cup = 0; bar.path = p.slice(1); bar.pending = pending; chime(69, 0, .07, .8); if (!bar.path.length) barArrive(); }
+function barArrive() { const p = bar.pending; bar.pending = null; const night = G.n > .5;
+  if (p === 'exit') return leaveBar();
+  if (typeof p === 'number') { bar.seat = p; bar.keepSay = night ? S().barServeNight : S().barServeDay; bar.keepSayT = 2.6; bar.cup = 1; chime(76, .3, .1); chime(83, .45, .08); } }
+function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['sayT', 'whoSayT', 'keepSayT']) if (bar[k] > 0) bar[k] -= dt; }
+function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; Object.assign(bar, { x: .5, y: 1.5, path: [], say: '', sayT: 0, pending: null, seat: -1, cup: 0, who: pick(['sailor', 'drunk', 'bard']), whoAt: pick(BSTOOL), whoSayT: 0, keepSayT: 0 }); chime(64, 0, .12); chime(71, .14, .1); }
+function leaveBar() { mode = 'world'; $('zoom').style.display = 'block'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
+function barTap(x, y) {
+  const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
+  if (hit('exit')) return barGo([0, 1], 'exit');
+  if (hit('keeper')) { const L = S(); bar.keepSay = pick(G.n > .5 ? L.barNight : L.barDay); bar.keepSayT = 3; chime(79, 0, .1); return; }
+  if (hit('who')) { bar.whoSay = pick(S().barPatron[bar.who]); bar.whoSayT = 3.2; chime(74, 0, .1); return; }
+  for (const j of BSTOOL) if (j !== bar.whoAt && hit('stool' + j)) return barGo([2, j], j);      // a free stool: sit there
+  const [gx, gy] = bv.inv(x, y), c = [Math.floor(gx), Math.floor(gy)]; if (!barBlocked(c[0], c[1]) && !(c[0] === 2 && c[1] === bar.whoAt)) barGo(c, null);
+}
+function drawBar(t) {
+  const night = G.n > .5; TK = night ? .3 : .1; TINT = [26, 22, 62]; SHADOW = [44, 32, 72]; skyNow(t, .2);
+  const N = BN, Hh = 3.2, s = Math.min(W / (8.6 * C30), (H - 300) / (Hh + N + .6)), v = bv; v.s = s; v.cx = W / 2; v.cy = Math.max(230, (H - (Hh + N) * s) * .5) + Hh * s; const P = v.P.bind(v), tn = c => tint(c);
+  const warm = [255, 206, 140], K = s * 1.1;
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) v.quad(i, j, 0, 1, 1, tn((i + j) % 2 ? [150, 104, 84] : [164, 116, 92]));      // dark plank floor
+  poly([P(0, 0, 0), P(N, 0, 0), P(N, 0, Hh), P(0, 0, Hh)], tn([150, 110, 96])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([132, 96, 86]));
+  for (let k = 1; k < 8; k++) { line([P(k * N / 8, 0, 0), P(k * N / 8, 0, Hh)], tn([122, 88, 78]), 1, .6); line([P(0, k * N / 8, 0), P(0, k * N / 8, Hh)], tn([110, 80, 72]), 1, .6); }      // timber boards
+  wallThick(v, N, N, Hh, -.34, tn([110, 80, 72]), tn([96, 70, 64]), tn([86, 62, 58]));
+  { const yc = 1.5, o = [0, yc, 0], dp = v.F('R', o, 0, .6); glow(dp[0], dp[1], s * 1.4, night ? [150, 170, 240] : [255, 236, 190], .45); v.arch('R', o, .9, 1.25, night ? tn([60, 70, 120]) : [250, 226, 180]); const ep = v.F('R', o, 0, .5); BARHIT.exit = [ep[0], ep[1], s * .9]; }      // the door, in the upper-left wall, open onto the evening or the morning
+  // the back shelf on the upper-right wall: bottles at night, coffee tins and cups by day
+  v.box(.6, .02, 1.7, 2.8, .32, .08, [96, 66, 54]); v.box(.6, .02, 2.4, 2.8, .32, .08, [96, 66, 54]);
+  for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) { const x = .75 + k * .37, z = 1.78 + r * .7, c = night ? [[96, 150, 110], [150, 70, 70], [210, 170, 90], [120, 120, 170]][(k + r) % 4] : [[236, 226, 206], [170, 120, 90], [214, 180, 120]][(k + r) % 3];
+    if (night) { v.box(x, .1, z, .12, .12, .3, c); v.box(x + .035, .135, z + .3, .05, .05, .12, c); } else v.box(x, .08, z, .2, .16, .2, c); }
+  { const lp = P(1.6, 2, Hh - .1), lb = P(1.6, 2, 2.3); line([lp, lb], [60, 46, 52], 1.2); glow(lb[0], lb[1] + s * .1, s * 2.2, warm, night ? .55 : .3); circ(lb[0], lb[1] + s * .1, s * .09, [255, 232, 170]); }      // one warm lamp over the room
+  const objs = [];
+  objs.push({ k: 3.3 + 2, d: () => { v.box(3.0, .35, 0, .62, 3.3, 1.0, [126, 84, 62]); v.box(2.94, .29, 1.0, .74, 3.42, .08, [176, 124, 90]);      // the counter
+    if (!night) { v.box(3.15, .5, 1.08, .36, .36, .42, [200, 204, 214]); v.box(3.2, .55, 1.5, .26, .26, .08, [70, 70, 80]); }      // the coffee machine
+    else { for (const [y, c] of [[.6, [96, 150, 110]], [.85, [150, 70, 70]]]) { v.box(3.2, y, 1.08, .12, .12, .32, c); v.box(3.235, y + .035, 1.4, .05, .05, .12, c); } } } });
+  for (const j of BSTOOL) objs.push({ k: 2.6 + j + .5 - .2, d: () => { const x = 2.55, y = j + .5; v.disc(x, y, 0, .06, .5, [90, 64, 54]); v.disc(x, y, .5, .2, .06, [176, 110, 80]); const q = P(x, y, .5); if (j !== bar.whoAt) BARHIT['stool' + j] = [q[0], q[1], s * .5]; } });
+  // the bartender, behind the counter: a barista by day, a barkeep at night
+  objs.push({ k: 3.85 + 2 + .5, d: () => { const q = P(3.75, 2.1), body = night ? [44, 40, 56] : [236, 230, 220]; fig(q[0], q[1], K, { kind: 'plain', body: tn(body), head: tn(SKIN), apron: night ? tn([120, 40, 50]) : tn([150, 104, 76]) }); BARHIT.keeper = [q[0], q[1] - K * .8, K * .7]; bar.keeperAt = q; } });
+  // the other customer, on a stool
+  objs.push({ k: 2.55 + bar.whoAt + .5 + .01, d: () => { const q = P(2.55, bar.whoAt + .5, .55), wk = bar.who; let look;
+    if (wk === 'sailor') look = { kind: 'ida', body: tn([236, 240, 250]), hat: tn([40, 60, 110]), head: tn(SKIN) };
+    else if (wk === 'drunk') look = { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
+    else look = { kind: 'ida', body: tn([110, 160, 120]), hat: tn([200, 90, 70]), head: tn(SKIN) };
+    fig(q[0], q[1], K, look); if (wk === 'sailor') line([[q[0] - K * .2, q[1] - K * .62], [q[0] + K * .2, q[1] - K * .62]], tn([40, 60, 110]), Math.max(2, K * .06));
+    if (wk === 'bard') { ell(q[0] + K * .28, q[1] - K * .45, K * .13, K * .1, tn([190, 130, 70])); line([[q[0] + K * .3, q[1] - K * .5], [q[0] + K * .5, q[1] - K * .9]], tn([150, 100, 60]), Math.max(1.5, K * .04)); }
+    BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
+  // you: walking the floor, or sitting on a stool with your drink in front of you
+  objs.push({ k: (bar.seat >= 0 ? 2.55 + bar.seat + .5 + .01 : bar.x + bar.y), d: () => { const sit = bar.seat >= 0, q = sit ? P(2.55, bar.seat + .5, .55) : P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
+    fig(q[0], q[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); bar.at = q;
+    if (sit && bar.cup) { const c = P(2.98, bar.seat + .5, 1.08); if (night) { poly([[c[0] - s * .07, c[1] - s * .22], [c[0] + s * .07, c[1] - s * .22], [c[0] + s * .05, c[1]], [c[0] - s * .05, c[1]]], [214, 160, 80]); } else { ell(c[0], c[1] - s * .08, s * .09, s * .05, [250, 246, 240]); poly([[c[0] - s * .09, c[1] - s * .08], [c[0] + s * .09, c[1] - s * .08], [c[0] + s * .07, c[1] + s * .04], [c[0] - s * .07, c[1] + s * .04]], [250, 246, 240]); ell(c[0], c[1] - s * .08, s * .07, s * .035, [120, 74, 50]); } } } });
+  objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
+  if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
+  const fs = clamp(s * .3, 12.5, 15), mw = Math.min(W * .62, 250);
+  if (bar.keepSayT > 0 && bar.keeperAt) sayBubble(bar.keeperAt[0], bar.keeperAt[1] - K * 1.75, bar.keepSay, fs, clamp(bar.keepSayT * 2), mw);
+  if (bar.whoSayT > 0 && bar.whoAtP) sayBubble(bar.whoAtP[0], bar.whoAtP[1] - K * 1.75, bar.whoSay, fs, clamp(bar.whoSayT * 2), mw);
+  TK = 0;
+}
 function drawChapel(v, t) {      // the church on the little island: a stone nave, a steep red roof, a thin spire with a cross
   const st = PAL.stone, lit = [255, 214, 140], o = [10, .92, 0];
   v.box(9.08, -.92, 0, 1.84, 1.84, 1.7, st);
@@ -587,6 +661,8 @@ function drawWorld(t, dt) {
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
   v.box(5, 0, -0.3, 3, 1, 0.3, [88, 128, 152]);      // the bridge: a deeper shade of the church rock's blue
+  v.box(1, 5, -0.3, 1, 3, 0.3, [120, 96, 84]);      // the bar's bridge, of dark planks
+  v.box(-.6, 8.4, -2.4, 1.8, 1.8, 1.0, PAL.under); v.box(-1, 8, -1.5, 3, 3, .5, mix(PAL.under, [150, 120, 100], .3)); v.box(-1, 8, -1, 3, 3, 1, [176, 150, 120]);      // the bar's islet, warm and sandy
   v.box(8.6, -.4, -2.6, 1.8, 1.8, 1.0, PAL.under); v.box(8, -1, -1.6, 3, 3, .6, mix(PAL.under, PAL.isl, .3)); v.box(8, -1, -1, 3, 3, 1, [128, 170, 190]);
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
@@ -594,6 +670,7 @@ function drawWorld(t, dt) {
   objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
   objs.push({ k: 0, d: () => drawTower(v, t) });
   objs.push({ k: 9.6, d: () => drawChapel(v, t) });
+  objs.push({ k: 8.4, d: () => drawBarHouse(v, t) });
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
   objs.push({ k: -2.0, d: () => drawHouse(v, t) });
   for (const [i, j] of TREES) objs.push({ k: i + j + 1, d: () => tree(v, i, j) });
@@ -615,7 +692,7 @@ function drawWorld(t, dt) {
   if (mode === 'world' && G.late) text('夜深了，回拉面档口睡觉', W / 2, H * 0.9, 15, [255, 236, 190], .7 + .3 * Math.sin(t * 3), 'center', true);
 }
 let worldHint = 6, nearDoor = null;
-const DOORS = { stall: DOOR, tower: TDOOR, lib: LDOOR, church: CDOOR }, goIn = w => w === 'stall' ? enterStall() : w === 'tower' ? enterTower() : w === 'church' ? enterChurch() : enterLib();
+const DOORS = { stall: DOOR, tower: TDOOR, lib: LDOOR, church: CDOOR, bar: BDOOR }, goIn = w => w === 'stall' ? enterStall() : w === 'tower' ? enterTower() : w === 'church' ? enterChurch() : w === 'bar' ? enterBar() : enterLib();
 function goDoor(which) { const d = DOORS[which], p = bfs(cellOf(player), d); if (!p) return; player.path = p.slice(1); player.enter = which; if (!player.path.length) { player.enter = false; goIn(which); } }
 function updateWorld(dt) {
   if (walk(player, dt, 3.4 * speedK(), true)) chime(pick([62, 66, 69, 74]) + 12, 0, 0.035, 0.5);
@@ -632,7 +709,7 @@ function updateWorld(dt) {
     n.hop = (n.hop || 0) + (n.path.length ? dt * 10 : 0);
     if (n.sayT > 0) n.sayT -= dt;
     if (n.path.length) { walk(n, dt, 1.6, true); if (n.blocked) { n.path = []; n.wait = rnd(.4, 1.6); } }
-    else if ((n.wait -= dt) < 0) { const to = nearestWalkable(rnd(-5, 11), rnd(-5, 5), true), isDoor = d => to[0] === d[0] && to[1] === d[1]; const p = isDoor(DOOR) || isDoor(TDOOR) || isDoor(LDOOR) || isDoor(CDOOR) ? null : bfs(cellOf(n), to, PATH); if (p) n.path = p.slice(1); n.wait = rnd(2, 7); }      // the townsfolk keep to the grass and never step on the path
+    else if ((n.wait -= dt) < 0) { const to = nearestWalkable(rnd(-5, 11), rnd(-5, 5), true), isDoor = d => to[0] === d[0] && to[1] === d[1]; const p = isDoor(DOOR) || isDoor(TDOOR) || isDoor(LDOOR) || isDoor(CDOOR) || isDoor(BDOOR) ? null : bfs(cellOf(n), to, PATH); if (p) n.path = p.slice(1); n.wait = rnd(2, 7); }      // the townsfolk keep to the grass and never step on the path
   }
   worldHint -= dt;
 }
@@ -643,6 +720,7 @@ function worldTap(sx, sy) {
   { const lp = v.P(2.85, -3.75, 1.3); if (Math.abs(sx - lp[0]) < v.s * 1.2 && Math.abs(sy - lp[1]) < v.s * 1.9) { goDoor('lib'); chime(69, 0, .12); return; } }
   { const sp = v.P(2.1, 0, .6), dp = v.F('R', [1, 0, 1.2], 0, .65); if (Math.hypot(sx - sp[0], sy - sp[1]) < v.s * 1.15 || (Math.abs(sx - dp[0]) < v.s * .6 && Math.abs(sy - dp[1]) < v.s * .95)) { goDoor('tower'); chime(62, 0, .12); return; } }
   { const cp = v.P(10, 0, 1.6); if (Math.abs(sx - cp[0]) < v.s * 1.7 && Math.abs(sy - cp[1]) < v.s * 2.3) { goDoor('church'); chime(62, 0, .12); return; } }
+  { const bp = v.P(0, 9, 1); if (Math.abs(sx - bp[0]) < v.s * 1.6 && Math.abs(sy - bp[1]) < v.s * 1.8) { goDoor('bar'); chime(67, 0, .12); return; } }
   const [x, y] = v.inv(sx, sy); let to = [Math.floor(x), Math.floor(y)];
   if (!walkable(to[0], to[1])) to = nearestWalkable(x, y);
   const p = bfs(cellOf(player), to); if (p) { player.path = p.slice(1); player.enter = false; chime(69, 0, .08, .8); }
@@ -2051,6 +2129,7 @@ function frame(now) {
   if (mode === 'stall') { updateStall(dt); drawStall(T); }
   else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); } else drawTowerRoom(T); }
   else if (mode === 'lib') { updateLib(dt); drawLib(T, dt); }
+  else if (mode === 'bar') { updateBar(dt); drawBar(T, dt); }
   else if (mode === 'church') { updateChurch(dt); drawChurch(T, dt); }
   else { if (mode === 'world') updateWorld(dt); drawWorld(T, dt); }
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
@@ -2072,7 +2151,7 @@ function start() {
 }
 $('gear').addEventListener('click', () => { if (!church.fight) devMenu(); });
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
-cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
+cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'bar') { barTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
 $('bag').addEventListener('click', () => { bag.open = !bag.open; bag.sel = null; chime(bag.open ? 74 : 62, 0, .12, .8); });
