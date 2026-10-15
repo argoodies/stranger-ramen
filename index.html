@@ -593,6 +593,10 @@ function barTap(x, y) {
   for (const j of BSTOOL) if (j !== bar.whoAt && hit('stool' + j)) return barGo([2, j], j);      // a free stool: sit there
   const [gx, gy] = bv.inv(x, y), c = [Math.floor(gx), Math.floor(gy)]; if (!barBlocked(c[0], c[1]) && !(c[0] === 2 && c[1] === bar.whoAt)) barGo(c, null);
 }
+function barSeat(v, x, y, legC) {      // someone sitting at the counter: knees forward over the edge of the seat, shins hanging down toward the counter's foot rail
+  const K = v.s, P = v.P.bind(v);
+  for (const dy of [-.07, .07]) { const a = P(x + .04, y + dy, .58), b = P(x + .3, y + dy, .56), c = P(x + .33, y + dy, .22); line([a, b, c], legC, Math.max(2.5, K * .1)); ell(c[0] + K * .03, c[1], K * .06, K * .03, [50, 40, 46]); }
+}
 function drawBar(t) {
   const night = G.n > .5; TK = night ? .3 : .1; TINT = [26, 22, 62]; SHADOW = [44, 32, 72]; skyNow(t, .2);
   const N = BN, Hh = 3.2, s = Math.min(W / (8.6 * C30), (H - 300) / (Hh + N + .6)), v = bv; v.s = s; v.cx = W / 2; v.cy = Math.max(230, (H - (Hh + N) * s) * .5) + Hh * s; const P = v.P.bind(v), tn = c => tint(c);
@@ -608,23 +612,24 @@ function drawBar(t) {
     if (night) { v.box(x, .1, z, .12, .12, .3, c); v.box(x + .035, .135, z + .3, .05, .05, .12, c); } else v.box(x, .08, z, .2, .16, .2, c); }
   { const lp = P(1.6, 2, Hh - .1), lb = P(1.6, 2, 2.3); line([lp, lb], [60, 46, 52], 1.2); glow(lb[0], lb[1] + s * .1, s * 2.2, warm, night ? .55 : .3); circ(lb[0], lb[1] + s * .1, s * .09, [255, 232, 170]); }      // one warm lamp over the room
   const objs = [];
-  objs.push({ k: 3.3 + 2, d: () => { v.box(3.0, .35, 0, .62, 3.3, 1.0, [126, 84, 62]); v.box(2.94, .29, 1.0, .74, 3.42, .08, [176, 124, 90]);      // the counter
+  objs.push({ k: 6.2, d: () => { v.box(3.0, .35, 0, .62, 3.3, 1.0, [126, 84, 62]);      // in front of every stool, behind the bartender
+ v.box(2.94, .29, 1.0, .74, 3.42, .08, [176, 124, 90]);      // the counter
     if (!night) { v.box(3.15, .5, 1.08, .36, .36, .42, [200, 204, 214]); v.box(3.2, .55, 1.5, .26, .26, .08, [70, 70, 80]); }      // the coffee machine
     else { for (const [y, c] of [[.6, [96, 150, 110]], [.85, [150, 70, 70]]]) { v.box(3.2, y, 1.08, .12, .12, .32, c); v.box(3.235, y + .035, 1.4, .05, .05, .12, c); } } } });
   for (const j of BSTOOL) objs.push({ k: 2.6 + j + .5 - .2, d: () => { const x = 2.55, y = j + .5; v.disc(x, y, 0, .06, .5, [90, 64, 54]); v.disc(x, y, .5, .2, .06, [176, 110, 80]); const q = P(x, y, .5); if (j !== bar.whoAt) BARHIT['stool' + j] = [q[0], q[1], s * .5]; } });
   // the bartender, behind the counter: a barista by day, a barkeep at night
-  objs.push({ k: 3.85 + 2 + .5, d: () => { const q = P(3.75, 2.1), body = night ? [44, 40, 56] : [236, 230, 220]; fig(q[0], q[1], K, { kind: 'plain', body: tn(body), head: tn(SKIN), apron: night ? tn([120, 40, 50]) : tn([150, 104, 76]) }); BARHIT.keeper = [q[0], q[1] - K * .8, K * .7]; bar.keeperAt = q; } });
+  objs.push({ k: 6.4, d: () => { const q = P(3.75, 2.1), body = night ? [44, 40, 56] : [236, 230, 220]; fig(q[0], q[1], K, { kind: 'plain', body: tn(body), head: tn(SKIN), apron: night ? tn([120, 40, 50]) : tn([150, 104, 76]) }); BARHIT.keeper = [q[0], q[1] - K * .8, K * .7]; bar.keeperAt = q; } });
   // the other customer, on a stool
-  objs.push({ k: 2.55 + bar.whoAt + .5 + .01, d: () => { const q = P(2.55, bar.whoAt + .5, .55), wk = bar.who; let look;
+  objs.push({ k: 2.55 + bar.whoAt + .5 + .01, d: () => { const q = P(2.55, bar.whoAt + .5, .56), wk = bar.who; let look;
     if (wk === 'sailor') look = { kind: 'ida', body: tn([236, 240, 250]), hat: tn([40, 60, 110]), head: tn(SKIN) };
     else if (wk === 'drunk') look = { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
     else look = { kind: 'ida', body: tn([110, 160, 120]), hat: tn([200, 90, 70]), head: tn(SKIN) };
-    fig(q[0], q[1], K, look); if (wk === 'sailor') line([[q[0] - K * .2, q[1] - K * .62], [q[0] + K * .2, q[1] - K * .62]], tn([40, 60, 110]), Math.max(2, K * .06));
+    fig(q[0], q[1], K * .9, look); if (wk === 'sailor') line([[q[0] - K * .2, q[1] - K * .62], [q[0] + K * .2, q[1] - K * .62]], tn([40, 60, 110]), Math.max(2, K * .06));
     if (wk === 'bard') { ell(q[0] + K * .28, q[1] - K * .45, K * .13, K * .1, tn([190, 130, 70])); line([[q[0] + K * .3, q[1] - K * .5], [q[0] + K * .5, q[1] - K * .9]], tn([150, 100, 60]), Math.max(1.5, K * .04)); }
-    BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
+    barSeat(v, 2.55, bar.whoAt + .5, tn(wk === 'sailor' ? [50, 66, 110] : wk === 'drunk' ? [96, 84, 70] : [86, 70, 60])); BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
   // you: walking the floor, or sitting on a stool with your drink in front of you
-  objs.push({ k: (bar.seat >= 0 ? 2.55 + bar.seat + .5 + .01 : bar.x + bar.y), d: () => { const sit = bar.seat >= 0, q = sit ? P(2.55, bar.seat + .5, .55) : P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
-    fig(q[0], q[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); bar.at = q;
+  objs.push({ k: (bar.seat >= 0 ? 2.55 + bar.seat + .5 + .01 : bar.x + bar.y), d: () => { const sit = bar.seat >= 0, q = sit ? P(2.55, bar.seat + .5, .56) : P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
+    fig(q[0], q[1] - hop, sit ? K * .9 : K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); if (sit) barSeat(v, 2.55, bar.seat + .5, tn([70, 66, 84])); bar.at = q;
     if (sit && bar.cup) { const c = P(2.98, bar.seat + .5, 1.08); if (night) { poly([[c[0] - s * .07, c[1] - s * .22], [c[0] + s * .07, c[1] - s * .22], [c[0] + s * .05, c[1]], [c[0] - s * .05, c[1]]], [214, 160, 80]); } else { ell(c[0], c[1] - s * .08, s * .09, s * .05, [250, 246, 240]); poly([[c[0] - s * .09, c[1] - s * .08], [c[0] + s * .09, c[1] - s * .08], [c[0] + s * .07, c[1] + s * .04], [c[0] - s * .07, c[1] + s * .04]], [250, 246, 240]); ell(c[0], c[1] - s * .08, s * .07, s * .035, [120, 74, 50]); } } } });
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
