@@ -467,8 +467,8 @@ const key = (i, j) => i + ',' + j;
 for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) blocked.add(key(i, j));
 [[2, -1], [2, 0], [2, -5], [3, -5], [2, -4], [3, -4], [-5, 1], [-4, 1], [-5, 2], [-4, 2]].forEach(c => blocked.add(key(c[0], c[1])));
 const TREES = [[-5, -5], [-3, -4], [4, 2], [3, 4], [-1, 4], [-5, 4]];
-const CDOOR = [9, 0], BDOOR = [5, 3], CDY = -1, CDZ = -1;      // CDZ: the church's ground lies a storey below the town, reached by steps
-const wz = (x, y) => x >= 9 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? CDZ * clamp((x - 5) / 4) : 0;      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
+const CDOOR = [9, 0], BDOOR = [5, 3], CDY = -1, CDZ = -2;      // CDZ: the church's ground lies a storey below the town, reached by steps
+const wz = (x, y) => x >= 9 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? CDZ * Math.min(5, Math.floor((x - 5) / .8) + 1) / 5 : 0;      // five treads      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
       // BDOOR: the cell in front of the bar's door, on the islet where the dead-end path at the bottom corner now leads
       // the church stands on the little island; this is the cell in front of its door
 [[9, -2], [10, -2], [9, -1], [10, -1], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
@@ -566,7 +566,7 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
     poly([P(a, d, zr(a)), P(b, d, zr(b)), P(b, d, T), P(a, d, T)], kl); poly([P(b, d, zr(b)), P(b, c, zr(b)), P(b, c, T), P(b, d, T)], kr); poly([P(a, c, T), P(b, c, T), P(b, d, T), P(a, d, T)], kt); }
   for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, h + .08 + SP * (1 - (cx - x0 - w / 2) / (w / 2 + ov)) + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
 }
-function drawBarHouse(v, t) {      // the little coffee house: stone walls, a flat roof with a low parapet and a board on top, wide lit shop windows under red-and-cream striped awnings, a pot of greenery by the corner. Its door opens onto the walkway, round the back
+function drawBarHouse(v, t) {      // the little coffee house: stone walls, a flat roof with a low parapet and a board on top, wide lit shop windows under red-and-cream striped awnings. Its door opens onto the walkway, round the back
   const x0 = 6, y0 = 2.85, w = 1.3, h = 1.35, lit = [255, 214, 140], nn = clamp((G.n - .35) / .3), P = v.P.bind(v), GR = PAL.roof, CR = [244, 234, 214];      // the awnings striped in the town's roof red
   v.box(x0 - .05, y0 - .05, -.3, w + .1, w + .1, .3, [88, 128, 152]);      // a thin footing in the church bridge's blue, no island round it
   v.box(x0, y0, 0, w, w, h, PAL.stone); v.box(x0 - .04, y0 - .04, h, w + .08, w + .08, .16, mix(PAL.stone, [255, 255, 255], .2));      // walls, and the parapet round the flat roof
@@ -583,8 +583,6 @@ function drawBarHouse(v, t) {      // the little coffee house: stone walls, a fl
     poly([a, b, c2, d], [60, 46, 44]); const m = P(bx0 + bw / 2, by, bz + .12 + bh / 2), r = v.s * .07;
     ctx.save(); ctx.globalAlpha = 1 - nn; poly([[m[0] - r * 1.2, m[1] - r * .6], [m[0] + r * 1.2, m[1] - r * .6], [m[0] + r * .9, m[1] + r * .9], [m[0] - r * .9, m[1] + r * .9]], CR); ctx.beginPath(); ctx.arc(m[0] + r * 1.25, m[1], r * .45, -1.4, 1.4); ctx.strokeStyle = css(CR); ctx.lineWidth = Math.max(1, r * .3); ctx.stroke(); for (const dx of [-.4, .4]) line([[m[0] + dx * r, m[1] - r * .9], [m[0] + dx * r + r * .2, m[1] - r * 1.5]], CR, 1, .8); ctx.restore();
     ctx.save(); ctx.globalAlpha = nn; poly([[m[0] - r * 1.1, m[1] - r * 1.1], [m[0] + r * 1.1, m[1] - r * 1.1], [m[0], m[1] + r * .2]], CR); line([[m[0], m[1] + r * .2], [m[0], m[1] + r * 1]], CR, 1.3); line([[m[0] - r * .5, m[1] + r * 1], [m[0] + r * .5, m[1] + r * 1]], CR, 1.3); ctx.restore(); }
-  // a pot of greenery at the front corner
-  { const px = x0 + w + .02, py = y0 + w + .02; v.disc(px, py, 0, .12, .18, [176, 110, 80]); const q = P(px, py, .3); for (let k = 0; k < 5; k++) { const g = k * 1.3; ell(q[0] + Math.cos(g) * v.s * .08, q[1] - v.s * .04 - Math.abs(Math.sin(g)) * v.s * .06, v.s * .09, v.s * .07, k % 2 ? [96, 160, 110] : [70, 130, 90]); } }
 }
 // ------------------------------------------------------------ the bar: a small square room. The door is in the upper-left wall, the counter runs along the lower right.
 // By day a barista makes coffee; at night a barkeep pours drinks. One other customer stands at the counter — a sailor or a drunk. There are no seats: tap whoever is
@@ -725,7 +723,7 @@ function drawWorld(t, dt) {
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
-  for (let i = 0; i < 8; i++) { const top = CDZ * (i + 1) / 8; v.box(5 + i * .5, 0, top - .3, .5, 1, .3, i % 2 ? [80, 118, 142] : [88, 128, 152]); }      // a flight of steps going down from the town to the church
+  for (let i = 0; i < 5; i++) { const top = CDZ * (i + 1) / 5; v.box(5 + i * .8, 0, CDZ - .7, .8, 1, top - CDZ + .7, i % 2 ? [80, 118, 142] : [88, 128, 152]); }      // a flight of solid steps, each as tall as those up to the clocktower, going down from the town to the church
   v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
   v.box(9, -2, CDZ - .7, 2, 3, .7, [68, 102, 128]);      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
