@@ -691,7 +691,7 @@ function drawWorld(t, dt) {
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
   v.box(5, 0, -0.3, 3, 1, 0.3, [88, 128, 152]);      // the bridge: a deeper shade of the church rock's blue
   v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
-  v.box(8, -1, -.3, 3, 3, .3, [128, 170, 190]);      // the church stands on a thin slab, no rock below
+  v.box(8.4, -.6, -1.15, 2.2, 2.2, .45, mix(PAL.under, [128, 170, 190], .4)); v.box(8, -1, -.7, 3, 3, .7, [128, 170, 190]);      // the church's rock: a little depth, a step in underneath
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
