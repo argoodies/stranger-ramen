@@ -1822,23 +1822,21 @@ function playCard() {      // Time Stop: every foe, and everything they have thr
   c.freeze = 10; save.stop = false; save.equip.card = null; saveNow();
   bell(220, .16); sfx(660, .6, .1, 'sine'); sfx(990, .8, .06, 'sine');
 }
-function devMenu() {      // developer mode: a short list of tools — jump to a round, or be given any item (it flies in as from a chest)
+function devMenu() {      // developer mode: a short list of tools, each opening a page of its own — jump to a round, or be given any item (it flies in as from a chest)
   if (document.getElementById('dbg')) return;
   const L = S(), c = church, d = document.createElement('div'); d.id = 'dbg'; d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,8,30,.55);z-index:99';
-  const box = document.createElement('div'); box.style.cssText = `background:#2a2450;color:#fff;padding:16px 18px;border-radius:14px;font:300 15px ${THINF};min-width:240px;max-width:300px`; d.appendChild(box);
-  const row = (txt, fn) => { const b = document.createElement('button'); b.textContent = txt; b.style.cssText = `display:block;width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:300 15px ${THINF};text-align:left`; b.onclick = fn; box.appendChild(b); return b; };
-  const close = () => d.remove();
-  row('1　' + L.devJump, () => { rounds.style.display = rounds.style.display === 'none' ? 'grid' : 'none'; });
-  const rounds = document.createElement('div'); rounds.style.cssText = 'display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 4px'; box.appendChild(rounds);      // the rounds, as Roman numerals: one tap jumps there
-  ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ'].slice(0, TIERS).forEach((rn, k) => { const b = document.createElement('button'), cur = k + 1 === c.tier; b.textContent = rn; b.style.cssText = `padding:10px 0;border-radius:10px;border:1px solid rgba(255,255,255,${cur ? .7 : .2});background:rgba(255,255,255,${cur ? .22 : .08});color:#fff;font:300 20px ${THINF}`;
-    b.onclick = () => { close(); if (c.done) churchRest(); c.tier = k + 1; churchBanner(L.lightTorch, 3); chime(81, 0, .1); }; rounds.appendChild(b); });
-  const items = row('2　' + L.devItems, () => { grid.style.display = grid.style.display === 'none' ? 'grid' : 'none'; });
-  const grid = document.createElement('div'); grid.style.cssText = 'display:none;grid-template-columns:repeat(4,56px);gap:8px;margin:8px 0 4px;justify-content:center'; box.appendChild(grid);
-  for (const id of Object.keys(ITEMS)) { const cell = document.createElement('button'); cell.title = L.items[id] ? L.items[id][0] : id; cell.style.cssText = 'width:56px;height:56px;overflow:hidden;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,' + (have(id) ? '.05' : '.14') + ');padding:0';
-    const cvs = document.createElement('canvas'), R = 2; cvs.width = cvs.height = 56 * R; cvs.style.cssText = 'position:static;width:56px;height:56px;display:block'; const real = ctx; ctx = cvs.getContext('2d'); ctx.scale(R, R); try { drawItem(id, 28, 30, 15); } finally { ctx = real; }
-    cell.appendChild(cvs); cell.onclick = () => { close(); devGive(id); }; grid.appendChild(cell); }
-  const x = document.createElement('button'); x.textContent = '✕'; x.style.cssText = 'margin-top:8px;padding:6px 14px;border-radius:8px'; x.onclick = close; box.appendChild(x);
-  d.addEventListener('pointerdown', e => { if (e.target === d) close(); }); document.body.appendChild(d);
+  const box = document.createElement('div'); box.style.cssText = `background:#2a2450;color:#fff;padding:16px 18px;border-radius:14px;font:300 15px ${THINF};width:270px`; d.appendChild(box);
+  const close = () => d.remove(), btn = (txt, css, fn) => { const b = document.createElement('button'); b.textContent = txt; b.style.cssText = css; b.onclick = fn; return b; };
+  const head = (title, back) => { const h = document.createElement('div'); h.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:12px'; if (back) h.appendChild(btn('‹', `width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:300 22px ${THINF};line-height:1;padding:0`, back)); const t = document.createElement('div'); t.textContent = title; t.style.cssText = 'flex:1;font-size:16px;letter-spacing:.08em'; h.appendChild(t); h.appendChild(btn('✕', `width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:300 16px ${THINF};padding:0`, close)); box.appendChild(h); };
+  const grid = (cols, size) => { const g = document.createElement('div'); g.style.cssText = `display:grid;grid-template-columns:repeat(${cols},${size});gap:8px;justify-content:center`; box.appendChild(g); return g; };
+  const home = () => { box.innerHTML = ''; head('Developer');
+    for (const [n, txt, page] of [[1, L.devJump, jump], [2, L.devItems, items]]) box.appendChild(btn(n + '　' + txt + '　›', `display:block;width:100%;margin:6px 0;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:300 15px ${THINF};text-align:left`, page)); };
+  const jump = () => { box.innerHTML = ''; head(L.devJump, home); const g = grid(3, '1fr');      // the rounds, as Roman numerals: one tap jumps there
+    ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ'].slice(0, TIERS).forEach((rn, k) => { const cur = k + 1 === c.tier; g.appendChild(btn(rn, `padding:14px 0;border-radius:10px;border:1px solid rgba(255,255,255,${cur ? .7 : .2});background:rgba(255,255,255,${cur ? .22 : .08});color:#fff;font:300 22px ${THINF}`, () => { close(); if (c.done) churchRest(); c.tier = k + 1; churchBanner(L.lightTorch, 3); chime(81, 0, .1); })); }); };
+  const items = () => { box.innerHTML = ''; head(L.devItems, home); const g = grid(4, '52px');      // every item, drawn as in the backpack: one tap and it is yours
+    for (const id of Object.keys(ITEMS)) { const cell = btn('', 'width:52px;height:52px;overflow:hidden;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,' + (have(id) ? '.05' : '.14') + ');padding:0', () => { close(); devGive(id); }); cell.title = L.items[id] ? L.items[id][0] : id;
+      const cvs = document.createElement('canvas'), R = 2; cvs.width = cvs.height = 52 * R; cvs.style.cssText = 'position:static;width:52px;height:52px;display:block'; const real = ctx; ctx = cvs.getContext('2d'); ctx.scale(R, R); try { drawItem(id, 26, 28, 14); } finally { ctx = real; } cell.appendChild(cvs); g.appendChild(cell); } };
+  home(); d.addEventListener('pointerdown', e => { if (e.target === d) close(); }); document.body.appendChild(d);
 }
 function devGive(id) { const c = church; if (c.fly) return; c.fly = { id, n: { at: [W / 2, H * .3] }, t: 0, dev: true }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12); }      // the item flies down to the chef, just as out of a chest
 function devGift(id) { const k = ITEMS[id]; save[id] = true; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
