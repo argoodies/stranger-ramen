@@ -645,9 +645,13 @@ function drawBar(t) {
       BARHIT['cup' + n] = [c[0], c[1] - s * .1, s * .32]; }); } });
   // the server, behind the counter: a barista by day, a barkeep at night. No shadow: the floor behind the counter is out of sight
   objs.push({ k: 6.8, d: () => { const q = P(3.75, keeperY);
-    alpha(clamp(nn * 2 - 1), () => fig(q[0], q[1], K, { kind: 'plain', body: tn([44, 40, 56]), head: tn(SKIN), apron: tn([120, 40, 50]), noShadow: true }));      // a change of shift: the barista fades out, then the barkeep fades in
-    alpha(clamp(1 - nn * 2), () => { const dress = tn([46, 42, 54]); fig(q[0], q[1], K, { kind: 'plain', body: dress, head: tn(SKIN), apron: tn([86, 150, 110]), noShadow: true });      // the barista, all in black, a green apron
-      poly([[q[0] - K * .38, q[1] + K * .01], [q[0] + K * .38, q[1] + K * .01], [q[0] + K * .25, q[1] - K * .22], [q[0] - K * .25, q[1] - K * .22]], dress); poly([[q[0] - K * .13, q[1] - K * .05], [q[0] + K * .13, q[1] - K * .05], [q[0] + K * .1, q[1] - K * .3], [q[0] - K * .1, q[1] - K * .3]], tn([86, 150, 110])); });
+    const server = (body, apron) => { const x = q[0], y = q[1], k = K, bl = mix(body, [255, 255, 255], .12), br = mix(body, [70, 50, 110], .26), ay = y - .95 * k, wy = y - .5 * k;      // a straight, tailored figure: narrow shoulders, a plain upright lower half, a long apron
+      poly([[x - .19 * k, y], [x, y + .03 * k], [x, wy], [x - .17 * k, wy]], bl); poly([[x, y + .03 * k], [x + .19 * k, y], [x + .17 * k, wy], [x, wy]], br);
+      poly([[x - .17 * k, wy], [x, wy], [x, ay], [x - .12 * k, ay + .04 * k]], bl); poly([[x, wy], [x + .17 * k, wy], [x + .12 * k, ay + .04 * k], [x, ay]], br);
+      poly([[x - .12 * k, y - .05 * k], [x + .12 * k, y - .05 * k], [x + .11 * k, y - .66 * k], [x - .11 * k, y - .66 * k]], apron); line([[x - .12 * k, ay + .1 * k], [x - .02 * k, y - .66 * k]], apron, Math.max(1, k * .025)); line([[x + .12 * k, ay + .1 * k], [x + .02 * k, y - .66 * k]], apron, Math.max(1, k * .025));
+      const hx = x, hy = ay - .06 * k, hr = .17 * k; circ(hx, hy, hr, tn(SKIN)); ctx.beginPath(); ctx.arc(hx, hy - hr * .05, hr * 1.04, Math.PI * 1.02, Math.PI * 1.98); ctx.fillStyle = css(tn([44, 32, 40])); ctx.fill(); };
+    alpha(clamp(nn * 2 - 1), () => server(tn([44, 40, 56]), tn([120, 40, 50])));      // a change of shift: the barista fades out, then the barkeep fades in
+    alpha(clamp(1 - nn * 2), () => server(tn([46, 42, 54]), tn([86, 150, 110])));      // the barista, all in black, a green apron
     BARHIT.keeper = [q[0], q[1] - K * .8, K * .7]; bar.keeperAt = q; } });
   // the other customer, standing at the counter
   objs.push({ k: 2.7 + bar.whoAt + .5, d: () => { const q = P(2.7, bar.whoAt + .5), wk = bar.who, look = wk === 'sailor' ? { kind: 'plain', body: tn([236, 240, 250]), head: tn(SKIN) } : { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
@@ -656,7 +660,7 @@ function drawBar(t) {
       const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75) * (1 + .12 * Math.sin(i * 2.7)); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind
     BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
   // the cat
-  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .5, f = c.face || 1, sit = c.sit > 0, step = sit ? 0 : Math.sin(c.t * 12) * k * .04, col = tn([236, 160, 90]), dk = tn([196, 120, 70]);
+  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .5, f = c.face || 1, sit = c.sit > 0, step = sit ? 0 : Math.sin(c.t * 12) * k * .04, col = tn([246, 244, 240]), dk = tn([206, 204, 210]);      // a white cat
       ell(q[0], q[1], k * .45, k * .14, [20, 12, 40], .25);
       if (sit) { ell(q[0], q[1] - k * .35, k * .3, k * .36, col); circ(q[0] + f * k * .05, q[1] - k * .82, k * .24, col); line([[q[0] - f * k * .25, q[1] - k * .05], [q[0] - f * k * .5, q[1] - k * .15], [q[0] - f * k * .45, q[1] - k * .45]], dk, Math.max(1.5, k * .09)); }
       else { ell(q[0], q[1] - k * .32 + step, k * .45, k * .22, col); circ(q[0] + f * k * .42, q[1] - k * .55 + step, k * .22, col); for (const dx of [-.28, .28]) line([[q[0] + dx * k, q[1] - k * .2], [q[0] + dx * k + step, q[1]]], dk, Math.max(1.5, k * .08)); line([[q[0] - f * k * .42, q[1] - k * .35], [q[0] - f * k * .7, q[1] - k * .7 + Math.sin(c.t * 3) * k * .1]], dk, Math.max(1.5, k * .09)); }
@@ -704,7 +708,7 @@ function drawWorld(t, dt) {
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
   v.box(5, 0, -0.3, 3, 1, 0.3, [88, 128, 152]);      // the bridge: a deeper shade of the church rock's blue
   v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
-  v.box(8.4, -1.6, -1.15, 2.2, 2.2, .45, mix(PAL.under, [128, 170, 190], .4)); v.box(8, -2, -.7, 3, 3, .7, [128, 170, 190]);      // the church's rock: a little depth, a step in underneath
+  v.box(8.4, -1.6, -1.15, 2.2, 2.2, .45, [52, 80, 102]); v.box(8, -2, -.7, 3, 3, .7, [68, 102, 128]);      // a deeper blue than the bridge      // the church's rock: a little depth, a step in underneath
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
