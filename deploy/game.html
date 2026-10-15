@@ -1684,7 +1684,7 @@ function churchPoof(e, col) { church.fx.push({ k: 'poof', x: e.x, y: e.y, t: 0, 
 function churchClear() { const c = church; c.shots = []; c.waves = []; c.cones = []; c.p.target = null; }
 function churchCleared() {      // the fight is over: the lights come up and a chest stands before the cross; one of the good folk, picked at random, takes shape once it has been opened
   const c = church; if (c.done) return; c.done = true; c.fight = false; churchClear(); bell(196, .14); bell(293.7, .08);
-  const left = LOOT.filter(id => !have(id)); c.chest = { id: pick(left.length ? left : LOOT), x: 3.3, y: CW / 2, a: 0, open: false, at: null };      // there is always a chest: something you lack while there is any, then whatever comes
+  const rare = LOOT.filter(id => id !== 'flower'), left = rare.filter(id => !have(id)); c.chest = { id: Math.random() < .7 ? 'flower' : pick(left.length ? left : rare), x: 3.3, y: CW / 2, a: 0, open: false, at: null };      // there is always a chest: seven times in ten a flower; otherwise a weapon or a charm, one you lack while there is any
 }
 function churchBossDown() {      // the boss falls, and everything it brought with it goes too
   const c = church; c.pass = null;
