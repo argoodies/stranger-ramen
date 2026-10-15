@@ -467,13 +467,13 @@ const key = (i, j) => i + ',' + j;
 for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) blocked.add(key(i, j));
 [[2, -1], [2, 0], [2, -5], [3, -5], [2, -4], [3, -4], [-5, 1], [-4, 1], [-5, 2], [-4, 2]].forEach(c => blocked.add(key(c[0], c[1])));
 const TREES = [[-5, -5], [-3, -4], [4, 2], [3, 4], [-1, 4], [-5, 4]];
-const CDOOR = [9, 1], BDOOR = [7, 3];      // BDOOR: the cell in front of the bar's door, on the islet where the dead-end path at the bottom corner now leads
+const CDOOR = [9, 1], BDOOR = [5, 3];      // BDOOR: the cell in front of the bar's door, on the islet where the dead-end path at the bottom corner now leads
       // the church stands on the little island; this is the cell in front of its door
-[[9, -1], [10, -1], [9, 0], [10, 0], [8, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
+[[9, -1], [10, -1], [9, 0], [10, 0], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
 TREES.forEach(c => blocked.add(key(c[0], c[1])));
 const LAMPS = [[-4, 4], [4, -1], [8, -1]];
 LAMPS.forEach(c => blocked.add(key(c[0], c[1])));
-const onLand = (i, j) => (i >= -5 && i < 5 && j >= -5 && j < 5) || (j === 0 && i >= 5 && i < 8) || (i >= 8 && i < 11 && j >= -1 && j < 2) || (j === 3 && i >= 5 && i < 8);      // the coffee-brown walkway where the path dead-ends by the bottom corner, running out to the coffee house
+const onLand = (i, j) => (i >= -5 && i < 5 && j >= -5 && j < 5) || (j === 0 && i >= 5 && i < 8) || (i >= 8 && i < 11 && j >= -1 && j < 2) || (j === 3 && i === 5);      // the coffee-brown walkway where the path dead-ends by the bottom corner, running out to the coffee house
 const walkable = (i, j) => onLand(i, j) && !blocked.has(key(i, j));
 const PATH = new Set();
 for (let j = 3; j <= 3; j++) for (let i = -4; i <= 4; i++) PATH.add(key(i, j));
@@ -565,7 +565,7 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
   for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, h + .08 + SP * (1 - (cx - x0 - w / 2) / (w / 2 + ov)) + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
 }
 function drawBarHouse(v, t) {      // the little coffee house and bar on its islet, no bigger than the library: dark timber walls, a low slate roof, two warm windows and a hanging sign (a cup by day, a glass by night). Its door opens onto the walkway, round the back
-  const x0 = 8, y0 = 2.85, w = 1.3, h = 1.45, wood = [120, 86, 70], lit = [255, 214, 140];
+  const x0 = 6, y0 = 2.85, w = 1.3, h = 1.45, wood = [120, 86, 70], lit = [255, 214, 140];
   v.box(x0 + .1, y0 + .1, -1.1, w - .2, w - .2, 1.1, [92, 66, 56]); v.box(x0, y0, 0, w, w, h, wood);      // on a timber foundation of its own, no island round it v.box(x0 - .1, y0 - .1, h, w + .2, w + .2, .1, [70, 58, 72]); v.pyramid(x0 - .05, y0 - .05, h + .1, w + .1, .5, [84, 74, 96]);
   { const wp = v.F('R', [x0 + w, y0 + w / 2, .55], 0, .2); glow(wp[0], wp[1], v.s * .8, lit, .5); } v.arch('R', [x0 + w, y0 + w / 2, .55], .36, .32, lit); v.arch('L', [x0 + w / 2, y0 + w, .55], .36, .32, lit);      // a window on each side you can see
   { const a = v.F('L', [x0 + w - .2, y0 + w, 1.15], 0, 0); line([a, [a[0], a[1] + v.s * .1]], [60, 46, 50], 1.5); const sx = a[0], sy = a[1] + v.s * .1; poly([[sx - v.s * .17, sy - v.s * .08], [sx + v.s * .17, sy], [sx + v.s * .17, sy + v.s * .25], [sx - v.s * .17, sy + v.s * .17]], [214, 180, 120]);
@@ -660,7 +660,7 @@ function drawWorld(t, dt) {
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
   v.box(5, 0, -0.3, 3, 1, 0.3, [88, 128, 152]);      // the bridge: a deeper shade of the church rock's blue
-  v.box(5, 3, -0.3, 3, 1, 0.3, [138, 98, 72]);      // where the path dead-ends by the bottom corner it carries on as a coffee-brown walkway out to the coffee house
+  v.box(5, 3, -0.3, 1, 1, 0.3, [138, 98, 72]);      // where the path dead-ends by the bottom corner it carries on as a coffee-brown walkway out to the coffee house
   v.box(8.6, -.4, -2.6, 1.8, 1.8, 1.0, PAL.under); v.box(8, -1, -1.6, 3, 3, .6, mix(PAL.under, PAL.isl, .3)); v.box(8, -1, -1, 3, 3, 1, [128, 170, 190]);
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
@@ -718,7 +718,7 @@ function worldTap(sx, sy) {
   { const lp = v.P(2.85, -3.75, 1.3); if (Math.abs(sx - lp[0]) < v.s * 1.2 && Math.abs(sy - lp[1]) < v.s * 1.9) { goDoor('lib'); chime(69, 0, .12); return; } }
   { const sp = v.P(2.1, 0, .6), dp = v.F('R', [1, 0, 1.2], 0, .65); if (Math.hypot(sx - sp[0], sy - sp[1]) < v.s * 1.15 || (Math.abs(sx - dp[0]) < v.s * .6 && Math.abs(sy - dp[1]) < v.s * .95)) { goDoor('tower'); chime(62, 0, .12); return; } }
   { const cp = v.P(10, 0, 1.6); if (Math.abs(sx - cp[0]) < v.s * 1.7 && Math.abs(sy - cp[1]) < v.s * 2.3) { goDoor('church'); chime(62, 0, .12); return; } }
-  { const bp = v.P(8.65, 3.5, 1); if (Math.abs(sx - bp[0]) < v.s * 1.6 && Math.abs(sy - bp[1]) < v.s * 1.8) { goDoor('bar'); chime(67, 0, .12); return; } }
+  { const bp = v.P(6.65, 3.5, 1); if (Math.abs(sx - bp[0]) < v.s * 1.6 && Math.abs(sy - bp[1]) < v.s * 1.8) { goDoor('bar'); chime(67, 0, .12); return; } }
   const [x, y] = v.inv(sx, sy); let to = [Math.floor(x), Math.floor(y)];
   if (!walkable(to[0], to[1])) to = nearestWalkable(x, y);
   const p = bfs(cellOf(player), to); if (p) { player.path = p.slice(1); player.enter = false; chime(69, 0, .08, .8); }
