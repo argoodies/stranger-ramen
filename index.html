@@ -603,13 +603,14 @@ function barCat(dt) {      // the cat: now padding about the floor, now sitting 
   const st = Math.min(d, .55 * dt); c.x += dx / d * st; c.y += dy / d * st; c.face = Math.sign(dx - dy) || c.face; c.depth = Math.sign(dx + dy); }      // face: which way it heads across the screen
 function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 2.8); c.y = clamp(c.y, .2, 3.8); if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
 function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); }
-function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: pick([1, 2, 3]), whoSayT: 0, keepSayT: 0, cat: { x: .5, y: 3.5, tx: .5, ty: 3.5, sit: 4, t: 0, face: 1, meowT: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }
+function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
+ whoSayT: 0, keepSayT: 0, cat: { x: .5, y: 3.5, tx: .5, ty: 3.5, sit: 4, t: 0, face: 1, meowT: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }
 function leaveBar() { mode = 'world'; $('zoom').style.display = 'block'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
 function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
   if (hit('exit')) return barGo([0, 1], 'exit');
   if (hit('cat')) { const c = bar.cat; c.meowT = 1.6; c.sit = Math.max(c.sit, 2.5); sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); return; }      // stroking the cat: a meow
-  for (const cp of bar.cups) if (cp.full && hit('cup' + bar.cups.indexOf(cp))) { cp.full = false; chime(72, 0, .08); chime(67, .15, .06); return; }      // drunk up from wherever you stand: an empty cup is left on the counter
+  for (const cp of bar.cups) if (hit('cup' + bar.cups.indexOf(cp))) { if (cp.full) { cp.full = false; chime(72, 0, .08); chime(67, .15, .06); } else cp.wob = performance.now(); return; }      // a full cup is drunk; an empty one just rattles, silently      // drunk up from wherever you stand: an empty cup is left on the counter
   if (hit('top')) { bar.wobTop = performance.now(); return; }
   if ((BARHIT.shelf || []).some(h => Math.hypot(x - h[0], y - h[1]) < h[2])) { bar.wobShelf = performance.now(); return; }
   if (hit('keeper')) { const L = S(), night = G.n > .5;
@@ -645,18 +646,19 @@ function drawBar(t) {
     alpha(1 - nn, () => { const j = jig('wobTop', 0); v.box(3.15, .5 + j, 1.08, .36, .36, .42, [200, 204, 214]); v.box(3.2, .55 + j, 1.5, .26, .26, .08, [70, 70, 80]); });      // the coffee machine
     alpha(nn, () => { for (const [y0, c] of [[.6, [96, 150, 110]], [.85, [150, 70, 70]]]) { const y = y0 + jig('wobTop', y0 * 9); v.box(3.2, y, 1.08, .12, .12, .32, c); v.box(3.235, y + .035, 1.4, .05, .05, .12, c); } });
     { const q = P(3.33, .68, 1.3); BARHIT.top = [q[0], q[1] - s * .1, s * .3]; }      // the machine or the bottles, not the bare counter
-    bar.cups.forEach((cp, n) => { if (cp.slide < 1) cp.slide = Math.min(1, cp.slide + 1 / 50); const u = ease(cp.slide), c = P(3.12 + .25 * (1 - u), lerp(cp.from, cp.y, u), 1.08);      // each cup you were given, where it was set down
+    bar.cups.forEach((cp, n) => { if (cp.slide < 1) cp.slide = Math.min(1, cp.slide + 1 / 50); const u = ease(cp.slide), jw = .035 * clamp(1 - (performance.now() - (cp.wob || -1e9)) / 650) * Math.sin(performance.now() / 22 + n * 2), c = P(3.12 + .25 * (1 - u), lerp(cp.from, cp.y, u) + jw, 1.08);      // each cup you were given, where it was set down
       if (cp.night) { poly([[c[0] - s * .07, c[1] - s * .22], [c[0] + s * .07, c[1] - s * .22], [c[0] + s * .05, c[1]], [c[0] - s * .05, c[1]]], [236, 240, 250], .55); if (cp.full) poly([[c[0] - s * .06, c[1] - s * .15], [c[0] + s * .06, c[1] - s * .15], [c[0] + s * .05, c[1] - s * .01], [c[0] - s * .05, c[1] - s * .01]], [214, 160, 80]); }
       else { ell(c[0], c[1] - s * .08, s * .09, s * .05, [250, 246, 240]); poly([[c[0] - s * .09, c[1] - s * .08], [c[0] + s * .09, c[1] - s * .08], [c[0] + s * .07, c[1] + s * .04], [c[0] - s * .07, c[1] + s * .04]], [250, 246, 240]); ell(c[0], c[1] - s * .08, s * .07, s * .035, cp.full ? [120, 74, 50] : [228, 220, 210]);
         if (cp.full) for (let i = 0; i < 3; i++) { const ph = (t * .5 + i / 3 + n * .3) % 1, sx = c[0] + Math.sin(t * 1.6 + i * 2 + n) * s * .04, sy = c[1] - s * (.14 + .5 * ph); circ(sx, sy, s * (.025 + .05 * ph), [255, 250, 245], .45 * (1 - ph)); } }      // the coffee steams
       BARHIT['cup' + n] = [c[0], c[1] - s * .1, s * .32]; }); } });
   // the server, behind the counter: a barista by day, a barkeep at night. No shadow: the floor behind the counter is out of sight
-  objs.push({ k: 6.8, d: () => { const q = P(3.75, keeperY);
+  objs.push({ k: 6.8, d: () => { const q = P(3.88, keeperY);      // standing clear of the counter's side, so the feet are on the floor in front of it
     const server = (body, apron) => { const x = q[0], y = q[1], k = K, bl = mix(body, [255, 255, 255], .12), br = mix(body, [70, 50, 110], .26), ay = y - .95 * k, wy = y - .5 * k;      // a straight, tailored figure: narrow shoulders, a plain upright lower half, a long apron
       poly([[x - .19 * k, y], [x, y + .03 * k], [x, wy], [x - .17 * k, wy]], bl); poly([[x, y + .03 * k], [x + .19 * k, y], [x + .17 * k, wy], [x, wy]], br);
       poly([[x - .17 * k, wy], [x, wy], [x, ay], [x - .12 * k, ay + .04 * k]], bl); poly([[x, wy], [x + .17 * k, wy], [x + .12 * k, ay + .04 * k], [x, ay]], br);
       if (apron) { poly([[x - .12 * k, y - .05 * k], [x + .12 * k, y - .05 * k], [x + .11 * k, y - .66 * k], [x - .11 * k, y - .66 * k]], apron); }
-      const hx = x, hy = ay - .06 * k, hr = .17 * k; circ(hx, hy, hr, tn(SKIN)); ctx.beginPath(); ctx.arc(hx, hy - hr * .05, hr * 1.04, Math.PI * 1.02, Math.PI * 1.98); ctx.fillStyle = css(tn([44, 32, 40])); ctx.fill(); };
+      const hx = x, hy = ay - .06 * k, hr = .17 * k, hc = tn([44, 32, 40]); poly([[hx - hr * 1.05, hy - hr * .1], [hx + hr * 1.05, hy - hr * .1], [hx + hr * .95, hy + hr * 1.9], [hx - hr * .95, hy + hr * 1.9]], hc);      // hair falling to the shoulders, behind the face
+      circ(hx, hy, hr, tn(SKIN)); ctx.beginPath(); ctx.arc(hx, hy - hr * .05, hr * 1.04, Math.PI * 1.02, Math.PI * 1.98); ctx.fillStyle = css(tn([44, 32, 40])); ctx.fill(); };
     alpha(clamp(nn * 2 - 1), () => server(tn([44, 40, 56]), null));      // the barkeep: no apron      // a change of shift: the barista fades out, then the barkeep fades in
     alpha(clamp(1 - nn * 2), () => server(tn([46, 42, 54]), tn([86, 150, 110])));      // the barista, all in black, a green apron
     BARHIT.keeper = [q[0], q[1] - K * .8, K * .7]; bar.keeperAt = q; } });
