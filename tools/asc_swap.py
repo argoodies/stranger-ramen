@@ -40,5 +40,5 @@ if shots:
         for typ, pre in (('APP_IPHONE_67', 'iphone'), ('APP_IPAD_PRO_3GEN_129', 'ipad')):
             sid = must('POST', '/v1/appScreenshotSets', {'data': {'type': 'appScreenshotSets', 'attributes': {'screenshotDisplayType': typ}, 'relationships': {'appStoreVersionLocalization': {'data': {'type': 'appStoreVersionLocalizations', 'id': lid}}}}})['data']['id']
             src = f'{shots}/{lc}' if os.path.isdir(f'{shots}/{lc}') else shots      # per-language folders when present
-            for i in range(1, 6): upload(sid, f'{src}/{pre}_{i}.png')
+            for i in range(1, 7): upload(sid, f'{src}/{pre}_{i}.png')
         print('screenshots replaced', lc)

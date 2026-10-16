@@ -36,8 +36,8 @@ for l in must('GET', f'/v1/appStoreVersions/{VID}/appStoreVersionLocalizations')
         for s in sets:
             if s['attributes']['screenshotDisplayType'] == typ: must('DELETE', f"/v1/appScreenshotSets/{s['id']}")
         sid = must('POST', '/v1/appScreenshotSets', {'data': {'type': 'appScreenshotSets', 'attributes': {'screenshotDisplayType': typ}, 'relationships': {'appStoreVersionLocalization': {'data': {'type': 'appStoreVersionLocalizations', 'id': lid}}}}})['data']['id']
-        for i in range(1, 6): upload(sid, f'{shots}/{pre}_{i}.png')
-        print(lc, typ, 'uploaded 5')
+        for i in range(1, 7): upload(sid, f'{shots}/{pre}_{i}.png')
+        print(lc, typ, 'uploaded 6')
 must('PATCH', f'/v1/appStoreVersions/{VID}/relationships/build', {'data': {'type': 'builds', 'id': b[0]['id']}})
 print('build on version', must('GET', f'/v1/appStoreVersions/{VID}/build?fields[builds]=version')['data']['attributes']['version'])
 print('VERSION_ID', VID)
