@@ -693,8 +693,8 @@ function drawBar(t) {
   // you
   objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
     fig(q[0], q[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); bar.at = q; } });
-  objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
+  objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   const fs = clamp(s * .3, 12.5, 15), mw = Math.min(W * .62, 250);
   if (bar.keepSayT > 0 && bar.keeperAt) sayBubble(bar.keeperAt[0], bar.keeperAt[1] - K * 1.75, bar.keepSay, fs, clamp(bar.keepSayT * 2), mw);
   if (bar.whoSayT > 0 && bar.whoAtP) sayBubble(bar.whoAtP[0], bar.whoAtP[1] - K * 1.75, bar.whoSay, fs, clamp(bar.whoSayT * 2), mw);
