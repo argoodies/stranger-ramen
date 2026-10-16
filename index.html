@@ -664,8 +664,8 @@ function drawBar(t) {
   // the other customer, standing at the counter
   objs.push({ k: 2.7 + bar.whoAt + .5, d: () => { const q = P(2.7, bar.whoAt + .5), wk = bar.who, look = wk === 'sailor' ? { kind: 'plain', body: tn([236, 240, 250]), head: tn(SKIN) } : { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
     fig(q[0], q[1], K, look);
-    if (wk === 'sailor') { const hx = q[0], hy = q[1] - K * 1.01, hr = K * .17, hc = tn([150, 206, 240]); line([[q[0] - K * .2, q[1] - K * .62], [q[0] + K * .2, q[1] - K * .62]], tn([40, 60, 110]), Math.max(2, K * .06));      // a navy collar stripe
-      const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75) * (1 + .12 * Math.sin(i * 2.7)); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind
+    if (wk === 'sailor') { const hx = q[0], hy = q[1] - K * 1.01, hr = K * .17, hc = tn([150, 206, 240]);
+      const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind, even on both sides
     BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
   // the cat
   { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55, f = c.face || 1, sit = c.sit > 0, col = tn([248, 246, 242]), sh = tn([224, 220, 226]), pink = [244, 170, 180];      // a round, soft white cat
