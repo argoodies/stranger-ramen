@@ -609,7 +609,7 @@ function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
   if (hit('exit')) return barGo([0, 1], 'exit');
   if (hit('cat')) { const c = bar.cat; c.meowT = 1.6; c.sit = Math.max(c.sit, 2.5); sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); return; }      // stroking the cat: a meow
-  for (const cp of bar.cups) if (cp.full && hit('cup' + bar.cups.indexOf(cp))) return barGo([2, clamp(Math.floor(cp.y), 0, 3) === bar.whoAt ? clamp(Math.floor(cp.y) + (Math.floor(cp.y) < 3 ? 1 : -1), 0, 3) : clamp(Math.floor(cp.y), 0, 3)], { cup: cp });      // walk up to the cup and drink it
+  for (const cp of bar.cups) if (cp.full && hit('cup' + bar.cups.indexOf(cp))) { cp.full = false; chime(72, 0, .08); chime(67, .15, .06); return; }      // drunk up from wherever you stand: an empty cup is left on the counter
   if (hit('top')) { bar.wobTop = performance.now(); return; }
   if ((BARHIT.shelf || []).some(h => Math.hypot(x - h[0], y - h[1]) < h[2])) { bar.wobShelf = performance.now(); return; }
   if (hit('keeper')) { const L = S(), night = G.n > .5;
@@ -725,7 +725,7 @@ function drawWorld(t, dt) {
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
   for (let i = 0; i < 3; i++) v.box(5 + i / 3, -.1, -.4 * i - .4, 1 / 3, 1.2, .4, i % 2 ? [80, 118, 142] : [88, 128, 152]);      // three steps down to the church, shaped like the clocktower's (the first flush with the island), in the church's blue, each one a slab open underneath
   v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
-  v.box(6, -2, CDZ - .7, 2, 3, .7, [68, 102, 128]);      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
+  v.box(6, -2, CDZ - .3, 2, 3, .3, [88, 128, 152]);      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
