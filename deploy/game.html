@@ -657,7 +657,7 @@ function drawBar(t) {
       poly([[x - .19 * k, y], [x, y + .03 * k], [x, wy], [x - .17 * k, wy]], bl); poly([[x, y + .03 * k], [x + .19 * k, y], [x + .17 * k, wy], [x, wy]], br);
       poly([[x - .17 * k, wy], [x, wy], [x, ay], [x - .12 * k, ay + .04 * k]], bl); poly([[x, wy], [x + .17 * k, wy], [x + .12 * k, ay + .04 * k], [x, ay]], br);
       if (apron) { poly([[x - .12 * k, y - .05 * k], [x + .12 * k, y - .05 * k], [x + .11 * k, y - .66 * k], [x - .11 * k, y - .66 * k]], apron); }
-      const hx = x, hy = ay - .06 * k, hr = .17 * k, hc = tn([44, 32, 40]); poly([[hx - hr * 1.05, hy - hr * .1], [hx + hr * 1.05, hy - hr * .1], [hx + hr * .95, hy + hr * 1.9], [hx - hr * .95, hy + hr * 1.9]], hc);      // hair falling to the shoulders, behind the face
+      const hx = x, hy = ay - .06 * k, hr = .17 * k, hc = tn([44, 32, 40]); { const pts = [[hx - hr * 1.08, hy - hr * .1], [hx + hr * 1.08, hy - hr * .1]]; for (let i = 0; i <= 8; i++) { const u = 1 - i / 8, px = hx + (u * 2 - 1) * hr * 1.06, py = hy + hr * (i % 2 ? .78 : 1.05) + Math.abs(u - .5) * hr * .2; pts.push([px, py]); } poly(pts, hc); }      // hair to about the jaw, the ends cut choppy, behind the face
       circ(hx, hy, hr, tn(SKIN)); ctx.beginPath(); ctx.arc(hx, hy - hr * .05, hr * 1.04, Math.PI * 1.02, Math.PI * 1.98); ctx.fillStyle = css(tn([44, 32, 40])); ctx.fill(); };
     alpha(clamp(nn * 2 - 1), () => server(tn([44, 40, 56]), null));      // the barkeep: no apron      // a change of shift: the barista fades out, then the barkeep fades in
     alpha(clamp(1 - nn * 2), () => server(tn([46, 42, 54]), tn([86, 150, 110])));      // the barista, all in black, a green apron
