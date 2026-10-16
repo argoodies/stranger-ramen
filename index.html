@@ -468,7 +468,7 @@ for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) blocked.add(key(i, j
 [[2, -1], [2, 0], [2, -5], [3, -5], [2, -4], [3, -4], [-5, 1], [-4, 1], [-5, 2], [-4, 2]].forEach(c => blocked.add(key(c[0], c[1])));
 const TREES = [[-5, -5], [-3, -4], [4, 2], [3, 4], [-1, 4], [-5, 4]];
 const CDOOR = [6, 0], BDOOR = [5, 3], CDX = -3, CDY = -1, CDZ = -1.2;      // CDZ: the church's ground lies a storey below the town, reached by steps
-const wz = (x, y) => x >= 6 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.4 * Math.min(2, Math.floor((x - 5) * 3)) : 0;      // three steps, like the clocktower's, the first flush with the island      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
+const wz = (x, y) => x >= 6 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.3 * (1 + Math.min(2, Math.floor((x - 5) * 3))) : 0;      // three steps, like the clocktower's, the first flush with the island      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
       // BDOOR: the cell in front of the bar's door, on the islet where the dead-end path at the bottom corner now leads
       // the church stands on the little island; this is the cell in front of its door
 [[6, -2], [7, -2], [6, -1], [7, -1], [7, 0], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
@@ -727,7 +727,7 @@ function drawWorld(t, dt) {
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
-  for (let i = 0; i < 3; i++) v.box(5 + i / 3 + .05, .02, -.4 * i - .2, .23, .96, .2, i % 2 ? [80, 118, 142] : [88, 128, 152]);      // three stepping stones down to the church, the first level with the island, each hanging in the air with a gap before the next, across and down
+  for (let i = 0; i < 3; i++) v.box(5.1 + i * .3, .02, -.3 * i - .5, .2, .96, .2, i % 2 ? [80, 118, 142] : [88, 128, 152]);      // three stepping stones down to the church, evenly spaced from the island's edge to the church's slab, each hanging in the air with a gap before the next, across and down
   v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
   v.box(6, -2, CDZ - .3, 2, 3, .3, [88, 128, 152]);      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
