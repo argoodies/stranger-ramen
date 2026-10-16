@@ -471,7 +471,7 @@ const CDOOR = [6, 0], BDOOR = [5, 3], CDX = -3, CDY = -1, CDZ = -1.2;      // CD
 const wz = (x, y) => x >= 6 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.4 * Math.min(2, Math.floor((x - 5) * 3)) : 0;      // three steps, like the clocktower's, the first flush with the island      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
       // BDOOR: the cell in front of the bar's door, on the islet where the dead-end path at the bottom corner now leads
       // the church stands on the little island; this is the cell in front of its door
-[[6, -2], [7, -2], [6, -1], [7, -1], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
+[[6, -2], [7, -2], [6, -1], [7, -1], [7, 0], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
 TREES.forEach(c => blocked.add(key(c[0], c[1])));
 const LAMPS = [[-4, 4], [4, -1]];
 LAMPS.forEach(c => blocked.add(key(c[0], c[1])));
@@ -641,11 +641,11 @@ function drawBar(t) {
   { const lp = P(1.6, 2, Hh - .1), lb = P(1.6, 2, 2.3); line([lp, lb], [60, 46, 52], 1.2); glow(lb[0], lb[1] + s * .1, s * 2.2, warm, lerp(.3, .55, nn)); circ(lb[0], lb[1] + s * .1, s * .09, [255, 232, 170]); }      // one warm lamp
   const keeperY = bar.whoAt <= 2 ? 3.1 : 1.3; bar.keeperY = keeperY;      // the server stands away from the other customer, so the two are never one behind the other
   const objs = [];
-  objs.push({ k: 6.6, d: () => { v.box(3.0, .35, 0, .62, 3.3, 1.0, [126, 84, 62]); v.box(2.94, .29, 1.0, .74, 3.42, .08, [176, 124, 90]); BARHIT.counter = [P(2.94, .29, 1.08), P(3.68, .29, 1.08), P(3.68, 3.71, 1.08), P(3.68, 3.71, 0), P(2.94, 3.71, 0), P(2.94, 3.71, 1.08)];      // the counter, and its outline for taps
-    alpha(1 - nn, () => { const j = jig('wobTop', 0); v.box(3.15, .5 + j, 1.08, .36, .36, .42, [200, 204, 214]); v.box(3.2, .55 + j, 1.5, .26, .26, .08, [70, 70, 80]); });      // the coffee machine
+  objs.push({ k: 6.6, d: () => { v.box(3.12, .35, 0, .5, 3.3, 1.0, [126, 84, 62]); v.box(3.06, .29, 1.0, .62, 3.42, .08, [176, 124, 90]); BARHIT.counter = [P(3.06, .29, 1.08), P(3.68, .29, 1.08), P(3.68, 3.71, 1.08), P(3.68, 3.71, 0), P(3.06, 3.71, 0), P(3.06, 3.71, 1.08)];      // the counter, and its outline for taps
+    alpha(1 - nn, () => { const j = jig('wobTop', 0); v.box(3.2, .5 + j, 1.08, .36, .36, .42, [200, 204, 214]); v.box(3.25, .55 + j, 1.5, .26, .26, .08, [70, 70, 80]); });      // the coffee machine
     alpha(nn, () => { for (const [y0, c] of [[.6, [96, 150, 110]], [.85, [150, 70, 70]]]) { const y = y0 + jig('wobTop', y0 * 9); v.box(3.2, y, 1.08, .12, .12, .32, c); v.box(3.235, y + .035, 1.4, .05, .05, .12, c); } });
     { const q = P(3.33, .68, 1.3); BARHIT.top = [q[0], q[1] - s * .1, s * .3]; }      // the machine or the bottles, not the bare counter
-    bar.cups.forEach((cp, n) => { if (cp.slide < 1) cp.slide = Math.min(1, cp.slide + 1 / 50); const u = ease(cp.slide), jw = .035 * clamp(1 - (performance.now() - (cp.wob || -1e9)) / 650) * Math.sin(performance.now() / 22 + n * 2), c = P(3.12 + .25 * (1 - u), lerp(cp.from, cp.y, u) + jw, 1.08);      // each cup you were given, where it was set down
+    bar.cups.forEach((cp, n) => { if (cp.slide < 1) cp.slide = Math.min(1, cp.slide + 1 / 50); const u = ease(cp.slide), jw = .035 * clamp(1 - (performance.now() - (cp.wob || -1e9)) / 650) * Math.sin(performance.now() / 22 + n * 2), c = P(3.2 + .2 * (1 - u), lerp(cp.from, cp.y, u) + jw, 1.08);      // each cup you were given, where it was set down
       if (cp.night) { poly([[c[0] - s * .07, c[1] - s * .22], [c[0] + s * .07, c[1] - s * .22], [c[0] + s * .05, c[1]], [c[0] - s * .05, c[1]]], [236, 240, 250], .55); if (cp.full) poly([[c[0] - s * .06, c[1] - s * .15], [c[0] + s * .06, c[1] - s * .15], [c[0] + s * .05, c[1] - s * .01], [c[0] - s * .05, c[1] - s * .01]], [214, 160, 80]); }
       else { ell(c[0], c[1] - s * .08, s * .09, s * .05, [250, 246, 240]); poly([[c[0] - s * .09, c[1] - s * .08], [c[0] + s * .09, c[1] - s * .08], [c[0] + s * .07, c[1] + s * .04], [c[0] - s * .07, c[1] + s * .04]], [250, 246, 240]); ell(c[0], c[1] - s * .08, s * .07, s * .035, cp.full ? [120, 74, 50] : [228, 220, 210]);
         if (cp.full) for (let i = 0; i < 3; i++) { const ph = (t * .5 + i / 3 + n * .3) % 1, sx = c[0] + Math.sin(t * 1.6 + i * 2 + n) * s * .04, sy = c[1] - s * (.14 + .5 * ph); circ(sx, sy, s * (.025 + .05 * ph), [255, 250, 245], .45 * (1 - ph)); } }      // the coffee steams
@@ -664,8 +664,8 @@ function drawBar(t) {
   // the other customer, standing at the counter
   objs.push({ k: 2.7 + bar.whoAt + .5, d: () => { const q = P(2.7, bar.whoAt + .5), wk = bar.who, look = wk === 'sailor' ? { kind: 'plain', body: tn([236, 240, 250]), head: tn(SKIN) } : { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
     fig(q[0], q[1], K, look);
-    if (wk === 'sailor') { const hx = q[0], hy = q[1] - K * 1.01, hr = K * .17, hc = tn([150, 206, 240]); line([[q[0] - K * .2, q[1] - K * .62], [q[0] + K * .2, q[1] - K * .62]], tn([40, 60, 110]), Math.max(2, K * .06));      // a navy collar stripe
-      const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75) * (1 + .12 * Math.sin(i * 2.7)); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind
+    if (wk === 'sailor') { const hx = q[0], hy = q[1] - K * 1.01, hr = K * .17, hc = tn([150, 206, 240]);
+      const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind, even on both sides
     BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
   // the cat
   { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55, f = c.face || 1, sit = c.sit > 0, col = tn([248, 246, 242]), sh = tn([224, 220, 226]), pink = [244, 170, 180];      // a round, soft white cat
@@ -737,6 +737,8 @@ function drawWorld(t, dt) {
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
   objs.push({ k: -2.0, d: () => drawHouse(v, t) });
   for (const [i, j] of TREES) objs.push({ k: i + j + 1, d: () => tree(v, i, j) });
+  objs.push({ k: 7.8 + .3 + .5, d: () => { const x = 7.78, y = .3, z = CDZ; v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
+    for (const [dz, w, h, c] of [[.18, .3, .34, [70, 150, 130]], [.38, .23, .3, [90, 170, 146]], [.56, .15, .26, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z + dz, w, h, c); } });
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
   const K = s * 0.72;
   for (const n of npcs) objs.push({ k: n.x + n.y, d: () => { const p = v.P(n.x, n.y, wz(n.x, n.y)); fig(p[0], p[1] - Math.abs(Math.sin(n.hop || 0)) * s * .08, K, n.look); } });
