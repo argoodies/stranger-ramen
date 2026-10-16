@@ -515,6 +515,8 @@ function walk(p, dt, speed, solid) {
   p.x += dx / d * st; p.y += dy / d * st; return false;
 }
 let titleT0 = null;
+const titleAgain = () => { if (mode === 'title') titleT0 = null; };      // a phone keeps the tab alive: coming back to it, or to a page restored from the back-forward cache, plays the title's fade again
+addEventListener('pageshow', e => { if (e.persisted) titleAgain(); }); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') titleAgain(); });
 let wv = new View(0, 0, 40), zoomOut = 1, zoomTarget = 1, camX = 0, camY = 0;
 let starCache = null;
 let moonAt = null;      // set while the town sky is drawn, so the stars keep clear of the moon
