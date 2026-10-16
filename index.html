@@ -618,7 +618,7 @@ function cafeTap(x, y) {
   if (hit('top')) { bar.wobTop = performance.now(); return; }
   if ((BARHIT.shelf || []).some(h => Math.hypot(x - h[0], y - h[1]) < h[2])) { bar.wobShelf = performance.now(); return; }
   if (hit('keeper')) { const night = G.n > .5;      // the server says nothing: a tap brings a drink, unless you have one in front of you already
-    if (!bar.cups.some(c => c.full)) { let cy = clamp(bar.y, 1.2, 3.4); if (Math.abs(cy - bar.whoAt - .5) < .45) cy += cy < bar.whoAt + .5 ? -.5 : .5; cy = clamp(cy, 1.2, 3.4);      // never as far up the counter as the machine and the bottles
+    if (!bar.cups.some(c => c.full)) { let cy = clamp(Math.floor(bar.y) + .5, 1.5, 3.5); if (Math.abs(cy - bar.whoAt - .5) < .45) cy = clamp(cy + 1, 1.5, 3.5);      // set squarely in line with the row you stand in, never as far up the counter as the machine and the bottles, or the other customer
       bar.cups = bar.cups.filter(c => Math.abs(c.y - cy) > .3); bar.cups.push({ y: cy, night, full: true, slide: 0, from: bar.keeperY || 2 }); if (bar.cups.length > 3) bar.cups.shift(); chime(76, .3, .1); } else bar.wobKeep = performance.now();      // a cup set down on the counter near you
     return; }
   if (hit('who')) { bar.whoSay = pick(S().barPatron[bar.who]); bar.whoSayT = 3.2; chime(74, 0, .1); return; }
