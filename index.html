@@ -756,7 +756,7 @@ function drawWorld(t, dt) {
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
     if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
     const tt = titleT0 == null ? -1 : titleT0;
-    chars.forEach((ch, k) => { const u = ease(clamp((tt - .7) / 1.8)); if (u <= 0) return; ctx.globalAlpha = u; ctx.fillText(ch, x0 + gap * k, y); }); ctx.globalAlpha = 1; ctx.restore();      // the whole title fades in at once, where it stands; nothing moves or changes size
+    { const u = ease(clamp((tt - .35) / 1.2)); if (u > 0) { ctx.fillStyle = `rgba(255,255,255,${.96 * u})`; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y)); } } ctx.restore();      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
   if (mode === 'world' && bag.open) drawBag(t);
   if (mode === 'world' && G.late) text('夜深了，回拉面档口睡觉', W / 2, H * 0.9, 15, [255, 236, 190], .7 + .3 * Math.sin(t * 3), 'center', true);
