@@ -693,8 +693,8 @@ function drawBar(t) {
   // you
   objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
     fig(q[0], q[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); bar.at = q; } });
-  objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
+  objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   const fs = clamp(s * .3, 12.5, 15), mw = Math.min(W * .62, 250);
   if (bar.keepSayT > 0 && bar.keeperAt) sayBubble(bar.keeperAt[0], bar.keeperAt[1] - K * 1.75, bar.keepSay, fs, clamp(bar.keepSayT * 2), mw);
   if (bar.whoSayT > 0 && bar.whoAtP) sayBubble(bar.whoAtP[0], bar.whoAtP[1] - K * 1.75, bar.whoSay, fs, clamp(bar.whoSayT * 2), mw);
@@ -2299,13 +2299,13 @@ if (location.hash) {
   if (location.hash === '#isle') setTimeout(() => { player.x = 8.5; player.y = 1.5; player.path = []; }, 200);
   if (location.hash.startsWith('#church')) setTimeout(() => { enterChurch(); fade = 0; }, 200);
   if (location.hash.startsWith('#tower')) setTimeout(() => { enterTower(); fade = 0; const k = location.hash.slice(6); if (k) { towerShow(); fade = 0; if (k !== 'view') { tw.view.kind = k; tw.view.night = k === 'meteor'; G.n = tw.view.night ? 1 : 0; G.t = tw.view.night ? HALF + 20 : 20; } } }, 200);      // #tower, #towerview, #towermeteor, #towerday
+  if (location.hash === '#shotbar') setTimeout(() => { G.n = 1; G.t = HALF + 20; enterBar(); fade = 0; Object.assign(bar, { who: 'sailor', x: 1.5, y: 2.5, path: [] }); Object.assign(bar.cat, { x: .7, y: 3.2, sit: 999 }); setTimeout(() => { const k = BARHIT.keeper; if (k) cafeTap(k[0], k[1]); }, 300); }, 200);      // the store screenshot of the coffee house at night: a drink served, the sailor at the counter, the cat
   if (location.hash === '#shottower') setTimeout(() => { enterTower(); towerShow(); fade = 0; G.n = 1; G.t = HALF + 20; Object.assign(tw.view, { kind: 'meteor', night: true, t: TSTAR + .47 }); updateTower = () => {}; }, 200);      // for the store screenshot: the night view from the top, held at the moment the shooting star crosses
-  if (location.hash === '#shotchurch' || location.hash === '#shotchurch2') setTimeout(() => {      // two fixed scenes for the store screenshots: the fight in the dark, and the lit church afterwards
+  if (location.hash === '#shotchurch' || location.hash === '#shotchurch2') setTimeout(() => {      // two fixed scenes for the store screenshots: round one's whirlwind, and a chest being opened
     enterChurch(); fade = 0; const c = church, p = c.p, my = CW / 2, foe = (kind, x, y, o) => Object.assign({ kind, wave: 0, boss: kind === 'whirl', x, y, hx: x, hy: y, wx: x, wy: y, wt: 9, hp: kind === 'whirl' ? BOSSHP : MINHP, max: kind === 'whirl' ? BOSSHP : MINHP, cd: 99, app: 0, wind: 0, dash: 0, spin: 0, stun: 0, hit: 0, dead: 0, ax: -1, ay: 0 }, o);
-    if (location.hash === '#shotchurch') { c.fight = true; c.torchOn = true; c.torchF = 1; c.bannerT = 0; p.x = p.tx = 10.8; p.y = p.ty = my + .3; p.sw = .1; p.sa = -2.4;
-      c.foes = [foe('ass', 10.1, my - .2, { hit: .1, hp: 2 }), foe('ass', 6.2, my + 2.2, { wind: .5, ax: .82, ay: -.57 }), foe('witch', 5.6, my - 1.9, { wind: .3 }), foe('witch', 7.6, my - 2.9), foe('ass', 10.6, my - 2.4)];
-      c.waves = [{ x: 8.9, y: my + 1.1, ax: .93, ay: -.37, t: 2, src: c.foes[2], wave: 0 }]; }
-    else { c.foes = []; c.done = true; c.lit = 1; c.torchOn = true; c.torchF = 1; c.bannerT = 0; p.x = p.tx = 5.2; p.y = p.ty = my + .9; c.chest = { id: 'ring', x: 3.3, y: my, a: 1, open: false, at: null }; c.npcs = [{ who: 'virgin', x: 2.6, y: my - 1.9, a: 1, mark: true }]; }
+    if (location.hash === '#shotchurch') { c.fight = true; c.torchOn = true; c.torchF = 1; c.bannerT = 0; c.tier = 1; p.x = p.tx = 9.4; p.y = p.ty = my + .4; p.sw = .1; p.sa = -2.2;      // round one: the two assassins are down, the whirlwind is tearing about
+      c.foes = [foe('whirl', 8.6, my - 1.5, { spin: 2, turn: 1, hp: 64, ax: .8, ay: .6, hit: .1 })]; }
+    else { c.foes = []; c.done = true; c.lit = 1; c.torchOn = true; c.torchF = 1; c.bannerT = 0; p.x = p.tx = 5.1; p.y = p.ty = my + 1; c.chest = { id: 'twin', x: 3.3, y: my, a: 1, open: true, at: null }; c.fly = { id: 'twin', n: c.chest, t: .5 }; c.npcs = []; }      // the chest just opened, a weapon flying out of it to the chef
     c.cam = null; updateChurch = () => {}; }, 200);
   if (location.hash === '#walk') setTimeout(() => { const hp = wv.P(-4.17, 2.15, 1.1); worldTap(hp[0], hp[1]); const n0 = player.path.length; for (let k = 0; k < 200 && mode === 'world'; k++) updateWorld(0.05); document.title = 'pathLen=' + n0 + ' mode=' + mode + ' pos=' + cellOf(player); }, 600);
   if (location.hash === '#stall' || location.hash === '#test' || location.hash === '#tap') {
