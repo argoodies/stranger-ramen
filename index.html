@@ -752,8 +752,8 @@ function drawWorld(t, dt) {
     ctx.font = `200 ${fs}px "PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.96)';
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
-    if (titleT0 == null && document.fonts.status === 'loaded') titleT0 = performance.now() / 1000;      // the letters wait for the font, so they never jump from one face to another
-    const tt = titleT0 == null ? -1 : performance.now() / 1000 - titleT0;
+    if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
+    const tt = titleT0 == null ? -1 : titleT0;
     chars.forEach((ch, k) => { const u = clamp((tt - .35 - k * .14) / .6); if (u <= 0) return; ctx.globalAlpha = u; ctx.fillText(ch, x0 + gap * k, y + (1 - ease(u)) * fs * .35); }); ctx.globalAlpha = 1; ctx.restore();      // one letter after another, each fading in as it settles; the size never changes
   }
   if (mode === 'world' && bag.open) drawBag(t);
