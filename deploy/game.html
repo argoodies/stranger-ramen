@@ -514,6 +514,7 @@ function walk(p, dt, speed, solid) {
   if (d <= st) { p.x = tx; p.y = ty; p.path.shift(); p.step++; return true; }
   p.x += dx / d * st; p.y += dy / d * st; return false;
 }
+let titleT0 = null;
 let wv = new View(0, 0, 40), zoomOut = 1, zoomTarget = 1, camX = 0, camY = 0;
 let starCache = null;
 let moonAt = null;      // set while the town sky is drawn, so the stars keep clear of the moon
@@ -751,7 +752,9 @@ function drawWorld(t, dt) {
     ctx.font = `200 ${fs}px "PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.96)';
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
-    chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y)); ctx.restore();
+    if (titleT0 == null && document.fonts.status === 'loaded') titleT0 = performance.now() / 1000;      // the letters wait for the font, so they never jump from one face to another
+    const tt = titleT0 == null ? -1 : performance.now() / 1000 - titleT0;
+    chars.forEach((ch, k) => { const u = clamp((tt - .35 - k * .14) / .6); if (u <= 0) return; ctx.globalAlpha = u; ctx.fillText(ch, x0 + gap * k, y + (1 - ease(u)) * fs * .35); }); ctx.globalAlpha = 1; ctx.restore();      // one letter after another, each fading in as it settles; the size never changes
   }
   if (mode === 'world' && bag.open) drawBag(t);
   if (mode === 'world' && G.late) text('夜深了，回拉面档口睡觉', W / 2, H * 0.9, 15, [255, 236, 190], .7 + .3 * Math.sin(t * 3), 'center', true);
