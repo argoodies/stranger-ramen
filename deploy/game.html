@@ -467,15 +467,16 @@ const key = (i, j) => i + ',' + j;
 for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) blocked.add(key(i, j));
 [[2, -1], [2, 0], [2, -5], [3, -5], [2, -4], [3, -4], [-5, 1], [-4, 1], [-5, 2], [-4, 2]].forEach(c => blocked.add(key(c[0], c[1])));
 const TREES = [[-5, -5], [-3, -4], [4, 2], [3, 4], [-1, 4], [-5, 4]];
-const CDOOR = [6, 0], BDOOR = [5, 3], CDX = -3, CDY = -1, CDZ = -1.2;      // CDZ: the church's ground lies a storey below the town, reached by steps
-const wz = (x, y) => x >= 6 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.4 * Math.min(2, Math.floor((x - 5) * 3)) : 0;      // three steps, like the clocktower's, the first flush with the island      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
+const CDOOR = [7, 0], BDOOR = [5, 3], CDX = -2.5, CDY = -1, CDZ = -2.0;
+const wx = (x, y) => x <= 5 || y > 1.2 ? x : x < 7 ? 5 + (x - 5) * .75 : x - .5, wxi = (x, y) => x <= 5 || y > 1.2 ? x : x < 6.5 ? 5 + (x - 5) / .75 : x + .5;      // the church's two cells out from the island are drawn half a cell closer: the walk over the stones is squeezed to a cell and a half, and the church's ground is drawn half a cell back (wxi undoes it, for taps)      // CDZ: the church's ground lies a storey below the town, reached by steps
+const wz = (x, y) => x >= 7 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.4 * (1 + Math.min(3, Math.floor((x - 5) * 2))) : 0;      // four stepping stones over two cells, each .4 below the last      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
       // BDOOR: the cell in front of the bar's door, on the islet where the dead-end path at the bottom corner now leads
       // the church stands on the little island; this is the cell in front of its door
-[[6, -2], [7, -2], [6, -1], [7, -1], [7, 0], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
+[[7, -2], [8, -2], [7, -1], [8, -1], [8, 0], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
 TREES.forEach(c => blocked.add(key(c[0], c[1])));
 const LAMPS = [[-4, 4], [4, -1]];
 LAMPS.forEach(c => blocked.add(key(c[0], c[1])));
-const onLand = (i, j) => (i >= -5 && i < 5 && j >= -5 && j < 5) || (j === 0 && i === 5) || (i >= 6 && i < 8 && j >= -2 && j < 1) || (j === 3 && i === 5);      // the coffee-brown walkway where the path dead-ends by the bottom corner, running out to the coffee house
+const onLand = (i, j) => (i >= -5 && i < 5 && j >= -5 && j < 5) || (j === 0 && (i === 5 || i === 6)) || (i >= 7 && i < 9 && j >= -2 && j < 1) || (j === 3 && i === 5);      // the coffee-brown walkway where the path dead-ends by the bottom corner, running out to the coffee house
 const walkable = (i, j) => onLand(i, j) && !blocked.has(key(i, j));
 const PATH = new Set();
 for (let j = 3; j <= 3; j++) for (let i = -4; i <= 4; i++) PATH.add(key(i, j));
@@ -727,10 +728,10 @@ function drawWorld(t, dt) {
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
-  for (let i = 0; i < 3; i++) v.box(5 + i / 3, -.1, -.4 * i - .4, 1 / 3, 1.2, .4, i % 2 ? [80, 118, 142] : [88, 128, 152]);      // three steps down to the church, shaped like the clocktower's (the first flush with the island), in the church's blue, each one a slab open underneath
+  for (let i = 0; i < 4; i++) v.box(5.09 + i * .352, .02, -.4 * i - .6, .26, .96, .2, i % 2 ? [80, 118, 142] : [88, 128, 152]);      // four stepping stones down to the church, evenly spaced from the island's edge to the church's slab, each hanging in the air with a gap before the next, across and down
   v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
-  v.box(6, -2, CDZ - .3, 2, 3, .3, [88, 128, 152]);      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
-  if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(c[0] + .5, c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
+  v.box(6.5, -2, CDZ - .3, 2, 2.75, .3, [88, 128, 152]);      // the strip in front of the church is kept narrow      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
+  if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(wx(c[0] + .5, c[1] + .5), c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
   objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
@@ -740,14 +741,14 @@ function drawWorld(t, dt) {
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
   objs.push({ k: -2.0, d: () => drawHouse(v, t) });
   for (const [i, j] of TREES) objs.push({ k: i + j + 1, d: () => tree(v, i, j) });
-  objs.push({ k: 7.8 + .3 + .5, d: () => { const x = 7.78, y = .3, z = CDZ; v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
+  objs.push({ k: 8.8 + .3 + .5, d: () => { const x = 8.28, y = .3, z = CDZ; v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
     for (const [dz, w, h, c] of [[.18, .3, .34, [70, 150, 130]], [.38, .23, .3, [90, 170, 146]], [.56, .15, .26, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z + dz, w, h, c); } });
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
   const K = s * 0.72;
-  for (const n of npcs) objs.push({ k: n.x + n.y, d: () => { const p = v.P(n.x, n.y, wz(n.x, n.y)); fig(p[0], p[1] - Math.abs(Math.sin(n.hop || 0)) * s * .08, K, n.look); } });
-  if (!hideChef) objs.push({ k: player.x + player.y + 0.01, d: () => { const p = v.P(player.x, player.y, wz(player.x, player.y)), hop = player.path.length ? Math.abs(Math.sin(t * 11)) * s * .1 : 0; glow(p[0], p[1] - K * .6, K * 1.3, [255, 240, 200], .35); fig(p[0], p[1] - hop, K, { kind: 'chef', apron: [220, 80, 80] }); } });
+  for (const n of npcs) objs.push({ k: n.x + n.y, d: () => { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); fig(p[0], p[1] - Math.abs(Math.sin(n.hop || 0)) * s * .08, K, n.look); } });
+  if (!hideChef) objs.push({ k: player.x + player.y + 0.01, d: () => { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)), hop = player.path.length ? Math.abs(Math.sin(t * 11)) * s * .1 : 0; glow(p[0], p[1] - K * .6, K * 1.3, [255, 240, 200], .35); fig(p[0], p[1] - hop, K, { kind: 'chef', apron: [220, 80, 80] }); } });
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
-  for (const n of npcs) if (n.sayT > 0) { const p = v.P(n.x, n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
+  for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
   if (mode === 'title') {
     // the title, in the Monument Valley manner: thin, widely spaced lettering beside the clock face
     const a = v.P(1.5, -1.5, 7.5), chars = [...S().title], en = LANG === 'en', fs = Math.max(en ? 9 : 11, Math.min(clamp(s * (en ? .7 : .86), en ? 10 : 13, 26), (W - a[0]) / (en ? 3.85 + (chars.length - 1) * .74 : 11.6))), x0 = a[0] + fs * 1.15, gap = Math.min(fs * (en ? .92 : 1.9), (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
@@ -791,7 +792,7 @@ function worldTap(sx, sy) {
   { const sp = v.P(2.1, 0, .6), dp = v.F('R', [1, 0, 1.2], 0, .65); if (Math.hypot(sx - sp[0], sy - sp[1]) < v.s * 1.15 || (Math.abs(sx - dp[0]) < v.s * .6 && Math.abs(sy - dp[1]) < v.s * .95)) { goDoor('tower'); chime(62, 0, .12); return; } }
   { const cp = v.P(10 + CDX, CDY, 1.6 + CDZ); if (Math.abs(sx - cp[0]) < v.s * 1.7 && Math.abs(sy - cp[1]) < v.s * 2.3) { goDoor('church'); chime(62, 0, .12); return; } }
   { const bp = v.P(6.65, 3.5, 1); if (Math.abs(sx - bp[0]) < v.s * 1.6 && Math.abs(sy - bp[1]) < v.s * 1.8) { goDoor('bar'); chime(67, 0, .12); return; } }
-  let [x, y] = v.inv(sx, sy); { const [lx, ly] = v.inv(sx, sy + CDZ * v.s); if (wz(lx, ly) < 0 && walkable(Math.floor(lx), Math.floor(ly))) { x = lx; y = ly; } }      // a tap on the lower ground by the church is read at that ground's height
+  let [x, y] = v.inv(sx, sy); x = wxi(x, y); for (const z of [CDZ, -1.6, -1.2, -.8, -.4]) { let [lx, ly] = v.inv(sx, sy + z * v.s); lx = wxi(lx, ly); if (Math.abs(wz(lx, ly) - z) < .01 && walkable(Math.floor(lx), Math.floor(ly))) { x = lx; y = ly; break; } }      // a tap on the lower ground by the church is read at that ground's height
   let to = [Math.floor(x), Math.floor(y)];
   if (!walkable(to[0], to[1])) to = nearestWalkable(x, y);
   const p = bfs(cellOf(player), to); if (p) { player.path = p.slice(1); player.enter = false; chime(69, 0, .08, .8); }
