@@ -587,9 +587,9 @@ function drawBarHouse(v, t) {      // the little coffee house: stone walls, a fl
 // ------------------------------------------------------------ the bar: a small square room. The door is in the upper-left wall, the counter runs along the lower right.
 // By day a barista makes coffee; at night a barkeep pours drinks. One other customer stands at the counter — a sailor or a drunk. There are no seats: tap whoever is
 // behind the counter and a cup is set on the counter near you; tap the cup to drink it up; ask again for another. A cat lives in the corner.
-const BN = 4, BX = 5, bar = { x: .5, y: 1.5, path: [], step: 0, pending: null, who: null, whoSay: '', whoSayT: 0, keepSay: '', keepSayT: 0, cups: [], cat: null }, BARHIT = {};
+const BN = 4, bar = { x: .5, y: 1.5, path: [], step: 0, pending: null, who: null, whoSay: '', whoSayT: 0, keepSay: '', keepSayT: 0, cups: [], cat: null }, BARHIT = {};
 let bv = new View(0, 0, 40);
-const barBlocked = (i, j) => i < 0 || j < 0 || i >= BX || j >= BN || i === 4 || (i === 3 && j === bar.whoAt);      // a real 4 by 4 floor to walk on, then the counter's column; the other customer stands in front of it
+const barBlocked = (i, j) => i < 0 || j < 0 || i >= BN || j >= BN || i === 3 || (i === 2 && j === bar.whoAt);      // the counter takes the last column; the other customer stands in front of it
 function barGo(cell, pending) { const p = (function () { const from = cellOf(bar), q = [from], prev = new Map([[key(from[0], from[1]), null]]); while (q.length) { const c = q.shift(); if (c[0] === cell[0] && c[1] === cell[1]) { const r = []; let k = c; while (k) { r.unshift(k); k = prev.get(key(k[0], k[1])); } return r; } for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = [c[0] + dx, c[1] + dy], kk = key(n[0], n[1]); if (!barBlocked(n[0], n[1]) && !prev.has(kk)) { prev.set(kk, c); q.push(n); } } } return null; })();
   if (!p) return; bar.path = p.slice(1); bar.pending = pending; chime(69, 0, .07, .8); if (!bar.path.length) barArrive(); }
 function barArrive() { const p = bar.pending; bar.pending = null;
@@ -599,9 +599,9 @@ function barCat(dt) {      // the cat: now padding about the floor, now sitting 
   const c = bar.cat; if (!c) return; c.t += dt; if (c.meowT > 0) c.meowT -= dt;
   if (c.sit > 0) { c.sit -= dt; return; }
   const dx = c.tx - c.x, dy = c.ty - c.y, d = Math.hypot(dx, dy);
-  if (d < .05) { if (Math.random() < .5) c.sit = rnd(3, 7); c.tx = rnd(.3, 3.6); c.ty = rnd(.4, 3.6); if (Math.abs(c.tx - 3.5) < .5 && Math.abs(c.ty - bar.whoAt - .5) < .6) c.tx = 1; return; }
+  if (d < .05) { if (Math.random() < .5) c.sit = rnd(3, 7); c.tx = rnd(.3, 2.6); c.ty = rnd(.4, 3.6); if (Math.abs(c.tx - 2.5) < .5 && Math.abs(c.ty - bar.whoAt - .5) < .6) c.tx = 1; return; }
   const st = Math.min(d, .55 * dt); c.x += dx / d * st; c.y += dy / d * st; c.face = Math.sign(dx - dy) || c.face; c.depth = Math.sign(dx + dy); }      // face: which way it heads across the screen
-function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 3.8); c.y = clamp(c.y, .2, 3.8); if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
+function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 2.8); c.y = clamp(c.y, .2, 3.8); if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
 function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); }
 function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
  whoSayT: 0, keepSayT: 0, cat: { x: .5, y: 3.5, tx: .5, ty: 3.5, sit: 4, t: 0, face: 1, meowT: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }
@@ -624,34 +624,34 @@ function cafeTap(x, y) {
 function drawBar(t) {
   const nn = clamp((G.n - .35) / .3), alpha = (a, f) => { if (a <= .01) return; ctx.save(); ctx.globalAlpha *= a; f(); ctx.restore(); };      // nn: how far evening has come; the morning things fade out as the evening things fade in
   TK = lerp(.1, .3, nn); TINT = [26, 22, 62]; SHADOW = [44, 32, 72]; skyNow(t, .2);
-  const N = BN, X = BX, Hh = 3.2, s = Math.min(W / (9.6 * C30), (H - 300) / (Hh + (X + N) / 2 + .6)), v = bv; v.s = s; v.cx = W / 2 - (X - N) / 2 * C30 * s; v.cy = Math.max(230, (H - (Hh + (X + N) / 2) * s) * .5) + Hh * s; const P = v.P.bind(v), tn = c => tint(c);
+  const N = BN, Hh = 3.2, s = Math.min(W / (8.6 * C30), (H - 300) / (Hh + N + .6)), v = bv; v.s = s; v.cx = W / 2; v.cy = Math.max(230, (H - (Hh + N) * s) * .5) + Hh * s; const P = v.P.bind(v), tn = c => tint(c);
   const warm = [255, 206, 140], K = s * 1.1;
-  for (let i = 0; i < X; i++) for (let j = 0; j < N; j++) v.quad(i, j, 0, 1, 1, tn((i + j) % 2 ? [150, 104, 84] : [164, 116, 92]));      // dark plank floor
-  poly([P(0, N, 0), P(X, N, 0), P(X, N, -.34), P(0, N, -.34)], tn([120, 84, 66])); poly([P(X, 0, 0), P(X, N, 0), P(X, N, -.34), P(X, 0, -.34)], tn([100, 70, 58]));      // the floor's own thickness, flush with the foot of the walls
-  poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, Hh), P(0, 0, Hh)], tn([150, 110, 96])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([132, 96, 86]));
-  for (let k = 1; k < 10; k++) { line([P(k * X / 10, 0, 0), P(k * X / 10, 0, Hh)], tn([122, 88, 78]), 1, .6); if (k < 8) line([P(0, k * N / 8, 0), P(0, k * N / 8, Hh)], tn([110, 80, 72]), 1, .6); }      // timber boards
-  wallThick(v, X, N, Hh, -.34, tn([110, 80, 72]), tn([96, 70, 64]), tn([86, 62, 58]));
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) v.quad(i, j, 0, 1, 1, tn((i + j) % 2 ? [150, 104, 84] : [164, 116, 92]));      // dark plank floor
+  poly([P(0, N, 0), P(N, N, 0), P(N, N, -.34), P(0, N, -.34)], tn([120, 84, 66])); poly([P(N, 0, 0), P(N, N, 0), P(N, N, -.34), P(N, 0, -.34)], tn([100, 70, 58]));      // the floor's own thickness, flush with the foot of the walls
+  poly([P(0, 0, 0), P(N, 0, 0), P(N, 0, Hh), P(0, 0, Hh)], tn([150, 110, 96])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([132, 96, 86]));
+  for (let k = 1; k < 8; k++) { line([P(k * N / 8, 0, 0), P(k * N / 8, 0, Hh)], tn([122, 88, 78]), 1, .6); line([P(0, k * N / 8, 0), P(0, k * N / 8, Hh)], tn([110, 80, 72]), 1, .6); }      // timber boards
+  wallThick(v, N, N, Hh, -.34, tn([110, 80, 72]), tn([96, 70, 64]), tn([86, 62, 58]));
   { const yc = 1.5, o = [0, yc, 0], dp = v.F('R', o, 0, .6); glow(dp[0], dp[1], s * 1.4, mix([255, 236, 190], [150, 170, 240], nn), .45); v.arch('R', o, .9, 1.25, mix([250, 226, 180], tn([60, 70, 120]), nn)); const ep = v.F('R', o, 0, .5); BARHIT.exit = [ep[0], ep[1], s * .9]; }      // the door, in the upper-left wall
-  v.box(1.1, .02, 1.7, 2.8, .32, .08, [96, 66, 54]); v.box(1.1, .02, 2.4, 2.8, .32, .08, [96, 66, 54]);      // the back shelf
+  v.box(.6, .02, 1.7, 2.8, .32, .08, [96, 66, 54]); v.box(.6, .02, 2.4, 2.8, .32, .08, [96, 66, 54]);      // the back shelf
   const jig = (k, ph) => .035 * clamp(1 - (performance.now() - (bar[k] || -1e9)) / 650) * Math.sin(performance.now() / 22 + ph);      // things tapped on the shelf or the counter rattle for a moment, silently, each a little out of step with the next (as the jars in the ramen shop do)
   const shelfHit = [];
-  alpha(1 - nn, () => { for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) v.box(1.25 + k * .37 + jig('wobShelf', k * 1.7 + r * 2.3), .08, 1.78 + r * .7, .2, .16, .2, [[236, 226, 206], [170, 120, 90], [214, 180, 120]][(k + r) % 3]); });      // coffee tins by day
-  alpha(nn, () => { for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) { const x = 1.25 + k * .37 + jig('wobShelf', k * 1.7 + r * 2.3), z = 1.78 + r * .7, c = [[96, 150, 110], [150, 70, 70], [210, 170, 90], [120, 120, 170]][(k + r) % 4]; v.box(x, .1, z, .12, .12, .3, c); v.box(x + .035, .135, z + .3, .05, .05, .12, c); } });      // bottles at night
-  for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) { const q = P(1.35 + k * .37, .16, 1.92 + r * .7); shelfHit.push([q[0], q[1], s * .2]); } BARHIT.shelf = shelfHit;      // only the things on the shelf answer a tap, not the bare boards
-  { const lp = P(2.1, 2, Hh - .1), lb = P(2.1, 2, 2.3); line([lp, lb], [60, 46, 52], 1.2); glow(lb[0], lb[1] + s * .1, s * 2.2, warm, lerp(.3, .55, nn)); circ(lb[0], lb[1] + s * .1, s * .09, [255, 232, 170]); }      // one warm lamp
+  alpha(1 - nn, () => { for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) v.box(.75 + k * .37 + jig('wobShelf', k * 1.7 + r * 2.3), .08, 1.78 + r * .7, .2, .16, .2, [[236, 226, 206], [170, 120, 90], [214, 180, 120]][(k + r) % 3]); });      // coffee tins by day
+  alpha(nn, () => { for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) { const x = .75 + k * .37 + jig('wobShelf', k * 1.7 + r * 2.3), z = 1.78 + r * .7, c = [[96, 150, 110], [150, 70, 70], [210, 170, 90], [120, 120, 170]][(k + r) % 4]; v.box(x, .1, z, .12, .12, .3, c); v.box(x + .035, .135, z + .3, .05, .05, .12, c); } });      // bottles at night
+  for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) { const q = P(.85 + k * .37, .16, 1.92 + r * .7); shelfHit.push([q[0], q[1], s * .2]); } BARHIT.shelf = shelfHit;      // only the things on the shelf answer a tap, not the bare boards
+  { const lp = P(1.6, 2, Hh - .1), lb = P(1.6, 2, 2.3); line([lp, lb], [60, 46, 52], 1.2); glow(lb[0], lb[1] + s * .1, s * 2.2, warm, lerp(.3, .55, nn)); circ(lb[0], lb[1] + s * .1, s * .09, [255, 232, 170]); }      // one warm lamp
   const keeperY = bar.whoAt <= 2 ? 3.1 : 1.3; bar.keeperY = keeperY;      // the server stands away from the other customer, so the two are never one behind the other
   const objs = [];
-  objs.push({ k: 7.6, d: () => { v.box(4.0, .35, 0, .62, 3.3, 1.0, [126, 84, 62]); v.box(3.94, .29, 1.0, .74, 3.42, .08, [176, 124, 90]); BARHIT.counter = [P(3.94, .29, 1.08), P(4.68, .29, 1.08), P(4.68, 3.71, 1.08), P(4.68, 3.71, 0), P(3.94, 3.71, 0), P(3.94, 3.71, 1.08)];      // the counter, and its outline for taps
-    alpha(1 - nn, () => { const j = jig('wobTop', 0); v.box(4.15, .5 + j, 1.08, .36, .36, .42, [200, 204, 214]); v.box(4.2, .55 + j, 1.5, .26, .26, .08, [70, 70, 80]); });      // the coffee machine
-    alpha(nn, () => { for (const [y0, c] of [[.6, [96, 150, 110]], [.85, [150, 70, 70]]]) { const y = y0 + jig('wobTop', y0 * 9); v.box(4.2, y, 1.08, .12, .12, .32, c); v.box(4.235, y + .035, 1.4, .05, .05, .12, c); } });
-    { const q = P(4.33, .68, 1.3); BARHIT.top = [q[0], q[1] - s * .1, s * .3]; }      // the machine or the bottles, not the bare counter
-    bar.cups.forEach((cp, n) => { if (cp.slide < 1) cp.slide = Math.min(1, cp.slide + 1 / 50); const u = ease(cp.slide), jw = .035 * clamp(1 - (performance.now() - (cp.wob || -1e9)) / 650) * Math.sin(performance.now() / 22 + n * 2), c = P(4.12 + .25 * (1 - u), lerp(cp.from, cp.y, u) + jw, 1.08);      // each cup you were given, where it was set down
+  objs.push({ k: 6.6, d: () => { v.box(3.12, .35, 0, .5, 3.3, 1.0, [126, 84, 62]); v.box(3.06, .29, 1.0, .62, 3.42, .08, [176, 124, 90]); BARHIT.counter = [P(3.06, .29, 1.08), P(3.68, .29, 1.08), P(3.68, 3.71, 1.08), P(3.68, 3.71, 0), P(3.06, 3.71, 0), P(3.06, 3.71, 1.08)];      // the counter, and its outline for taps
+    alpha(1 - nn, () => { const j = jig('wobTop', 0); v.box(3.2, .5 + j, 1.08, .36, .36, .42, [200, 204, 214]); v.box(3.25, .55 + j, 1.5, .26, .26, .08, [70, 70, 80]); });      // the coffee machine
+    alpha(nn, () => { for (const [y0, c] of [[.6, [96, 150, 110]], [.85, [150, 70, 70]]]) { const y = y0 + jig('wobTop', y0 * 9); v.box(3.2, y, 1.08, .12, .12, .32, c); v.box(3.235, y + .035, 1.4, .05, .05, .12, c); } });
+    { const q = P(3.33, .68, 1.3); BARHIT.top = [q[0], q[1] - s * .1, s * .3]; }      // the machine or the bottles, not the bare counter
+    bar.cups.forEach((cp, n) => { if (cp.slide < 1) cp.slide = Math.min(1, cp.slide + 1 / 50); const u = ease(cp.slide), jw = .035 * clamp(1 - (performance.now() - (cp.wob || -1e9)) / 650) * Math.sin(performance.now() / 22 + n * 2), c = P(3.2 + .2 * (1 - u), lerp(cp.from, cp.y, u) + jw, 1.08);      // each cup you were given, where it was set down
       if (cp.night) { poly([[c[0] - s * .07, c[1] - s * .22], [c[0] + s * .07, c[1] - s * .22], [c[0] + s * .05, c[1]], [c[0] - s * .05, c[1]]], [236, 240, 250], .55); if (cp.full) poly([[c[0] - s * .06, c[1] - s * .15], [c[0] + s * .06, c[1] - s * .15], [c[0] + s * .05, c[1] - s * .01], [c[0] - s * .05, c[1] - s * .01]], [214, 160, 80]); }
       else { ell(c[0], c[1] - s * .08, s * .09, s * .05, [250, 246, 240]); poly([[c[0] - s * .09, c[1] - s * .08], [c[0] + s * .09, c[1] - s * .08], [c[0] + s * .07, c[1] + s * .04], [c[0] - s * .07, c[1] + s * .04]], [250, 246, 240]); ell(c[0], c[1] - s * .08, s * .07, s * .035, cp.full ? [120, 74, 50] : [228, 220, 210]);
         if (cp.full) for (let i = 0; i < 3; i++) { const ph = (t * .5 + i / 3 + n * .3) % 1, sx = c[0] + Math.sin(t * 1.6 + i * 2 + n) * s * .04, sy = c[1] - s * (.14 + .5 * ph); circ(sx, sy, s * (.025 + .05 * ph), [255, 250, 245], .45 * (1 - ph)); } }      // the coffee steams
       BARHIT['cup' + n] = [c[0], c[1] - s * .1, s * .32]; }); } });
   // the server, behind the counter: a barista by day, a barkeep at night. No shadow: the floor behind the counter is out of sight
-  objs.push({ k: 7.8, d: () => { const q = P(4.88, keeperY);      // standing clear of the counter's side, so the feet are on the floor in front of it
+  objs.push({ k: 6.8, d: () => { const q = P(3.88, keeperY);      // standing clear of the counter's side, so the feet are on the floor in front of it
     const server = (body, apron) => { const x = q[0], y = q[1], k = K, bl = mix(body, [255, 255, 255], .12), br = mix(body, [70, 50, 110], .26), ay = y - .95 * k, wy = y - .5 * k;      // a straight, tailored figure: narrow shoulders, a plain upright lower half, a long apron
       poly([[x - .19 * k, y], [x, y + .03 * k], [x, wy], [x - .17 * k, wy]], bl); poly([[x, y + .03 * k], [x + .19 * k, y], [x + .17 * k, wy], [x, wy]], br);
       poly([[x - .17 * k, wy], [x, wy], [x, ay], [x - .12 * k, ay + .04 * k]], bl); poly([[x, wy], [x + .17 * k, wy], [x + .12 * k, ay + .04 * k], [x, ay]], br);
@@ -662,7 +662,7 @@ function drawBar(t) {
     alpha(clamp(1 - nn * 2), () => server(tn([46, 42, 54]), tn([86, 150, 110])));      // the barista, all in black, a green apron
     BARHIT.keeper = [q[0], q[1] - K * .8, K * .7]; bar.keeperAt = q; } });
   // the other customer, standing at the counter
-  objs.push({ k: 3.7 + bar.whoAt + .5, d: () => { const q = P(3.7, bar.whoAt + .5), wk = bar.who, look = wk === 'sailor' ? { kind: 'plain', body: tn([236, 240, 250]), head: tn(SKIN) } : { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
+  objs.push({ k: 2.7 + bar.whoAt + .5, d: () => { const q = P(2.7, bar.whoAt + .5), wk = bar.who, look = wk === 'sailor' ? { kind: 'plain', body: tn([236, 240, 250]), head: tn(SKIN) } : { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
     fig(q[0], q[1], K, look);
     if (wk === 'sailor') { const hx = q[0], hy = q[1] - K * 1.01, hr = K * .17, hc = tn([150, 206, 240]); line([[q[0] - K * .2, q[1] - K * .62], [q[0] + K * .2, q[1] - K * .62]], tn([40, 60, 110]), Math.max(2, K * .06));      // a navy collar stripe
       const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75) * (1 + .12 * Math.sin(i * 2.7)); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind
@@ -737,8 +737,8 @@ function drawWorld(t, dt) {
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
   objs.push({ k: -2.0, d: () => drawHouse(v, t) });
   for (const [i, j] of TREES) objs.push({ k: i + j + 1, d: () => tree(v, i, j) });
-  objs.push({ k: 7 + 0 + 1, d: () => { const x = 7.55, y = .5, z = CDZ; v.disc(x, y, z, .22, .16, [176, 110, 80]); v.box(x - .05, y - .05, z + .16, .1, .1, .2, [150, 110, 90]);      // a clipped cypress in a pot, at the corner in front of the church
-    for (const [dz, w, h, c] of [[.3, .5, .55, [70, 150, 130]], [.62, .38, .5, [90, 170, 146]], [.92, .24, .42, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z + dz, w, h, c); } });
+  objs.push({ k: 7.8 + .3 + .5, d: () => { const x = 7.78, y = .3, z = CDZ; v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
+    for (const [dz, w, h, c] of [[.18, .3, .34, [70, 150, 130]], [.38, .23, .3, [90, 170, 146]], [.56, .15, .26, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z + dz, w, h, c); } });
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
   const K = s * 0.72;
   for (const n of npcs) objs.push({ k: n.x + n.y, d: () => { const p = v.P(n.x, n.y, wz(n.x, n.y)); fig(p[0], p[1] - Math.abs(Math.sin(n.hop || 0)) * s * .08, K, n.look); } });
