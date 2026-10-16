@@ -615,7 +615,7 @@ function cafeTap(x, y) {
   if ((BARHIT.shelf || []).some(h => Math.hypot(x - h[0], y - h[1]) < h[2])) { bar.wobShelf = performance.now(); return; }
   if (hit('keeper')) { const night = G.n > .5;      // the server says nothing: a tap brings a drink, unless you have one in front of you already
     if (!bar.cups.some(c => c.full)) { let cy = clamp(bar.y, 1.2, 3.4); if (Math.abs(cy - bar.whoAt - .5) < .45) cy += cy < bar.whoAt + .5 ? -.5 : .5; cy = clamp(cy, 1.2, 3.4);      // never as far up the counter as the machine and the bottles
-      bar.cups = bar.cups.filter(c => Math.abs(c.y - cy) > .3); bar.cups.push({ y: cy, night, full: true, slide: 0, from: bar.keeperY || 2 }); if (bar.cups.length > 3) bar.cups.shift(); chime(76, .3, .1); }      // a cup set down on the counter near you
+      bar.cups = bar.cups.filter(c => Math.abs(c.y - cy) > .3); bar.cups.push({ y: cy, night, full: true, slide: 0, from: bar.keeperY || 2 }); if (bar.cups.length > 3) bar.cups.shift(); chime(76, .3, .1); } else bar.wobKeep = performance.now();      // a cup set down on the counter near you
     return; }
   if (hit('who')) { bar.whoSay = pick(S().barPatron[bar.who]); bar.whoSayT = 3.2; chime(74, 0, .1); return; }
   { const q = BARHIT.counter; if (q) { let inside = false; for (let a = 0, b = q.length - 1; a < q.length; b = a++) if ((q[a][1] > y) !== (q[b][1] > y) && x < (q[b][0] - q[a][0]) * (y - q[a][1]) / (q[b][1] - q[a][1]) + q[a][0]) inside = !inside; if (inside) return; } }      // the counter itself: a tap on it does nothing
@@ -651,7 +651,7 @@ function drawBar(t) {
         if (cp.full) for (let i = 0; i < 3; i++) { const ph = (t * .5 + i / 3 + n * .3) % 1, sx = c[0] + Math.sin(t * 1.6 + i * 2 + n) * s * .04, sy = c[1] - s * (.14 + .5 * ph); circ(sx, sy, s * (.025 + .05 * ph), [255, 250, 245], .45 * (1 - ph)); } }      // the coffee steams
       BARHIT['cup' + n] = [c[0], c[1] - s * .1, s * .32]; }); } });
   // the server, behind the counter: a barista by day, a barkeep at night. No shadow: the floor behind the counter is out of sight
-  objs.push({ k: 6.8, d: () => { const q = P(3.88, keeperY);      // standing clear of the counter's side, so the feet are on the floor in front of it
+  objs.push({ k: 6.8, d: () => { const q = P(3.88, keeperY); q[0] += jig('wobKeep', 0) * s * 1.6;      // standing clear of the counter's side, so the feet are on the floor in front of it
     const server = (body, apron) => { const x = q[0], y = q[1], k = K, bl = mix(body, [255, 255, 255], .12), br = mix(body, [70, 50, 110], .26), ay = y - .95 * k, wy = y - .5 * k;      // a straight, tailored figure: narrow shoulders, a plain upright lower half, a long apron
       poly([[x - .19 * k, y], [x, y + .03 * k], [x, wy], [x - .17 * k, wy]], bl); poly([[x, y + .03 * k], [x + .19 * k, y], [x + .17 * k, wy], [x, wy]], br);
       poly([[x - .17 * k, wy], [x, wy], [x, ay], [x - .12 * k, ay + .04 * k]], bl); poly([[x, wy], [x + .17 * k, wy], [x + .12 * k, ay + .04 * k], [x, ay]], br);
@@ -668,7 +668,7 @@ function drawBar(t) {
       const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind, even on both sides
     BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
   // the cat
-  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55, f = c.face || 1, sit = c.sit > 0, col = tn([248, 246, 242]), sh = tn([224, 220, 226]), pink = [244, 170, 180];      // a round, soft white cat
+  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55, f = c.face || 1, sit = c.sit > 0, col = [248, 246, 242], sh = [224, 220, 226], pink = [244, 170, 180];      // a round, soft white cat
       const tail = (pts, w) => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.quadraticCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1]); ctx.quadraticCurveTo(pts[3][0], pts[3][1], pts[4][0], pts[4][1]); ctx.strokeStyle = css(sh); ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke(); ctx.strokeStyle = css(col); ctx.lineWidth = w * .7; ctx.stroke(); };
       ell(q[0], q[1], k * .42, k * .12, [20, 12, 40], .22);
       let hx, hy;
