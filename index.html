@@ -279,11 +279,11 @@ class View {
   }
   clock(pl, o, r, ah, am) {
     const ring = rr => { const p = []; for (let i = 0; i < 36; i++) { const q = TAU * i / 36; p.push(this.F(pl, o, rr * Math.cos(q), rr * Math.sin(q))); } return p; };
-    poly(ring(r), tint(DARK)); poly(ring(r * 0.86), tint([250, 240, 218]));
-    for (let i = 0; i < 12; i++) { const q = TAU * i / 12; line([this.F(pl, o, r * .68 * Math.sin(q), r * .68 * Math.cos(q)), this.F(pl, o, r * .8 * Math.sin(q), r * .8 * Math.cos(q))], tint(DARK), this.s * 0.03); }
+    poly(ring(r), tint(DARK)); poly(ring(r * 0.78), tint([250, 240, 218]));      // a thick dark rim
+    for (let i = 0; i < 12; i++) { const q = TAU * i / 12; line([this.F(pl, o, r * .58 * Math.sin(q), r * .58 * Math.cos(q)), this.F(pl, o, r * .7 * Math.sin(q), r * .7 * Math.cos(q))], tint(DARK), this.s * 0.03); }
     const c0 = this.F(pl, o, 0, 0);
-    line([c0, this.F(pl, o, r * .46 * Math.sin(ah), r * .46 * Math.cos(ah))], [60, 40, 80], this.s * 0.07);
-    line([c0, this.F(pl, o, r * .72 * Math.sin(am), r * .72 * Math.cos(am))], [60, 40, 80], this.s * 0.045);
+    line([c0, this.F(pl, o, r * .46 * Math.sin(ah), r * .42 * Math.cos(ah))], [60, 40, 80], this.s * 0.11);
+    line([c0, this.F(pl, o, r * .72 * Math.sin(am), r * .64 * Math.cos(am))], [60, 40, 80], this.s * 0.075); circ(c0[0], c0[1], this.s * .07, [60, 40, 80]);      // bolder hands, joined by a hub
   }
 }
 
