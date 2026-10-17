@@ -282,8 +282,8 @@ class View {
     poly(ring(r), tint(DARK)); poly(ring(r * 0.86), tint([250, 240, 218]));
     for (let i = 0; i < 12; i++) { const q = TAU * i / 12; sq([this.F(pl, o, r * .68 * Math.sin(q), r * .68 * Math.cos(q)), this.F(pl, o, r * .8 * Math.sin(q), r * .8 * Math.cos(q))], tint(DARK), this.s * 0.038); }
     const c0 = this.F(pl, o, 0, 0);
-    sq([c0, this.F(pl, o, r * .46 * Math.sin(ah), r * .46 * Math.cos(ah))], [60, 40, 80], this.s * 0.086);
-    sq([c0, this.F(pl, o, r * .72 * Math.sin(am), r * .72 * Math.cos(am))], [60, 40, 80], this.s * 0.057);      // ticks and hands as in the Blood on the Clocktower video: square-ended, 4, 9 and 6 px at the title shot's scale of 105
+    sq([this.F(pl, o, -r * .1 * Math.sin(ah), -r * .1 * Math.cos(ah)), this.F(pl, o, r * .46 * Math.sin(ah), r * .46 * Math.cos(ah))], [60, 40, 80], this.s * 0.086);
+    sq([this.F(pl, o, -r * .12 * Math.sin(am), -r * .12 * Math.cos(am)), this.F(pl, o, r * .72 * Math.sin(am), r * .72 * Math.cos(am))], [60, 40, 80], this.s * 0.057);      // each hand runs a little past the centre, as on its pivot; ticks and hands as in the Blood on the Clocktower video: square-ended, 4, 9 and 6 px at the title shot's scale of 105
   }
 }
 
