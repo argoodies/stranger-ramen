@@ -997,7 +997,7 @@ function updateStall(dt) {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
     else if (c.state === 'wait') { c.wait += dt; if (c.wait > waitMax()) { c.state = 'leave'; c.t = 0; c.say = S().later; refreshUI(); } }
-    else if (c.state === 'eat' && c.t > 4.2) { c.state = 'leave'; c.t = 0; if (c.look.kind === 'ft' && c.ok && Math.random() < .3) { const left = CARDS.filter(id => !have(id)); if (left.length) { const id = pick(left); save[id] = true; if (!save.equip.card || !have(save.equip.card)) save.equip.card = id; saveNow(); s.ownSay = S().gotCard; s.ownSayT = 3.5; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } }      // a fortune teller who liked the bowl sometimes leaves a card you do not have yet: Time Stop, or a plain playing card
+    else if (c.state === 'eat' && c.t > 4.2) { c.state = 'leave'; c.t = 0; if (c.look.kind === 'ft' && c.ok && Math.random() < .3) { { const id = pick(CARDS); save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.card || !have(save.equip.card)) save.equip.card = id; saveNow(); s.ownSay = S().gotCard; s.ownSayT = 3.5; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } }      // a fortune teller who liked the bowl sometimes leaves a card (they stack): Time Stop, or a plain playing card
     else if (c.state === 'leave' && c.t > 1.0) { s.seats[i] = null; }
   });
   s.fx = s.fx.filter(f => (f.t += dt) < 1.4); s.fly = s.fly.filter(f => (f.t += dt * 2.6) < 1);
@@ -1692,7 +1692,9 @@ function mvBack(t, title) {
 }
 // ---- the backpack: opened from the button that shows while you are on the church's island
 const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc', stop: 'card', h7: 'card', cq: 'card', d4: 'card', sa: 'card' }, CARDS = ['stop', 'h7', 'cq', 'd4', 'sa'], POKER = { h7: ['7', '♥', 1], cq: ['Q', '♣', 0], d4: ['4', '♦', 1], sa: ['A', '♠', 0] }, LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
-const have = id => id === 'knife' || !!save[id] || (id === 'ring' && !!save.badges.ring), owned = () => Object.keys(ITEMS).filter(have), wearing = id => save.equip[ITEMS[id]] === id && have(id);
+save.cards = save.cards || {}; for (const id of CARDS) if (save[id] && !save.cards[id]) save.cards[id] = 1;      // cards stack: save.cards[id] is how many you hold, the one on the card plinth included
+const cardN = id => save.cards[id] || 0, rest = id => (ITEMS[id] === 'card' ? cardN(id) : 1) - (save.equip[ITEMS[id]] === id ? 1 : 0);      // rest: how many of it lie loose in the backpack
+const have = id => id === 'knife' || (ITEMS[id] === 'card' ? cardN(id) > 0 : !!save[id]) || (id === 'ring' && !!save.badges.ring), owned = () => Object.keys(ITEMS).filter(have), wearing = id => save.equip[ITEMS[id]] === id && have(id);
 const armed = () => ITEMS[save.equip.weapon] === 'weapon' && have(save.equip.weapon), sleepy = () => wearing('sleep'), ringOn = () => wearing('ring'), guardOn = () => wearing('guard');
 function drawItem(id, x, y, r) {
   if (id === 'stop') {      // the Time Stop card: a small upright card with a clock on its face
@@ -1712,7 +1714,7 @@ function drawItem(id, x, y, r) {
 }
 // Where each thing you carry lies: save.bagPos[id] = slab 0..7. Things you own but have never placed take the first free slab.
 function bagSlabs() {
-  const P0 = save.bagPos = save.bagPos || {}, out = Array(12).fill(null), loose = owned().filter(id => save.equip[ITEMS[id]] !== id);
+  const P0 = save.bagPos = save.bagPos || {}, out = Array(12).fill(null), loose = owned().filter(id => rest(id) > 0);
   for (const id of Object.keys(P0)) if (!loose.includes(id)) delete P0[id];
   for (const id of loose) if (P0[id] != null && P0[id] >= 0 && P0[id] < 12 && !out[P0[id]]) out[P0[id]] = id; else delete P0[id];
   for (const id of loose) if (P0[id] == null) { const k = out.indexOf(null); if (k < 0) break; out[k] = id; P0[id] = k; }
@@ -1725,7 +1727,8 @@ function drawBag(t) {      // what you wear stands on two plinths; what you carr
     if (sel || over) glow(cx, cy + s * .2, s * 2, [255, 236, 170], over ? .9 : .75);
     if ((id && !held) || over) v.box(-.5, -.5, -h, 1, 1, h, sel || over ? mix(PAL.stone, [255, 255, 255], .25) : PAL.stone); else v.box(-.5, -.5, -h, 1, 1, h, [255, 255, 255], .16);
     if (id) hits.push([cx - cell / 2, cy - s * .45 - cell / 2, id, place]);
-    if (id && !held) { const by = cy - s * .72 - Math.sin(t * 2 + cx * .05) * 3; ell(cx, cy, s * .34, s * .17, [60, 40, 90], .25); glow(cx, by, s * 1.1, [255, 240, 200], .45); drawItem(id, cx, by, s * .44); } };
+    if (id && !held) { const by = cy - s * .72 - Math.sin(t * 2 + cx * .05) * 3; ell(cx, cy, s * .34, s * .17, [60, 40, 90], .25); glow(cx, by, s * 1.1, [255, 240, 200], .45); drawItem(id, cx, by, s * .44);
+      const n = typeof place === 'number' ? rest(id) : 0; if (n > 1) { const bx = cx + s * .42, byy = by + s * .3; circ(bx, byy, 8, [255, 236, 190]); ctx.font = `400 11px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([60, 40, 90]); ctx.fillText(String(n), bx, byy + .5); } } };      // a stack of cards shows how many lie there
   thinText(L.bagWorn, W / 2, y0 + 64, 12.5, [255, 255, 255], .7);
   const yA = y0 + 64 + s * 2.3;
   ['weapon', 'acc', 'card'].forEach((k, n) => { const cx = W / 2 + (n - 1) * s * 2.3, id = has.includes(save.equip[k]) ? save.equip[k] : null; stand(cx, yA, id, .9, k); thinText(L.bagSlots[n], cx, yA + s * 1.4 + 20, 12.5, [255, 255, 255], .8); });
@@ -1751,10 +1754,11 @@ function bagUp() {      // finger up: without a drag it was only a look; with on
   const to = d.over, id = d.id, kind = ITEMS[id], P0 = save.bagPos, slabs = bagSlabs(); let ok = false;
   if (to === d.from || to == null) ok = false;
   else if (typeof to === 'string') {      // onto a plinth: only its own kind; whatever stood there goes to where this came from
-    if (to === kind) { const prev = have(save.equip[to]) ? save.equip[to] : null; save.equip[to] = id; delete P0[id]; if (prev && typeof d.from === 'number') P0[prev] = d.from; ok = true; }
+    if (to === kind && save.equip[to] !== id) { const prev = have(save.equip[to]) ? save.equip[to] : null; save.equip[to] = id; if (rest(id) <= 0) delete P0[id]; if (prev && typeof d.from === 'number') P0[prev] = d.from; ok = true; }
   } else if (typeof d.from === 'number') { const o = slabs[to]; P0[id] = to; if (o) P0[o] = d.from; ok = true; }      // slab to slab: move, or change places
   else { const o = slabs[to];      // off a plinth onto a slab: taken off; a thing of the same kind lying there goes on instead, anything else makes room
     if (!o) { save.equip[d.from] = null; P0[id] = to; ok = true; }
+    else if (o === id) { save.equip[d.from] = null; ok = true; }      // a card dropped back onto its own stack
     else if (ITEMS[o] === d.from) { save.equip[d.from] = o; delete P0[o]; P0[id] = to; ok = true; }
     else { const free = slabs.indexOf(null); if (free >= 0) { save.equip[d.from] = null; P0[o] = free; P0[id] = to; ok = true; } } }
   if (ok) { saveNow(); knock(); } else chime(57, 0, .08, .6);
@@ -1970,7 +1974,7 @@ function updateChurch(dt) {
 }
 function playCard() {      // Time Stop: every foe, and everything they have thrown, holds still for ten seconds; the card is used up
   const c = church; if (!wearing('stop') || c.freeze > 0) return;
-  c.freeze = 10; save.stop = false; save.equip.card = null; saveNow();
+  c.freeze = 10; save.cards.stop = Math.max(0, cardN('stop') - 1); save.stop = cardN('stop') > 0; save.equip.card = null; saveNow();      // one card used; any others stay in the backpack
   bell(220, .16); sfx(660, .6, .1, 'sine'); sfx(990, .8, .06, 'sine');
 }
 function devMenu() {      // developer mode: a short list of tools, each opening a page of its own — jump to a round, or be given any item (it flies in as from a chest)
@@ -1991,7 +1995,7 @@ function devMenu() {      // developer mode: a short list of tools, each opening
   home(); d.addEventListener('pointerdown', e => { if (e.target === d) close(); }); document.body.appendChild(d);
 }
 function devGive(id) { const c = church; if (c.fly) return; c.fly = { id, n: { at: [W / 2, H * .3] }, t: 0, dev: true }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12); }      // the item flies down to the chef, just as out of a chest
-function devGift(id) { const k = ITEMS[id]; save[id] = true; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
+function devGift(id) { const k = ITEMS[id]; save[id] = true; if (k === 'card') save.cards[id] = cardN(id) + 1; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
 function debugAsk(msg, val, done) {      // a small input box over the game (window.prompt is not shown inside the app's web view)
   if (document.getElementById('dbg')) return;
   const d = document.createElement('div'); d.id = 'dbg'; d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,8,30,.55);z-index:99';
