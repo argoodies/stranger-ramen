@@ -278,12 +278,12 @@ class View {
     poly(pts.map(p => this.F(pl, o, p[0], p[1])), c, a);
   }
   clock(pl, o, r, ah, am) {
-    const ring = rr => { const p = []; for (let i = 0; i < 36; i++) { const q = TAU * i / 36; p.push(this.F(pl, o, rr * Math.cos(q), rr * Math.sin(q))); } return p; };
+    const sq = (pts, c, w) => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[1][0], pts[1][1]); ctx.strokeStyle = css(c, 1); ctx.lineWidth = w; ctx.lineCap = 'butt'; ctx.stroke(); ctx.lineCap = 'round'; }, ring = rr => { const p = []; for (let i = 0; i < 40; i++) { const q = TAU * i / 40; p.push(this.F(pl, o, rr * Math.cos(q), rr * Math.sin(q))); } return p; };
     poly(ring(r), tint(DARK)); poly(ring(r * 0.86), tint([250, 240, 218]));
-    for (let i = 0; i < 12; i++) { const q = TAU * i / 12; line([this.F(pl, o, r * .68 * Math.sin(q), r * .68 * Math.cos(q)), this.F(pl, o, r * .8 * Math.sin(q), r * .8 * Math.cos(q))], tint(DARK), this.s * 0.03); }
+    for (let i = 0; i < 12; i++) { const q = TAU * i / 12; sq([this.F(pl, o, r * .68 * Math.sin(q), r * .68 * Math.cos(q)), this.F(pl, o, r * .8 * Math.sin(q), r * .8 * Math.cos(q))], tint(DARK), this.s * 0.038); }
     const c0 = this.F(pl, o, 0, 0);
-    line([c0, this.F(pl, o, r * .46 * Math.sin(ah), r * .46 * Math.cos(ah))], [60, 40, 80], this.s * 0.07);
-    line([c0, this.F(pl, o, r * .72 * Math.sin(am), r * .72 * Math.cos(am))], [60, 40, 80], this.s * 0.045);
+    sq([c0, this.F(pl, o, r * .46 * Math.sin(ah), r * .46 * Math.cos(ah))], [60, 40, 80], this.s * 0.086);
+    sq([c0, this.F(pl, o, r * .72 * Math.sin(am), r * .72 * Math.cos(am))], [60, 40, 80], this.s * 0.057);      // ticks and hands as in the Blood on the Clocktower video: square-ended, 4, 9 and 6 px at the title shot's scale of 105
   }
 }
 
