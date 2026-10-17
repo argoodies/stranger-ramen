@@ -1728,7 +1728,7 @@ function drawBag(t) {      // what you wear stands on two plinths; what you carr
     if ((id && !held) || over) v.box(-.5, -.5, -h, 1, 1, h, sel || over ? mix(PAL.stone, [255, 255, 255], .25) : PAL.stone); else v.box(-.5, -.5, -h, 1, 1, h, [255, 255, 255], .16);
     if (id) hits.push([cx - cell / 2, cy - s * .45 - cell / 2, id, place]);
     if (id && !held) { const by = cy - s * .72 - Math.sin(t * 2 + cx * .05) * 3; ell(cx, cy, s * .34, s * .17, [60, 40, 90], .25); glow(cx, by, s * 1.1, [255, 240, 200], .45); drawItem(id, cx, by, s * .44);
-      const n = typeof place === 'number' ? rest(id) : 0; if (n > 1) { const bx = cx + s * .42, byy = by + s * .3; circ(bx, byy, 9, [255, 236, 190]); ctx.font = `400 11px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([60, 40, 90]); ctx.fillText('×' + n, bx, byy + .5); } } };      // a stack of cards shows how many lie there
+      const n = typeof place === 'number' ? rest(id) : 0; if (n > 1) { const bx = cx + s * .42, byy = by + s * .3; circ(bx, byy, 8, [255, 236, 190]); ctx.font = `400 11px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([60, 40, 90]); ctx.fillText(String(n), bx, byy + .5); } } };      // a stack of cards shows how many lie there
   thinText(L.bagWorn, W / 2, y0 + 64, 12.5, [255, 255, 255], .7);
   const yA = y0 + 64 + s * 2.3;
   ['weapon', 'acc', 'card'].forEach((k, n) => { const cx = W / 2 + (n - 1) * s * 2.3, id = has.includes(save.equip[k]) ? save.equip[k] : null; stand(cx, yA, id, .9, k); thinText(L.bagSlots[n], cx, yA + s * 1.4 + 20, 12.5, [255, 255, 255], .8); });
