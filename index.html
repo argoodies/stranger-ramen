@@ -672,7 +672,7 @@ function drawBar(t) {
       const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind, even on both sides
     BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
   // the cat
-  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55, f = c.face || 1, sit = c.sit > 0, col = [248, 246, 242], sh = [224, 220, 226], pink = [244, 170, 180];      // a round, soft white cat
+  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55, f = c.face || 1, sit = false, still = c.sit > 0, col = [248, 246, 242], sh = [224, 220, 226], pink = [244, 170, 180];      // a round, soft white cat, always on all four feet: when it pauses it simply stands still
       const tail = (pts, w) => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.quadraticCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1]); ctx.quadraticCurveTo(pts[3][0], pts[3][1], pts[4][0], pts[4][1]); ctx.strokeStyle = css(sh); ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke(); ctx.strokeStyle = css(col); ctx.lineWidth = w * .7; ctx.stroke(); };
       ell(q[0], q[1], k * .42, k * .12, [20, 12, 40], .22);
       let hx, hy;
@@ -680,9 +680,9 @@ function drawBar(t) {
         tail([[q[0] - f * k * .22, q[1] - k * .08], [q[0] - f * k * .5, q[1] - k * .02], [q[0] - f * k * .3, q[1] + k * .06 + sw * .3], [q[0] + f * k * .05, q[1] + k * .1], [q[0] + f * k * .22, q[1] + k * .02 + sw * .2]], Math.max(3, k * .13));
         ell(q[0], q[1] - k * .3, k * .3, k * .32, col); ell(q[0] + k * .06, q[1] - k * .26, k * .14, k * .24, sh, .35); for (const dx of [-.1, .1]) ell(q[0] + f * k * .1 + dx * k, q[1] - k * .03, k * .08, k * .05, col);      // body and front paws
         hx = q[0] + f * k * .05; hy = q[1] - k * .76; }
-      else { const ph = c.t * 9, bob = Math.abs(Math.sin(ph)) * k * .03, by = q[1] - k * .3 - bob;      // walking: little legs stepping toward where it goes, tail up and swaying
+      else { const ph = still ? 0 : c.t * 9, bob = Math.abs(Math.sin(ph)) * k * .03, by = q[1] - k * .3 - bob;      // walking: little legs stepping toward where it goes, tail up and swaying
         tail([[q[0] - f * k * .3, by - k * .02], [q[0] - f * k * .55, by - k * .05], [q[0] - f * k * .52, by - k * .3], [q[0] - f * k * .5, by - k * .55 + Math.sin(c.t * 4) * k * .05], [q[0] - f * k * (.36 + .08 * Math.sin(c.t * 4)), by - k * .6]], Math.max(3, k * .13));
-        const legs = [[-.22, 0], [-.1, Math.PI], [.14, Math.PI], [.26, 0]]; for (const [lx, o] of legs) { const sw = Math.sin(ph + o) * k * .08; line([[q[0] + f * lx * k, by + k * .1], [q[0] + f * lx * k + f * sw, q[1] - k * .02]], o ? sh : col, Math.max(2.5, k * .11)); }      // each foot swings forward, then back
+        const legs = [[-.22, 0], [-.1, Math.PI], [.14, Math.PI], [.26, 0]]; for (const [lx, o] of legs) { const sw = still ? 0 : Math.sin(ph + o) * k * .08; line([[q[0] + f * lx * k, by + k * .1], [q[0] + f * lx * k + f * sw, q[1] - k * .02]], o ? sh : col, Math.max(2.5, k * .11)); }      // each foot swings forward, then back
         ell(q[0], by, k * .38, k * .22, col); ell(q[0] - f * k * .04, by + k * .05, k * .3, k * .1, sh, .35);
         hx = q[0] + f * k * .34; hy = by - k * .2; }
       for (const sg of [-1, 1]) { poly([[hx + sg * k * .08, hy - k * .17], [hx + sg * k * .23, hy - k * .08], [hx + sg * k * .2, hy - k * .36]], col); poly([[hx + sg * k * .11, hy - k * .17], [hx + sg * k * .2, hy - k * .12], [hx + sg * k * .19, hy - k * .28]], pink); }      // ears, pink inside
