@@ -1719,7 +1719,7 @@ function drawItem(id, x, y, r) {
     poly([ll, rl, r1, l1], cof ? [120, 78, 52] : [214, 232, 246], cof ? .92 : .75);      // the drink
     for (const [dx, dy] of [[-.2, .22], [.14, .12], [-.02, .42], [.2, .5]]) { ctx.save(); ctx.translate(x + dx * k, y + dy * k - k * .25); ctx.rotate(dx * 2); ctx.fillStyle = css([236, 246, 255], .6); rrect(-k * .11, -k * .11, k * .22, k * .22, k * .05); ctx.fill(); ctx.restore(); }      // ice
     ctx.beginPath(); ctx.moveTo(l0[0], l0[1]); ctx.lineTo(l1[0], l1[1]); ctx.lineTo(r1[0], r1[1]); ctx.lineTo(r0[0], r0[1]); ctx.strokeStyle = css([255, 255, 255], .85); ctx.lineWidth = Math.max(1, k * .07); ctx.lineJoin = 'round'; ctx.stroke();
-    if (cof) { line([[x + k * .1, top - k * .05], [x + k * .26, top - k * .55]], [96, 170, 120], Math.max(1, k * .09)); ctx.beginPath(); ctx.ellipse(x, top, k * .52, k * .24, 0, Math.PI, TAU); ctx.lineTo(x + k * .55, top + k * .06); ctx.lineTo(x - k * .55, top + k * .06); ctx.closePath(); ctx.fillStyle = css([248, 250, 255], .85); ctx.fill(); ctx.strokeStyle = css([255, 255, 255]); ctx.lineWidth = Math.max(1, k * .06); ctx.stroke(); }      // a domed lid, and a straw through it
+    if (cof) { line([[x + k * .1, top - k * .05], [x + k * .26, top - k * .55]], [96, 170, 120], Math.max(1, k * .09)); line([[l0[0] - k * .04, top], [r0[0] + k * .04, top]], [255, 255, 255], Math.max(1.2, k * .1), .95); }      // a flat lid, just a line, and a straw through it
     return; }
 
   if (id === 'ring') drawRing(x, y + r * .1, r * .62); else if (id === 'guard') drawGuard(x, y, r);
