@@ -142,8 +142,8 @@ const STR = {
     barDay: ['早上好，来杯咖啡吗？', '今天的豆子烤得正好。'], barNight: ['晚上好，喝点什么？', '今晚来杯麦酒吧。'], barServeDay: '您的咖啡。', barServeNight: '您的酒。', barEnjoy: '请享用。', meow: '喵～', barPatron: { sailor: ['起雾的时候，听钟楼的钟声认路。', '海上可没有拉面吃。'], drunk: ['嗝……老板，再来一杯。', '我就坐一会儿……'], bard: ['想听一首关于钟楼的歌吗？', '这间酒馆，适合写一首慢歌。'] },
     churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）', devOn: '进入开发者模式。', devOff: '离开开发者模式。', devTitle: '开发者', devJump: '跳关', devItems: '获得物品', drySay: '怎么是拌面？',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
-    bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '卡片'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
-    gotCard: '占卜师留下了一张牌。', items: { stop: ['时间静止', '战斗中点上方的牌，全场敌人静止十秒，用完即消失。'], h7: ['红桃7', '一张普通的扑克牌，没什么用。'], cq: ['梅花Q', '一张普通的扑克牌，没什么用。'], d4: ['方片4', '一张普通的扑克牌，没什么用。'], sa: ['黑桃A', '一张普通的扑克牌，没什么用。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
+    bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '卡片', '饮品'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
+    takeCoffee: '现取咖啡可以拿走。', takeBooze: '瓶装酒可以拿走。', gotCard: '占卜师留下了一张牌。', items: { csail: ['水手牌', '战斗中点上方的牌：随机一个敌人头冒金星，眩晕十秒不动。用掉一张少一张。'], csnake: ['毒蛇牌', '战斗中点上方的牌：随机一个敌人眩晕五秒不动，每秒掉一滴血。用掉一张少一张。'], coffee: ['现取咖啡', '战斗中点上方的杯子：恢复一半生命。用掉一杯少一杯。'], booze: ['瓶装酒', '战斗中点上方的酒瓶：五秒内不会受伤。用掉一瓶少一瓶。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
     badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'], ring: ['贞洁之戒', '从教堂里救出了贞洁者。'] },
     welcome: '欢迎来玩三人染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
@@ -171,8 +171,8 @@ const STR = {
     barDay: ['早安，來杯咖啡嗎？', '今天的豆子烘得正好。'], barNight: ['晚上好，喝點什麼？', '今晚來杯麥酒吧。'], barServeDay: '您的咖啡。', barServeNight: '您的酒。', barEnjoy: '請享用。', meow: '喵～', barPatron: { sailor: ['起霧的時候，聽鐘樓的鐘聲認路。', '海上可沒有拉麵吃。'], drunk: ['嗝……老闆，再來一杯。', '我就坐一會兒……'], bard: ['想聽一首關於鐘樓的歌嗎？', '這間酒館，適合寫一首慢歌。'] },
     churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）', devOn: '進入開發者模式。', devOff: '離開開發者模式。', devTitle: '開發者', devJump: '跳關', devItems: '獲得物品', drySay: '怎麼是拌麵？',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
-    bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '卡片'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
-    gotCard: '占卜師留下了一張牌。', items: { stop: ['時間靜止', '戰鬥中點上方的牌，全場敵人靜止十秒，用完即消失。'], h7: ['紅桃7', '一張普通的撲克牌，沒什麼用。'], cq: ['梅花Q', '一張普通的撲克牌，沒什麼用。'], d4: ['方片4', '一張普通的撲克牌，沒什麼用。'], sa: ['黑桃A', '一張普通的撲克牌，沒什麼用。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
+    bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '卡片', '飲品'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
+    takeCoffee: '現取咖啡可以拿走。', takeBooze: '瓶裝酒可以拿走。', gotCard: '占卜師留下了一張牌。', items: { csail: ['水手牌', '戰鬥中點上方的牌：隨機一個敵人頭冒金星，暈眩十秒不動。用掉一張少一張。'], csnake: ['毒蛇牌', '戰鬥中點上方的牌：隨機一個敵人暈眩五秒不動，每秒掉一滴血。用掉一張少一張。'], coffee: ['現取咖啡', '戰鬥中點上方的杯子：恢復一半生命。用掉一杯少一杯。'], booze: ['瓶裝酒', '戰鬥中點上方的酒瓶：五秒內不會受傷。用掉一瓶少一瓶。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
     badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'], ring: ['貞潔之戒', '從教堂裡救出了貞潔者。'] },
     welcome: '歡迎來玩三人染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
@@ -200,8 +200,8 @@ const STR = {
     barDay: ['Morning! Coffee?', 'The beans are roasted just right today.'], barNight: ['Evening. What will it be?', 'An ale tonight, perhaps.'], barServeDay: 'Your coffee.', barServeNight: 'Your drink.', barEnjoy: 'Enjoy.', meow: 'Meow~', barPatron: { sailor: ['In the fog I steer by the clocktower bell.', 'No ramen out at sea.'], drunk: ['Hic… one more, barkeep.', 'Just sitting a while…'], bard: ['Shall I sing you a song of the clocktower?', 'This little bar wants a slow song.'] },
     churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)', devOn: 'Developer mode on.', devOff: 'Developer mode off.', devTitle: 'Developer', devJump: 'Jump to round', devItems: 'Get an item', drySay: 'Dry noodles? Where is the soup?',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
-    bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Card'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
-    gotCard: 'The fortune teller left a card.', items: { stop: ['Time Stop', 'Tap the card at the top in a fight: every foe stands still for ten seconds. Used up after one go.'], h7: ['Seven of Hearts', 'An ordinary playing card. No use at all.'], cq: ['Queen of Clubs', 'An ordinary playing card. No use at all.'], d4: ['Four of Diamonds', 'An ordinary playing card. No use at all.'], sa: ['Ace of Spades', 'An ordinary playing card. No use at all.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
+    bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Card', 'Drink'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
+    takeCoffee: 'Coffee to go, yours to take.', takeBooze: 'A bottle to go, yours to take.', gotCard: 'The fortune teller left a card.', items: { csail: ['Sailor Card', 'Tap the card at the top in a fight: a random foe sees stars and stands dazed for ten seconds. One card is used each time.'], csnake: ['Snake Card', 'Tap the card at the top in a fight: a random foe stands dazed for five seconds and loses a drop of blood each second. One card is used each time.'], coffee: ['Coffee to Go', 'Tap the cup at the top in a fight: half your hearts come back. One cup is used each time.'], booze: ['Bottle to Go', 'Tap the bottle at the top in a fight: nothing can hurt you for five seconds. One bottle is used each time.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
     badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'], ring: ['Ring of Chastity', 'Rescued the Virgin from the church.'] },
     welcome: 'Welcome to the three-player game.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
@@ -593,7 +593,7 @@ function drawBarHouse(v, t) {      // the little coffee house: stone walls, a fl
 // behind the counter and a cup is set on the counter near you; tap the cup to drink it up; ask again for another. A cat lives in the corner.
 const BN = 4, bar = { x: .5, y: 1.5, path: [], step: 0, pending: null, who: null, whoSay: '', whoSayT: 0, keepSay: '', keepSayT: 0, cups: [], cat: null }, BARHIT = {};
 let bv = new View(0, 0, 40);
-const barBlocked = (i, j) => i < 0 || j < 0 || i >= BN || j >= BN || i === 3 || (i === 2 && j === bar.whoAt);      // the counter takes the last column; the other customer stands in front of it
+const barBlocked = (i, j) => i < 0 || j < 0 || i >= BN || j >= BN || i === 3 || (i === 2 && j === bar.whoAt) || (i === 0 && j === 0);      // ... and the little table by the door takes the corner cell      // the counter takes the last column; the other customer stands in front of it
 function barGo(cell, pending) { const p = (function () { const from = cellOf(bar), q = [from], prev = new Map([[key(from[0], from[1]), null]]); while (q.length) { const c = q.shift(); if (c[0] === cell[0] && c[1] === cell[1]) { const r = []; let k = c; while (k) { r.unshift(k); k = prev.get(key(k[0], k[1])); } return r; } for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = [c[0] + dx, c[1] + dy], kk = key(n[0], n[1]); if (!barBlocked(n[0], n[1]) && !prev.has(kk)) { prev.set(kk, c); q.push(n); } } } return null; })();
   if (!p) return; bar.path = p.slice(1); bar.pending = pending; chime(69, 0, .07, .8); if (!bar.path.length) barArrive(); }
 function barArrive() { const p = bar.pending; bar.pending = null;
@@ -603,16 +603,19 @@ function barCat(dt) {      // the cat: now padding about the floor, now sitting 
   const c = bar.cat; if (!c) return; c.t += dt; if (c.meowT > 0) c.meowT -= dt;
   if (c.sit > 0) { c.sit -= dt; return; }
   const dx = c.tx - c.x, dy = c.ty - c.y, d = Math.hypot(dx, dy);
-  if (d < .05) { if (Math.random() < .5) c.sit = rnd(3, 7); c.tx = rnd(.3, 2.6); c.ty = rnd(.4, 3.6); if (Math.abs(c.tx - 2.5) < .5 && Math.abs(c.ty - bar.whoAt - .5) < .6) c.tx = 1; return; }
+  if (d < .05) { if (Math.random() < .5) c.sit = rnd(3, 7); c.tx = rnd(.3, 2.6); c.ty = rnd(.4, 3.6); if (Math.abs(c.tx - 2.5) < .5 && Math.abs(c.ty - bar.whoAt - .5) < .6) c.tx = 1; if (c.tx < 1.2 && c.ty < 1.2) c.ty = rnd(1.5, 3.6); return; }
   const st = Math.min(d, .55 * dt); c.x += dx / d * st; c.y += dy / d * st; c.face = Math.sign(dx - dy) || c.face; c.depth = Math.sign(dx + dy); }      // face: which way it heads across the screen
-function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 2.8); c.y = clamp(c.y, .2, 3.8); if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
-function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); }
+function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 2.8); c.y = clamp(c.y, .2, 3.8); if (c.x < 1.1 && c.y < 1.1) c.y = 1.1; if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
+function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT', 'mySayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); }
 function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
- whoSayT: 0, keepSayT: 0, cat: { x: .5, y: 3.5, tx: .5, ty: 3.5, sit: 4, t: 0, face: 1, meowT: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }
+ whoSayT: 0, keepSayT: 0, mySayT: 0, cat: { x: .5, y: 3.5, tx: .5, ty: 3.5, sit: 4, t: 0, face: 1, meowT: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }
 function leaveBar() { mode = 'world'; $('zoom').style.display = 'block'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
 function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
   if (hit('exit')) return barGo([0, 1], 'exit');
+  if (hit('take')) { const per = Math.floor(G.t / HALF), id = per % 2 ? 'booze' : 'coffee';      // the drink on the little table: yours to take, once each day and once each night
+    bar.taken = per; save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.drink || !have(save.equip.drink)) save.equip.drink = id; saveNow();
+    bar.mySay = id === 'coffee' ? S().takeCoffee : S().takeBooze; bar.mySayT = 3; chime(84, 0, .1); chime(91, .1, .1); return; }
   if (hit('cat')) { const c = bar.cat; c.meowT = 1.6; c.sit = Math.max(c.sit, 2.5); sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); return; }      // stroking the cat: a meow
   for (const cp of bar.cups) if (hit('cup' + bar.cups.indexOf(cp))) { if (cp.full) { cp.full = false; chime(72, 0, .08); chime(67, .15, .06); } else cp.wob = performance.now(); return; }      // a full cup is drunk; an empty one just rattles, silently      // drunk up from wherever you stand: an empty cup is left on the counter
   if (hit('top')) { bar.wobTop = performance.now(); return; }
@@ -642,7 +645,7 @@ function drawBar(t) {
   alpha(1 - nn, () => { for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) v.box(.75 + k * .37 + jig('wobShelf', k * 1.7 + r * 2.3), .08, 1.78 + r * .7, .2, .16, .2, [[236, 226, 206], [170, 120, 90], [214, 180, 120]][(k + r) % 3]); });      // coffee tins by day
   alpha(nn, () => { for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) { const x = .75 + k * .37 + jig('wobShelf', k * 1.7 + r * 2.3), z = 1.78 + r * .7, c = [[96, 150, 110], [150, 70, 70], [210, 170, 90], [120, 120, 170]][(k + r) % 4]; v.box(x, .1, z, .12, .12, .3, c); v.box(x + .035, .135, z + .3, .05, .05, .12, c); } });      // bottles at night
   for (let r = 0; r < 2; r++) for (let k = 0; k < 7; k++) { const q = P(.85 + k * .37, .16, 1.92 + r * .7); shelfHit.push([q[0], q[1], s * .2]); } BARHIT.shelf = shelfHit;      // only the things on the shelf answer a tap, not the bare boards
-  { const lp = P(1.6, 2, Hh - .1), lb = P(1.6, 2, 2.3); line([lp, lb], [60, 46, 52], 1.2); glow(lb[0], lb[1] + s * .1, s * 2.2, warm, lerp(.3, .55, nn)); circ(lb[0], lb[1] + s * .1, s * .09, [255, 232, 170]); }      // one warm lamp
+  { const lp = P(1.6, 2, Hh - .1), lb = P(1.6, 2, 2.75); line([lp, lb], [60, 46, 52], 1.2); glow(lb[0], lb[1] + s * .1, s * 2.2, warm, lerp(.3, .55, nn)); circ(lb[0], lb[1] + s * .1, s * .09, [255, 232, 170]); }      // one warm lamp, hung high enough to clear the little table
   const keeperY = bar.whoAt <= 2 ? 3.1 : 1.3; bar.keeperY = keeperY;      // the server stands away from the other customer, so the two are never one behind the other
   const objs = [];
   objs.push({ k: 6.6, d: () => { v.box(3.12, .35, 0, .5, 3.3, 1.0, [126, 84, 62]); v.box(3.06, .29, 1.0, .62, 3.42, .08, [176, 124, 90]); BARHIT.counter = [P(3.06, .29, 1.08), P(3.68, .29, 1.08), P(3.68, 3.71, 1.08), P(3.68, 3.71, 0), P(3.06, 3.71, 0), P(3.06, 3.71, 1.08)];      // the counter, and its outline for taps
@@ -690,6 +693,11 @@ function drawBar(t) {
       for (const sg of [-1, 1]) { circ(hx + sg * k * .1 + f * k * .03, hy - k * .02, k * .045, [44, 34, 44]); circ(hx + sg * k * .1 + f * k * .03 + k * .015, hy - k * .035, k * .015, [255, 255, 255]); ell(hx + sg * k * .17 + f * k * .03, hy + k * .07, k * .05, k * .03, pink, .55); }      // eyes with a glint, rosy cheeks
       circ(hx + f * k * .03, hy + k * .05, k * .025, pink);      // a tiny nose
       BARHIT.cat = [q[0], q[1] - k * .4, s * .45]; c.at = [hx, hy]; } }); }
+  { const per = Math.floor(G.t / HALF), up = bar.taken !== per; BARHIT.take = null;      // a little round table by the door; on it, once a day and once a night, a coffee or a bottle to take away, glinting
+    objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5, .5, .66, .36, .06, [176, 124, 90]);
+      if (up) { const id = per % 2 ? 'booze' : 'coffee', q = P(.5, .5, .72), r = s * .27, iy = q[1] - r * .72; glow(q[0], iy, s * .7, [255, 236, 170], .55 + .15 * Math.sin(t * 3)); drawItem(id, q[0], iy, r);
+        for (let i = 0; i < 3; i++) { const ph = (t * .8 + i / 3) % 1, a = Math.sin(ph * Math.PI), sx = q[0] + Math.cos(i * 2.1 + 1) * r * 1.3, sy = iy - r * .3 + Math.sin(i * 2.1 + 1) * r * 1.1, g = r * .32 * a; if (g > .5) poly([[sx, sy - g], [sx + g * .25, sy - g * .25], [sx + g, sy], [sx + g * .25, sy + g * .25], [sx, sy + g], [sx - g * .25, sy + g * .25], [sx - g, sy], [sx - g * .25, sy - g * .25]], [255, 250, 220], a); }      // glints, to catch the eye
+        BARHIT.take = [q[0], iy, s * .6]; } } }); }
   // you
   objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
     fig(q[0], q[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); bar.at = q; } });
@@ -697,6 +705,7 @@ function drawBar(t) {
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   const fs = clamp(s * .3, 12.5, 15), mw = Math.min(W * .62, 250);
   if (bar.keepSayT > 0 && bar.keeperAt) sayBubble(bar.keeperAt[0], bar.keeperAt[1] - K * 1.75, bar.keepSay, fs, clamp(bar.keepSayT * 2), mw);
+  if (bar.mySayT > 0 && bar.at) sayBubble(bar.at[0], bar.at[1] - K * 1.75, bar.mySay, fs, clamp(bar.mySayT * 2), mw);
   if (bar.whoSayT > 0 && bar.whoAtP) sayBubble(bar.whoAtP[0], bar.whoAtP[1] - K * 1.75, bar.whoSay, fs, clamp(bar.whoSayT * 2), mw);
   if (bar.cat && bar.cat.meowT > 0 && bar.cat.at) sayBubble(bar.cat.at[0], bar.cat.at[1] - s * .3, S().meow, fs, clamp(bar.cat.meowT * 2), mw);
   TK = 0;
@@ -1356,9 +1365,9 @@ async function playBotc() {
   return g.result;
 }
 // round character token, as in the video: cream disc + flat icon (blue = good, red = evil)
-function roleToken(x, y, r, role, a = 1, mono = null) {
+function roleToken(x, y, r, role, a = 1, mono = null, thin = false) {
   if (r <= 1) return;
-  const evil = role === 'pukka', c = mono || (evil ? [206, 40, 62] : [60, 130, 230]), c2 = mono || mix(c, [255, 255, 255], .5), w = Math.max(1.5, r * .11);
+  const evil = role === 'pukka', c = mono || (evil ? [206, 40, 62] : [60, 130, 230]), c2 = mono || mix(c, [255, 255, 255], .5), w = thin ? r * .075 : Math.max(1.5, r * .11);      // thin: drawn small on a card, the lines keep to the token's own proportions
   ctx.save(); ctx.globalAlpha = a;
   if (!mono) { if (r > 12) glow(x, y, r * 1.7, c, .5); ell(x, y + r * .08, r, r, [20, 12, 40], .4); circ(x, y, r, [206, 190, 160]); circ(x, y, r * .88, [244, 232, 208]); }
   const q = r * .95;
@@ -1666,11 +1675,12 @@ function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight:
   for (let i = 0; i < max; i++) { const gold = i === 6; drawHeart(W / 2 + (i - (max - 1) / 2) * 22, 74, 7.5, i < hp ? (gold ? [255, 204, 110] : [236, 96, 110]) : [70, 58, 100], i < hp ? 1 : .8); }
   let x = W / 2 + ((max - 1) / 2 + 1) * 22 + 4;
   const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && ringUsed) ctx.globalAlpha = .3; drawItem(id, x, 73, id === 'ring' ? 9.5 : 8); ctx.restore(); x += 26; }
-  const c = church; hudCard = null;
-  const cid = save.equip.card; if (cid && cid !== 'stop' && have(cid)) drawItem(cid, x, 73, 9);      // a playing card is only carried
-  else if (wearing('stop') || c.freeze > 0) { const on = c.freeze > 0; if (on) { ctx.beginPath(); ctx.arc(x, 73, 13, -Math.PI / 2, -Math.PI / 2 + TAU * c.freeze / 10); ctx.strokeStyle = css([170, 200, 255], .9); ctx.lineWidth = 2.5; ctx.stroke(); } else { glow(x, 73, 16, [190, 170, 255], .5 + .2 * Math.sin(performance.now() / 300)); drawItem('stop', x, 73, 9); hudCard = [x, 73]; } }
+  const c = church; hudCard = hudDrink = null; const pulse = .5 + .2 * Math.sin(performance.now() / 300);
+  const cid = save.equip.card; if (cid && have(cid)) { glow(x, 73, 16, cid === 'csail' ? [150, 190, 255] : [255, 150, 160], pulse); drawItem(cid, x, 73, 9); hudCard = [x, 73]; x += 26; }      // a card to play: tap it
+  const did = save.equip.drink; if (did && have(did)) { glow(x, 73, 16, [255, 230, 170], pulse); drawItem(did, x, 73, 9); hudDrink = [x, 73]; x += 26; }      // a drink to take: tap it
+  if (c.inv > 0) { ctx.beginPath(); ctx.arc(x, 73, 11, -Math.PI / 2, -Math.PI / 2 + TAU * c.inv / 5); ctx.strokeStyle = css([255, 214, 120], .95); ctx.lineWidth = 2.5; ctx.stroke(); }      // the drink's five seconds, running down
 }
-let hudCard = null;      // where the card sits on the fight's top bar, so a tap can play it
+let hudCard = null, hudDrink = null;      // where the card sits on the fight's top bar, so a tap can play it
 function drawScales(x, y, r, a = 1) {      // a little gold pair of scales: a post, a beam, two pans on strings
   const g = css([236, 200, 120], a), w = Math.max(1, r * .12); ctx.save(); ctx.strokeStyle = g; ctx.fillStyle = g; ctx.lineWidth = w; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(x, y - r * .75); ctx.lineTo(x, y + r * .7); ctx.moveTo(x - r * .4, y + r * .75); ctx.lineTo(x + r * .4, y + r * .75); ctx.moveTo(x - r * .8, y - r * .5); ctx.lineTo(x + r * .8, y - r * .5); ctx.stroke();
@@ -1691,19 +1701,26 @@ function mvBack(t, title) {
   return y;
 }
 // ---- the backpack: opened from the button that shows while you are on the church's island
-const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc', stop: 'card', h7: 'card', cq: 'card', d4: 'card', sa: 'card' }, CARDS = ['stop', 'h7', 'cq', 'd4', 'sa'], POKER = { h7: ['7', '♥', 1], cq: ['Q', '♣', 0], d4: ['4', '♦', 1], sa: ['A', '♠', 0] }, LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
-save.cards = save.cards || {}; for (const id of CARDS) if (save[id] && !save.cards[id]) save.cards[id] = 1;      // cards stack: save.cards[id] is how many you hold, the one on the card plinth included
-const cardN = id => save.cards[id] || 0, rest = id => (ITEMS[id] === 'card' ? cardN(id) : 1) - (save.equip[ITEMS[id]] === id ? 1 : 0);      // rest: how many of it lie loose in the backpack
-const have = id => id === 'knife' || (ITEMS[id] === 'card' ? cardN(id) > 0 : !!save[id]) || (id === 'ring' && !!save.badges.ring), owned = () => Object.keys(ITEMS).filter(have), wearing = id => save.equip[ITEMS[id]] === id && have(id);
+const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc', csail: 'card', csnake: 'card', coffee: 'drink', booze: 'drink' }, CARDS = ['csail', 'csnake'], DRINKS = ['coffee', 'booze'], LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
+save.cards = save.cards || {}; if (save.cards.stop || save.stop) save.cards.csail = (save.cards.csail || 0) + (save.cards.stop || 1);      // cards and drinks stack: save.cards[id] is how many you hold, the one on its plinth included (an old Time Stop card becomes a Sailor card; the playing cards are gone)
+for (const id of Object.keys(save.cards)) if (!ITEMS[id]) delete save.cards[id]; for (const k of ['card', 'drink']) if (save.equip[k] && !ITEMS[save.equip[k]]) save.equip[k] = null;
+const STACK = id => ITEMS[id] === 'card' || ITEMS[id] === 'drink', cardN = id => save.cards[id] || 0, rest = id => (STACK(id) ? cardN(id) : 1) - (save.equip[ITEMS[id]] === id ? 1 : 0);      // rest: how many of it lie loose in the backpack
+const have = id => id === 'knife' || (STACK(id) ? cardN(id) > 0 : !!save[id]) || (id === 'ring' && !!save.badges.ring), owned = () => Object.keys(ITEMS).filter(have), wearing = id => save.equip[ITEMS[id]] === id && have(id);
 const armed = () => ITEMS[save.equip.weapon] === 'weapon' && have(save.equip.weapon), sleepy = () => wearing('sleep'), ringOn = () => wearing('ring'), guardOn = () => wearing('guard');
 function drawItem(id, x, y, r) {
-  if (id === 'stop') {      // the Time Stop card: a small upright card with a clock on its face
-    ctx.save(); ctx.translate(x, y); ctx.rotate(-.12); ctx.fillStyle = css([248, 240, 222]); rrect(-r * .58, -r * .82, r * 1.16, r * 1.64, r * .16); ctx.fill(); ctx.strokeStyle = css([110, 90, 170]); ctx.lineWidth = Math.max(1.2, r * .08); rrect(-r * .48, -r * .72, r * .96, r * 1.44, r * .1); ctx.stroke();
-    ctx.beginPath(); ctx.arc(0, 0, r * .32, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -r * .22); ctx.moveTo(0, 0); ctx.lineTo(r * .16, r * .06); ctx.stroke(); ctx.restore();
+  if (id === 'csail' || id === 'csnake') {      // the two cards: a cream card with the Sailor's or the Pukka's token on its face
+    ctx.save(); ctx.translate(x, y); ctx.rotate(id === 'csail' ? -.1 : .1); ctx.fillStyle = css([248, 240, 222]); rrect(-r * .6, -r * .84, r * 1.2, r * 1.68, r * .16); ctx.fill(); ctx.strokeStyle = css(id === 'csail' ? [70, 120, 200] : [190, 50, 70]); ctx.lineWidth = Math.max(1.2, r * .08); rrect(-r * .5, -r * .74, r, r * 1.48, r * .1); ctx.stroke();
+    roleToken(0, 0, r * .42, id === 'csail' ? 'sailor' : 'pukka', 1, null, true); ctx.restore(); return; }
+  if (id === 'coffee' || id === 'booze') {      // to take away, poured over ice in a clear convenience-store cup: coffee, or something stronger
+    const k = r, top = y - k * .62, bot = y + k * .7, edge = u => [[x - k * (.48 - .1 * u), top + (bot - top) * u], [x + k * (.48 - .1 * u), top + (bot - top) * u]], lv = .3;
+    const [l0, r0] = edge(0), [l1, r1] = edge(1), [ll, rl] = edge(lv); poly([l0, r0, r1, l1], [255, 255, 255], .2);
+    poly([ll, rl, r1, l1], id === 'coffee' ? [120, 78, 52] : [222, 160, 70], .92);      // the drink
+    for (const [dx, dy] of [[-.2, .22], [.14, .12], [-.02, .42], [.2, .5]]) { ctx.save(); ctx.translate(x + dx * k, y + dy * k - k * .25); ctx.rotate(dx * 2); ctx.fillStyle = css([236, 246, 255], .55); rrect(-k * .11, -k * .11, k * .22, k * .22, k * .05); ctx.fill(); ctx.restore(); }      // ice
+    ctx.beginPath(); ctx.moveTo(l0[0], l0[1]); ctx.lineTo(l1[0], l1[1]); ctx.lineTo(r1[0], r1[1]); ctx.lineTo(r0[0], r0[1]); ctx.strokeStyle = css([255, 255, 255], .85); ctx.lineWidth = Math.max(1, k * .07); ctx.lineJoin = 'round'; ctx.stroke();
+    line([[l0[0] - k * .03, top], [r0[0] + k * .03, top]], [255, 255, 255], Math.max(1.2, k * .1), .95);      // the sealed film on top
+    if (id === 'coffee') line([[x + k * .12, top + k * .3], [x + k * .3, top - k * .38]], [96, 170, 120], Math.max(1, k * .09));      // a straw
+    else { ctx.fillStyle = css([150, 60, 60]); rrect(x - k * .18, y + k * .2, k * .36, k * .2, k * .05); ctx.fill(); }      // a little red label
     return; }
-  if (POKER[id]) {      // an ordinary playing card: rank and suit in a corner, the suit large in the middle
-    const [rk, su, red] = POKER[id], ink = red ? [214, 48, 60] : [40, 34, 56]; ctx.save(); ctx.translate(x, y); ctx.rotate(.1); ctx.fillStyle = css([252, 250, 246]); rrect(-r * .58, -r * .82, r * 1.16, r * 1.64, r * .16); ctx.fill(); ctx.strokeStyle = css([200, 196, 210]); ctx.lineWidth = Math.max(1, r * .05); ctx.stroke();
-    ctx.fillStyle = css(ink); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `600 ${r * .5}px ${THINF}`; ctx.fillText(rk, -r * .3, -r * .52); ctx.font = `${r * .9}px ${THINF}`; ctx.fillText(su, 0, r * .12); ctx.restore(); return; }
 
   if (id === 'ring') drawRing(x, y + r * .1, r * .62); else if (id === 'guard') drawGuard(x, y, r);
   else if (id === 'twin') { drawKnife(x - r * .3, y, r * .85, 1, [226, 232, 244]); ctx.save(); ctx.translate(x + r * .3, y); ctx.scale(-1, 1); drawKnife(0, 0, r * .85, 1, [206, 212, 230]); ctx.restore(); }
@@ -1722,16 +1739,16 @@ function bagSlabs() {
 }
 function drawBag(t) {      // what you wear stands on two plinths; what you carry lies on the slabs below. Things are moved by dragging; a tap only shows what a thing is.
   const L = S(), y0 = mvBack(t, L.bagTitle), s = clamp(Math.min(W * .1, (H - 150) / 14), 24, 42), cell = 62, hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
-  const stand = (cx, cy, id, h, place) => { const v = new View(cx, cy, s), sel = id && bag.sel === id, held = dg && dg.id === id, over = dg && dg.over === place;
+  const stand = (cx, cy, id, h, place, sc = 1) => { const v = new View(cx, cy, s * sc), sel = id && bag.sel === id, held = dg && dg.id === id, over = dg && dg.over === place;
     spots.push([cx, cy - s * .45, place]);
     if (sel || over) glow(cx, cy + s * .2, s * 2, [255, 236, 170], over ? .9 : .75);
     if ((id && !held) || over) v.box(-.5, -.5, -h, 1, 1, h, sel || over ? mix(PAL.stone, [255, 255, 255], .25) : PAL.stone); else v.box(-.5, -.5, -h, 1, 1, h, [255, 255, 255], .16);
     if (id) hits.push([cx - cell / 2, cy - s * .45 - cell / 2, id, place]);
-    if (id && !held) { const by = cy - s * .72 - Math.sin(t * 2 + cx * .05) * 3; ell(cx, cy, s * .34, s * .17, [60, 40, 90], .25); glow(cx, by, s * 1.1, [255, 240, 200], .45); drawItem(id, cx, by, s * .44);
+    if (id && !held) { const by = cy - s * sc * .72 - Math.sin(t * 2 + cx * .05) * 3; ell(cx, cy, s * .34, s * .17, [60, 40, 90], .25); glow(cx, by, s * sc * 1.1, [255, 240, 200], .45); drawItem(id, cx, by, s * sc * .44);
       const n = typeof place === 'number' ? rest(id) : 0; if (n > 1) { const bx = cx + s * .42, byy = by + s * .3; circ(bx, byy, 8, [255, 236, 190]); ctx.font = `400 11px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([60, 40, 90]); ctx.fillText(String(n), bx, byy + .5); } } };      // a stack of cards shows how many lie there
   thinText(L.bagWorn, W / 2, y0 + 64, 12.5, [255, 255, 255], .7);
   const yA = y0 + 64 + s * 2.3;
-  ['weapon', 'acc', 'card'].forEach((k, n) => { const cx = W / 2 + (n - 1) * s * 2.3, id = has.includes(save.equip[k]) ? save.equip[k] : null; stand(cx, yA, id, .9, k); thinText(L.bagSlots[n], cx, yA + s * 1.4 + 20, 12.5, [255, 255, 255], .8); });
+  ['weapon', 'acc', 'card', 'drink'].forEach((k, n) => { const big = n < 2, gap = Math.min(s * 2.05, (W - 60) / 4), cx = W / 2 + (n - 1.5) * gap, id = has.includes(save.equip[k]) ? save.equip[k] : null; stand(cx, yA + (big ? 0 : s * .2), id, big ? .9 : .5, k, big ? 1 : .72); thinText(L.bagSlots[n], cx, yA + s * 1.4 + 20, 12.5, [255, 255, 255], .8); });      // weapon and charm on tall plinths; card and drink on small ones
   const yL = yA + s * 1.4 + 50; line([[W / 2 - 70, yL], [W / 2 + 70, yL]], [255, 255, 255], 1, .35);
   const yB = yL + s * 1.5, gx = Math.min(s * 1.95, (W - 40) / 4), slabs = bagSlabs();
   for (let n = 0; n < 12; n++) stand(W / 2 + (n % 4 - 1.5) * gx, yB + (n >> 2) * s * 1.45, slabs[n], .14, n);
@@ -1809,7 +1826,7 @@ function churchBanner(txt, sec = 3) { church.banner = txt; church.bannerT = sec;
 function enterChurch() {
   mode = 'church'; $('zoom').style.display = 'none'; $('bag').style.display = 'none'; $('bback').style.display = 'none'; fade = 1; bag.open = false;      // no button leads out: you walk down the steps at the door, any time there is no fight on
   const c = church, p = c.p;
-  Object.assign(c, { freeze: 0, bonus: false, wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
+  Object.assign(c, { freeze: 0, inv: 0, bonus: false, wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
   Object.assign(p, { x: CX1 - 1.2, y: CW / 2, exit: false, second: null, pend: null, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y;
   churchBanner(S().lightTorch, 5); bell(196, .12);
 }
@@ -1826,7 +1843,7 @@ function leaveChurch() {      // back outside, at the church door
   player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
 function churchHurt(src) {
-  const c = church, p = c.p, dmg = 1; if (c.hurt > 0 || c.down > 0 || !c.fight) return;
+  const c = church, p = c.p, dmg = 1; if (c.hurt > 0 || c.down > 0 || !c.fight || c.inv > 0) return;      // nothing lands while the bottle's five seconds last
   if (src && src.boss && guardOn() && Math.random() < .3) { c.hurt = .5; c.fx.push({ k: 'shield', x: p.x, y: p.y, t: 0, T: .6 }); churchBanner(S().guardSave, 2); sfx(880, .3, .14, 'triangle'); sfx(1320, .4, .1, 'sine', .04); noise(.15, .3, 1500, 3000); return; }      // the Guardian Cross: three times in ten a boss's blow (and only a boss's) simply does not land
   if (c.hp <= dmg && !c.ringUsed && ringOn()) {      // the Ring of Chastity: once, the blow that would fell you goes back to whoever dealt it
     c.ringUsed = true; c.hurt = 1; c.fx.push({ k: 'ring', x: p.x, y: p.y, t: 0, T: .7 }); churchBanner(S().ringSave, 3); bell(293.7, .12); chime(86, 0, .14); chime(93, .1, .12);
@@ -1892,7 +1909,7 @@ function churchGift(id) {      // out of the chest and into the backpack; it goe
 }
 function updateChurch(dt) {
   const c = church, p = c.p;
-  p.cd -= dt; p.sw -= dt; p.sw2 = (p.sw2 || 0) - dt; c.hurt -= dt;
+  p.cd -= dt; p.sw -= dt; p.sw2 = (p.sw2 || 0) - dt; c.hurt -= dt; if (c.inv > 0) c.inv -= dt;
   if (p.second && (p.second.t -= dt) <= 0) { const q = p.second; p.second = null; if (c.fight && c.down <= 0 && q.e.hp > 0 && !q.e.inv && !(q.e.spin > 0)) { p.sw2 = .2; noise(.1, .4, 3000, 900); churchStrike(q.e, q.parry); } }      // the second of the twin blades
   c.flash -= dt; if (c.bannerT > 0) c.bannerT -= dt; if (c.freeze > 0) { c.freeze -= dt; if (c.freeze <= 0) sfx(330, .4, .08, 'sine'); }
   if (c.down > 0) { c.down -= dt; if (c.down <= 0) return leaveChurch(); }      // you wake up back outside
@@ -1915,6 +1932,8 @@ function updateChurch(dt) {
     if (e.shieldT > 0) e.shieldT -= dt;
     if (!(e.wind > 0) && !(e.dash > 0)) e.parried = false;
     if (e.app > 0) { e.app -= dt; continue; }
+    if (e.poison > 0) { e.poison -= dt; if ((e.ptick -= dt) <= 0) { e.ptick = 1; c.fx.push({ k: 'drop', x: e.x, y: e.y, t: 0, T: .7 }); churchDamage(e, 1); if (e.hp <= 0) continue; } }      // the Pukka card's poison: a drop of blood a second
+    if (e.stun > 0 && !e.inv) { e.stun -= dt; if (e.sayT > 0) e.sayT -= dt; continue; }      // reeling: it does nothing at all
     if (e.kind === 'adv') {      // the Advocate keeps its distance, and every ten seconds throws a ten-second shield over someone on its side who has none (itself included), never the same one twice running
       const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy) || 1, Z = zoneOf(e.wave); if (d < 3) { e.x += -dx / d * 1.3 * dt; e.y += -dy / d * 1.3 * dt; } else { if ((e.wt -= dt) < 0) { e.wt = rnd(1.5, 4); e.wx = clamp(e.hx + rnd(-1.2, 1.2), Z[0], Z[1]); e.wy = clamp(e.hy + rnd(-1.2, 1.2), CY0, CY1); } const wx = e.wx - e.x, wy = e.wy - e.y, wd = Math.hypot(wx, wy); if (wd > .05) { e.x += wx / wd * .6 * dt; e.y += wy / wd * .6 * dt; } }
       e.x = clamp(e.x, Z[0], Z[1]); e.y = clamp(e.y, CY0, CY1); churchBump(e);
@@ -1972,10 +1991,19 @@ function updateChurch(dt) {
   for (const b of c.stains) b.t += dt;
   c.lit = c.done ? Math.min(1, c.lit + dt / 2.2) : Math.max(0, c.lit - dt / 1.2); c.torchF = clamp(c.torchF + (c.torchOn ? dt * 3 : -dt * 2)); for (const n of c.npcs.concat(c.chest || [])) if (n.a < 1) n.a = Math.min(1, n.a + dt / 2.6);
 }
-function playCard() {      // Time Stop: every foe, and everything they have thrown, holds still for ten seconds; the card is used up
-  const c = church; if (!wearing('stop') || c.freeze > 0) return;
-  c.freeze = 10; save.cards.stop = Math.max(0, cardN('stop') - 1); save.stop = cardN('stop') > 0; save.equip.card = null; saveNow();      // one card used; any others stay in the backpack
-  bell(220, .16); sfx(660, .6, .1, 'sine'); sfx(990, .8, .06, 'sine');
+function useUp(k) { const id = save.equip[k]; save.cards[id] = Math.max(0, cardN(id) - 1); save[id] = cardN(id) > 0; save.equip[k] = null; saveNow(); }      // one used; any others wait in the backpack, for the next fight
+function playCard() {      // the Sailor card: a random foe reels, stars spinning round its head, for ten seconds; the Pukka card: five seconds, and a drop of blood each second
+  const c = church, id = save.equip.card; if (!id || !have(id)) return;
+  const live = c.foes.filter(e => e.hp > 0 && e.wave === c.wave && !(e.app > 0) && !e.inv); if (!live.length) return;
+  const e = pick(live), snake = id === 'csnake'; e.stun = Math.max(e.stun || 0, snake ? 5 : 10); e.wind = 0; e.dash = 0; e.spin = 0; e.combo = 0; if (snake) { e.poison = 5; e.ptick = 1; }
+  c.fx.push({ k: 'card', id, x: e.x, y: e.y, t: 0, T: .9 }); useUp('card');
+  bell(snake ? 196 : 262, .14); sfx(snake ? 330 : 523, .5, .09, 'sine'); sfx(snake ? 220 : 392, .7, .07, 'sine', .15);
+}
+function playDrink() {      // coffee mends half your hearts; a bottle makes you untouchable for five seconds
+  const c = church, id = save.equip.drink; if (!id || !have(id)) return;
+  if (id === 'coffee') { if (c.hp >= 6) return; c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }
+  else { c.inv = 5; bell(330, .14); sfx(660, .5, .08, 'triangle'); }
+  c.fx.push({ k: 'drink', id, x: c.p.x, y: c.p.y, t: 0, T: .9 }); useUp('drink');
 }
 function devMenu() {      // developer mode: a short list of tools, each opening a page of its own — jump to a round, or be given any item (it flies in as from a chest)
   if (document.getElementById('dbg')) return;
@@ -1995,7 +2023,7 @@ function devMenu() {      // developer mode: a short list of tools, each opening
   home(); d.addEventListener('pointerdown', e => { if (e.target === d) close(); }); document.body.appendChild(d);
 }
 function devGive(id) { const c = church; if (c.fly) return; c.fly = { id, n: { at: [W / 2, H * .3] }, t: 0, dev: true }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12); }      // the item flies down to the chef, just as out of a chest
-function devGift(id) { const k = ITEMS[id]; save[id] = true; if (k === 'card') save.cards[id] = cardN(id) + 1; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
+function devGift(id) { const k = ITEMS[id]; save[id] = true; if (STACK(id)) save.cards[id] = cardN(id) + 1; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
 function debugAsk(msg, val, done) {      // a small input box over the game (window.prompt is not shown inside the app's web view)
   if (document.getElementById('dbg')) return;
   const d = document.createElement('div'); d.id = 'dbg'; d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,8,30,.55);z-index:99';
@@ -2007,6 +2035,7 @@ function debugAsk(msg, val, done) {      // a small input box over the game (win
 function churchTap(sx, sy) {
   const c = church, p = c.p, v = chv, K = v.s * .8; if (c.down > 0) return;
   if (c.fight && hudCard && Math.hypot(sx - hudCard[0], sy - hudCard[1]) < 22) { playCard(); return; }
+  if (c.fight && hudDrink && Math.hypot(sx - hudDrink[0], sy - hudDrink[1]) < 22) { playDrink(); return; }
   p.pend = null;
   let best = null, bd = K * 1.05;
   for (const e of c.foes) if (e.hp > 0 && !(e.app > 0)) { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
@@ -2145,7 +2174,8 @@ function drawChurch(t, dt) {
         for (let i = 0; i < 6; i++) { const g = t * 9 + i * 1.05, h = (i + (t * 2) % 1) / 6; circ(x + Math.cos(g) * k * (.2 + .7 * h), y - h * k * 1.9 + Math.sin(g) * k * .1, k * .05, [255, 255, 255], .8); } top = 2.2; }
       else { const tw = e.wind > 0 ? Math.sin(t * 40) * k * .05 : 0; fig(x + tw, y, k, { kind: 'plain', body: col([160, 206, 214]), head: [226, 238, 240], a }); ctx.save(); ctx.globalAlpha = a; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(x + tw, y - k * (.2 + i * .25), k * (.34 - i * .07), k * (.1 - i * .02), 0, t * (e.wind > 0 ? 14 : 3) + i, t * (e.wind > 0 ? 14 : 3) + i + 3.6); ctx.strokeStyle = css([240, 250, 255], .8); ctx.lineWidth = Math.max(1.2, k * .035); ctx.stroke(); } ctx.restore(); } }
     if (shielded(e)) { const by = y - k * (top + .55) - Math.sin(t * 3) * k * .04; glow(x, by, k * .45, [236, 200, 120], .5); drawScales(x, by, k * .2, .95); }      // under the Advocate's shield: a small pair of scales floats above it
-    if (e.stun > 0 && e.hp > 0) for (let i = 0; i < 3; i++) { const g = t * 5 + i * TAU / 3; circ(x + Math.cos(g) * k * .3, y - k * (top - .25) + Math.sin(g) * k * .1, k * .06, [255, 236, 130]); }
+    if (e.stun > 0 && e.hp > 0) for (let i = 0; i < 3; i++) { const g = t * 5 + i * TAU / 3, sx = x + Math.cos(g) * k * .32, sy = y - k * (top - .25) + Math.sin(g) * k * .1, r = k * .12; poly([[sx, sy - r], [sx + r * .3, sy - r * .3], [sx + r, sy], [sx + r * .3, sy + r * .3], [sx, sy + r], [sx - r * .3, sy + r * .3], [sx - r, sy], [sx - r * .3, sy - r * .3]], [255, 236, 130]); }      // dizzy: three little stars wheel round its head
+    if (e.poison > 0 && e.hp > 0) glow(x, y - k * .6, k * .7, [120, 200, 120], .35);
     if (e.hp > 0 && !(e.app > 0) && e.max > 2 && (big || e.hp < e.max)) { const bw = k * (big ? .9 : .6), bh = Math.max(3, k * .08), bx = x - bw / 2, by = y - k * (top - .04); ctx.fillStyle = css([40, 28, 60], .9); rrect(bx - 1.5, by - 1.5, bw + 3, bh + 3, bh / 2 + 1.5); ctx.fill(); ctx.fillStyle = css([255, 90, 90]); rrect(bx, by, Math.max(bh, bw * e.hp / e.max), bh, bh / 2); ctx.fill(); }
     if (open) { const g = k * (.17 + .03 * pulse), gy = y - k * (top + (e.max > 2 ? .28 : .03)); glow(x, gy, g * 2.4, Y, .8); poly([[x, gy - g * 1.6], [x + g * .4, gy - g * .4], [x + g * 1.6, gy], [x + g * .4, gy + g * .4], [x, gy + g * 1.6], [x - g * .4, gy + g * .4], [x - g * 1.6, gy], [x - g * .4, gy - g * .4]], [255, 240, 140]); }
   } }); }
@@ -2165,6 +2195,8 @@ function drawChurch(t, dt) {
     for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(q[0] - Math.cos(g) * s * (.5 + i * .16), q[1] - Math.sin(g) * s * (.5 + i * .16), s * .62, g - .75, g + .75); ctx.strokeStyle = css(i ? [170, 110, 230] : [230, 200, 255], a * (.95 - i * .3)); ctx.lineWidth = s * (.11 - i * .025); ctx.lineCap = 'round'; ctx.stroke(); } }
   for (const f of c.fx) { const u = f.t / f.T, q = P(f.x, f.y);
     if (f.k === 'poof') for (let i = 0; i < 7; i++) { const g = P(f.x + Math.cos(i * 2.4) * u * .7, f.y + Math.sin(i * 2.4) * u * .7, .3 + u * (.5 + .25 * (i % 3))); circ(g[0], g[1], s * (.2 - .12 * u), f.c, .7 * (1 - u)); }
+    else if (f.k === 'card' || f.k === 'drink') { const y0 = q[1] - K * (1.4 + .6 * eout(u)); ctx.save(); ctx.globalAlpha = 1 - u * u; glow(q[0], y0, K * .7, f.k === 'drink' ? [255, 230, 170] : [255, 236, 190], .7); drawItem(f.id, q[0], y0, K * .32); ctx.restore(); }      // what was used rises over whoever it touched, and fades
+    else if (f.k === 'drop') { const y0 = q[1] - K * (.7 - .5 * u); circ(q[0] + K * .12, y0, K * .07, [200, 30, 50], 1 - u); poly([[q[0] + K * .12, y0 - K * .16], [q[0] + K * .06, y0 - K * .02], [q[0] + K * .18, y0 - K * .02]], [200, 30, 50], 1 - u); }      // a drop of blood falls
     else if (f.k === 'ring') { const r = s * (.4 + 2.2 * eout(u)) * 1.22; ctx.beginPath(); ctx.ellipse(q[0], q[1], r, r * .577, 0, 0, TAU); ctx.strokeStyle = css([255, 232, 150], 1 - u); ctx.lineWidth = s * .12 * (1 - u) + 1; ctx.stroke(); glow(q[0], q[1] - K * .6, K * 2.2, [255, 236, 170], 1 - u); }
     else if (f.k === 'zap') { const pts = [[q[0], q[1]]]; let zx = q[0], zy = q[1]; for (let i = 1; i <= 7; i++) { zy -= s * 1.3; zx += Math.sin(i * 12.9898 + f.x * 78.233) * s * .5; pts.push([zx, zy]); } line(pts, [200, 180, 255], s * .22 * (1 - u) + 1, .6 * (1 - u)); line(pts, [255, 255, 255], s * .09 * (1 - u) + 1, 1 - u); glow(q[0], q[1] - K * .5, K * 2.4, [190, 170, 255], 1 - u); if (u < .25) { ctx.fillStyle = css([220, 210, 255], .25 * (1 - u * 4)); ctx.fillRect(0, 0, W, H); } }
     else if (f.k === 'shield') { const cy = q[1] - K * .6, r = K * (1 + .25 * eout(u)); ctx.beginPath(); ctx.arc(q[0], cy, r, 0, TAU); ctx.fillStyle = css([170, 214, 255], .35 * (1 - u)); ctx.fill(); ctx.strokeStyle = css([226, 240, 255], 1 - u); ctx.lineWidth = Math.max(2, K * .08); ctx.stroke(); drawGuard(q[0], cy - r * 1.1, K * .28, 1 - u); }
