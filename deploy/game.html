@@ -145,7 +145,7 @@ const STR = {
     churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）', devOn: '进入开发者模式。', devOff: '离开开发者模式。', devTitle: '开发者', devJump: '跳关', devItems: '获得物品', devTime: '调整时间', devBuff: '开关预言', on: '开', off: '关', drySay: '怎么是拌面？',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '饮品'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
-    takeCoffee: '可以带走。', useSay: { coffee: '一口冰咖啡，又有力气了！' }, gotProphecy: '占卜师留下了预言。', buffNames: { speed: '速度预言', freeze: '冰冻预言' }, buffSay: { speed: '速度预言：战斗中我会跑得更快。', freeze: '冰冻预言：弹刀能把敌人冻住五秒。' }, items: { coffee: ['咖啡', '可在战斗中使用：恢复一半生命。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
+    takeCoffee: '可以带走。', useSay: { coffee: '一口冰咖啡，又有力气了！' }, gotProphecy: '占卜师留下了预言。', buffNames: { speed: '速度预言', freeze: '冰冻预言' }, buffSay: { speed: '速度预言：战斗中我会跑得更快。', freeze: '冰冻预言：弹刀能让敌人冻得慢下来，持续五秒。' }, items: { coffee: ['咖啡', '可在战斗中使用：恢复一半生命。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
     badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'], ring: ['贞洁之戒', '从教堂里救出了贞洁者。'] },
     welcome: '欢迎来玩三人染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
@@ -174,7 +174,7 @@ const STR = {
     churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）', devOn: '進入開發者模式。', devOff: '離開開發者模式。', devTitle: '開發者', devJump: '跳關', devItems: '獲得物品', devTime: '調整時間', devBuff: '開關預言', on: '開', off: '關', drySay: '怎麼是拌麵？',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '飲品'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
-    takeCoffee: '可以帶走。', useSay: { coffee: '一口冰咖啡，又有力氣了！' }, gotProphecy: '占卜師留下了預言。', buffNames: { speed: '速度預言', freeze: '冰凍預言' }, buffSay: { speed: '速度預言：戰鬥中我會跑得更快。', freeze: '冰凍預言：彈刀能把敵人凍住五秒。' }, items: { coffee: ['咖啡', '可在戰鬥中使用：恢復一半生命。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
+    takeCoffee: '可以帶走。', useSay: { coffee: '一口冰咖啡，又有力氣了！' }, gotProphecy: '占卜師留下了預言。', buffNames: { speed: '速度預言', freeze: '冰凍預言' }, buffSay: { speed: '速度預言：戰鬥中我會跑得更快。', freeze: '冰凍預言：彈刀能讓敵人凍得慢下來，持續五秒。' }, items: { coffee: ['咖啡', '可在戰鬥中使用：恢復一半生命。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
     badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'], ring: ['貞潔之戒', '從教堂裡救出了貞潔者。'] },
     welcome: '歡迎來玩三人染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
@@ -203,7 +203,7 @@ const STR = {
     churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)', devOn: 'Developer mode on.', devOff: 'Developer mode off.', devTitle: 'Developer', devJump: 'Jump to round', devItems: 'Get an item', devTime: 'Set the time', devBuff: 'Prophecies', on: 'On', off: 'Off', drySay: 'Dry noodles? Where is the soup?',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Drink'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
-    takeCoffee: 'To take away.', useSay: { coffee: 'Iced coffee. Back on my feet!' }, gotProphecy: 'The fortune teller left a prophecy.', buffNames: { speed: 'Prophecy of Speed', freeze: 'Prophecy of Frost' }, buffSay: { speed: 'Prophecy of Speed: I run faster in a fight.', freeze: 'Prophecy of Frost: a parry freezes a foe for five seconds.' }, items: { coffee: ['Iced Coffee', 'Can be used in a fight: half your hearts come back.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
+    takeCoffee: 'To take away.', useSay: { coffee: 'Iced coffee. Back on my feet!' }, gotProphecy: 'The fortune teller left a prophecy.', buffNames: { speed: 'Prophecy of Speed', freeze: 'Prophecy of Frost' }, buffSay: { speed: 'Prophecy of Speed: I run faster in a fight.', freeze: 'Prophecy of Frost: a parry chills a foe to a crawl for five seconds.' }, items: { coffee: ['Iced Coffee', 'Can be used in a fight: half your hearts come back.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
     badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'], ring: ['Ring of Chastity', 'Rescued the Virgin from the church.'] },
     welcome: 'Welcome to the three-player game.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
@@ -1881,7 +1881,7 @@ function churchDamage(e, n) {
 }
 // the opening for a parry: the moment a foe commits to its attack — a flask or a spell raised, a blade drawn back, a charge chosen or under way, a whirl winding up.
 // It can be taken once per attack, and it does not stop the attack: you still have to get out of the way.
-const parryable = e => !(e.frz > 0) && !e.inv && !shielded(e) && !e.parried && !(e.app > 0) && e.hp > 0 && !(e.stun > 0) && !(e.spin > 0) && (e.dash > 0 || (e.wind > 0 && e.wind <= ({ imp: 0, ass: .4, pukka: .6 }[e.kind] || 9)));
+const parryable = e => !e.inv && !shielded(e) && !e.parried && !(e.app > 0) && e.hp > 0 && !(e.stun > 0) && !(e.spin > 0) && (e.dash > 0 || (e.wind > 0 && e.wind <= ({ imp: 0, ass: .4, pukka: .6 }[e.kind] || 9)));
 function churchStrike(e, parry) {      // one blade landing on a foe
   const c = church, p = c.p, knife = armed();
   noise(.08, .55, 700, 180, .03); sfx(knife ? 210 : 130, .14, .45, 'triangle', .03); if (knife) sfx(1650, .07, .14, 'triangle', .03);
@@ -1891,7 +1891,7 @@ function churchStrike(e, parry) {      // one blade landing on a foe
   if (parry) { e.parried = true; c.flash = .3; sfx(1900, .25, .16, 'triangle'); sfx(2850, .18, .08); sfx(620, .1, .14, 'square'); }
   if (parry && e.boss && sleepy() && Math.random() < .3) { e.stun = 3; e.wind = 0; e.dash = 0; e.combo = 0; sfx(523, .5, .08, 'sine'); sfx(392, .7, .07, 'sine', .15); }      // the Exorcist's Knife: three parries in ten put a boss (and only a boss) to sleep for three seconds, and no blow wakes it
   const shut = shielded(e); churchDamage(e, parry ? (sleepy() || wearing('twin') ? 3 : 10) : 1);
-  if (parry && !shut && buffOn('freeze') && e.hp > 0) { e.frz = 5; e.wind = 0; e.dash = 0; e.spin = 0; e.combo = 0; c.fx.push({ k: 'frost', x: e.x, y: e.y, t: 0, T: .6 }); sfx(1760, .4, .08, 'sine'); sfx(2640, .5, .05, 'sine', .05); }      // the Prophecy of Frost: a parry freezes the foe where it stands for five seconds
+  if (parry && !shut && buffOn('freeze') && e.hp > 0) { e.frz = 5; c.fx.push({ k: 'frost', x: e.x, y: e.y, t: 0, T: .6 }); sfx(1760, .4, .08, 'sine'); sfx(2640, .5, .05, 'sine', .05); }      // the Prophecy of Frost: a parry chills the foe blue for five seconds, slowing it to a crawl
   if (parry && e.kind === 'imp') { e.dash = 0; e.cd = 1.9; }      // the Imp, caught mid-charge, is thrown back and stops there (after the blow lands: the shield only covers it once the charge is over)
   if (parry && wearing('doom')) { const live = c.foes.filter(f => f.hp > 0 && !f.inv); if (live.length) { const z = pick(live); c.fx.push({ k: 'zap', x: z.x, y: z.y, t: 0, T: .45 }); noise(.35, .5, 5000, 300); sfx(90, .4, .3, 'sawtooth'); const sp = z.spin; z.spin = 0; churchDamage(z, 10); if (z.hp > 0) z.spin = sp; } }      // the Doomsday Necklace: lightning on one foe at random, whatever it is doing
 }
@@ -1931,13 +1931,13 @@ function updateChurch(dt) {
     if (!c.fight && p.exit && p.x >= CX1 - 1.3 && Math.abs(p.y - CW / 2) < 1.2) return leaveChurch();      // heading for the steps when there is no fight on: he hurries, and is out as soon as he is near the door
   }
   const lob = (e, tx, ty, T) => c.shots.push({ x0: e.x, y0: e.y, x1: clamp(tx, churchXmin(), churchXmax()), y1: clamp(ty, CY0, CY1), t: 0, T, src: e });
+  const pre = new Map(c.foes.filter(e => e.frz > 0).map(e => [e, [e.x, e.y]]));      // where the frozen ones stood, so their steps can be cut short below
   for (const e of c.foes) {
     e.hit -= dt; if (e.sl > 0) e.sl -= dt; if (e.hp <= 0) { e.dead -= dt; continue; }
     if (c.freeze > 0) continue;      // time stands still for them
     if (e.shieldT > 0) e.shieldT -= dt;
     if (!(e.wind > 0) && !(e.dash > 0)) e.parried = false;
     if (e.app > 0) { e.app -= dt; continue; }
-    if (e.frz > 0) { e.frz -= dt; if (e.sayT > 0) e.sayT -= dt; continue; }      // frozen by the Prophecy of Frost: it stands where it is, blue, until it thaws
     if (e.kind === 'adv') {      // the Advocate keeps its distance, and every ten seconds throws a ten-second shield over someone on its side who has none (itself included), never the same one twice running
       const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy) || 1, Z = zoneOf(e.wave); if (d < 3) { e.x += -dx / d * 1.3 * dt; e.y += -dy / d * 1.3 * dt; } else { if ((e.wt -= dt) < 0) { e.wt = rnd(1.5, 4); e.wx = clamp(e.hx + rnd(-1.2, 1.2), Z[0], Z[1]); e.wy = clamp(e.hy + rnd(-1.2, 1.2), CY0, CY1); } const wx = e.wx - e.x, wy = e.wy - e.y, wd = Math.hypot(wx, wy); if (wd > .05) { e.x += wx / wd * .6 * dt; e.y += wy / wd * .6 * dt; } }
       e.x = clamp(e.x, Z[0], Z[1]); e.y = clamp(e.y, CY0, CY1); churchBump(e);
@@ -1979,6 +1979,7 @@ function updateChurch(dt) {
     } else { e.cd -= dt; if (d < 2.3) step(-dx / d, -dy / d, 1.25); else wander(); if (e.cd <= 0 && d < 7.5) e.wind = .7; }
     e.x = clamp(e.x, Z[0], Z[1]); e.y = clamp(e.y, CY0, CY1); churchBump(e);
   }
+  for (const [e, [x0, y0]] of pre) { e.frz -= dt; e.x = x0 + (e.x - x0) * .1; e.y = y0 + (e.y - y0) * .1; }      // the Prophecy of Frost: a frozen foe still does everything it would, but moves at a tenth of its pace
   c.foes = c.foes.filter(e => e.hp > 0 || e.dead > 0);
   for (const s of c.shots) { if (c.freeze > 0) continue; s.t += dt; if (s.t >= s.T) { c.fx.push({ k: 'splash', x: s.x1, y: s.y1, t: 0, T: .6 }); sfx(180, .1, .08, 'triangle'); if (Math.hypot(p.x - s.x1, p.y - s.y1) < .62) churchHurt(s.src); } }
   c.shots = c.shots.filter(s => s.t < s.T);
