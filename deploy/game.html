@@ -624,7 +624,7 @@ function cafeTap(x, y) {
   if (hit('top')) { bar.wobTop = performance.now(); return; }
   if ((BARHIT.shelf || []).some(h => Math.hypot(x - h[0], y - h[1]) < h[2])) { bar.wobShelf = performance.now(); return; }
   if (hit('keeper')) { const night = G.n > .5;      // the server says nothing: a tap brings a drink, unless you have one in front of you already
-    if (!bar.cups.some(c => c.full)) { let cy = clamp(Math.floor(bar.y) + .5, 1.5, 3.5); if (Math.abs(cy - bar.whoAt - .5) < .45) cy = clamp(cy + 1, 1.5, 3.5);      // set squarely in line with the row you stand in, never as far up the counter as the machine and the bottles, or the other customer
+    if (!bar.cups.some(c => c.full)) { const takeUp = Math.floor(G.t / HALF) % 2 === 0 && bar.taken !== Math.floor(G.t / HALF); let cy = clamp(Math.floor(bar.y) + .5, 1.5, takeUp ? 3.05 : 3.5); if (Math.abs(cy - bar.whoAt - .5) < .45) cy = clamp(cy + 1, 1.5, takeUp ? 3.05 : 3.5);      // set squarely in line with the row you stand in, never as far up the counter as the machine and the bottles, or the other customer, and clear of the coffee to take away while it is there
       bar.cups = bar.cups.filter(c => Math.abs(c.y - cy) > .3); bar.cups.push({ y: cy, night, col: pick([[220, 60, 70], [60, 150, 236], [240, 200, 60], [80, 190, 110]]), full: true, slide: 0, from: bar.keeperY || 2 }); if (bar.cups.length > 3) bar.cups.shift(); chime(76, .3, .1); } else bar.wobKeep = performance.now();      // a cup set down on the counter near you
     return; }
   if (hit('who')) { bar.whoSay = pick(S().barPatron[bar.who]); bar.whoSayT = 3.2; chime(74, 0, .1); return; }
@@ -655,6 +655,7 @@ function drawBar(t) {
     alpha(1 - nn, () => { const j = jig('wobTop', 0); v.box(3.2, .5 + j, 1.08, .36, .36, .42, [200, 204, 214]); v.box(3.25, .55 + j, 1.5, .26, .26, .08, [70, 70, 80]); });      // the coffee machine
     alpha(nn, () => { for (const [y0, c] of [[.6, [96, 150, 110]], [.85, [150, 70, 70]]]) { const y = y0 + jig('wobTop', y0 * 9); v.box(3.2, y, 1.08, .12, .12, .32, c); v.box(3.235, y + .035, 1.4, .05, .05, .12, c); } });
     { const q = P(3.33, .68, 1.3); BARHIT.top = [q[0], q[1] - s * .1, s * .3]; }      // the machine or the bottles, not the bare counter
+    { const per = Math.floor(G.t / HALF); BARHIT.take = null; if (per % 2 === 0 && bar.taken !== per) { const q = P(3.36, 3.5, 1.08), r = s * .145, iy = q[1] - r * .7; glow(q[0], iy, s * .45, [255, 236, 170], .35 + .1 * Math.sin(t * 3)); drawItem('coffee', q[0], iy, r); BARHIT.take = [q[0], iy, s * .5]; } }      // by day, an iced coffee to take away waits at the left end of the counter
     bar.cups.forEach((cp, n) => { if (cp.slide < 1) cp.slide = Math.min(1, cp.slide + 1 / 50); const u = ease(cp.slide), jw = .035 * clamp(1 - (performance.now() - (cp.wob || -1e9)) / 650) * Math.sin(performance.now() / 22 + n * 2), c = P(3.2 + .2 * (1 - u), lerp(cp.from, cp.y, u) + jw, 1.08);      // each cup you were given, where it was set down
       if (cp.night) { poly([[c[0] - s * .07, c[1] - s * .22], [c[0] + s * .07, c[1] - s * .22], [c[0] + s * .05, c[1]], [c[0] - s * .05, c[1]]], [236, 240, 250], .55); if (cp.full) poly([[c[0] - s * .06, c[1] - s * .15], [c[0] + s * .06, c[1] - s * .15], [c[0] + s * .05, c[1] - s * .01], [c[0] - s * .05, c[1] - s * .01]], cp.col || [60, 150, 236], .92); if (cp.full) for (const [dx, dy, g] of [[-.025, -.13, .3], [.022, -.105, -.4], [-.005, -.07, .1]]) { ctx.save(); ctx.translate(c[0] + dx * s, c[1] + dy * s); ctx.rotate(g); ctx.fillStyle = css([236, 246, 255], .75); rrect(-s * .022, -s * .022, s * .044, s * .044, s * .01); ctx.fill(); ctx.restore(); } }      // a bright drink over ice, red, blue, yellow or green, poured at random
       else { ell(c[0], c[1] - s * .08, s * .09, s * .05, [250, 246, 240]); poly([[c[0] - s * .09, c[1] - s * .08], [c[0] + s * .09, c[1] - s * .08], [c[0] + s * .07, c[1] + s * .04], [c[0] - s * .07, c[1] + s * .04]], [250, 246, 240]); ell(c[0], c[1] - s * .08, s * .07, s * .035, cp.full ? [120, 74, 50] : [228, 220, 210]);
@@ -696,10 +697,9 @@ function drawBar(t) {
       for (const sg of [-1, 1]) { circ(hx + sg * k * .1 + f * k * .03, hy - k * .02, k * .045, [44, 34, 44]); circ(hx + sg * k * .1 + f * k * .03 + k * .015, hy - k * .035, k * .015, [255, 255, 255]); ell(hx + sg * k * .17 + f * k * .03, hy + k * .07, k * .05, k * .03, pink, .55); }      // eyes with a glint, rosy cheeks
       circ(hx + f * k * .03, hy + k * .05, k * .025, pink);      // a tiny nose
       BARHIT.cat = [q[0], q[1] - k * .4, s * .45]; c.at = [hx, hy]; } }); }
-  { const per = Math.floor(G.t / HALF), up = per % 2 === 0 && bar.taken !== per, jt = jig('wobTable', 0); BARHIT.take = null; { const tq = P(.5, .5, .5); BARHIT.table = [tq[0], tq[1], s * .5]; }      // a little round table by the door; on it, once each day, an iced coffee to take away, the size of a glass on the counter; bare, a tap just rocks it
+  { const per = Math.floor(G.t / HALF), up = per % 2 === 0 && bar.taken !== per, jt = jig('wobTable', 0); { const tq = P(.5, .5, .5); BARHIT.table = [tq[0], tq[1], s * .5]; }      // a little round table by the door, bare: a tap just rocks it (the iced coffee to take away stands at the left end of the counter, below)
     objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46 + jt, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5 + jt, .5, .66, .36, .06, [176, 124, 90]);
-      if (up) { const id = 'coffee', q = P(.5 + jt, .5, .72), r = s * .145, iy = q[1] - r * .7; glow(q[0], iy, s * .45, [255, 236, 170], .35 + .1 * Math.sin(t * 3)); drawItem(id, q[0], iy, r);
-        BARHIT.take = [q[0], iy, s * .6]; } } }); }
+    } }); }
   // you
   objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
     fig(q[0], q[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); bar.at = q; } });
