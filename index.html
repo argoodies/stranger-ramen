@@ -695,7 +695,7 @@ function drawBar(t) {
       BARHIT.cat = [q[0], q[1] - k * .4, s * .45]; c.at = [hx, hy]; } }); }
   { const per = Math.floor(G.t / HALF), up = bar.taken !== per; BARHIT.take = null;      // a little round table by the door; on it, once a day and once a night, a coffee or a bottle to take away, the size of a glass on the counter
     objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5, .5, .66, .36, .06, [176, 124, 90]);
-      if (up) { const id = per % 2 ? 'booze' : 'coffee', q = P(.5, .5, .72), r = s * .17, iy = q[1] - r * .7; glow(q[0], iy, s * .45, [255, 236, 170], .35 + .1 * Math.sin(t * 3)); drawItem(id, q[0], iy, r);
+      if (up) { const id = per % 2 ? 'booze' : 'coffee', q = P(.5, .5, .72), r = s * .145, iy = q[1] - r * .7; glow(q[0], iy, s * .45, [255, 236, 170], .35 + .1 * Math.sin(t * 3)); drawItem(id, q[0], iy, r);
         BARHIT.take = [q[0], iy, s * .6]; } } }); }
   // you
   objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
