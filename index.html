@@ -1677,10 +1677,10 @@ function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight:
   const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && ringUsed) ctx.globalAlpha = .3; drawItem(id, x, 73, id === 'ring' ? 9.5 : 8); ctx.restore(); x += 26; }
   const c = church; hudCard = hudDrink = null; const pulse = .5 + .2 * Math.sin(performance.now() / 300);
   const cid = save.equip.card; if (cid && have(cid)) { glow(x, 73, 16, cid === 'csail' ? [255, 220, 120] : [255, 150, 160], pulse); drawItem(cid, x, 73, 9); hudCard = [x, 73]; x += 26; }      // a card to play: tap it
-  const did = save.equip.drink; if (did && have(did)) { const dx = W / 2 - ((max - 1) / 2 + 1) * 22 - 4; glow(dx, 73, 16, [255, 230, 170], pulse); drawItem(did, dx, 73, 9); hudDrink = [dx, 73]; }      // a drink to take, to the left of the hearts: tap it
+  const did = save.equip.drink; if (did && have(did)) { const wt = (performance.now() - hudDrinkWob) / 1000, dx = W / 2 - ((max - 1) / 2 + 1) * 22 - 4 + (wt < .4 ? Math.sin(wt * 60) * 3 * (1 - wt / .4) : 0); glow(dx, 73, 16, [255, 230, 170], pulse); drawItem(did, dx, 73, 9); hudDrink = [dx, 73]; }      // a drink to take, to the left of the hearts: tap it
   if (c.inv > 0) { ctx.beginPath(); ctx.arc(x, 73, 11, -Math.PI / 2, -Math.PI / 2 + TAU * c.inv / 5); ctx.strokeStyle = css([255, 214, 120], .95); ctx.lineWidth = 2.5; ctx.stroke(); }      // the drink's five seconds, running down
 }
-let hudCard = null, hudDrink = null;      // where the card sits on the fight's top bar, so a tap can play it
+let hudCard = null, hudDrink = null, hudDrinkWob = -1e9;      // where the card sits on the fight's top bar, so a tap can play it
 function drawScales(x, y, r, a = 1) {      // a little gold pair of scales: a post, a beam, two pans on strings
   const g = css([236, 200, 120], a), w = Math.max(1, r * .12); ctx.save(); ctx.strokeStyle = g; ctx.fillStyle = g; ctx.lineWidth = w; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(x, y - r * .75); ctx.lineTo(x, y + r * .7); ctx.moveTo(x - r * .4, y + r * .75); ctx.lineTo(x + r * .4, y + r * .75); ctx.moveTo(x - r * .8, y - r * .5); ctx.lineTo(x + r * .8, y - r * .5); ctx.stroke();
@@ -2003,7 +2003,7 @@ function playCard() {      // the Sailor card: a random foe reels, stars spinnin
 }
 function playDrink() {      // iced coffee mends half your hearts
   const c = church, id = save.equip.drink; if (!id || !have(id)) return;
-  if (id === 'coffee') { if (c.hp >= 6) return; c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }
+  if (id === 'coffee') { if (c.hp >= 6) { hudDrinkWob = performance.now(); return; } c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }      // already whole: the cup just trembles
   c.fx.push({ k: 'drink', id, x: c.p.x, y: c.p.y, t: 0, T: .9 }); useUp('drink');
 }
 function devMenu() {      // developer mode: a short list of tools, each opening a page of its own — jump to a round, or be given any item (it flies in as from a chest)
