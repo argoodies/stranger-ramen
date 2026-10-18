@@ -143,7 +143,7 @@ const STR = {
     churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）', devOn: '进入开发者模式。', devOff: '离开开发者模式。', devTitle: '开发者', devJump: '跳关', devItems: '获得物品', drySay: '怎么是拌面？',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '卡片', '饮品'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
-    takeCoffee: '可以带走。', takeBooze: '可以带走。', gotCard: '占卜师留下了一张牌。', items: { csail: ['醉酒牌', '战斗中点上方的牌：随机一个敌人头冒金星，眩晕十秒不动。用掉一张少一张。'], csnake: ['毒蛇牌', '战斗中点上方的牌：随机一个敌人眩晕五秒不动，每秒掉一滴血。用掉一张少一张。'], coffee: ['咖啡', '战斗中点上方的杯子：恢复一半生命。用掉一杯少一杯。'], booze: ['酒', '战斗中点上方的酒杯：五秒内不会受伤。用掉一杯少一杯。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
+    takeCoffee: '可以带走。', gotCard: '占卜师留下了一张牌。', items: { csail: ['醉酒牌', '战斗中点上方的牌：随机一个敌人头冒金星，眩晕十秒不动。用掉一张少一张。'], csnake: ['毒蛇牌', '战斗中点上方的牌：随机一个敌人眩晕五秒不动，每秒掉一滴血。用掉一张少一张。'], coffee: ['咖啡', '战斗中点上方的杯子：恢复一半生命。用掉一杯少一杯。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
     badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'], ring: ['贞洁之戒', '从教堂里救出了贞洁者。'] },
     welcome: '欢迎来玩三人染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
@@ -172,7 +172,7 @@ const STR = {
     churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）', devOn: '進入開發者模式。', devOff: '離開開發者模式。', devTitle: '開發者', devJump: '跳關', devItems: '獲得物品', drySay: '怎麼是拌麵？',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '卡片', '飲品'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
-    takeCoffee: '可以帶走。', takeBooze: '可以帶走。', gotCard: '占卜師留下了一張牌。', items: { csail: ['醉酒牌', '戰鬥中點上方的牌：隨機一個敵人頭冒金星，暈眩十秒不動。用掉一張少一張。'], csnake: ['毒蛇牌', '戰鬥中點上方的牌：隨機一個敵人暈眩五秒不動，每秒掉一滴血。用掉一張少一張。'], coffee: ['咖啡', '戰鬥中點上方的杯子：恢復一半生命。用掉一杯少一杯。'], booze: ['酒', '戰鬥中點上方的酒杯：五秒內不會受傷。用掉一杯少一杯。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
+    takeCoffee: '可以帶走。', gotCard: '占卜師留下了一張牌。', items: { csail: ['醉酒牌', '戰鬥中點上方的牌：隨機一個敵人頭冒金星，暈眩十秒不動。用掉一張少一張。'], csnake: ['毒蛇牌', '戰鬥中點上方的牌：隨機一個敵人暈眩五秒不動，每秒掉一滴血。用掉一張少一張。'], coffee: ['咖啡', '戰鬥中點上方的杯子：恢復一半生命。用掉一杯少一杯。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
     badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'], ring: ['貞潔之戒', '從教堂裡救出了貞潔者。'] },
     welcome: '歡迎來玩三人染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
@@ -201,7 +201,7 @@ const STR = {
     churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)', devOn: 'Developer mode on.', devOff: 'Developer mode off.', devTitle: 'Developer', devJump: 'Jump to round', devItems: 'Get an item', drySay: 'Dry noodles? Where is the soup?',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Card', 'Drink'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
-    takeCoffee: 'To take away.', takeBooze: 'To take away.', gotCard: 'The fortune teller left a card.', items: { csail: ['Drunk Card', 'Tap the card at the top in a fight: a random foe sees stars and stands dazed for ten seconds. One card is used each time.'], csnake: ['Snake Card', 'Tap the card at the top in a fight: a random foe stands dazed for five seconds and loses a drop of blood each second. One card is used each time.'], coffee: ['Iced Coffee', 'Tap the cup at the top in a fight: half your hearts come back. One cup is used each time.'], booze: ['A Drink', 'Tap the drink at the top in a fight: nothing can hurt you for five seconds. One is used each time.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
+    takeCoffee: 'To take away.', gotCard: 'The fortune teller left a card.', items: { csail: ['Drunk Card', 'Tap the card at the top in a fight: a random foe sees stars and stands dazed for ten seconds. One card is used each time.'], csnake: ['Snake Card', 'Tap the card at the top in a fight: a random foe stands dazed for five seconds and loses a drop of blood each second. One card is used each time.'], coffee: ['Iced Coffee', 'Tap the cup at the top in a fight: half your hearts come back. One cup is used each time.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
     badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'], ring: ['Ring of Chastity', 'Rescued the Virgin from the church.'] },
     welcome: 'Welcome to the three-player game.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
@@ -613,9 +613,10 @@ function leaveBar() { mode = 'world'; $('zoom').style.display = 'block'; player.
 function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
   if (hit('exit')) return barGo([0, 1], 'exit');
-  if (hit('take')) { const per = Math.floor(G.t / HALF), id = per % 2 ? 'booze' : 'coffee';      // the drink on the little table: yours to take, once each day and once each night
+  if (hit('take')) { const per = Math.floor(G.t / HALF), id = 'coffee';      // the iced coffee on the little table: yours to take, once each day
     bar.taken = per; save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.drink || !have(save.equip.drink)) save.equip.drink = id; saveNow();
-    bar.mySay = id === 'coffee' ? S().takeCoffee : S().takeBooze; bar.mySayT = 3; chime(84, 0, .1); chime(91, .1, .1); return; }
+    bar.mySay = S().takeCoffee; bar.mySayT = 3; chime(84, 0, .1); chime(91, .1, .1); return; }
+  if (hit('table')) { bar.wobTable = performance.now(); return; }      // the bare table rocks, silently
   if (hit('cat')) { const c = bar.cat; c.meowT = 1.6; c.sit = Math.max(c.sit, 2.5); sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); return; }      // stroking the cat: a meow
   for (const cp of bar.cups) if (hit('cup' + bar.cups.indexOf(cp))) { if (cp.full) { cp.full = false; chime(72, 0, .08); chime(67, .15, .06); } else cp.wob = performance.now(); return; }      // a full cup is drunk; an empty one just rattles, silently      // drunk up from wherever you stand: an empty cup is left on the counter
   if (hit('top')) { bar.wobTop = performance.now(); return; }
@@ -693,9 +694,9 @@ function drawBar(t) {
       for (const sg of [-1, 1]) { circ(hx + sg * k * .1 + f * k * .03, hy - k * .02, k * .045, [44, 34, 44]); circ(hx + sg * k * .1 + f * k * .03 + k * .015, hy - k * .035, k * .015, [255, 255, 255]); ell(hx + sg * k * .17 + f * k * .03, hy + k * .07, k * .05, k * .03, pink, .55); }      // eyes with a glint, rosy cheeks
       circ(hx + f * k * .03, hy + k * .05, k * .025, pink);      // a tiny nose
       BARHIT.cat = [q[0], q[1] - k * .4, s * .45]; c.at = [hx, hy]; } }); }
-  { const per = Math.floor(G.t / HALF), up = bar.taken !== per; BARHIT.take = null;      // a little round table by the door; on it, once a day and once a night, a coffee or a bottle to take away, the size of a glass on the counter
-    objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5, .5, .66, .36, .06, [176, 124, 90]);
-      if (up) { const id = per % 2 ? 'booze' : 'coffee', q = P(.5, .5, .72), r = s * .145, iy = q[1] - r * .7; glow(q[0], iy, s * .45, [255, 236, 170], .35 + .1 * Math.sin(t * 3)); drawItem(id, q[0], iy, r);
+  { const per = Math.floor(G.t / HALF), up = per % 2 === 0 && bar.taken !== per, jt = jig('wobTable', 0); BARHIT.take = null; { const tq = P(.5, .5, .5); BARHIT.table = [tq[0], tq[1], s * .5]; }      // a little round table by the door; on it, once each day, an iced coffee to take away, the size of a glass on the counter; bare, a tap just rocks it
+    objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46 + jt, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5 + jt, .5, .66, .36, .06, [176, 124, 90]);
+      if (up) { const id = 'coffee', q = P(.5 + jt, .5, .72), r = s * .145, iy = q[1] - r * .7; glow(q[0], iy, s * .45, [255, 236, 170], .35 + .1 * Math.sin(t * 3)); drawItem(id, q[0], iy, r);
         BARHIT.take = [q[0], iy, s * .6]; } } }); }
   // you
   objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
@@ -1700,7 +1701,7 @@ function mvBack(t, title) {
   return y;
 }
 // ---- the backpack: opened from the button that shows while you are on the church's island
-const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc', csail: 'card', csnake: 'card', coffee: 'drink', booze: 'drink' }, CARDS = ['csail', 'csnake'], DRINKS = ['coffee', 'booze'], LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
+const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc', csail: 'card', csnake: 'card', coffee: 'drink' }, CARDS = ['csail', 'csnake'], DRINKS = ['coffee'], LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
 save.cards = save.cards || {}; if (save.cards.stop || save.stop) save.cards.csail = (save.cards.csail || 0) + (save.cards.stop || 1);      // cards and drinks stack: save.cards[id] is how many you hold, the one on its plinth included (an old Time Stop card becomes a Sailor card; the playing cards are gone)
 for (const id of Object.keys(save.cards)) if (!ITEMS[id]) delete save.cards[id]; for (const k of ['card', 'drink']) if (save.equip[k] && !ITEMS[save.equip[k]]) save.equip[k] = null;
 const STACK = id => ITEMS[id] === 'card' || ITEMS[id] === 'drink', cardN = id => save.cards[id] || 0, rest = id => (STACK(id) ? cardN(id) : 1) - (save.equip[ITEMS[id]] === id ? 1 : 0);      // rest: how many of it lie loose in the backpack
@@ -1713,7 +1714,7 @@ function drawItem(id, x, y, r) {
     if (id === 'csail') { const b = [70, 120, 200]; ctx.fillStyle = css(b); rrect(-r * .3, -r * .32, r * .44, r * .66, r * .07); ctx.fill(); ctx.strokeStyle = css(b); ctx.lineWidth = Math.max(1.2, r * .1); ctx.beginPath(); ctx.arc(r * .14, r * .01, r * .17, -Math.PI / 2, Math.PI / 2); ctx.stroke(); }      // a plain solid blue mug
     else { const z = [[-.26, -.34], [.26, -.34], [-.26, .34], [.26, .34]].map(([a, b]) => [a * r, b * r]); ctx.strokeStyle = css([190, 50, 70]); ctx.lineWidth = Math.max(1.4, r * .14); ctx.beginPath(); ctx.moveTo(z[0][0], z[0][1]); ctx.arcTo(z[1][0], z[1][1], z[2][0], z[2][1], r * .12); ctx.arcTo(z[2][0], z[2][1], z[3][0], z[3][1], r * .12); ctx.lineTo(z[3][0], z[3][1]); ctx.stroke(); }      // a red Z, its two bends softly rounded
     ctx.restore(); return; }
-  if (id === 'coffee' || id === 'booze') {      // poured over ice in a clear convenience-store cup: iced coffee with a lid and a straw, or a clear spirit, open
+  if (id === 'coffee') {      // iced coffee in a clear convenience-store cup, with a lid and a straw
     const k = r, top = y - k * .62, bot = y + k * .7, edge = u => [[x - k * (.48 - .1 * u), top + (bot - top) * u], [x + k * (.48 - .1 * u), top + (bot - top) * u]], cof = id === 'coffee', lv = cof ? .3 : .38;
     const [l0, r0] = edge(0), [l1, r1] = edge(1), [ll, rl] = edge(lv); poly([l0, r0, r1, l1], [255, 255, 255], .2);
     poly([ll, rl, r1, l1], cof ? [120, 78, 52] : [214, 232, 246], cof ? .92 : .75);      // the drink
@@ -1999,10 +2000,9 @@ function playCard() {      // the Sailor card: a random foe reels, stars spinnin
   c.fx.push({ k: 'card', id, x: e.x, y: e.y, t: 0, T: .9 }); useUp('card');
   bell(snake ? 196 : 262, .14); sfx(snake ? 330 : 523, .5, .09, 'sine'); sfx(snake ? 220 : 392, .7, .07, 'sine', .15);
 }
-function playDrink() {      // coffee mends half your hearts; a bottle makes you untouchable for five seconds
+function playDrink() {      // iced coffee mends half your hearts
   const c = church, id = save.equip.drink; if (!id || !have(id)) return;
   if (id === 'coffee') { if (c.hp >= 6) return; c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }
-  else { c.inv = 5; bell(330, .14); sfx(660, .5, .08, 'triangle'); }
   c.fx.push({ k: 'drink', id, x: c.p.x, y: c.p.y, t: 0, T: .9 }); useUp('drink');
 }
 function devMenu() {      // developer mode: a short list of tools, each opening a page of its own — jump to a round, or be given any item (it flies in as from a chest)
