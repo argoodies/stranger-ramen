@@ -53,6 +53,8 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
     <button class="pill" id="bclose" style="display:none;padding:8px 11px;line-height:0" aria-label="close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <button class="pill" id="zoom" style="display:none;padding:8px 11px;line-height:0" aria-label="全景"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
     <button class="pill" id="bag" style="display:none;padding:8px 11px;line-height:0" aria-label="背包"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM9 9V6a3 3 0 0 1 6 0v3M9 14h6"/></svg></button>
+    <button class="pill" id="bspeed" style="display:none;padding:8px 11px;line-height:0" aria-label="speed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7l5 5-5 5M13 7l5 5-5 5"/></svg></button>
+    <button class="pill" id="bfreeze" style="display:none;padding:8px 11px;line-height:0" aria-label="frost"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12.0 3.0L12.0 21.0M10.1 4.6L12.0 6.6L13.9 4.6M10.1 19.4L12.0 17.4L13.9 19.4M19.8 7.5L4.2 16.5M17.4 6.7L16.7 9.3L19.3 10.0M4.7 14.0L7.3 14.7L6.6 17.3M19.8 16.5L4.2 7.5M19.3 14.0L16.7 14.7L17.4 17.3M6.6 6.7L7.3 9.3L4.7 10.0"/></svg></button>
   </div>
   <div style="display:flex;gap:8px;position:relative">
     <button class="pill" id="gear" style="display:none;padding:8px 11px;line-height:0" aria-label="debug"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
@@ -1681,12 +1683,12 @@ function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight:
 }
 const BUFFCOL = { speed: [255, 255, 255], freeze: [120, 180, 255] };
 function drawBuff(k, x, y, r) {      // a prophecy's mark: a round badge, white with swift chevrons (speed) or blue with a snowflake (frost)
-  const cl = BUFFCOL[k]; glow(x, y, r * 1.8, cl, .45); circ(x, y, r, [40, 34, 70], .85); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = css(cl, .95); ctx.lineWidth = Math.max(1.2, r * .12); ctx.stroke();
+  const cl = [255, 255, 255]; glow(x, y, r * 1.8, cl, .3); circ(x, y, r, [40, 34, 70], .85); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = css(cl, .95); ctx.lineWidth = Math.max(1.2, r * .12); ctx.stroke();
   ctx.save(); ctx.translate(x, y); ctx.strokeStyle = css(cl); ctx.lineWidth = Math.max(1.1, r * (k === 'speed' ? .14 : .1)); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
   if (k === 'speed') for (const dx of [-.12, .14]) { ctx.moveTo((dx - .12) * r, -.28 * r); ctx.lineTo((dx + .12) * r, 0); ctx.lineTo((dx - .12) * r, .28 * r); }      // two chevrons, centred well inside the ring
   else for (let i = 0; i < 3; i++) { const g = i * Math.PI / 3, cx = Math.cos(g) * r * .5, cy = Math.sin(g) * r * .5; ctx.moveTo(-cx, -cy); ctx.lineTo(cx, cy); for (const sg of [-1, 1]) { const ex = sg * cx * .78, ey = sg * cy * .78, nx = -Math.sin(g) * r * .1, ny = Math.cos(g) * r * .1; ctx.moveTo(ex + nx, ey + ny); ctx.lineTo(sg * cx * .58, sg * cy * .58); ctx.lineTo(ex - nx, ey - ny); } }      // a snowflake: three strokes, each end with a small fork
   ctx.stroke(); ctx.restore(); }
-let buffHits = [], hudDrink = null, hudDrinkWob = -1e9;      // where the card sits on the fight's top bar, so a tap can play it
+let hudDrink = null, hudDrinkWob = -1e9;      // where the card sits on the fight's top bar, so a tap can play it
 function drawScales(x, y, r, a = 1) {      // a little gold pair of scales: a post, a beam, two pans on strings
   const g = css([236, 200, 120], a), w = Math.max(1, r * .12); ctx.save(); ctx.strokeStyle = g; ctx.fillStyle = g; ctx.lineWidth = w; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(x, y - r * .75); ctx.lineTo(x, y + r * .7); ctx.moveTo(x - r * .4, y + r * .75); ctx.lineTo(x + r * .4, y + r * .75); ctx.moveTo(x - r * .8, y - r * .5); ctx.lineTo(x + r * .8, y - r * .5); ctx.stroke();
@@ -2037,7 +2039,6 @@ function debugAsk(msg, val, done) {      // a small input box over the game (win
 function churchTap(sx, sy) {
   const c = church, p = c.p, v = chv, K = v.s * .8; if (c.down > 0) return;
   if (c.fight && hudDrink && Math.hypot(sx - hudDrink[0], sy - hudDrink[1]) < 22) { playDrink(); return; }
-  { const h = buffHits.find(h => Math.hypot(sx - h[0], sy - h[1]) < 18); if (h) { churchBanner(S().buffSay[h[2]], 3); chime(81, 0, .08, .7); return; } }
   p.pend = null;
   let best = null, bd = K * 1.05;
   for (const e of c.foes) if (e.hp > 0 && !(e.app > 0)) { const q = v.P(e.x, e.y), d = Math.hypot(sx - q[0], sy - (q[1] - K * .6)); if (d < bd) { bd = d; best = e; } }
@@ -2215,7 +2216,6 @@ function drawChurch(t, dt) {
   // hearts, and the chef's own remarks
   if (c.freeze > 0) { ctx.fillStyle = css([150, 180, 255], .1 + .04 * Math.sin(performance.now() / 200)); ctx.fillRect(0, 0, W, H); }      // time stands still: a cold hush over everything
   if (c.fight) drawHud(c.hp, c.ringUsed, c.bonus ? 7 : 6);      // only while there is a fight on
-  buffHits = []; if ($('bag').style.display === 'block') BUFFS.filter(buffOn).forEach((k, i) => { const x = 30 + i * 34; drawBuff(k, x, 112, 12); buffHits.push([x, 112, k]); });      // the prophecies you carry, top left, shown whenever the backpack is to hand (not in a fight); a tap says what each one does
   for (const a of c.foes) if (a.kind === 'adv' && a.hp > 0 && a.sayT > 0) { const q = P(a.x, a.y); sayBubble(q[0], q[1] - K * 2.75, a.say, clamp(s * .34, 12.5, 15), clamp(a.sayT * 3), Math.min(W * .7, 260)); }      // the Advocate gloats
   if (c.bannerT > 0) { const q = P(p.x, p.y); sayBubble(q[0], q[1] - K * 1.55, c.banner, clamp(s * .34, 12.5, 15), clamp(c.bannerT * 3), Math.min(W * .7, 260)); }      // what the chef has to say about it
   TK = 0;
@@ -2250,7 +2250,7 @@ function frame(now) {
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5), lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
   { const can = mode === 'church' && !church.fight && church.down <= 0, set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };
-    if (!can) bag.open = false; set('bag', can && !bag.open, 'block');      // the backpack is at hand inside the church whenever there is no fight on
+    if (!can) bag.open = false; set('bag', can && !bag.open, 'block'); for (const k of BUFFS) set(k === 'speed' ? 'bspeed' : 'bfreeze', can && !bag.open && buffOn(k), 'block');      // each prophecy as a white mark beside the backpack button      // the backpack is at hand inside the church whenever there is no fight on
     set('gear', mode === 'church' && !!save.dev && !church.fight && !bag.open && church.down <= 0, 'block');      // developer mode: a gear for choosing the round
     set('bclose', bag.open, 'block'); if (mode === 'world') set('zoom', !bag.open, 'block'); }      // with the backpack open the only button is a cross, and all it does is close the backpack
   musicTick();
@@ -2270,6 +2270,7 @@ cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
 $('bag').addEventListener('click', () => { bag.open = !bag.open; bag.sel = null; chime(bag.open ? 74 : 62, 0, .12, .8); });
+for (const k of ['speed', 'freeze']) $(k === 'speed' ? 'bspeed' : 'bfreeze').addEventListener('click', () => { if (mode === 'church') { churchBanner(S().buffSay[k], 3); chime(81, 0, .08, .7); } });      // a tap says what the prophecy does
 $('bclose').addEventListener('click', () => { bag.open = false; bag.drag = null; chime(62, 0, .1, .8); });
 $('bback').addEventListener('click', () => { if (stall.board) closeBoard(); });
 cv.addEventListener('pointermove', e => { if (mode === 'stall' && stall.board) boardMove(e.clientX, e.clientY); else if (bag.open) bagMove(e.clientX, e.clientY); });
