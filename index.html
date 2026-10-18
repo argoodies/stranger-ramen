@@ -1677,7 +1677,7 @@ function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight:
   const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && ringUsed) ctx.globalAlpha = .3; drawItem(id, x, 73, id === 'ring' ? 9.5 : 8); ctx.restore(); x += 26; }
   const c = church; hudCard = hudDrink = null; const pulse = .5 + .2 * Math.sin(performance.now() / 300);
   const cid = save.equip.card; if (cid && have(cid)) { glow(x, 73, 16, cid === 'csail' ? [255, 220, 120] : [255, 150, 160], pulse); drawItem(cid, x, 73, 9); hudCard = [x, 73]; x += 26; }      // a card to play: tap it
-  const did = save.equip.drink; if (did && have(did)) { glow(x, 73, 16, [255, 230, 170], pulse); drawItem(did, x, 73, 9); hudDrink = [x, 73]; x += 26; }      // a drink to take: tap it
+  const did = save.equip.drink; if (did && have(did)) { const dx = W / 2 - ((max - 1) / 2 + 1) * 22 - 4; glow(dx, 73, 16, [255, 230, 170], pulse); drawItem(did, dx, 73, 9); hudDrink = [dx, 73]; }      // a drink to take, to the left of the hearts: tap it
   if (c.inv > 0) { ctx.beginPath(); ctx.arc(x, 73, 11, -Math.PI / 2, -Math.PI / 2 + TAU * c.inv / 5); ctx.strokeStyle = css([255, 214, 120], .95); ctx.lineWidth = 2.5; ctx.stroke(); }      // the drink's five seconds, running down
 }
 let hudCard = null, hudDrink = null;      // where the card sits on the fight's top bar, so a tap can play it
