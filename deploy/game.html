@@ -890,7 +890,7 @@ function serve(i) {
 // whole steps in one go, for the automated checks: act('soup') = pick the ladle up + pour it in, act('serve', i) = lift the bowl + hand it over
 function act(a, seat) {
   const s = stall;
-  if (a === 'boil') { if (s.pot !== 'empty' || s.hold) return false; if (s.done) { s.done = false; s.sinceSelf = 0; s.spawn = 1.2; }      // noodles on again after your own bowl: a new round, three more customers
+  if (a === 'boil') { if (s.pot !== 'empty' || s.hold) return false; if (s.done) { s.done = false; s.oracle = false; s.sinceSelf = 0; s.spawn = 1.2; }      // noodles on again after your own bowl: a new round, three more customers
     s.pot = 'cooking'; s.potT = 0; goTo('boil'); chime(NOTE.boil, 0, .2, 1.4); return true; }
   if (a === 'scoop') return grab('noodle');
   if (a === 'put') return s.hold === 'noodle' && intoBowl();
@@ -948,6 +948,7 @@ const SHOP_DOOR = [1.8, 3.95];
 // tap an object in the shop
 const HIT = {};
 function stallTap(x, y) {
+  if (stall.oracle && stall.oracleAt && Math.hypot(x - stall.oracleAt[0], y - stall.oracleAt[1]) < 30) { const id = stall.oracle; save.buffs[id] = true; saveNow(); stall.oracle = false; stall.ownSay = S().gotProphecy; stall.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); return; }      // the prophecy mark: yours for the tapping
   let best = null, bd = 1e9;
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
   if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
@@ -981,7 +982,7 @@ function dump() {
 }
 function enterStall() {
   mode = 'stall'; $('leave').style.display = 'block'; $('zoom').style.display = 'none'; $('enter').style.display = 'none';
-  setHold(null); $('bback').style.display = 'none'; stall.pend = null; stall.board = false; stall.drag = null; stall.tip = null; stall.glowOn = false; stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.fresh = save.badgeNew.length > 0; stall.toldWalk = false; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
+  setHold(null); $('bback').style.display = 'none'; stall.pend = null; stall.board = false; stall.drag = null; stall.tip = null; stall.glowOn = false; stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.fresh = save.badgeNew.length > 0; stall.toldWalk = false; stall.oracle = false; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
 }
 function leaveStall() {
   $('leave').classList.remove('hint');
@@ -1003,12 +1004,12 @@ function updateStall(dt) {
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
-  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }
+  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (Math.random() < .3) s.oracle = pick(BUFFS); else if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }      // your own bowl finished: three times in ten, nothing is said and a prophecy mark appears where the bowl stood
   s.seats.forEach((c, i) => {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
     else if (c.state === 'wait') { c.wait += dt; if (c.wait > waitMax()) { c.state = 'leave'; c.t = 0; c.say = S().later; refreshUI(); } }
-    else if (c.state === 'eat' && c.t > 4.2) { c.state = 'leave'; c.t = 0; if (c.look.kind === 'ft' && c.ok && Math.random() < .3) { { const id = pick(BUFFS); save.buffs[id] = true; saveNow(); s.ownSay = S().gotProphecy; s.ownSayT = 3.5; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } }      // a fortune teller who liked the bowl sometimes leaves a prophecy, carried into the church until you fall or walk out: Time Stop, or a plain playing card
+    else if (c.state === 'eat' && c.t > 4.2) { c.state = 'leave'; c.t = 0; }
     else if (c.state === 'leave' && c.t > 1.0) { s.seats[i] = null; }
   });
   s.fx = s.fx.filter(f => (f.t += dt) < 1.4); s.fly = s.fly.filter(f => (f.t += dt * 2.6) < 1);
@@ -1080,6 +1081,7 @@ function drawStall(t) {
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], .3, 1.02, .33, c.dish); if (c.dish.soup) steam(SEATX[i], .3, 1.12, i); } });
   hit('bar', 4.5, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done) { const p = P(4.5, .3, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
+  if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(4.5, .3, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, a warm yellow ring of light below
   if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl; iso_bowl(v, 4.5, .3, 1.02, .33, mb); if (mb.soup) steam(4.5, .3, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
@@ -1683,7 +1685,7 @@ function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight:
 }
 const BUFFCOL = { speed: [255, 255, 255], freeze: [120, 180, 255] };
 function drawBuff(k, x, y, r) {      // a prophecy's mark: a round badge, white with swift chevrons (speed) or blue with a snowflake (frost)
-  const cl = [255, 255, 255]; glow(x, y, r * 1.8, cl, .3); circ(x, y, r, [40, 34, 70], .85); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = css(cl, .95); ctx.lineWidth = Math.max(1.2, r * .12); ctx.stroke();
+  const cl = [255, 255, 255]; glow(x, y, r * 1.8, cl, .3); ctx.save(); ctx.setLineDash([Math.max(2, r * .32), Math.max(1.5, r * .22)]); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = css(cl, .95); ctx.lineWidth = Math.max(1.2, r * .12); ctx.stroke(); ctx.restore();      // a dashed ring on a clear ground, like the prophecy buttons in the church
   ctx.save(); ctx.translate(x, y); ctx.strokeStyle = css(cl); ctx.lineWidth = Math.max(1.1, r * (k === 'speed' ? .14 : .1)); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
   if (k === 'speed') for (const dx of [-.12, .14]) { ctx.moveTo((dx - .12) * r, -.28 * r); ctx.lineTo((dx + .12) * r, 0); ctx.lineTo((dx - .12) * r, .28 * r); }      // two chevrons, centred well inside the ring
   else for (let i = 0; i < 3; i++) { const g = i * Math.PI / 3, cx = Math.cos(g) * r * .5, cy = Math.sin(g) * r * .5; ctx.moveTo(-cx, -cy); ctx.lineTo(cx, cy); for (const sg of [-1, 1]) { const ex = sg * cx * .78, ey = sg * cy * .78, nx = -Math.sin(g) * r * .1, ny = Math.cos(g) * r * .1; ctx.moveTo(ex + nx, ey + ny); ctx.lineTo(sg * cx * .58, sg * cy * .58); ctx.lineTo(ex - nx, ey - ny); } }      // a snowflake: three strokes, each end with a small fork
