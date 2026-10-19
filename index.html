@@ -468,7 +468,7 @@ const blocked = new Set();
 const key = (i, j) => i + ',' + j;
 for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) blocked.add(key(i, j));
 [[2, -1], [2, 0], [2, -5], [3, -5], [2, -4], [3, -4], [-5, 1], [-4, 1], [-5, 2], [-4, 2]].forEach(c => blocked.add(key(c[0], c[1])));
-const TREES = [[-5, -5], [-3, -4], [4, 2], [3, 4], [-1, 4], [-5, 4]];
+const TREES = [[-5, -5], [-3, -4], [4, -4], [3, 4], [-1, 4], [-5, 4]];      // the one that stood by the coffee house now stands beside the library
 const CDOOR = [7, 0], BDOOR = [5, 3], CDX = -2.5, CDY = -1, CDZ = -2.0;
 const wx = (x, y) => x <= 5 || y > 1.2 ? x : x < 7 ? 5 + (x - 5) * .75 : x - .5, wxi = (x, y) => x <= 5 || y > 1.2 ? x : x < 6.5 ? 5 + (x - 5) / .75 : x + .5;      // the church's two cells out from the island are drawn half a cell closer: the walk over the stones is squeezed to a cell and a half, and the church's ground is drawn half a cell back (wxi undoes it, for taps)      // CDZ: the church's ground lies a storey below the town, reached by steps
 const wz = (x, y) => x >= 7 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.4 * (1 + Math.min(3, Math.floor((x - 5) * 2))) : 0;      // four stepping stones over two cells, each .4 below the last      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
