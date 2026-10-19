@@ -1982,8 +1982,8 @@ function updateChurch(dt) {
     } else { e.cd -= dt; if (d < 2.3) step(-dx / d, -dy / d, 1.25); else wander(); if (e.cd <= 0 && d < 7.5) e.wind = .7; }
     e.x = clamp(e.x, Z[0], Z[1]); e.y = clamp(e.y, CY0, CY1); churchBump(e);
   }
-  for (const e of c.foes) if (e.suck && e.hp > 0 && !(e.app > 0) && !(e.stun > 0) && c.down <= 0) {      // the drawing whirlwind: anyone within reach is pulled in at the pace you walk, so walking straight away gets you nowhere
-    const pull = (o, z0, z1) => { const dx = e.x - o.x, dy = e.y - o.y, d = Math.hypot(dx, dy); if (d < SUCKR && d > .35) { const st = Math.min(d - .35, 3.9 * dt); o.x = clamp(o.x + dx / d * st, z0, z1); o.y = clamp(o.y + dy / d * st, CY0, CY1); } };
+  for (const e of c.foes) if (e.suck && e.hp > 0 && !(e.app > 0) && !(e.stun > 0) && c.down <= 0) {      // the drawing whirlwind: anyone within reach is pulled in at four fifths of your walking pace, so walking straight away barely gets you anywhere
+    const pull = (o, z0, z1) => { const dx = e.x - o.x, dy = e.y - o.y, d = Math.hypot(dx, dy); if (d < SUCKR && d > .35) { const st = Math.min(d - .35, 3.9 * .8 * dt); o.x = clamp(o.x + dx / d * st, z0, z1); o.y = clamp(o.y + dy / d * st, CY0, CY1); } };
     pull(p, churchXmin(), churchXmax()); for (const f of c.foes) if (f !== e && f.hp > 0 && !(f.app > 0)) { const Z = zoneOf(f.wave); pull(f, Z[0], Z[1]); } }
   for (const [e, [x0, y0]] of pre) { e.frz -= dt; e.x = x0 + (e.x - x0) * .1; e.y = y0 + (e.y - y0) * .1; }      // the Prophecy of Frost: a frozen foe still does everything it would, but moves at a tenth of its pace
   c.foes = c.foes.filter(e => e.hp > 0 || e.dead > 0);
