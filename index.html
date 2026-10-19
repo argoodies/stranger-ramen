@@ -673,7 +673,7 @@ function drawBar(t) {
     alpha(clamp(1 - nn * 2), () => server(tn([46, 42, 54]), tn([86, 150, 110])));      // the barista, all in black, a green apron
     BARHIT.keeper = [q[0], q[1] - K * .8, K * .7]; bar.keeperAt = q; } });
   // the other customer, standing at the counter
-  objs.push({ k: 2.7 + bar.whoAt + .5, d: () => { const q = P(2.7, bar.whoAt + .5), wk = bar.who, look = wk === 'sailor' ? { kind: 'plain', body: tn([236, 240, 250]), head: tn(SKIN) } : { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
+  if (!storyHook) objs.push({ k: 2.7 + bar.whoAt + .5, d: () => { const q = P(2.7, bar.whoAt + .5), wk = bar.who, look = wk === 'sailor' ? { kind: 'plain', body: tn([236, 240, 250]), head: tn(SKIN) } : { kind: 'drunk', body: tn([226, 212, 186]), hat: tn([44, 40, 56]), head: tn([246, 196, 186]) };
     fig(q[0], q[1], K, look);
     if (wk === 'sailor') { const hx = q[0], hy = q[1] - K * 1.01, hr = K * .17, hc = tn([150, 206, 240]);
       const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind, even on both sides
@@ -701,10 +701,12 @@ function drawBar(t) {
     objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46 + jt, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5 + jt, .5, .66, .36, .06, [176, 124, 90]);
     } }); }
   // you
-  objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
+  if (storyHook) storyHook(v, objs, K, t, 'bar');      // the story's people, when the coffee house is the stage
+  if (!storyHook) objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
     fig(q[0], q[1] - hop, K, { kind: 'chef', apron: tn([220, 80, 80]), body: tn(WHITE), head: tn(SKIN) }); bar.at = q; } });
   if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
+  if (storyAfter) storyAfter(v, K, t, 'bar');
   const fs = clamp(s * .3, 12.5, 15), mw = Math.min(W * .62, 250);
   if (bar.keepSayT > 0 && bar.keeperAt) sayBubble(bar.keeperAt[0], bar.keeperAt[1] - K * 1.75, bar.keepSay, fs, clamp(bar.keepSayT * 2), mw);
   if (bar.mySayT > 0 && bar.at) sayBubble(bar.at[0], bar.at[1] - K * 1.75, bar.mySay, fs, clamp(bar.mySayT * 2), mw);
@@ -1051,7 +1053,7 @@ function drawStall(t) {
     if (c.state === 'arrive') { off = (1 - eout(c.t / .8)) * 2.4; a = clamp(c.t / .4); }
     if (c.state === 'leave') { off = -ease(c.t / 1.0) * 2.4; a = 1 - clamp(c.t / 1.0); }
     const p = P(SEATX[i] + CUSTY * .5 + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
-    fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
+    if (c.story) { storySeatPos[c.story] = [p[0], p[1] - bob]; (c.story === 'he' ? storyHe : storyShe)(p[0], p[1] - bob, K); } else fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
   // floor + walls
@@ -1879,15 +1881,15 @@ function storyLying(x, y, K, body = [226, 234, 252], veil = [156, 186, 240]) { e
 const CROWD = [[150, 140, 170], [170, 150, 140], [140, 160, 150], [160, 150, 170]];
 // Each scene: where (the town or the church), how long, night (town) or light (church), where the camera looks, who stands where (moving with u, 0..1 through the scene), and who says what when.
 const STORY = [
-  { at: 'town', d: 6, n: 0, cam: [-4, 3.4], cast: u => [{ who: 'he', x: -4.4, y: 3.7, bowl: 1 }, { who: 'she', x: -3.6, y: 3.6, bowl: 1 }], lines: [['she', 0, .5], ['he', .5, 1]] },      // ramen together
-  { at: 'town', d: 6, n: 0, cam: [4, 3], cast: u => [{ who: 'he', x: 4.2, y: 3.6, cup: 1 }, { who: 'she', x: 4.4, y: 2.7, cup: 1 }], lines: [['he', 0, .5], ['she', .5, 1]] },      // coffee together
+  { at: 'stall', d: 6, cast: u => [], lines: [['she', 0, .5], ['he', .5, 1]] },      // ramen together, at the counter of the ramen shop
+  { at: 'bar', d: 6, cast: u => [{ who: 'he', x: 2.3, y: 1.5 }, { who: 'she', x: 2.3, y: 2.5 }], lines: [['he', 0, .5], ['she', .5, 1]] },      // coffee together, at the coffee house counter
   { at: 'town', d: 7, n: 0, cam: [1, 2.6], cast: u => [{ who: 'he', x: .4, y: 2.8 }, { who: 'she', x: 1, y: 3.4 }, { who: 'flower', x: 1.8, y: 2.3 }], lines: [['flower', 0, .33], ['he', .33, .66], ['she', .7, 1]], flower: 1 },      // flowers from the flower girl
-  { at: 'town', d: 6, n: 0, cam: [.3, 1.6], cast: u => [{ who: 'he', x: 0, y: 1.7 }, { who: 'she', x: .7, y: 1.9 }], lines: [['she', .1, .5], ['he', .5, .95]], birds: 1 },      // he calls the wind, and the birds come
+  { at: 'town', d: 6, n: 0, cam: [-2.4, 4.1], cast: u => [{ who: 'he', x: -2.7, y: 4.4 }, { who: 'she', x: -2.0, y: 4.6 }], lines: [['she', .1, .5], ['he', .5, .95]], birds: 1 },      // among the trees at the bottom corner of the town he calls the wind, and the birds come
   { at: 'town', d: 8.5, n: .15, cam: [4.6, .8], cast: u => [{ who: 'he', x: 4.1, y: .7 }, { who: 'she', x: lerp(4.7, 7.5, ease(clamp((u - .78) / .22))), y: .5 }], lines: [['she', 0, .3], ['she', .3, .58], ['he', .58, .85]] },      // she goes to sing in the church
   { at: 'church', d: 6, lit: 1, cam: [5, CW / 2], cast: u => [{ who: 'she', x: 3, y: CW / 2 }, { who: 'c0', x: 6, y: CW / 2 - 1.4 }, { who: 'c1', x: 6.6, y: CW / 2 + 1.2 }, { who: 'c2', x: 7.2, y: CW / 2 - .2 }, { who: 'c3', x: 7.6, y: CW / 2 + 2 }], lines: [['c1', .55, .95]], notes: 1 },      // she sings; the town listens
   { at: 'church', d: 7, lit: 1, cam: [5, CW / 2], cast: u => [{ who: 'she', x: 3, y: CW / 2 }, { who: 'c0', x: 6, y: CW / 2 - 1.4 }, { who: 'c1', x: 6.6, y: CW / 2 + 1.2 }, { who: 'c2', x: 7.2, y: CW / 2 - .2 }, { who: 'c3', x: 7.6, y: CW / 2 + 2 }, { who: 'inv', x: 5.2, y: CW / 2 + .6, arm: ease(clamp(u / .2)) }], lines: [['inv', 0, .38], ['c2', .38, .6], ['she', .6, 1]] },      // the accusation
   { at: 'church', d: 5, lit: 1, cam: [4.5, CW / 2], cast: u => [{ who: 'she', x: 3, y: CW / 2 }, { who: 'c0', x: 6, y: CW / 2 - 1.4 }, { who: 'c1', x: 6.6, y: CW / 2 + 1.2 }, { who: 'c2', x: 7.2, y: CW / 2 - .2 }, { who: 'c3', x: 7.6, y: CW / 2 + 2 }, { who: 'inv', x: lerp(5.2, 3.8, ease(clamp(u / .4))), y: CW / 2 + .4, blade: ease(clamp((u - .3) / .4)) }], lines: [['inv', .1, .9]], red: 1 },      // he means to put her to death before the cross
-  { at: 'town', d: 5.5, n: .3, cam: [1.2, 2], cast: u => [{ who: 'he', x: .6, y: 1.7 }, { who: 'flower', x: lerp(3.4, 1.5, ease(clamp(u / .4))), y: lerp(3.6, 2, ease(clamp(u / .4))), run: u < .4 }], lines: [['flower', .35, .7], ['he', .7, 1]], birds: .5 },      // the flower girl comes running
+  { at: 'town', d: 5.5, n: .3, cam: [-2, 4], cast: u => [{ who: 'he', x: -2.7, y: 4.4 }, { who: 'flower', x: lerp(.6, -1.9, ease(clamp(u / .4))), y: lerp(3.5, 4.3, ease(clamp(u / .4))), run: u < .4 }], lines: [['flower', .35, .7], ['he', .7, 1]], birds: .5 },      // the flower girl comes running to him among the trees
   { at: 'town', d: 6, n: .35, cam: [5.6, .8], cast: u => [{ who: 'he', x: 5.5, y: .5, storm: ease(u) }], lines: [['he', .45, .95]], storm: 1 },      // at the foot of the church steps he raises the whirlwind
   { at: 'church', d: 5.5, lit: 1, cam: [5.2, CW / 2], cast: u => { const w = ease(clamp((u - .1) / .4)); return [{ who: 'she', x: 3, y: CW / 2 }, { who: 'c0', x: 6, y: lerp(CW / 2 - 1.4, CY0, w) }, { who: 'c1', x: 6.6, y: lerp(CW / 2 + 1.2, CY1, w) }, { who: 'c2', x: 7.2, y: lerp(CW / 2 - .2, CY0 + .2, w) }, { who: 'c3', x: 7.6, y: lerp(CW / 2 + 2, CY1, w) }, { who: 'inv', x: lerp(3.8, 4.4, w), y: lerp(CW / 2 + .4, CY1 - .3, w) }]; }, lines: [['c1', .25, .6], ['inv', .6, .98]], gust: 1 },      // the windows burst open; the wind throws everyone to the walls
   { at: 'church', d: 5.5, lit: 1, cam: [6, CW / 2], cast: u => { const r = ease(clamp((u - .45) / .5)); return [{ who: 'she', x: 3, y: CW / 2 }, { who: 'he', x: lerp(CX1, 6.2, ease(clamp(u / .35))), y: CW / 2 + .3 }, { who: 'inv', x: 4.4, y: CY1 - .3, lying: u > .35, fade: clamp(1 - (u - .5) / .4) }, { who: 'c0', x: lerp(6, CX1 - .6, r), y: lerp(CY0, CW / 2 - .8, r) }, { who: 'c1', x: lerp(6.6, CX1 - .4, r), y: lerp(CY1, CW / 2 + 1, r) }, { who: 'c2', x: lerp(7.2, CX1 - .9, r), y: lerp(CY0 + .2, CW / 2 - .2, r) }, { who: 'c3', x: lerp(7.6, CX1 - .7, r), y: lerp(CY1, CW / 2 + .4, r) }]; }, lines: [['c0', .5, .95]] },      // he kills the investigator; everyone runs
@@ -1895,7 +1897,7 @@ const STORY = [
   { at: 'church', d: 7.5, lit: .22, cam: [3.6, CW / 2], cast: u => [{ who: 'she', x: 3, y: CW / 2, lying: 1, fade: clamp(1 - (u - .7) / .3) }, { who: 'he', x: 3.7, y: CW / 2 + .5, kneel: 1 }], lines: [['she', .1, .5], ['he', .5, .9]] },      // she is too weak; she dies
   { at: 'town', d: 7, n: 1, cam: [6.5, 0], cast: u => [], lines: [], lock: 1 },      // he locks the church away for ever
 ];
-let storyHook = null, storyAfter = null;
+let storyHook = null, storyAfter = null, storySeatPos = {};
 function storyCast(sc, u, t, v, objs, K, at) {      // put the people of this scene into the town's or the church's own list of things to draw
   const pos = (x, y) => at === 'town' ? v.P(wx(x, y), y, wz(x, y)) : v.P(x, y), L = S().story, out = [];
   for (const a of sc.cast(u)) { const q = pos(a.x, a.y), hop = a.run ? Math.abs(Math.sin(t * 14)) * K * .1 : a.bump ? Math.abs(Math.sin(t * 9 + a.x)) * K * .06 : 0, y = q[1] - hop; a.q = [q[0], y]; out.push(a);
@@ -1912,7 +1914,7 @@ function storyCast(sc, u, t, v, objs, K, at) {      // put the people of this sc
 }
 function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the air: birds, notes, the whirlwind, the gusts; then who is speaking
   const P = at === 'town' ? (x, y, z = 0) => v.P(wx(x, y), y, wz(x, y) + z) : v.P.bind(v), L = S().story, fs = clamp(W * .036, 12.5, 15), find = w => cast.find(a => a.who === w);
-  if (sc.birds) { const he = find('he'), n = Math.round(4 + 10 * sc.birds * ease(u)); if (he) for (let k = 0; k < n; k++) { const g = t * .9 + k * TAU / n, r = K * (1.3 + .5 * (k % 3)); storyBird(he.q[0] + K * .3 + Math.cos(g) * r, he.q[1] - K * 1.5 + Math.sin(g) * r * .4 - (k % 4) * K * .14, K * .12, t * 9 + k); } }
+  if (sc.birds) { const he = find('he'), n = Math.round(4 + 10 * sc.birds * ease(u)); if (he) for (let k = 0; k < n; k++) { const g = t * .9 + k * TAU / n, r = K * (1.5 + .6 * (k % 3)); storyBird(he.q[0] + K * .3 + Math.cos(g) * r, he.q[1] - K * 1.7 + Math.sin(g) * r * .45 - (k % 4) * K * .18, K * .22, t * 9 + k); } }
   if (sc.flower) { const sh = find('she'), fl = find('flower'), w = ease(clamp((u - .4) / .3)); if (sh && fl) drawItem('flower', lerp(fl.q[0] + K * .34, sh.q[0] + K * .25, w), lerp(fl.q[1] - K * .4, sh.q[1] - K * .55, w) - Math.sin(Math.PI * w) * K * .6, K * .22); }
   if (sc.notes) { const sh = find('she'); for (let k = 0; k < 5; k++) { const ph = (t * .35 + k / 5) % 1; ctx.font = `300 ${Math.round(K * .4)}px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([255, 236, 190], (1 - ph) * .9); ctx.fillText(k % 2 ? '♪' : '♫', sh.q[0] + Math.sin(t + k * 1.7) * K * .7, sh.q[1] - K * (1.4 + ph * 2.2)); } }
   if (sc.red) { ctx.fillStyle = css([160, 20, 40], .1 + .07 * Math.sin(t * 6)); ctx.fillRect(0, 0, W, H); }
@@ -1928,7 +1930,10 @@ function drawStory(t) {      // one scene, in the town or the church as they wer
   if (i < 0) { c.storyIn = true; drawChurch(t, 0); c.storyIn = false; ctx.fillStyle = css([6, 4, 16], clamp(st.t / 1.6)); ctx.fillRect(0, 0, W, H); return; }      // first the church goes dark
   const sc = STORY[i], u = clamp(st.t / sc.d), sa = clamp(Math.min(st.t / .8, (sc.d - st.t) / .8));
   let cast = []; storyHook = (v, objs, K, tt, at) => { cast = storyCast(sc, u, tt, v, objs, K, at); }; storyAfter = (v, K, tt, at) => storyEffects(sc, u, tt, v, K, at, cast);
-  if (sc.at === 'town') { const keep = [player.x, player.y, zoomOut, zoomTarget, camX, camY, G.n, hideChef], crowd = npcs.splice(0); player.x = sc.cam[0]; player.y = sc.cam[1]; zoomOut = zoomTarget = 0; hideChef = false; G.n = sc.n; drawWorld(t, 1);
+  if (sc.at === 'stall') { const keep = [stall.seats, stall.owner.x, stall.owner.y, G.n]; stall.seats = [null, { story: 'he', look: {}, state: 'eat', t: st.t, dish: { noodle: true, soup: true, beef: true } }, { story: 'she', look: {}, state: 'eat', t: st.t + .7, dish: { noodle: true, soup: true, cilantro: true } }]; stall.owner.x = stall.owner.y = -99; G.n = 0; storyHook = null; drawStall(t);      // the two of them at the counter of the ramen shop, two bowls steaming
+    [stall.seats, stall.owner.x, stall.owner.y, G.n] = keep; const fs = clamp(W * .036, 12.5, 15); sc.lines.forEach(([who, a, b], j) => { const q = storySeatPos[who], txt = S().story[i][j]; if (q && txt && u >= a && u <= b) sayBubble(q[0], q[1] - W * .2, txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); }); }
+  else if (sc.at === 'bar') { const keep = [bar.cups, G.n]; bar.cups = [{ y: 1.5, night: false, full: true, slide: 1, from: 1.5 }, { y: 2.5, night: false, full: true, slide: 1, from: 2.5 }]; G.n = 0; drawBar(t); [bar.cups, G.n] = keep; }      // the two of them at the coffee house counter, two coffees steaming
+  else if (sc.at === 'town') { const keep = [player.x, player.y, zoomOut, zoomTarget, camX, camY, G.n, hideChef], crowd = npcs.splice(0); player.x = sc.cam[0]; player.y = sc.cam[1]; zoomOut = zoomTarget = 0; hideChef = false; G.n = sc.n; drawWorld(t, 1);
     [player.x, player.y, zoomOut, zoomTarget, camX, camY, G.n, hideChef] = keep; npcs.push(...crowd); }
   else { const p = c.p, keep = [p.x, p.y, c.lit, c.cam && c.cam.slice()]; p.x = sc.cam[0] + 1.4; p.y = sc.cam[1]; c.lit = typeof sc.lit === 'function' ? sc.lit(u) : sc.lit; c.cam = null; c.storyIn = true; drawChurch(t, 1); c.storyIn = false; [p.x, p.y, c.lit] = keep; c.cam = keep[3]; }
   storyHook = storyAfter = null;
