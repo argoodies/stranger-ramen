@@ -948,7 +948,7 @@ const SHOP_DOOR = [1.8, 3.95];
 // tap an object in the shop
 const HIT = {};
 function stallTap(x, y) {
-  if (stall.oracle && stall.oracleAt && Math.hypot(x - stall.oracleAt[0], y - stall.oracleAt[1]) < 30) { const id = pick(BUFFS); save.buffs[id] = true; saveNow(); stall.oracle = false; stall.ownSay = S().gotProphecy; stall.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); return; }      // the prophecy mark: yours for the tapping
+  if (stall.oracle && stall.oracleAt && Math.hypot(x - stall.oracleAt[0], y - stall.oracleAt[1]) < 30) { const id = stall.oracle; save.buffs[id] = true; saveNow(); stall.oracle = false; stall.ownSay = S().gotProphecy; stall.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); return; }      // the prophecy mark: yours for the tapping
   let best = null, bd = 1e9;
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
   if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
@@ -1004,7 +1004,7 @@ function updateStall(dt) {
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
-  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (Math.random() < .3) s.oracle = true; else if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }      // your own bowl finished: three times in ten, nothing is said and a prophecy mark appears where the bowl stood
+  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (Math.random() < .3) s.oracle = pick(BUFFS); else if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }      // your own bowl finished: three times in ten, nothing is said and a prophecy mark appears where the bowl stood
   s.seats.forEach((c, i) => {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
@@ -1081,7 +1081,7 @@ function drawStall(t) {
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], .3, 1.02, .33, c.dish); if (c.dish.soup) steam(SEATX[i], .3, 1.12, i); } });
   hit('bar', 4.5, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done) { const p = P(4.5, .3, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
-  if (st.oracle) { const q = v.P(4.5, .3, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)), r = s * .2; ell(q[0], q[1], s * .32, s * .16, [200, 180, 255], .35); glow(q[0], y, s * .9, [200, 180, 255], .7); poly([[q[0], y - r * 1.5], [q[0] + r * .35, y - r * .35], [q[0] + r * 1.5, y], [q[0] + r * .35, y + r * .35], [q[0], y + r * 1.5], [q[0] - r * .35, y + r * .35], [q[0] - r * 1.5, y], [q[0] - r * .35, y - r * .35]], [255, 255, 255]); circ(q[0], y, r * .3, [214, 196, 255]); st.oracleAt = [q[0], y]; }      // a prophecy mark floats over your place at the counter
+  if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(4.5, .3, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, cl, .4); glow(q[0], y, s * .9, cl, .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, its ring of light below
   if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl; iso_bowl(v, 4.5, .3, 1.02, .33, mb); if (mb.soup) steam(4.5, .3, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
