@@ -1983,7 +1983,7 @@ function updateChurch(dt) {
     e.x = clamp(e.x, Z[0], Z[1]); e.y = clamp(e.y, CY0, CY1); churchBump(e);
   }
   for (const e of c.foes) if (e.suck && e.hp > 0 && !(e.app > 0) && !(e.stun > 0) && c.down <= 0) {      // the drawing whirlwind: anyone within reach is pulled in at four fifths of your walking pace, so walking straight away barely gets you anywhere
-    const pull = (o, z0, z1) => { const dx = e.x - o.x, dy = e.y - o.y, d = Math.hypot(dx, dy); if (d < SUCKR && d > .35) { const st = Math.min(d - .35, 3.9 * .8 * dt); o.x = clamp(o.x + dx / d * st, z0, z1); o.y = clamp(o.y + dy / d * st, CY0, CY1); } };
+    const out = e.spin > 0, pull = (o, z0, z1) => { const dx = e.x - o.x, dy = e.y - o.y, d = Math.hypot(dx, dy) || .01; if (d < SUCKR && (out || d > .35)) { const st = out ? -3.9 * .8 * dt : Math.min(d - .35, 3.9 * .8 * dt); o.x = clamp(o.x + dx / d * st, z0, z1); o.y = clamp(o.y + dy / d * st, CY0, CY1); } };      // drawn in while it stands; once it whirls up, thrown outward instead
     pull(p, churchXmin(), churchXmax()); for (const f of c.foes) if (f !== e && f.hp > 0 && !(f.app > 0)) { const Z = zoneOf(f.wave); pull(f, Z[0], Z[1]); } }
   for (const [e, [x0, y0]] of pre) { e.frz -= dt; e.x = x0 + (e.x - x0) * .1; e.y = y0 + (e.y - y0) * .1; }      // the Prophecy of Frost: a frozen foe still does everything it would, but moves at a tenth of its pace
   c.foes = c.foes.filter(e => e.hp > 0 || e.dead > 0);
@@ -2101,7 +2101,7 @@ function drawChurch(t, dt) {
   for (const b of c.stains) { const q = P(b.x, b.y), g = eout(b.t / .25), rr = s * b.r * 1.22 * g; ctx.beginPath(); ctx.ellipse(q[0], q[1], rr * b.q, rr * .577, 0, 0, TAU); ctx.fillStyle = css([150, 16, 34], .82); ctx.fill(); ctx.beginPath(); ctx.ellipse(q[0] - rr * .2, q[1] - rr * .12, rr * .4 * b.q, rr * .2, 0, 0, TAU); ctx.fillStyle = css([196, 36, 52], .7); ctx.fill(); }      // your blood on the stones
   for (const e of c.foes) if (e.suck && e.hp > 0 && !(e.app > 0) && !(e.stun > 0)) for (let i = 0; i < 14; i++) {      // the drawing whirlwind's pull: streaks of air spiralling in across the floor
     if (i === 0) { const q = P(e.x, e.y); ctx.beginPath(); ctx.ellipse(q[0], q[1], SUCKR * s * 1.22, SUCKR * s * .705, 0, 0, TAU); ctx.fillStyle = css([190, 180, 255], .07); ctx.fill(); }      // the reach of its pull, faintly
-    const ph = (t * .7 + i / 14) % 1, r0 = SUCKR * (1 - ph), g0 = i * 2.4 + ph * 2.2, g1 = g0 + .45, r1 = Math.max(.3, r0 - .65), a = Math.sin(ph * Math.PI) * .85;
+    const ph0 = (t * .7 + i / 14) % 1, ph = e.spin > 0 ? 1 - ph0 : ph0, r0 = SUCKR * (1 - ph), g0 = i * 2.4 + ph * 2.2, g1 = g0 + .45, r1 = Math.max(.3, r0 - .65), a = Math.sin(ph * Math.PI) * .85;
     const q0 = P(e.x + Math.cos(g0) * r0, e.y + Math.sin(g0) * r0), q1 = P(e.x + Math.cos(g1) * r1, e.y + Math.sin(g1) * r1); line([q0, q1], [226, 218, 255], Math.max(1.5, s * .07), a); }
   if (LIT < 1) { ctx.fillStyle = css([14, 12, 44], .5 * (1 - LIT)); ctx.fillRect(0, 0, W, H); }      // the lights are out
   // marks on the floor: what is about to hit, and where
