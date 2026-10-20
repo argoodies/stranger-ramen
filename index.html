@@ -2191,7 +2191,8 @@ function drawChurch(t, dt) {
   v.box(3.5, 2.5, -3.2, CL - 7, CW - 5, 1.1, [150, 140, 176]); v.box(1.6, 1.2, -2.1, CL - 3.2, CW - 2.4, 1.1, [182, 166, 190]); v.box(0, 0, -1, CL, CW, 1, [240, 230, 220]);
   for (let i = 0; i < CL; i++) for (let j = 0; j < CW; j++) if ((i + j) % 2) v.quad(i, j, 0, 1, 1, tn([250, 243, 234]));
   // inlaid in the flagstones: a ring, a square and a diamond in gold
-  { const cx = 8, q = P(cx, my), r = s * 2.3 * 1.22; ctx.lineWidth = Math.max(1.2, s * .04); ctx.strokeStyle = css(GOLD, .7);
+  const past = c.story && c.storyIn && c.story.i >= 0;      // the church in the story, years ago: no torch and no ring of gold for the fight
+  if (!past) { const cx = 8, q = P(cx, my), r = s * 2.3 * 1.22; ctx.lineWidth = Math.max(1.2, s * .04); ctx.strokeStyle = css(GOLD, .7);
     loop([[cx - 3.2, my], [cx, my - 3.2], [cx + 3.2, my], [cx, my + 3.2]]); ctx.stroke(); loop([[cx - 2.3, my - 2.3], [cx + 2.3, my - 2.3], [cx + 2.3, my + 2.3], [cx - 2.3, my + 2.3]]); ctx.stroke();
     ctx.beginPath(); ctx.ellipse(q[0], q[1], r, r * .577, 0, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.ellipse(q[0], q[1], r * .5, r * .5 * .577, 0, 0, TAU); ctx.fillStyle = css([255, 240, 214], .5); ctx.fill(); ctx.stroke(); }
   poly([P(2.2, my - .6), P(CL, my - .6), P(CL, my + .6), P(2.2, my + .6)], tn([214, 128, 140]), .92); for (const y of [my - .5, my + .5]) line([P(2.2, y), P(CL, y)], GOLD, s * .03, .9);
@@ -2239,7 +2240,7 @@ function drawChurch(t, dt) {
     v.box(.55, my - .5, .4, .8, 1, .22, [246, 236, 226]);
     { const wk = clamp(1 - (performance.now() - (c.crossWob || -1e9)) / 700), b = P(.95, my, .62), ang = .025 * wk * Math.sin(performance.now() / 45); ctx.save(); ctx.translate(b[0], b[1]); ctx.rotate(ang); ctx.translate(-b[0], -b[1]); v.box(.84, my - .11, .62, .22, .22, 3.2, GOLD); v.box(.84, my - .8, 2.7, .22, 1.6, .22, GOLD); ctx.restore(); }      // it rocks on its foot when tapped
     for (const y of [my - 1.1, my + 1.1]) { v.box(.96, y - .05, .4, .1, .1, .7, [250, 244, 232]); const q = P(1.01, y, 1.22); glow(q[0], q[1], s * (.8 + .08 * Math.sin(t * 9 + y)), [255, 214, 140], .85 * LIT); circ(q[0], q[1], s * .055, [255, 240, 190], LIT); } } });
-  objs.push({ k: TORCH[0] + TORCH[1], d: () => { const [x, y] = TORCH, f = c.torchF, top = P(x, y, 1.5), fl = .85 + .15 * Math.sin(t * 13);      // the torch: a brazier on a post, cold until you light it
+  if (!past) objs.push({ k: TORCH[0] + TORCH[1], d: () => { const [x, y] = TORCH, f = c.torchF, top = P(x, y, 1.5), fl = .85 + .15 * Math.sin(t * 13);      // the torch: a brazier on a post, cold until you light it
     v.box(x - .2, y - .2, 0, .4, .4, .12, GOLD); v.box(x - .06, y - .06, .12, .12, .12, 1.05, [150, 104, 84]); v.box(x - .22, y - .22, 1.17, .44, .44, .16, GOLD);
     if (f > 0) { glow(top[0], top[1], s * 3.6 * f * fl, [255, 170, 90], .75 * f); glow(top[0], top[1] - s * .2, s * 1.2 * f, [255, 220, 150], .9 * f);
       poly([[top[0] - s * .16 * f, top[1] + s * .1], [top[0] + s * .16 * f, top[1] + s * .1], [top[0] + s * .05 * Math.sin(t * 9), top[1] - s * .62 * f * fl]], [255, 150, 70]); poly([[top[0] - s * .09 * f, top[1] + s * .1], [top[0] + s * .09 * f, top[1] + s * .1], [top[0] - s * .03 * Math.sin(t * 11), top[1] - s * .36 * f * fl]], [255, 230, 150]); }
