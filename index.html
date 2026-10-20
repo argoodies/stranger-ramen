@@ -2011,7 +2011,7 @@ function churchGift(id) {      // out of the chest and into the backpack; it goe
   const k = ITEMS[id]; save[id] = true;
   if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id;
   churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14));
-  if (!church.npcs.length) church.npcs.push({ who: pick(['saint', 'virgin', 'exorcist', 'flower']), x: 2.6, y: CW / 2 - 1.9, a: 0, mark: true });
+  if (!church.npcs.length) church.npcs.push({ who: pick(['saint', 'flower']), x: 2.6, y: CW / 2 - 1.9, a: 0, mark: true });
 }
 function updateChurch(dt) {
   const c = church, p = c.p; if (c.story) { for (const f of c.foes) if (f.corpse) f.deadT = (f.deadT || 0) + dt; storyStep(dt); return; }
