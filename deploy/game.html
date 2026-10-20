@@ -1737,6 +1737,7 @@ function drawItem(id, x, y, r) {
     const k = r, top = y - k * .62, bot = y + k * .7, edge = u => [[x - k * (.48 - .1 * u), top + (bot - top) * u], [x + k * (.48 - .1 * u), top + (bot - top) * u]], cof = id === 'coffee', lv = cof ? .3 : .38;
     const [l0, r0] = edge(0), [l1, r1] = edge(1), [ll, rl] = edge(lv); poly([l0, r0, r1, l1], [255, 255, 255], .2);
     poly([ll, rl, r1, l1], cof ? [120, 78, 52] : [214, 232, 246], cof ? .92 : .75);      // the drink
+    if (cof) { const [lm, rm] = edge(lv + .2); poly([ll, rl, rm, lm], [246, 238, 222], .95); }      // a coconut latte: a band of creamy coconut milk over the coffee
     for (const [dx, dy] of [[-.2, .22], [.14, .12], [-.02, .42], [.2, .5]]) { ctx.save(); ctx.translate(x + dx * k, y + dy * k - k * .25); ctx.rotate(dx * 2); ctx.fillStyle = css([236, 246, 255], .6); rrect(-k * .11, -k * .11, k * .22, k * .22, k * .05); ctx.fill(); ctx.restore(); }      // ice
     ctx.beginPath(); ctx.moveTo(l0[0], l0[1]); ctx.lineTo(l1[0], l1[1]); ctx.lineTo(r1[0], r1[1]); ctx.lineTo(r0[0], r0[1]); ctx.strokeStyle = css([255, 255, 255], .85); ctx.lineWidth = Math.max(1, k * .07); ctx.lineJoin = 'round'; ctx.stroke();
     if (cof) { line([[x + k * .1, top - k * .05], [x + k * .26, top - k * .55]], [96, 170, 120], Math.max(1, k * .09)); line([[l0[0] - k * .04, top], [r0[0] + k * .04, top]], [255, 255, 255], Math.max(1.2, k * .1), .95); }      // a flat lid, just a line, and a straw through it
