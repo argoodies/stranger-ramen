@@ -2255,8 +2255,7 @@ function drawChurch(t, dt) {
     if (n.who === 'saint') { fig(x, y, K, { kind: 'plain', body: [250, 238, 200] }); halo(x, hy, hr); }
     else if (n.who === 'virgin') { for (const sg of [-1, 1]) poly([[x + sg * hr * .6, hy - hr * .5], [x + sg * hr * 1.35, hy], [x + sg * hr * 1.5, hy + hr * 2.1], [x + sg * hr * .8, hy + hr * 1.6]], [156, 186, 240]); fig(x, y, K, { kind: 'plain', body: [226, 234, 252] }); ctx.beginPath(); ctx.ellipse(x, hy - hr * .25, hr * 1.22, hr * .95, 0, Math.PI, TAU); ctx.fillStyle = css([156, 186, 240]); ctx.fill(); }
     else if (n.who === 'exorcist') { fig(x, y, K, { kind: 'teller', body: [62, 72, 122], hat: [42, 48, 88] }); line([[x, y - K * .74], [x, y - K * .44]], [250, 220, 140], Math.max(1.5, K * .05)); line([[x - K * .08, y - K * .64], [x + K * .08, y - K * .64]], [250, 220, 140], Math.max(1.5, K * .05)); }
-    else { for (const sg of [-1, 1]) circ(x + sg * hr * 1.05, hy - hr * .35, hr * .55, [150, 96, 70]); fig(x, y, K, { kind: 'plain', body: [252, 204, 214] }); ctx.beginPath(); ctx.ellipse(x, hy - hr * .2, hr * 1.08, hr * .9, 0, Math.PI, TAU); ctx.fillStyle = css([150, 96, 70]); ctx.fill();
-      const bx = x + K * .34, by = y - K * .3; poly([[bx - K * .16, by], [bx + K * .16, by], [bx + K * .12, by + K * .18], [bx - K * .12, by + K * .18]], [176, 124, 84]); [[236, 96, 110], [250, 200, 90], [240, 150, 190], [250, 246, 240]].forEach((fc, i) => circ(bx - K * .12 + i * K * .08, by - K * .04 - (i % 2) * K * .05, K * .06, fc)); }
+    else storyFlower(x, y, K * FLOWER_K);      // the flower girl, the same size as in the story
     ctx.restore(); n.at = [x, y];
   } }); }
   if (c.chest) { const ch = c.chest; objs.push({ k: ch.x + ch.y + .2, d: () => {      // the chest: wood and gold; opened, its lid stands up and light spills out
