@@ -1929,8 +1929,7 @@ function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the ai
   }
   if (sc.gust) { const f = clamp(1 - u / .35); ctx.fillStyle = css([255, 252, 240], .55 * f); ctx.fillRect(0, 0, W, H); for (let k = 0; k < 16; k++) { const ph = (t * 1.5 + k / 16) % 1, y0 = CY0 + (k * 3.7) % (CY1 - CY0), q0 = P(2.6 + ph * 9, y0, 2.2 - ph), q1 = P(3.4 + ph * 9, y0 + .2, 2 - ph); line([q0, q1], [255, 250, 235], Math.max(1.4, K * .06), Math.sin(ph * Math.PI) * .75); } }      // the windows burst open in a white blast; the wind pours down the nave
   if (sc.draw) for (let k = 0; k < 14; k++) { const ph = (t * .9 + k / 14) % 1, g = k * 2.4, q0 = P(6.2 + Math.cos(g) * 5 * (1 - ph), CW / 2 + Math.sin(g) * 3.6 * (1 - ph), 1.2), q1 = P(6.2 + Math.cos(g + .25) * 4 * (1 - ph), CW / 2 + Math.sin(g + .25) * 2.9 * (1 - ph), 1.1); line([q0, q1], [226, 236, 250], Math.max(1.2, K * .05), Math.sin(ph * Math.PI) * .6); }      // drawn inward, as everything is shut
-  if (sc.lock) { const c0 = P(7.5, .5, 1.6); for (let k = 0; k < 22; k++) { const w = clamp(u * 1.6 - (k % 6) * .05), g = k * 2.39 + (k % 3) * .2, d = K * (1.6 + 9 * w) * (.7 + (k % 4) * .15);      // the flock is already about the church, flying off in every direction      // each bird wheels round as it flies out: a spiral
-      if (w <= 0) continue; storyBird(c0[0] + Math.cos(g) * d, c0[1] - K * (.8 + 1.2 * w) + Math.sin(g) * d * .5, K * (.24 + .06 * (k % 3)), t * 16 + k, clamp(1.2 - w)); } }      // the church is sealed: a flock of birds bursts from it and scatters into the night
+  if (sc.lock) { const c0 = P(7.5, .5, 1.6); for (let k = 0; k < 22; k++) { const w = clamp(u * 1.4 - (k % 6) * .04), g = k * 2.39 + (k % 3) * .2, d = K * 1.2 + Math.max(W, H) * .9 * w * w * (.7 + (k % 4) * .15); if (w <= 0) continue; storyBird(c0[0] + Math.cos(g) * d, c0[1] - K * .8 - H * .25 * w + Math.sin(g) * d * .5, K * (.24 + .06 * (k % 3)), t * 16 + k); } }      // the church is sealed: the flock about it flies off in every direction and away out of sight
   sc.lines.forEach(([who, a, b], j) => { if (u < a || u > b) return; const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
 }
 function drawStory(t) {      // one scene, in the town or the church as they were
@@ -1943,7 +1942,7 @@ function drawStory(t) {      // one scene, in the town or the church as they wer
   else if (sc.at === 'bar') { const keep = [bar.cups, G.n]; bar.cups = [{ y: 1.5, night: false, full: true, slide: 1, from: 1.5 }, { y: 2.5, night: false, full: true, slide: 1, from: 2.5 }]; G.n = 0; drawBar(t); [bar.cups, G.n] = keep; }      // the two of them at the coffee house counter, two coffees steaming
   else if (sc.at === 'town') { const keep = [player.x, player.y, zoomOut, zoomTarget, camX, camY, G.n, hideChef], crowd = npcs.splice(0); player.x = sc.cam[0]; player.y = sc.cam[1]; zoomOut = zoomTarget = sc.zoom ? sc.zoom(u) : 0; hideChef = false; G.n = sc.n; drawWorld(t, 1);
     [player.x, player.y, zoomOut, zoomTarget, camX, camY, G.n, hideChef] = keep; npcs.push(...crowd); }
-  else { const p = c.p, keep = [p.x, p.y, c.lit, c.cam && c.cam.slice()]; p.x = sc.cam[0] + 1.4; p.y = sc.cam[1]; c.lit = typeof sc.lit === 'function' ? sc.lit(u) : sc.lit; c.cam = null; c.storyIn = true; drawChurch(t, 1); c.storyIn = false; [p.x, p.y, c.lit] = keep; c.cam = keep[3]; }
+  else { const p = c.p, keep = [p.x, p.y, c.lit, c.cam && c.cam.slice()], today = { foes: c.foes, stains: c.stains, fx: c.fx, shots: c.shots, waves: c.waves, cones: c.cones, chest: c.chest, npcs: c.npcs, torchOn: c.torchOn, torchF: c.torchF }; Object.assign(c, { foes: [], stains: [], fx: [], shots: [], waves: [], cones: [], chest: null, npcs: [], torchOn: false, torchF: 0 }); p.x = sc.cam[0] + 1.4; p.y = sc.cam[1]; c.lit = typeof sc.lit === 'function' ? sc.lit(u) : sc.lit; c.cam = null; c.storyIn = true; drawChurch(t, 1); c.storyIn = false; [p.x, p.y, c.lit] = keep; c.cam = keep[3]; Object.assign(c, today); }      // years ago: none of today's fight in it
   storyHook = storyAfter = storySky = null;
   ctx.fillStyle = css([6, 4, 16], 1 - sa); ctx.fillRect(0, 0, W, H);      // each scene fades in from black and out to it
 }
@@ -1964,7 +1963,7 @@ const CHAPTER_T = 5;
 function storyTap() { const st = church.story; if (st.i >= 0 && st.t > .5) st.t = Math.max(st.t, STORY[st.i].d - .8); }      // a tap moves on to the next scene
 function churchCleared() {      // the fight is over: the lights come up and a chest stands before the cross; one of the good folk, picked at random, takes shape once it has been opened
   const c = church; if (c.done) return;
-  if (c.tier === TIERS && !c.storyDone) { if (!c.story) { c.story = { i: -1, t: -1.8 };      // a moment to see it fall, then the dark
+  if (c.tier === TIERS && !c.storyDone) { if (!c.story) { c.story = { i: -1, t: -5 };      // a moment to see it fall, then the dark
  c.fight = false; c.bannerT = 0; churchClear(); bell(98, .16); } return; }      // the last round won: the church goes dark, and the drawing whirlwind's story plays first
   c.done = true; c.fight = false; churchClear(); bell(196, .14); bell(293.7, .08);
   const rare = LOOT.filter(id => id !== 'flower'), left = rare.filter(id => !have(id)); c.chest = { id: Math.random() < .7 ? 'flower' : pick(left.length ? left : rare), x: 3.3, y: CW / 2, a: 0, open: false, at: null };      // there is always a chest: seven times in ten a flower; otherwise a weapon or a charm, one you lack while there is any
@@ -2017,10 +2016,10 @@ function churchGift(id) {      // out of the chest and into the backpack; it goe
   const k = ITEMS[id]; save[id] = true;
   if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id;
   churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14));
-  if (!church.npcs.length) church.npcs.push({ who: pick(['saint', 'flower']), x: 2.6, y: CW / 2 - 1.9, a: 0, mark: true });
+  if (!church.npcs.length) church.npcs.push({ who: 'flower', x: 2.6, y: CW / 2 - 1.9, a: 0, mark: true });
 }
 function updateChurch(dt) {
-  const c = church, p = c.p; if (c.story) { for (const f of c.foes) if (f.corpse) f.deadT = (f.deadT || 0) + dt; storyStep(dt); return; }
+  const c = church, p = c.p; if (c.story) { for (const f of c.foes) { if (f.corpse) f.deadT = (f.deadT || 0) + dt; else if (f.hp <= 0) f.dead -= dt; } c.foes = c.foes.filter(f => f.hp > 0 || f.dead > 0 || f.corpse); for (const f of c.fx) f.t += dt; c.fx = c.fx.filter(f => f.t < f.T); storyStep(dt); return; }      // the rest of the fallen fade as usual while the story waits
   if (c.chapter) { for (const f of c.foes) if (f.corpse) f.deadT = (f.deadT || 0) + dt; if ((c.chapter.t += dt) >= CHAPTER_T) { const dev = c.chapter.dev; c.chapter = null; if (!dev) churchCleared(); } return; }      // the card shows, fades, and then the lights come up and the chest appears      // the great whirlwind finishes falling while the story waits
   p.cd -= dt; p.sw -= dt; p.sw2 = (p.sw2 || 0) - dt; c.hurt -= dt; if (c.inv > 0) c.inv -= dt;
   if (p.second && (p.second.t -= dt) <= 0) { const q = p.second; p.second = null; if (c.fight && c.down <= 0 && q.e.hp > 0 && !q.e.inv && !(q.e.spin > 0)) { p.sw2 = .2; noise(.1, .4, 3000, 900); churchStrike(q.e, q.parry); } }      // the second of the twin blades
@@ -2211,7 +2210,7 @@ function drawChurch(t, dt) {
   const suckers = c.foes.filter(e => e.suck && e.hp > 0 && !(e.app > 0) && !(e.stun > 0)); if (suckers.length) { ctx.save(); ctx.beginPath(); [[CX0 - .3, CY0 - .6], [CL, CY0 - .6], [CL, CY1 + .6], [CX0 - .3, CY1 + .6]].forEach(([x, y], n) => { const q = P(x, y); n ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath(); ctx.clip(); }      // the streaks keep to the nave floor: never across the dais, the walls or the steps
   for (const e of suckers) for (let i = 0; i < 14; i++) {      // the drawing whirlwind's pull (or, whirling, its blast): streaks of air across the whole floor, spiralling in, or longer ones streaming out
         const out = e.spin > 0, ph0 = (t * .7 + i / 14) % 1, ph = out ? 1 - ph0 : ph0, r0 = SUCKVIS * (1 - ph), g0 = i * 2.4 + ph * 2.2, g1 = g0 + (out ? .6 : .45), r1 = Math.max(.3, r0 - (out ? 1.5 : .65)), a = Math.sin(ph * Math.PI) * .85;
-    const q0 = P(e.x + Math.cos(g0) * r0, e.y + Math.sin(g0) * r0), q1 = P(e.x + Math.cos(g1) * r1, e.y + Math.sin(g1) * r1); line([q0, q1], [226, 218, 255], Math.max(1.5, s * .07), a); }
+    const pts = []; for (let m = 0; m <= 8; m++) { const f = m / 8, rr = lerp(r0, r1, f), gg = lerp(g0, g1 + (out ? .9 : 1.1), f); pts.push(P(e.x + Math.cos(gg) * rr, e.y + Math.sin(gg) * rr)); } line(pts, [226, 218, 255], Math.max(1.5, s * .06), a); }      // each streak curls along the spiral, like a vortex
   if (suckers.length) ctx.restore();
   if (LIT < 1) { ctx.fillStyle = css([14, 12, 44], .5 * (1 - LIT)); ctx.fillRect(0, 0, W, H); }      // the lights are out
   // marks on the floor: what is about to hit, and where
