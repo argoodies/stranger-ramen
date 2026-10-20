@@ -1957,8 +1957,8 @@ function drawChapter(t) {      // the chapter's closing card, in the middle of t
     poly([[W / 2, y + dy - 3], [W / 2 + 3, y + dy + .5], [W / 2, y + dy + 4], [W / 2 - 3, y + dy + .5]], G, a); }      // gold rules, a small diamond at their middle
   const shine = .5 + .5 * Math.sin(t * 3); glow(W / 2, y + 10, 90, [255, 226, 160], (.28 + .12 * shine) * a);      // a soft gold light behind the words, breathing
   ctx.save(); ctx.shadowColor = css([255, 220, 140], .9 * a); ctx.shadowBlur = 10 + 6 * shine;
-  thinText(L.chapterDone, W / 2, y - 22, 11, G, a, 1.2); thinText(L.chapterNo, W / 2, y - 3, 12.5, [255, 248, 230], a, 1.2); thinText(L.cutStory, W / 2, y + 20, 22, [255, 252, 244], a, 1.1); ctx.restore();
-  thinText(L.cutStory, W / 2, y + 20, 22, [255, 255, 255], a * (.25 + .35 * Math.max(0, Math.sin(t * 2.2))), 1.1);      // the name brightens and softens again: a slow shimmer
+  thinText(L.chapterNo, W / 2, y - 24, 12.5, [255, 248, 230], a, 1.2); thinText(L.cutStory, W / 2, y, 22, [255, 252, 244], a, 1.1); thinText(L.chapterDone, W / 2, y + 24, 11, G, a, 1.2); ctx.restore();
+  thinText(L.cutStory, W / 2, y, 22, [255, 255, 255], a * (.25 + .35 * Math.max(0, Math.sin(t * 2.2))), 1.1);      // the name brightens and softens again: a slow shimmer
 }
 const CHAPTER_T = 5;
 function storyTap() { const st = church.story; if (st.i >= 0 && st.t > .5) st.t = Math.max(st.t, STORY[st.i].d - .8); }      // a tap moves on to the next scene
