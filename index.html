@@ -2038,8 +2038,9 @@ function updateChurch(dt) {
   if (c.down > 0) { c.down -= dt; if (c.down <= 0) return leaveChurch(); }      // you wake up back outside
   else {
     if (p.target && p.target.hp <= 0) p.target = null;
+    if (p.arrived && !p.target && !p.exit) { p.tx = p.x; p.ty = p.y; }      // once there, the chef stays wherever he is pushed or pulled: he never walks back to the spot
     const e = p.target, gx = e ? e.x : p.tx, gy = e ? e.y : p.ty, dx = gx - p.x, dy = gy - p.y, d = Math.hypot(dx, dy), reach = e ? .78 : .02;
-    p.vx = p.vy = 0; p.moving = d > reach;
+    p.vx = p.vy = 0; p.moving = d > reach; if (!e && !p.exit && d < .2) p.arrived = true;      // close enough counts as there, even with a whirlwind tugging at you
     if (p.moving) { const sp = p.exit ? 7 : 3.9 * (c.fight && buffOn('speed') ? 1.5 : 1), st = Math.min(d - reach, sp * dt); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += dx / d * st; p.y += dy / d * st; p.face = dy - dx; p.hopT = (p.hopT || 0) + dt; }
     p.x = clamp(p.x, churchXmin(), churchXmax()); p.y = clamp(p.y, CY0, CY1); churchBump(p);
     for (const f of c.foes) { if (f.hp <= 0 || f.app > 0 || f.spin > 0 || f.inv) continue; const dx = p.x - f.x, dy = p.y - f.y, dd = Math.hypot(dx, dy), R = .62; if (dd < R) { const k = dd > .001 ? R / dd : 0; p.x = f.x + (k ? dx * k : R); p.y = f.y + (k ? dy * k : 0); } }      // the chef cannot walk through a foe: he is pushed back out round it
@@ -2161,7 +2162,7 @@ function debugAsk(msg, val, done) {      // a small input box over the game (win
   document.getElementById('dbgok').onclick = () => close(true); document.getElementById('dbgno').onclick = () => close(false); inp.onkeydown = ev => { if (ev.key === 'Enter') close(true); };
 }
 function churchTap(sx, sy) {
-  const c = church, p = c.p, v = chv, K = v.s * .8; if (c.story && !(c.story.i < 0 && c.story.t < 0)) { storyTap(); return; } if (c.chapter) return; if (c.down > 0) return;
+  const c = church, p = c.p, v = chv, K = v.s * .8; if (c.story && !(c.story.i < 0 && c.story.t < 0)) { storyTap(); return; } if (c.chapter) return; if (c.down > 0) return; p.arrived = false;
   if (c.fight && hudDrink && Math.hypot(sx - hudDrink[0], sy - hudDrink[1]) < 22) { playDrink(); return; }
   p.pend = null;
   let best = null, bd = K * 1.05;
@@ -2174,7 +2175,7 @@ function churchTap(sx, sy) {
     if (Math.hypot(sx - q[0], sy - (q[1] - K * .8)) < K * 1.1) { const dx = p.x - TORCH[0], dy = p.y - TORCH[1], d = Math.hypot(dx, dy) || 1; p.target = null; p.exit = false; p.tx = TORCH[0] + dx / d * .62; p.ty = TORCH[1] + dy / d * .62; p.pend = 'torch'; chime(69, 0, .05, .6); return; } }
   if (c.chest && !c.chest.open && c.chest.at && Math.hypot(sx - c.chest.at[0], sy - (c.chest.at[1] - K * .3)) < K) return churchOpen();
   for (const n of c.npcs) if (n.a > .7 && n.at && Math.hypot(sx - n.at[0], sy - (n.at[1] - K * .6)) < K) return churchTalk(n);
-  const [x, y] = v.inv(sx, sy); p.target = null; p.tx = clamp(x, churchXmin(), churchXmax()); p.ty = clamp(y, CY0, CY1); chime(69, 0, .05, .6);
+  const [x, y] = v.inv(sx, sy); p.target = null; p.arrived = false; p.tx = clamp(x, churchXmin(), churchXmax()); p.ty = clamp(y, CY0, CY1); chime(69, 0, .05, .6);
   p.exit = !c.fight && !c.story && x > CX1 - .1 && Math.abs(y - CW / 2) < 1.1; if (p.exit) { p.tx = CX1; p.ty = CW / 2; }      // the steps, or the floor right at the door: you mean to leave
 }
 function drawChurch(t, dt) {
