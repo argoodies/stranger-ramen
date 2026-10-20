@@ -1891,7 +1891,7 @@ function storyLying(x, y, K, body = [226, 234, 252], veil = [156, 186, 240]) { e
 const CROWD = [[150, 140, 170], [170, 150, 140], [140, 160, 150], [160, 150, 170]], CROWDHAIR = [[90, 60, 50], [210, 170, 90], [60, 50, 70], [170, 90, 70]];
 // Each scene: where (the town or the church), how long, night (town) or light (church), where the camera looks, who stands where (moving with u, 0..1 through the scene), and who says what when.
 const STORY = [
-  { at: 'town', d: 11, n: 1, cam: [3.4, -2.4], cast: u => [{ who: 'he', x: lerp(4.6, 3.2, u), y: -2.3 }, { who: 'she', x: lerp(4.8, 3.4, u), y: -2.8 }], lines: [['she', .62, .8], ['he', .81, .98]], meteor: 1 },      // the two of them walking by the library; after five seconds, a shooting star; then they speak      // a night walk together by the library, under a shooting star
+  { at: 'town', d: 11, n: 1, cam: [3.4, -2.4], zoom: u => 1 - ease(clamp(u / (4.6 / 11))), cast: u => [{ who: 'he', x: lerp(4.6, 3.2, u), y: -2.3 }, { who: 'she', x: lerp(4.8, 3.4, u), y: -2.8 }], lines: [['she', .62, .8], ['he', .81, .98]], meteor: 1 },      // the two of them walking by the library; after five seconds, a shooting star; then they speak      // a night walk together by the library, under a shooting star
   { at: 'bar', d: 6, cast: u => [{ who: 'he', x: 2.3, y: 1.5 }, { who: 'she', x: 2.3, y: 2.5 }], lines: [['he', 0, .5], ['she', .5, 1]] },      // coffee together, at the coffee house counter
   { at: 'town', d: 7, n: 1, cam: [1, 2.6], cast: u => [{ who: 'he', x: .4, y: 3.1 }, { who: 'she', x: .8, y: 2.7 }, { who: 'flower', x: 1.6, y: 2.1 }], lines: [['he', .1, .5], ['she', .7, 1]], flower: 1 },      // flowers from the flower girl
   { at: 'town', d: 6, n: 0, cam: [.6, 4.1], cast: u => [{ who: 'he', x: .4, y: 4.5 }, { who: 'she', x: 1, y: 4.6 }], lines: [['she', .1, .5], ['he', .5, .95]], birds: 1 },      // by the tree further along from the ramen shop he calls the wind, and the birds come
@@ -1938,12 +1938,13 @@ function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the ai
   }
   if (sc.gust) { const f = clamp(1 - u / .35); ctx.fillStyle = css([255, 252, 240], .55 * f); ctx.fillRect(0, 0, W, H); }      // the windows burst open in a white blast
   if (sc.lock) { const c0 = P(7.5, .5, 1.6); for (let k = 0; k < 22; k++) { const w = clamp(u * 1.4 - (k % 6) * .04), g = k * 2.39 + (k % 3) * .2, d = K * 1.2 + Math.max(W, H) * .9 * w * w * (.7 + (k % 4) * .15); if (w <= 0) continue; storyBird(c0[0] + Math.cos(g) * d, c0[1] - K * .8 - H * .25 * w + Math.sin(g) * d * .5, K * (.24 + .06 * (k % 3)), t * 16 + k); } }      // the church is sealed: the flock about it flies off in every direction and away out of sight
-  sc.lines.forEach(([who, a, b], j) => { if (u < a || u > b) return; const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
+  sc.lines.forEach(([who, a, b0], j) => { const b = b0 >= .9 ? 9 : b0; if (u < a || u > b) return;      // a closing line stays up through the hold
+ const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
 }
 function drawStory(t) {      // one scene, in the town or the church as they were
   const c = church, st = c.story, i = st.i;
   if (i < 0) { c.storyIn = true; drawChurch(t, 0); c.storyIn = false; ctx.fillStyle = css([6, 4, 16], clamp(st.t / 1.6)); ctx.fillRect(0, 0, W, H); return; }      // first the church goes dark
-  const sc = STORY[i], u = clamp(st.t / sc.d), sa = clamp(Math.min(st.t / .8, (sc.d - st.t) / .8));
+  const sc = STORY[i], u = clamp(st.t / sc.d), sa = clamp(Math.min(st.t / .8, (sc.d + STORY_HOLD - st.t) / .8));      // each scene holds a moment on its last word before fading
   let cast = []; storyHook = (v, objs, K, tt, at) => { cast = storyCast(sc, u, tt, v, objs, K, at); }; storyAfter = (v, K, tt, at) => storyEffects(sc, u, tt, v, K, at, cast); storyPan = sc.pan ? sc.pan(u) : 0; storyRain = !!sc.rain; storySky = sc.meteor ? () => { for (const [t0, x0, y0] of [[5 / 11, .62, .1]]) { const w = (u - t0) / .13; if (w < 0 || w > 1) continue; const hx = W * (x0 - .42 * w), hy = H * (y0 + .12 * w), a = Math.sin(w * Math.PI); glow(hx, hy, 22, [255, 250, 230], a); const g = ctx.createLinearGradient(hx, hy, hx + W * .16, hy - H * .05); g.addColorStop(0, css([255, 250, 230], a)); g.addColorStop(1, css([255, 250, 230], 0)); ctx.strokeStyle = g; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + W * .16, hy - H * .05); ctx.stroke(); } } : null;      // shooting stars across the night sky
   if (sc.at === 'stall') { const keep = [stall.seats, stall.owner.x, stall.owner.y, G.n]; stall.seats = [null, { story: 'he', look: {}, state: 'eat', t: st.t, dish: { noodle: true, soup: true, beef: true } }, { story: 'she', look: {}, state: 'eat', t: st.t + .7, dish: { noodle: true, soup: true, cilantro: true } }]; stall.owner.x = stall.owner.y = -99; G.n = 0; storyHook = null; drawStall(t);      // the two of them at the counter of the ramen shop, two bowls steaming
     [stall.seats, stall.owner.x, stall.owner.y, G.n] = keep; const fs = clamp(W * .036, 12.5, 15); sc.lines.forEach(([who, a, b], j) => { const q = storySeatPos[who], txt = S().story[i][j]; if (q && txt && u >= a && u <= b) sayBubble(q[0], q[1] - W * .2, txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); }); }
@@ -1956,7 +1957,7 @@ function drawStory(t) {      // one scene, in the town or the church as they wer
 }
 function storyStep(dt) {      // the story's clock: scene by scene, then the lights come up
   const c = church, st = c.story; st.t += dt;
-  const D = st.i < 0 ? 1.8 : STORY[st.i].d;
+  const D = st.i < 0 ? 1.8 : STORY[st.i].d + STORY_HOLD;
   if (st.t >= D) { st.i++; st.t = 0; if (st.i >= STORY.length) { c.story = null; if (st.dev) { c.lit = st.lit || 0; c.chapter = { t: 0, dev: true }; } else { c.storyDone = true; c.lit = 0; c.chapter = { t: 0 }; } [67, 71, 74, 79].forEach((m, k) => chime(m, .12 * k, .14, 1.4)); bell(196, .1); } else chime(pick([62, 65, 69, 72]), 0, .06, .8); }      // back in the dark church: the chapter's closing card, and only then the lights
 }
 function drawChapter(t) {      // the chapter's closing card, in the middle of the screen, on nothing: two gold rules opening out from the centre, "Completed", the chapter, its name, glinting
@@ -1969,7 +1970,8 @@ function drawChapter(t) {      // the chapter's closing card, in the middle of t
   thinText(L.cutStory, W / 2, y, 22, [255, 255, 255], a * (.25 + .35 * Math.max(0, Math.sin(t * 2.2))), 1.1);      // the name brightens and softens again: a slow shimmer
 }
 const CHAPTER_T = 5;
-function storyTap() { const st = church.story; if (st.i >= 0 && st.t > .5) st.t = Math.max(st.t, STORY[st.i].d - .8); }      // a tap moves on to the next scene
+function storyTap() { const st = church.story; if (st.i >= 0 && st.t > .5) st.t = Math.max(st.t, STORY[st.i].d + STORY_HOLD - .8); }
+const STORY_HOLD = 1.4;      // a tap moves on to the next scene
 function churchCleared() {      // the fight is over: the lights come up and a chest stands before the cross; one of the good folk, picked at random, takes shape once it has been opened
   const c = church; if (c.done) return;
   if (c.tier === TIERS && !c.storyDone) { if (!c.story) { c.story = { i: -1, t: -5 };      // a moment to see it fall, then the dark
