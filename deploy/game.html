@@ -1888,7 +1888,7 @@ function storyFlower(x, y, K) { const hy = y - 1.01 * K, hr = .17 * K; for (cons
 function storyInv(x, y, K, arm = 0) { fig(x, y, K, { kind: 'teller', body: [96, 72, 60], hat: [56, 42, 40] }); if (arm) { const sx = x - K * .12, sy = y - K * .62; line([[sx, sy], [sx - K * .5 * arm, sy - K * .18 * arm]], [96, 72, 60], Math.max(2, K * .08)); } }      // the investigator, a long brown coat; arm: the accusing hand
 function storyBird(x, y, r, ph, a = 1) { const f = Math.sin(ph) * r * .5; line([[x - r, y - f], [x, y], [x + r, y - f]], [240, 236, 250], Math.max(1.2, r * .24), a); }
 function storyLying(x, y, K, body = [226, 234, 252], veil = [156, 186, 240]) { ell(x, y + K * .02, K * .6, K * .13, [20, 12, 40], .3); ell(x + K * .05, y - K * .08, K * .48, K * .15, body); circ(x - K * .48, y - K * .12, K * .15, SKIN); if (veil) { ctx.beginPath(); ctx.ellipse(x - K * .52, y - K * .14, K * .19, K * .16, 0, Math.PI * .5, Math.PI * 1.6); ctx.fillStyle = css(veil); ctx.fill(); } }
-const SHE_K = .9, FLOWER_K = .78, CROWD = [[150, 140, 170], [170, 150, 140], [140, 160, 150], [160, 150, 170]], CROWDHAIR = [[90, 60, 50], [210, 170, 90], [60, 50, 70], [170, 90, 70]];
+const SHE_K = .9, FLOWER_K = .78, CROWD = [[150, 140, 170], [170, 150, 140], [140, 160, 150], [160, 150, 170]], CROWDHAIR = [[90, 60, 50], [210, 170, 90], [60, 50, 70], [170, 90, 70]], CROWDSKIN = [[226, 186, 156], [212, 170, 138], [232, 196, 166], [204, 160, 128]];      // the townsfolk in the church: a warm tan, a touch darker than the pale floor
 // Each scene: where (the town or the church), how long, night (town) or light (church), where the camera looks, who stands where (moving with u, 0..1 through the scene), and who says what when.
 const STORY = [
   { at: 'town', d: 11, n: 1, cam: [3.4, -2.4], zoom: u => 1 - ease(clamp(u / (4.6 / 11))), cast: u => [{ who: 'he', x: lerp(4.6, 3.2, u), y: -2.3 }, { who: 'she', x: lerp(4.8, 3.4, u), y: -2.8 }], lines: [['she', .62, .8], ['he', .81, .98]], meteor: 1 },      // the two of them walking by the library; after five seconds, a shooting star; then they speak      // a night walk together by the library, under a shooting star
@@ -1919,7 +1919,7 @@ function storyCast(sc, u, t, v, objs, K, at) {      // put the people of this sc
       else if (a.who === 'he') { if (a.kneel) storyHe(q[0], y + K * .25, K * .78); else storyHe(q[0], y, K, { a: a.storm ? 1 - a.storm * .5 : 1 }); }
       else if (a.who === 'she') storyShe(q[0], y, K * SHE_K); else if (a.who === 'flower') storyFlower(q[0], y, K * FLOWER_K);
       else if (a.who === 'inv') { storyInv(q[0], y, K, a.arm || 0); if (a.blade) { const bx = q[0] - K * .3, by = y - K * (1.1 + .3 * a.blade); line([[bx, by + K * .25], [bx, by - K * .35]], [226, 232, 244], Math.max(2, K * .07)); } }
-      else { const kk = K, hy = y - 1.01 * kk, hr = .17 * kk; fig(q[0], y, kk, { kind: 'plain', body: CROWD[+a.who[1]] }); ctx.beginPath(); ctx.ellipse(q[0], hy - hr * .2, hr * 1.08, hr * .92, 0, Math.PI, TAU); ctx.fillStyle = css(CROWDHAIR[+a.who[1]]); ctx.fill(); }      // townsfolk, each with short hair of their own colour
+      else { const kk = K, hy = y - 1.01 * kk, hr = .17 * kk; fig(q[0], y, kk, { kind: 'plain', body: CROWD[+a.who[1]], head: CROWDSKIN[+a.who[1]] }); ctx.beginPath(); ctx.ellipse(q[0], hy - hr * .2, hr * 1.08, hr * .92, 0, Math.PI, TAU); ctx.fillStyle = css(CROWDHAIR[+a.who[1]]); ctx.fill(); }      // townsfolk, each with short hair of their own colour
       if (a.bowl) { const bx = q[0] + K * .26, by = y - K * .55; ell(bx, by, K * .16, K * .07, [250, 246, 240]); ell(bx, by - K * .02, K * .12, K * .045, [232, 170, 90]); for (let k = 0; k < 2; k++) { const ph = (t * .5 + k / 2 + a.x) % 1; circ(bx + Math.sin(t * 2 + k) * K * .03, by - K * (.12 + .35 * ph), K * (.03 + .03 * ph), [255, 250, 245], .45 * (1 - ph)); } }
       if (a.cup) { const bx = q[0] + K * .26, by = y - K * .55; poly([[bx - K * .07, by - K * .16], [bx + K * .07, by - K * .16], [bx + K * .05, by], [bx - K * .05, by]], [250, 246, 240]); for (let k = 0; k < 2; k++) { const ph = (t * .5 + k / 2 + a.y) % 1; circ(bx, by - K * (.2 + .3 * ph), K * (.025 + .03 * ph), [255, 250, 245], .45 * (1 - ph)); } }
       ctx.restore(); } }); }
@@ -1958,7 +1958,7 @@ function drawStory(t) {      // one scene, in the town or the church as they wer
 function storyStep(dt) {      // the story's clock: scene by scene, then the lights come up
   const c = church, st = c.story; st.t += dt;
   const D = st.i < 0 ? 1.8 : STORY[st.i].d + STORY_HOLD;
-  if (st.t >= D) { st.i++; st.t = 0; if (st.i >= STORY.length) { c.story = null; if (st.dev) { c.lit = st.lit || 0; c.chapter = { t: 0, dev: true }; } else { c.storyDone = true; c.lit = 0; c.chapter = { t: 0 }; } [67, 71, 74, 79].forEach((m, k) => chime(m, .12 * k, .14, 1.4)); bell(196, .1); } else chime(pick([62, 65, 69, 72]), 0, .06, .8); }      // back in the dark church: the chapter's closing card, and only then the lights
+  if (st.t >= D) { st.i++; st.t = 0; if (st.i === 0) { const p = c.p; p.moving = false; p.target = null; p.tx = p.x; p.ty = p.y; } if (st.i >= STORY.length) { c.story = null; if (st.dev) { c.lit = st.lit || 0; c.chapter = { t: 0, dev: true }; } else { c.storyDone = true; c.lit = 0; c.chapter = { t: 0 }; } [67, 71, 74, 79].forEach((m, k) => chime(m, .12 * k, .14, 1.4)); bell(196, .1); } else chime(pick([62, 65, 69, 72]), 0, .06, .8); }      // back in the dark church: the chapter's closing card, and only then the lights      // the chef stops where the story begins
 }
 function drawChapter(t) {      // the chapter's closing card, in the middle of the screen, on nothing: two gold rules opening out from the centre, "Completed", the chapter, its name, glinting
   const c = church, ch = c.chapter, u = ch.t, a = clamp(Math.min(u / .8, (CHAPTER_T - u) / .8)), open = eout(clamp(u / 1.1)), y = H * .44, G = [246, 220, 150], L = S();
@@ -2234,7 +2234,7 @@ function drawChurch(t, dt) {
   for (const f of c.cones) { const u = f.t / f.T, pts = [P(f.x, f.y)]; for (let i = 0; i <= 10; i++) { const a = f.a - .58 + 1.16 * i / 10; pts.push(P(f.x + Math.cos(a) * 6.6, f.y + Math.sin(a) * 6.6)); } poly(pts, [190, 110, 240], .8 * (1 - u)); }
   for (const f of c.fx) if (f.k === 'splash') { const q = P(f.x, f.y), u = f.t / f.T, r = s * .62 * 1.22 * (.6 + .5 * u); ell(q[0], q[1], r, r * .577, [232, 44, 60], .5 * (1 - u)); }
 
-  if (p.moving && !p.target) { const q = P(p.tx, p.ty); ell(q[0], q[1], s * .26, s * .13, [255, 240, 200], .4); }
+  if (p.moving && !p.target && !past) { const q = P(p.tx, p.ty); ell(q[0], q[1], s * .26, s * .13, [255, 240, 200], .4); }      // where the chef is walking to (not in the story's church of years ago)
   // everything that stands on the floor, back to front
   const objs = [], flash = (col, e) => e.hit > 0 ? mix(col, [255, 255, 255], .7) : col;
   objs.push({ k: 1 + my + .2, d: () => {      // the Holy Cross on its steps, under the rose window
