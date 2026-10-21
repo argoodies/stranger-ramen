@@ -1973,12 +1973,17 @@ function drawChapter(t) {      // the chapter's closing card, in the middle of t
 const CHAPTER_T = 5;
 function storyTap() { const st = church.story; if (st.i >= 0 && st.t > .5) st.t = Math.max(st.t, STORY[st.i].d + STORY_HOLD - .8); }
 const STORY_HOLD = 1.4;      // a tap moves on to the next scene
+function clearOfBody(spots, kind, also) {      // the first of these spots where the chest ('chest') or the flower girl doesn't overlap, on screen, the great whirlwind's fallen body (and its rolled-off crown) or `also`
+  const sc = (x, y, z = 0) => [(y - x) * C30, (x + y) * .5 - z], box = pts => { const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };      // the church view in units of s, as MView draws it
+  const rect = (k, x, y) => k === 'chest' ? box([-.34, .34].flatMap(dx => [-.44, .44].flatMap(dy => [0, .9].map(z => sc(x + dx, y + dy, z))))) : (q => [q[0] - .35, q[1] - 1.15, q[0] + .4, q[1] + .12])(sc(x + .14, y + .14));
+  const bodies = church.foes.filter(f => f.corpse).map(f => { const q = sc(f.x, f.y); return [q[0] - .4, q[1] - .5, q[0] + 2.05, q[1] + .2]; }), hit = (r, o) => r[0] < o[2] + .1 && o[0] < r[2] + .1 && r[1] < o[3] + .1 && o[1] < r[3] + .1;
+  return spots.find(([x, y]) => { const r = rect(kind, x, y); return !bodies.some(o => hit(r, o)) && !(also && hit(r, rect('chest', also[0], also[1]))); }) || spots[0]; }
 function churchCleared() {      // the fight is over: the lights come up and a chest stands before the cross; one of the good folk, picked at random, takes shape once it has been opened
   const c = church; if (c.done) return;
   if (c.tier === TIERS && !c.storyDone) { if (!c.story) { c.story = { i: -1, t: -5 };      // a moment to see it fall, then the dark
  c.fight = false; c.bannerT = 0; churchClear(); bell(98, .16); } return; }      // the last round won: the church goes dark, and the drawing whirlwind's story plays first
   c.done = true; c.fight = false; churchClear(); bell(196, .14); bell(293.7, .08);
-  const rare = LOOT.filter(id => id !== 'flower'), left = rare.filter(id => !have(id)); c.chest = { id: Math.random() < .7 ? 'flower' : pick(left.length ? left : rare), x: 3.3, y: CW / 2, a: 0, open: false, at: null };      // there is always a chest: seven times in ten a flower; otherwise a weapon or a charm, one you lack while there is any
+  const rare = LOOT.filter(id => id !== 'flower'), left = rare.filter(id => !have(id)), my = CW / 2, [chx, chy] = clearOfBody([[3.3, my], [3.3, my + 1.5], [3.3, my - 1.5], [4.5, my], [4.5, my + 1.2], [4.5, my - 1.2], [3.3, my + 2.6], [3.3, my - 2.6]], 'chest'); c.chest = { id: Math.random() < .7 ? 'flower' : pick(left.length ? left : rare), x: chx, y: chy, a: 0, open: false, at: null };      // there is always a chest: seven times in ten a flower; otherwise a weapon or a charm, one you lack while there is any
 }
 function churchBossDown() {      // the boss falls, and everything it brought with it goes too
   const c = church; c.pass = null;
@@ -2028,7 +2033,7 @@ function churchGift(id) {      // out of the chest and into the backpack; it goe
   const k = ITEMS[id]; save[id] = true;
   if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id;
   churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14));
-  if (!church.npcs.length) church.npcs.push({ who: 'flower', x: 2.6, y: CW / 2 - 1.9, a: 0, mark: true });
+  if (!church.npcs.length) { const my = CW / 2, ch = church.chest, [x, y] = clearOfBody([[2.6, my - 1.9], [2.6, my + 1.9], [4.4, my - 2.3], [4.4, my + 2.3], [2.6, my], [5.4, my - 2.6], [5.4, my + 2.6]], 'girl', ch && [ch.x, ch.y]); church.npcs.push({ who: 'flower', x, y, a: 0, mark: true }); }      // she keeps clear of the fallen whirlwind and of the chest
 }
 function updateChurch(dt) {
   const c = church, p = c.p; if (c.story) { if (c.story.i < 0 && c.story.t < 0) storyStep(dt); else { for (const f of c.foes) { if (f.corpse) f.deadT = (f.deadT || 0) + dt; else if (f.hp <= 0) f.dead -= dt; } c.foes = c.foes.filter(f => f.hp > 0 || f.dead > 0 || f.corpse); for (const f of c.fx) f.t += dt; c.fx = c.fx.filter(f => f.t < f.T); storyStep(dt); return; } }      // the five seconds after the last blow: the game goes on as usual (in the dark), then the story
