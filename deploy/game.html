@@ -775,13 +775,13 @@ function drawWorld(t, dt) {
     if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
     const tt = titleT0 == null ? -1 : titleT0;
     { const u = ease(clamp((tt - .35) / 1.2)); if (u > 0) { ctx.fillStyle = `rgba(255,255,255,${.96 * u})`; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y)); } } ctx.restore();
-    if (tt >= TITLE_UP) tapHint('tapStart', clamp((tt - TITLE_UP) / .25));      // as soon as the title is up: "tap anywhere to start"      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
+    if (tt >= TITLE_UP) tapHint('tapStart', tt - TITLE_UP);      // as soon as the title is up: "tap anywhere to start"      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
-  if (mode === 'world' && zoomTarget > .5 && !bag.open) tapHint('tapGo');      // the zoomed-out view of the town: a tap anywhere goes back in
+  if (mode === 'world' && zoomTarget > .5 && !bag.open) { if (zoomHintT0 == null) zoomHintT0 = t; tapHint('tapGo', t - zoomHintT0); } else zoomHintT0 = null;      // the zoomed-out view of the town: a tap anywhere goes back in
   if (mode === 'world' && bag.open) drawBag(t);
   if (mode === 'world' && G.late) text('夜深了，回拉面档口睡觉', W / 2, H * 0.9, 15, [255, 236, 190], .7 + .3 * Math.sin(t * 3), 'center', true);
 }
-let worldHint = 6, nearDoor = null;
+let worldHint = 6, nearDoor = null, zoomHintT0 = null;      // zoomHintT0: when the zoomed-out view's hint first showed
 const DOORS = { stall: DOOR, tower: TDOOR, lib: LDOOR, church: CDOOR, bar: BDOOR }, goIn = w => w === 'stall' ? enterStall() : w === 'tower' ? enterTower() : w === 'church' ? enterChurch() : w === 'bar' ? enterBar() : enterLib();
 function goDoor(which) { const d = DOORS[which], p = bfs(cellOf(player), d); if (!p) return; player.path = p.slice(1); player.enter = which; if (!player.path.length) { player.enter = false; goIn(which); } }
 function updateWorld(dt) {
@@ -1721,7 +1721,7 @@ function drawTopHat(x, y, r, c, a = 1) { drawTopHat0(x, y, r, c, a); drawScales(
 function drawTopHat0(x, y, r, c, a = 1) { const d = mix(c, [40, 20, 40], .35); poly([[x - r * .95, y + r * .32], [x + r * .95, y + r * .32], [x + r * .95, y + r * .5], [x - r * .95, y + r * .5]], d, a); poly([[x - r * .55, y - r * .7], [x + r * .55, y - r * .7], [x + r * .55, y + r * .34], [x - r * .55, y + r * .34]], c, a); poly([[x - r * .55, y + r * .06], [x + r * .55, y + r * .06], [x + r * .55, y + r * .22], [x - r * .55, y + r * .22]], [40, 26, 40], a); }
 function drawHeart(x, y, r, c, a = 1) { circ(x - r * .5, y - r * .25, r * .56, c, a); circ(x + r * .5, y - r * .25, r * .56, c, a); poly([[x - r * .98, y], [x + r * .98, y], [x, y + r * 1.05]], c, a); }
 // The backpack is drawn in the Monument Valley manner: a dusk gradient, thin widely spaced lettering, little isometric plinths.
-function tapHint(key, a = 1) { thinText(S()[key], W / 2, H - 64, 11, [255, 252, 244], a * (.5 - .5 * Math.cos(performance.now() / 1000 * 2.4)), 1.2); }      // the small "tap anywhere to …" line at the foot of the screen, breathing in and out all the way down to nothing (it starts from nothing too); until it shows, a tap does nothing
+function tapHint(key, since) { thinText(S()[key], W / 2, H - 64, 11, [255, 252, 244], .5 - .5 * Math.cos(Math.max(0, since) * 2.4), 1.2); }      // the small "tap anywhere to …" line at the foot of the screen, breathing in and out all the way down to nothing; since: seconds since it first showed, so it starts from nothing and its first fade-in is just like every later one; until it shows, a tap does nothing
 function thinText(str, x, y, px, c = [255, 255, 255], a = 1, wide = 1) {
   ctx.font = `200 ${px}px ${THINF}`; const chars = [...str], gap = px * (LANG === 'en' ? .14 : .5) * wide, ws = chars.map(ch => ctx.measureText(ch).width); let cx = x - (ws.reduce((p, w) => p + w, 0) + gap * (chars.length - 1)) / 2;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = css(c, a); chars.forEach((ch, k) => { ctx.fillText(ch, cx, y); cx += ws[k] + gap; });
@@ -1984,7 +1984,7 @@ function drawStory(t) {      // one scene, in the town or the church as they wer
   else { const p = c.p, keep = [p.x, p.y, c.lit, c.cam && c.cam.slice()], today = { foes: c.foes, stains: c.stains, fx: c.fx, shots: c.shots, waves: c.waves, cones: c.cones, chest: c.chest, npcs: c.npcs, torchOn: c.torchOn, torchF: c.torchF }; Object.assign(c, { foes: [], stains: [], fx: [], shots: [], waves: [], cones: [], chest: null, npcs: [], torchOn: false, torchF: 0 }); p.x = sc.cam[0] + 1.4; p.y = sc.cam[1]; c.lit = typeof sc.lit === 'function' ? sc.lit(u) : sc.lit; c.lamp = typeof sc.lamp === 'function' ? sc.lamp(u) : sc.lamp || 0; c.cam = null; c.storyIn = true; drawChurch(t, 1); c.storyIn = false; c.lamp = 0; [p.x, p.y, c.lit] = keep; c.cam = keep[3]; Object.assign(c, today); }      // years ago: none of today's fight in it
   storyHook = storyAfter = storySky = null; storyRain = false; storyPan = 0;
   ctx.fillStyle = css([6, 4, 16], 1 - sa); ctx.fillRect(0, 0, W, H);      // each scene fades in from black and out to it
-  if (st.card) { const cd = st.card, sh = ctx.createRadialGradient(W / 2, H * .44, 0, W / 2, H * .44, W * .62); sh.addColorStop(0, css([6, 4, 16], .55 * clamp(cd.t / .8))); sh.addColorStop(1, css([6, 4, 16], 0)); ctx.save(); ctx.translate(0, H * .44); ctx.scale(1, .45); ctx.translate(0, -H * .44); ctx.fillStyle = sh; ctx.fillRect(0, 0, W, H * 2); ctx.restore(); drawChapter(t, cd.t, true); if (cd.t > 1.6) tapHint('tapGo', clamp((cd.t - 1.6) / .3));      // over the rain and the drawing back: a soft shade so it reads over the town, the chapter's card, then "tap anywhere to continue"
+  if (st.card) { const cd = st.card, sh = ctx.createRadialGradient(W / 2, H * .44, 0, W / 2, H * .44, W * .62); sh.addColorStop(0, css([6, 4, 16], .55 * clamp(cd.t / .8))); sh.addColorStop(1, css([6, 4, 16], 0)); ctx.save(); ctx.translate(0, H * .44); ctx.scale(1, .45); ctx.translate(0, -H * .44); ctx.fillStyle = sh; ctx.fillRect(0, 0, W, H * 2); ctx.restore(); drawChapter(t, cd.t, true); if (cd.t > 1.6) tapHint('tapGo', cd.t - 1.6);      // over the rain and the drawing back: a soft shade so it reads over the town, the chapter's card, then "tap anywhere to continue"
     if (cd.out != null) { ctx.fillStyle = css([6, 4, 16], clamp(cd.out)); ctx.fillRect(0, 0, W, H); } }      // tapped: down to black
 }
 function storyEnd() {      // the card tapped away and the screen gone black: back to the church, fading in from the black
@@ -2435,7 +2435,7 @@ function frame(now) {
   if (mode === 'icon') { drawIcon(T); return; }
   if (mode !== 'title') tick(dt);
   if (mode === 'stall') { updateStall(dt); drawStall(T); }
-  else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); if (tw.view.t >= TVIEW + 1.8) tapHint('tapGo'); } else drawTowerRoom(T); }      // the view from the top: after the clock's second stroke, "tap anywhere to continue"
+  else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); if (tw.view.t >= TVIEW + 1.8) tapHint('tapGo', tw.view.t - TVIEW - 1.8); } else drawTowerRoom(T); }      // the view from the top: after the clock's second stroke, "tap anywhere to continue"
   else if (mode === 'lib') { updateLib(dt); drawLib(T, dt); }
   else if (mode === 'bar') { updateBar(dt); drawBar(T, dt); }
   else if (mode === 'church') { updateChurch(dt); drawChurch(T, dt); }
