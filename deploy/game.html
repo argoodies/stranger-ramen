@@ -2218,7 +2218,7 @@ function drawChurch(t, dt) {
     { const q = v.F('L', o, 0, 1.4); glow(q[0], q[1], s * 2.2, g, .1 + .4 * LIT); }
     v.arch('L', [x, 0, 1.1], 1.24, 2.3, tn(FR)); v.arch('L', o, 1.0, 2.2, mix(g, [255, 255, 255], .3)); v.arch('L', o, 1.0, 1.3, mix(g, GLASS[(k + 1) % 4], .5)); v.arch('L', o, 1.0, .55, mix(g, GLASS[(k + 2) % 4], .6));
     line([v.F('L', o, 0, 0), v.F('L', o, 0, 2.68)], tn(FR), s * .04); for (const z of [.55, 1.3, 2.2]) line([v.F('L', o, -.5, z), v.F('L', o, .5, z)], tn(FR), s * .035);
-    poly([P(x - .5, .1), P(x + .5, .1), P(x + 2.3, 4.2), P(x + 1.0, 4.2)], g, .05 * (1 - LIT)); shafts.push({ cols: [0, 1, 2].map(j => sat(GLASS[(k + j) % 4])), wc: v.F('L', o, 0, 1.3), g, ow: d => P(x + d * .45, .9, 1.2 + 1.5 - d * .2) }); }      // each window: in the dark a faint wash of its colour on the floor; lit, a soft wash of its colours (drawn further down, over the dark)
+    poly([P(x - .5, .1), P(x + .5, .1), P(x + 2.3, 4.2), P(x + 1.0, 4.2)], g, .05 * (1 - LIT)); shafts.push({ cols: [0, 1, 2].map(j => sat(GLASS[(k + j) % 4])), wc: v.F('L', o, 0, 1.3), g, x, k }); }      // each window: in the dark a faint wash of its colour on the floor; lit, a few coloured rays (drawn further down, over the dark)
   for (let k = 0; k < 5; k++) { const x = .6 + 3.2 * k; v.box(x - .2, 0, 0, .4, .2, Hh - .5, [255, 248, 238]); v.box(x - .28, 0, Hh - .5, .56, .26, .16, GOLD); v.box(x - .28, 0, 0, .56, .26, .2, [240, 228, 218]); }
   { const o = [0, my, 3.05], RS = .8, ring = (r, n = 32) => { const a = []; for (let k = 0; k < n; k++) { const q = TAU * k / n; a.push(v.F('R', o, r * Math.cos(q), r * Math.sin(q))); } return a; }, m = v.F('R', o, 0, 0);
     glow(m[0], m[1], s * 3.4 * RS, [255, 232, 190], .1 + .5 * LIT); poly(ring(1.36 * RS), tn(FR)); poly(ring(1.26 * RS), GOLD);
@@ -2234,11 +2234,15 @@ function drawChurch(t, dt) {
   for (const e of suckers) drawVortex(P, e.x, e.y, t, e.spin > 0, s);
   if (suckers.length) ctx.restore();
   { ctx.fillStyle = css([14, 12, 44], lerp(.5, .4, LIT)); ctx.fillRect(0, 0, W, H); }      // the night in the church: lit or not, the stone stays dark
-  if (LIT > 0) { const WL = [255, 246, 228];      // lit: each stained-glass window on the left glows and spills a soft wash of its colours, then warm pools under the candles
-    for (const { cols, wc, g, ow } of shafts) { glow(wc[0], wc[1], s * 1.5, mix(WL, g, .4), .45 * LIT); if (!cols) continue;      // the glass itself shines
-      ctx.save(); ctx.globalCompositeOperation = 'screen'; const q = ow(0); glow(q[0], q[1], s * 2.9, cols[0], .55 * LIT); ctx.restore(); }      // and spills a soft wash of its own colour about it: no rays
-    const pool = (x, y, r, col, a) => { const q = P(x, y), rr = s * r * 1.22; ctx.save(); ctx.translate(q[0], q[1]); ctx.scale(1, .577); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rr); g.addColorStop(0, css(col, a)); g.addColorStop(.45, css(col, a * .45)); g.addColorStop(1, css(col, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill(); ctx.restore(); };      // a soft pool of light on the floor
-    for (const [x, y] of CANDLES) pool(x, y, 1.5, [255, 190, 110], .3 * LIT); pool(1.2, my, 2, [255, 206, 130], .26 * LIT); }
+  if (LIT > 0) { const WL = [255, 246, 228], D = [.6, 1.55, -1], RAYS = [[-.3, 1.95, .06], [-.08, 1.45, .08], [.14, 2.15, .05], [.32, 1.2, .07]];      // lit: the light is the windows' — each stained-glass window on the left sends a few thin coloured rays slanting down toward the floor, gone before they reach it
+    const hull = pts => { pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = []; for (const q of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); } for (const q of pts.slice().reverse()) { while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); } return lo.slice(0, -1).concat(up.slice(0, -1)); };
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    for (const { cols, wc, g, x, k } of shafts) { glow(wc[0], wc[1], s * 1.5, mix(WL, g, .4), .45 * LIT); if (!cols) continue;      // the glass itself shines
+      RAYS.forEach(([u, w, hw], j) => { const z = 1.2 + w, T = z - .45, src = [], end = [];      // each ray: a small patch of the glass, carried down along the light until just above the floor
+        for (const [du, dw] of [[-hw, -.12], [hw, -.12], [hw, .12], [-hw, .12]]) { src.push(P(x + u + du, 0, z + dw)); end.push(P(x + u + du + D[0] * T, D[1] * T, z + dw + D[2] * T)); }
+        const a0 = P(x + u, 0, z), a1 = P(x + u + D[0] * T, D[1] * T, z + D[2] * T), col = cols[(j + k) % 3], al = .5 * LIT * (.8 + .2 * Math.sin(t * .6 + k * 1.7 + j * 2.3)), gr = ctx.createLinearGradient(a0[0], a0[1], a1[0], a1[1]);
+        gr.addColorStop(0, css(col, al)); gr.addColorStop(.5, css(col, al * .45)); gr.addColorStop(.9, css(col, 0)); ctx.fillStyle = gr; ctx.beginPath(); hull(src.concat(end)).forEach((q, n) => n ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fill(); }); }
+    ctx.restore(); }
   // marks on the floor: what is about to hit, and where
   for (const sh of c.shots) { const q = P(sh.x1, sh.y1), u = sh.t / sh.T, r = s * .62 * 1.22; ell(q[0], q[1], r, r * .577, RED, .1 + .2 * u); ctx.beginPath(); ctx.ellipse(q[0], q[1], r, r * .577, 0, 0, TAU); ctx.strokeStyle = css([255, 110, 110], .5 + .4 * u); ctx.lineWidth = 1.5; ctx.stroke(); }
   for (const e of c.foes) { if (e.hp <= 0 || e.inv || e.wave !== c.wave) continue;
@@ -2257,13 +2261,13 @@ function drawChurch(t, dt) {
     { const q = P(.95, my, 2.6); glow(q[0], q[1], s * (3 + .18 * Math.sin(t * 2)), [255, 236, 180], .75 * LIT); }
     v.box(.55, my - .5, .4, .8, 1, .22, [246, 236, 226]);
     { const wk = clamp(1 - (performance.now() - (c.crossWob || -1e9)) / 700), b = P(.95, my, .62), ang = .025 * wk * Math.sin(performance.now() / 45); ctx.save(); ctx.translate(b[0], b[1]); ctx.rotate(ang); ctx.translate(-b[0], -b[1]); v.box(.84, my - .11, .62, .22, .22, 3.2, GOLD); v.box(.84, my - .8, 2.7, .22, 1.6, .22, GOLD); ctx.restore(); }      // it rocks on its foot when tapped
-    for (const y of [my - 1.1, my + 1.1]) { v.box(.96, y - .05, .4, .1, .1, .7, [250, 244, 232]); const q = P(1.01, y, 1.22); glow(q[0], q[1], s * (.8 + .08 * Math.sin(t * 9 + y)), [255, 214, 140], .85 * LIT); circ(q[0], q[1], s * .055, [255, 240, 190], LIT); } } });
+    for (const y of [my - 1.1, my + 1.1]) { v.box(.96, y - .05, .4, .1, .1, .7, [250, 244, 232]); } } });      // the candles by the cross stay unlit: the church's light is the windows'
   if (!past) objs.push({ k: TORCH[0] + TORCH[1], d: () => { const [x, y] = TORCH, f = c.torchF, top = P(x, y, 1.5), fl = .85 + .15 * Math.sin(t * 13);      // the torch: a brazier on a post, cold until you light it
     v.box(x - .2, y - .2, 0, .4, .4, .12, GOLD); v.box(x - .06, y - .06, .12, .12, .12, 1.05, [150, 104, 84]); v.box(x - .22, y - .22, 1.17, .44, .44, .16, GOLD);
     if (f > 0) { glow(top[0], top[1], s * 3.6 * f * fl, [255, 170, 90], .75 * f); glow(top[0], top[1] - s * .2, s * 1.2 * f, [255, 220, 150], .9 * f);
       poly([[top[0] - s * .16 * f, top[1] + s * .1], [top[0] + s * .16 * f, top[1] + s * .1], [top[0] + s * .05 * Math.sin(t * 9), top[1] - s * .62 * f * fl]], [255, 150, 70]); poly([[top[0] - s * .09 * f, top[1] + s * .1], [top[0] + s * .09 * f, top[1] + s * .1], [top[0] - s * .03 * Math.sin(t * 11), top[1] - s * .36 * f * fl]], [255, 230, 150]); }
     else if (!c.fight && !c.done && !c.storyIn) { const yy = top[1] - s * .5 - Math.abs(Math.sin(t * 3)) * s * .12, r = s * .11; glow(top[0], yy, r * 4, [255, 236, 170], .7); poly([[top[0], yy - r * 1.3], [top[0] + r, yy], [top[0], yy + r * 1.3], [top[0] - r, yy]], [255, 236, 170]); } } });
-  for (const [x, y] of CANDLES) objs.push({ k: x + y, d: () => { v.box(x - .12, y - .12, 0, .24, .24, .12, GOLD); v.box(x - .04, y - .04, .12, .08, .08, 1.3, GOLD); v.box(x - .14, y - .14, 1.42, .28, .28, .06, GOLD); const q = P(x, y, 1.72); glow(q[0], q[1], s * (1 + .1 * Math.sin(t * 8 + x + y)), [255, 214, 140], .8 * LIT); circ(q[0], q[1], s * .06, [255, 240, 190], LIT); } });      // tall candlesticks in the corners
+  for (const [x, y] of CANDLES) objs.push({ k: x + y, d: () => { v.box(x - .12, y - .12, 0, .24, .24, .12, GOLD); v.box(x - .04, y - .04, .12, .08, .08, 1.3, GOLD); v.box(x - .14, y - .14, 1.42, .28, .28, .06, GOLD); } });      // tall candlesticks in the corners, unlit
   const halo = (x, hy, hr) => { ctx.beginPath(); ctx.ellipse(x, hy - hr * 1.5, hr * 1.05, hr * .36, 0, 0, TAU); ctx.strokeStyle = css([255, 222, 130]); ctx.lineWidth = Math.max(1.5, K * .045); ctx.stroke(); glow(x, hy - hr * 1.5, hr * 2.4, [255, 226, 150], .5); };
   for (const n of c.npcs) { if (!seen(n.x)) { n.at = null; continue; } objs.push({ k: n.x + n.y + .3, d: () => {
     const q = P(n.x + .14, n.y + .14), y = q[1] - (n.a < 1 ? (1 - ease(n.a)) * s * .5 : Math.abs(Math.sin(t * 5 + n.y)) * s * .06), x = q[0], hy = y - 1.01 * K, hr = .17 * K;
