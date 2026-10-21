@@ -1814,6 +1814,7 @@ function bagUp() {      // finger up: without a drag it was only a look; with on
 const CL = 14, CW = 9, CX0 = 2.4, CX1 = CL - .8, CY0 = .8, CY1 = CW - .8;
 const MINIONS = ['ass'], BOSSES = ['whirl'], TIERS = 7, SUCKR = 99, SUCKVIS = 6, MINHP = 3, BOSSHP = 100, HEIRHP = 30;      // a small foe takes three plain cuts, a boss a hundred; every hit on you, the boss's too, costs one heart
 const TORCH = [8, CW / 2];      // the torch in the middle of the floor: lighting it starts a fight
+let shaftCv = null;      // a scratch canvas for the church's light shafts
 const CANDLES = [[CX0 + 1.1, CY0 + 1.1], [CX0 + 1.1, CY1 - 1.1], [CX1 - 1.1, CY0 + 1.1], [CX1 - 1.1, CY1 - 1.1]];      // the four tall candlesticks, a pace in from each corner: nobody walks through them, anybody can walk round behind
 function churchBump(o) { const c = church, more = (c.chest ? [[c.chest.x, c.chest.y]] : []).concat((c.npcs || []).filter(n => n.a > .3).map(n => [n.x, n.y])); for (const [x, y] of [TORCH, ...CANDLES, ...more]) {      // the chest and whoever has come to say thanks are solid too
  const dx = o.x - x, dy = o.y - y, d = Math.hypot(dx, dy); if (d < .42) { const k = d > .001 ? .42 / d : 0, q = Math.atan2(dy, dx) + (y < CW / 2 ? 1 : -1) * (dx >= 0 ? 1 : -1) * .05; o.x = x + (k ? Math.cos(q) * .42 : .42); o.y = y + (k ? Math.sin(q) * .42 : 0); } } }      // pushed back out, and a little round it on the side away from the wall, so walking straight at one slides past
@@ -2218,15 +2219,16 @@ function drawChurch(t, dt) {
     { const q = v.F('L', o, 0, 1.4); glow(q[0], q[1], s * 2.2, g, .1 + .4 * LIT); }
     v.arch('L', [x, 0, 1.1], 1.24, 2.3, tn(FR)); v.arch('L', o, 1.0, 2.2, mix(g, [255, 255, 255], .3)); v.arch('L', o, 1.0, 1.3, mix(g, GLASS[(k + 1) % 4], .5)); v.arch('L', o, 1.0, .55, mix(g, GLASS[(k + 2) % 4], .6));
     line([v.F('L', o, 0, 0), v.F('L', o, 0, 2.68)], tn(FR), s * .04); for (const z of [.55, 1.3, 2.2]) line([v.F('L', o, -.5, z), v.F('L', o, .5, z)], tn(FR), s * .035);
-    poly([P(x - .5, .1), P(x + .5, .1), P(x + 2.3, 4.2), P(x + 1.0, 4.2)], g, .05 * (1 - LIT)); for (let j = 0; j < 3; j++) { const f0 = j / 3, f1 = (j + 1) / 3, nx = f => x - .5 + f, fx = f => x + 1.0 + 1.3 * f, gc = sat(GLASS[(k + j) % 4]);      // the shaft in three strips, one for each colour of glass it comes through
-      shafts.push([[f0 - .5, f1 - .5].flatMap(u => [0, 1.2, 2.2].map(w => v.F('L', o, u, w))), [[nx(f0), .1], [nx(f1), .1], [fx(f1), 4.2], [fx(f0), 4.2]], gc, j ? null : v.F('L', o, 0, 1.3)]); } }      // each window: in the dark a faint wash of its colour on the floor; lit, a shaft of light (drawn further down, over the dark)
+    const ol = [[-.5, 0], [.5, 0], [.5, 2.2]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; ol.push([.5 * Math.cos(q), 2.2 + .5 * Math.sin(q)]); }      // the glass's outline, arch and all
+    const win = ol.map(([u, w]) => v.F('L', o, u, w)), floor = ol.map(([u, w]) => P(x + u + .6 * w, .1 + 1.55 * w));      // the light falls in parallel: each point of the window lands on the floor further out, so the patch has the window's arch at its far end
+    poly(floor, g, .05 * (1 - LIT)); shafts.push({ win, floor, cols: [0, 1, 2].map(j => sat(GLASS[(k + j) % 4])), wc: v.F('L', o, 0, 1.3), g }); }      // each window: in the dark a faint wash of its colour on the floor; lit, a shaft of its colours (drawn further down, over the dark)
   for (let k = 0; k < 5; k++) { const x = .6 + 3.2 * k; v.box(x - .2, 0, 0, .4, .2, Hh - .5, [255, 248, 238]); v.box(x - .28, 0, Hh - .5, .56, .26, .16, GOLD); v.box(x - .28, 0, 0, .56, .26, .2, [240, 228, 218]); }
   { const o = [0, my, 3.05], RS = .8, ring = (r, n = 32) => { const a = []; for (let k = 0; k < n; k++) { const q = TAU * k / n; a.push(v.F('R', o, r * Math.cos(q), r * Math.sin(q))); } return a; }, m = v.F('R', o, 0, 0);
     glow(m[0], m[1], s * 3.4 * RS, [255, 232, 190], .1 + .5 * LIT); poly(ring(1.36 * RS), tn(FR)); poly(ring(1.26 * RS), GOLD);
     for (let k = 0; k < 12; k++) { const q0 = TAU * k / 12, q1 = TAU * (k + 1) / 12, qm = (q0 + q1) / 2; poly([m, v.F('R', o, 1.16 * RS * Math.cos(q0), 1.16 * RS * Math.sin(q0)), v.F('R', o, 1.2 * RS * Math.cos(qm), 1.2 * RS * Math.sin(qm)), v.F('R', o, 1.16 * RS * Math.cos(q1), 1.16 * RS * Math.sin(q1))], mix(GLASS[k % 4], [255, 255, 255], .25)); }
     for (let k = 0; k < 12; k++) { const q = TAU * k / 12; line([m, v.F('R', o, 1.16 * RS * Math.cos(q), 1.16 * RS * Math.sin(q))], tn(FR), s * .03); } poly(ring(.3 * RS, 14), GOLD);
     for (const y of [1.6, CW - 1.6]) { const w = [0, y, 1.2]; v.arch('R', [0, y, 1.1], .84, 2.0, tn(FR)); v.arch('R', w, .64, 1.9, mix(GLASS[1], [255, 255, 255], .35)); v.arch('R', w, .64, .9, mix(GLASS[2], [255, 255, 255], .3)); }
-    shafts.push([null, null, [255, 240, 206], m]); }      // the rose window behind the cross only glows: no shaft from it
+    shafts.push({ wc: m, g: [255, 240, 206] }); }      // the rose window behind the cross only glows: no shaft from it
   v.box(0, my - 2, 0, 2.1, 4, .2, [252, 246, 238]); v.box(0, my - 1.4, .2, 1.6, 2.8, .2, [255, 250, 244]);      // the steps of the cross
   if (!c.fight && !(c.story && c.storyIn)) for (let k = 0; k < 4; k++) v.box(CL + k * .32, my - .7, -1.2, .32, 1.4, 1.2 - .26 * k, [240, 230, 220]);      // the way out, there whenever no fight is on: steps going down from the door, as at the library
   if (!c.fight && !(c.story && c.storyIn)) { const q = P(CL + .5, my, -.3), a = (.5 + .3 * Math.sin(t * 3)) * (.4 + .6 * LIT); glow(q[0], q[1], s * 1.3, [255, 236, 190], .6 * a); }
@@ -2236,11 +2238,19 @@ function drawChurch(t, dt) {
   if (suckers.length) ctx.restore();
   { ctx.fillStyle = css([14, 12, 44], lerp(.5, .4, LIT)); ctx.fillRect(0, 0, W, H); }      // the night in the church: lit or not, the stone stays dark
   if (LIT > 0) { const WL = [255, 246, 228], cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);      // lit: from each stained-glass window on the left a shaft of its own coloured light, as in the library, then warm pools under the candles
-    for (const [rim, patch, g, wc] of shafts) { if (wc) glow(wc[0], wc[1], s * 1.5, mix(WL, g, .4), .45 * LIT); if (!rim) continue;      // the glass itself shines
-      const fl = patch.map(([x, y]) => P(x, y)), pts = rim.concat(fl).sort((a, b) => a[0] - b[0] || a[1] - b[1]), lo = [], up = [];
+    for (const { win, floor, cols, wc, g } of shafts) { glow(wc[0], wc[1], s * 1.5, mix(WL, g, .4), .45 * LIT); if (!win) continue;      // the glass itself shines
+      const pts = win.concat(floor).sort((a, b) => a[0] - b[0] || a[1] - b[1]), lo = [], up = [];
       for (const q of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); } for (const q of pts.slice().reverse()) { while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
-      const hull = lo.slice(0, -1).concat(up.slice(0, -1)), w0 = rim.reduce((a, q) => [a[0] + q[0] / rim.length, a[1] + q[1] / rim.length], [0, 0]), w1 = fl.reduce((a, q) => [a[0] + q[0] / fl.length, a[1] + q[1] / fl.length], [0, 0]), col = g, gr = ctx.createLinearGradient(w0[0], w0[1], w1[0], w1[1]);
-      gr.addColorStop(0, css(col, .38 * LIT)); gr.addColorStop(1, css(col, .1 * LIT)); ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.beginPath(); hull.forEach((q, n) => n ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fillStyle = gr; ctx.fill(); poly(fl, g, .22 * LIT); ctx.restore(); }
+      const hull = lo.slice(0, -1).concat(up.slice(0, -1)), avg = a => a.reduce((m, q) => [m[0] + q[0] / a.length, m[1] + q[1] / a.length], [0, 0]), w0 = avg(win), w1 = avg(floor);
+      const bx = Math.floor(Math.min(...hull.map(q => q[0]))) - 2, by = Math.floor(Math.min(...hull.map(q => q[1]))) - 2, bw = Math.ceil(Math.max(...hull.map(q => q[0]))) + 2 - bx, bh = Math.ceil(Math.max(...hull.map(q => q[1]))) + 2 - by;
+      const oc = shaftCv || (shaftCv = document.createElement('canvas')), o2 = oc.getContext('2d'); oc.width = Math.ceil(bw * DPR); oc.height = Math.ceil(bh * DPR); o2.setTransform(DPR, 0, 0, DPR, -bx * DPR, -by * DPR);      // the shaft is painted on its own, then laid over the church
+      const dl = Math.hypot(w1[0] - w0[0], w1[1] - w0[1]) || 1; let n = [-(w1[1] - w0[1]) / dl, (w1[0] - w0[0]) / dl]; if ((win[0][0] - w0[0]) * n[0] + (win[0][1] - w0[1]) * n[1] > 0) n = [-n[0], -n[1]];      // across the shaft, from the window's left edge to its right
+      const dots = hull.map(q => (q[0] - w0[0]) * n[0] + (q[1] - w0[1]) * n[1]), d0 = Math.min(...dots), d1 = Math.max(...dots), ga = o2.createLinearGradient(w0[0] + n[0] * d0, w0[1] + n[1] * d0, w0[0] + n[0] * d1, w0[1] + n[1] * d1);
+      ga.addColorStop(.15, css(cols[0])); ga.addColorStop(.5, css(cols[1])); ga.addColorStop(.85, css(cols[2]));      // the colours of the glass, blending softly into one another
+      const path = a => { o2.beginPath(); a.forEach((q, i) => i ? o2.lineTo(q[0], q[1]) : o2.moveTo(q[0], q[1])); o2.closePath(); };
+      o2.fillStyle = ga; path(hull); o2.globalAlpha = .7; o2.fill(); path(floor); o2.globalAlpha = .6; o2.fill(); o2.globalAlpha = 1;      // the shaft, and brighter where it lands
+      const gf = o2.createLinearGradient(w0[0], w0[1], w1[0], w1[1]); gf.addColorStop(0, 'rgba(0,0,0,1)'); gf.addColorStop(.7, 'rgba(0,0,0,.5)'); gf.addColorStop(1, 'rgba(0,0,0,.75)'); o2.globalCompositeOperation = 'destination-in'; o2.fillStyle = gf; o2.fillRect(bx, by, bw, bh); o2.globalCompositeOperation = 'source-over';      // fading as it falls
+      ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = .55 * LIT; ctx.drawImage(oc, bx, by, bw, bh); ctx.restore(); }
     const pool = (x, y, r, col, a) => { const q = P(x, y), rr = s * r * 1.22; ctx.save(); ctx.translate(q[0], q[1]); ctx.scale(1, .577); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rr); g.addColorStop(0, css(col, a)); g.addColorStop(.45, css(col, a * .45)); g.addColorStop(1, css(col, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill(); ctx.restore(); };      // a soft pool of light on the floor
     for (const [x, y] of CANDLES) pool(x, y, 1.5, [255, 190, 110], .3 * LIT); pool(1.2, my, 2, [255, 206, 130], .26 * LIT); }
   // marks on the floor: what is about to hit, and where
