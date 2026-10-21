@@ -298,10 +298,11 @@ function wallThick(v, X, Y, Hh, z0, top, endX, endY, T = .24) {
 }
 
 // ------------------------------------------------------------ figures
+let figNoShadow = false;      // set while a figure is drawn toppled: its own shadow would turn with it and stick out behind it
 function fig(x, y, k, o = {}) {
   const body = o.body || WHITE, head = o.head || SKIN, a = o.a == null ? 1 : o.a, kind = o.kind || 'ida', lean = (o.lean || 0) + (o.kind === 'drunk' ? .13 * Math.sin(performance.now() / 420) : 0), shade = [70, 50, 110];
   if (a <= 0 || k <= 0) return;
-  if (!o.noShadow) ell(x, y, .36 * k, .10 * k, [20, 12, 40], 0.3 * a);
+  if (!o.noShadow && !figNoShadow) ell(x, y, .36 * k, .10 * k, [20, 12, 40], 0.3 * a);
   const ax = x + lean * k, ay = y - .95 * k;
   const bl = mix(body, [255, 255, 255], .12), br = mix(body, shade, .26);
   const hat = o.hat || body, hl = mix(hat, [255, 255, 255], .12), hd = mix(hat, shade, .26);
@@ -1672,7 +1673,7 @@ function drawVortex(P, cx, cy, t, out, s, dim = 0) {      // dim: the dark laid 
 function drawCrown(hx, hy, k, cc, a = 1) { const cw = k * .17; poly([[hx - cw, hy], [hx + cw, hy], [hx + cw, hy - k * .17], [hx + cw * .5, hy - k * .08], [hx, hy - k * .2], [hx - cw * .5, hy - k * .08], [hx - cw, hy - k * .17]], cc, a); }      // the great whirlwind's little crown, the colour of its robe
 function drawTopple(x, y, K, u, dir, body) {      // anyone falling as the chef falls: a stagger, then toppling about the feet to lie on the floor; body draws them standing at 0,0
   const st = clamp(u / .22), fall = eout(clamp((u - .18) / .22)), ang = dir * (st * .18 + fall * 1.32), sink = st * K * .12 * (1 - fall);
-  ell(x + dir * fall * K * .45, y + K * .02, K * (.36 + .5 * fall), K * (.1 + .06 * fall), [20, 12, 40], .3); ctx.save(); ctx.translate(x, y + sink); ctx.rotate(ang); body(); ctx.restore(); }
+  ell(x + dir * fall * K * .62, y + K * .02, K * (.36 + .3 * fall), K * (.1 + .05 * fall), [20, 12, 40], .3); ctx.save(); ctx.translate(x, y + sink); ctx.rotate(ang); figNoShadow = true; try { body(); } finally { figNoShadow = false; } ctx.restore(); }      // their shadow on the floor (lying, under the middle of the body, stopping at the feet); the figure's own, which would turn with it, is left out
 function drawStar(x, y, r, c, a = 1) { const pts = []; for (let i = 0; i < 10; i++) { const q = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; pts.push([x + Math.cos(q) * rr, y + Math.sin(q) * rr]); } poly(pts, c, a); }
 function drawKnifeFlat(x, y, r, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(1, .55); drawKnife(0, 0, r, 1); ctx.restore(); }      // the knife lying on the floor, foreshortened
 function drawKnife(x, y, r, a = 1, blade = [226, 232, 244]) {      // the kitchen knife, as a picture
@@ -1924,9 +1925,16 @@ const RAIN_FAR = -9, RAIN_NEAR = 12;      // landing nearer than the island's ba
 function rainDrop(v, t, r, K) {      // one drop, aimed at its spot on the ground: it comes down along the rain's lean from above the screen to where it lands; the nearer that spot, the longer, wider and brighter it looks. On open ground it opens a ring; off the island it just falls on into the dark
   const ZF = 9, onIsland = walkable(Math.floor(r.gx), Math.floor(r.gy)), land = onIsland ? v.P(wx(r.gx, r.gy), r.gy, wz(r.gx, r.gy)) : v.P(r.gx, r.gy), hf = ZF * v.s, top = land[1] - hf;      // every drop falls the same height (ZF) onto its spot, so with the spots spread evenly the rain is even all over the screen
   if (land[1] < -40 || top > H + 40 || land[0] + hf * RAIN_SLANT < -60 || land[0] > W + 60) return;
-  const near = clamp((land[1] / H + .1) / 1.4), R = rainLook(near), FALL = .86, ph = (t * .47 * r.sp + r.ph) % 1;      // each drop keeps its own steady pace in the world: the camera drawing back makes the rain look smaller, never quicker (a pace worked out from the zoom used to send it racing as the view widened)
+  const near = clamp((land[1] / H + .1) / 1.4), R = rainLook(near), FALL = .86, ph = (t * .61 * r.sp + r.ph) % 1;      // each drop keeps its own steady pace in the world: the camera drawing back makes the rain look smaller, never quicker (a pace worked out from the zoom used to send it racing as the view widened)
   if (ph < FALL) { const yb = lerp(top, land[1], ph / FALL), xb = land[0] + (land[1] - yb) * RAIN_SLANT; if (xb < -60 || xb > W + 60) return; const ya = yb - R.len, xa = xb + R.len * RAIN_SLANT, g = ctx.createLinearGradient(xa, ya, xb, yb); g.addColorStop(0, css([236, 242, 255], 0)); g.addColorStop(1, css([236, 242, 255], R.al)); ctx.strokeStyle = g; ctx.lineWidth = R.wd; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(xb, yb); ctx.stroke(); }
   else if (onIsland) { const w = (ph - FALL) / (1 - FALL), rr = K * (.06 + .3 * w); ctx.beginPath(); ctx.ellipse(land[0], land[1], rr, rr * .45, 0, 0, TAU); ctx.strokeStyle = css([236, 244, 255], .6 * (1 - w)); ctx.lineWidth = 1; ctx.stroke(); } }
+const RIPPLES = []; { let k = 0; const add = (x0, y0, w, h, n, z) => { for (let i = 0; i < n; i++, k++) { const h1 = Math.abs(Math.sin(k * 12.9898) * 43758.5453 % 1), h2 = Math.abs(Math.sin(k * 78.233) * 12543.13 % 1), h3 = Math.abs(Math.sin(k * 39.425) * 24634.63 % 1); RIPPLES.push({ x: x0 + .12 + (w - .24) * h1, y: y0 + .12 + (h - .24) * h2, z, ph: h3 * 9, sp: .8 + .4 * h1 * h2 }); } };
+  for (let i = -5; i < 5; i++) for (let j = -5; j < 5; j++) if (walkable(i, j)) add(i, j, 1, 1, 1, null);      // one ripple to each cell of open ground on the island
+  add(CDOOR[0], CDOOR[1], 1, 1, 3, null); add(BDOOR[0], BDOOR[1], 1, 1, 1, null);      // and the ground in front of the church's door, and the walkway to the coffee house
+  add(6, 2.85, 1.3, 1.3, 3, 1.51); }      // and the coffee house's flat roof
+function ripple(v, t, K, r) {      // a ring opening where a drop has just landed, now and then, at its own pace
+  const ph = (t * .55 * r.sp + r.ph) % 1; if (ph > .4) return; const w = ph / .4, q = r.z == null ? v.P(wx(r.x, r.y), r.y, wz(r.x, r.y)) : v.P(r.x, r.y, r.z), rr = K * (.06 + .3 * w);
+  ctx.beginPath(); ctx.ellipse(q[0], q[1], rr, rr * .45, 0, 0, TAU); ctx.strokeStyle = css([236, 244, 255], .6 * (1 - w)); ctx.lineWidth = 1; ctx.stroke(); }
 function rainField(v, t, K, part, objs) {      // the rain, drawn in its three places by where each drop lands: 'far' (behind the island), 'mid' (in among the island's things, via objs) or 'near' (in front of it)
   for (const r of RAIN) { if (part === 'far' ? r.d >= RAIN_FAR : part === 'near' ? r.d <= RAIN_NEAR : (r.d < RAIN_FAR || r.d > RAIN_NEAR)) continue;
     if (part === 'mid') objs.push({ k: r.d + .45, d: () => rainDrop(v, t, r, K) }); else rainDrop(v, t, r, K); } }
@@ -1934,7 +1942,7 @@ const RAINSPOTS = []; for (let i = -5; i < 5; i++) for (let j = -5; j < 5; j++) 
 function storyCast(sc, u, t, v, objs, K, at) {      // put the people of this scene into the town's or the church's own list of things to draw
   const pos = (x, y) => at === 'town' ? v.P(wx(x, y), y, wz(x, y)) : v.P(x, y), L = S().story, out = [];
   if (sc.draw && at === 'church') { const he = sc.cast(u).find(a => a.who === 'he'), P = v.P.bind(v); ctx.save(); ctx.beginPath(); [[CX0 - .3, CY0 - .6], [CL, CY0 - .6], [CL, CY1 + .6], [CX0 - .3, CY1 + .6]].forEach(([x, y], n) => { const q = P(x, y); n ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath(); ctx.clip(); drawVortex(P, he.x, he.y, t, false, K / .8, .5); ctx.restore(); }      // drawn inward as everything is shut: the great whirlwind's own pull, on the floor beneath everyone, as in the fight (and as faint: the church's dark lies over it there)
-  if (sc.rain && at === 'town') rainField(v, t, K, 'mid', objs);      // the rain that lands on the island and around it, in among everything standing there
+  if (sc.rain && at === 'town') { for (const r of RIPPLES) if (r.z == null) ripple(v, t, K, r); objs.push({ k: 12.5, d: () => { for (const r of RIPPLES) if (r.z != null) ripple(v, t, K, r); } }); rainField(v, t, K, 'mid', objs); }      // ripples on the ground (under everything standing on it) and on the coffee house's roof (after the house)      // the rain that lands on the island and around it, in among everything standing there
   for (const a of sc.cast(u)) { const q = pos(a.x, a.y), hop = a.run ? Math.abs(Math.sin(t * 14)) * K * .1 : a.bump ? Math.abs(Math.sin(t * 9 + a.x)) * K * .06 : 0, y = q[1] - hop; a.q = [q[0], y]; out.push(a);
     objs.push({ k: a.x + a.y + .02, d: () => { ctx.save(); if (a.fade != null) ctx.globalAlpha *= a.fade;
       if (a.topple != null) { if (a.who === 'she' && a.glow) glow(q[0] - K * .5, y - K * .2, K * 1.4, [226, 234, 252], .45 * a.glow); drawTopple(q[0], y, a.who === 'inv' ? K : K * SHE_K, a.topple, a.dir || -1, () => a.who === 'inv' ? storyInv(0, 0, K) : storyShe(0, 0, K * SHE_K)); }      // the dead fall as the chef falls, and stay where they fell
