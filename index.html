@@ -1973,7 +1973,7 @@ function storyStep(dt) {      // the story's clock: scene by scene; on the last,
   const c = church, st = c.story;
   if (st.card) { st.card.t += dt; if (st.card.out != null && (st.card.out += dt / .9) >= 1) storyEnd(); return; }
   st.t += dt;
-  if (st.i === STORY.length - 1 && st.t >= STORY[st.i].d) { st.t = STORY[st.i].d; st.card = { t: 0 }; [67, 71, 74, 79].forEach((m, k) => chime(m, .12 * k, .14, 1.4)); bell(196, .1); return; }
+  if (st.i === STORY.length - 1 && st.t >= STORY[st.i].d) { st.t = STORY[st.i].d; st.card = { t: 0 }; return; }      // the card comes up in silence: only the rain
   const D = st.i < 0 ? 1.8 : STORY[st.i].d + STORY_HOLD;
   if (st.t >= D) { st.i++; st.t = 0; if (st.i === 0) { const p = c.p; p.moving = false; p.target = null; p.tx = p.x; p.ty = p.y; } chime(pick([62, 65, 69, 72]), 0, .06, .8); }      // the chef stops where the story begins
 }
@@ -2184,7 +2184,7 @@ function debugAsk(msg, val, done) {      // a small input box over the game (win
   document.getElementById('dbgok').onclick = () => close(true); document.getElementById('dbgno').onclick = () => close(false); inp.onkeydown = ev => { if (ev.key === 'Enter') close(true); };
 }
 function churchTap(sx, sy) {
-  const c = church, p = c.p, v = chv, K = v.s * .8; if (c.story) { const cd = c.story.card; if (cd && cd.t > 1.6 && cd.out == null) { cd.out = 0; chime(74, 0, .1); } return; }      // during the story taps do nothing, except to take the closing card away if (c.chapter) return; if (c.down > 0) return; p.arrived = false;
+  const c = church, p = c.p, v = chv, K = v.s * .8; if (c.story) { const cd = c.story.card; if (cd && cd.t > 1.6 && cd.out == null) { cd.out = 0; } return; }      // during the story taps do nothing, except to take the closing card away if (c.chapter) return; if (c.down > 0) return; p.arrived = false;
   if (c.fight && hudDrink && Math.hypot(sx - hudDrink[0], sy - hudDrink[1]) < 22) { playDrink(); return; }
   p.pend = null;
   let best = null, bd = K * 1.05;
