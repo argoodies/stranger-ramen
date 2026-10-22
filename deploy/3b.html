@@ -2633,7 +2633,10 @@ if (location.hash) {
   let bookAt = null;
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
-  const APPEAR = [[0, () => bell(146.8, .12)], [.6, () => chime(62, 0, .12, 1.4)], [1.2, () => chime(66, 0, .12, 1.4)], [1.8, () => chime(69, 0, .12, 1.4)], [2.4, () => { chime(74, 0, .12, 1.6); chime(81, .1, .1, 1.6); }]], APPEAR_END = 3.0;
+  // the opening of the Monument Valley 血染钟楼 video (botc-video/make.py, its title scene): the title chord fades in underneath, a chime rises with each thing that appears
+  // (62 66 69 74 76 78, 0.6 s apart), and then the tower bell rings with a quick sparkle of four high chimes
+  const APPEAR = [[0, () => { if (AC) pad([38, 45, 50, 54, 57, 64], AC.currentTime, 7); chime(62, 0, .2, 1.6); }], [.6, () => chime(66, 0, .2, 1.6)], [1.2, () => chime(69, 0, .2, 1.6)], [1.8, () => chime(74, 0, .2, 1.6)], [2.4, () => chime(76, 0, .2, 1.6)], [3.0, () => chime(78, 0, .2, 1.6)],
+    [3.8, () => { bell(146.8, .26); [74, 78, 81, 86].forEach((m, j) => chime(m, .12 * j, .12, 1.6)); }]], APPEAR_END = 3.9, APPEAR_TAP = 3.0;
   const ap = k => appear ? clamp((appear.t - APPEAR[k][0]) / .55) : 1;      // how far in the k-th thing has faded      // this visit: until 小染书 has been read only it sparkles; after that the Storyteller does
   let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
@@ -2688,7 +2691,7 @@ if (location.hash) {
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
         if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
-  towerTap = (x, y) => { if (tr || appear) return;      // nothing to tap until everything has appeared if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
+  towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return;      // nothing to tap until everything has appeared (the bell may still be ringing out) if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
