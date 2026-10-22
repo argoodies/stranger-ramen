@@ -19,7 +19,7 @@ boot = """<script>
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
-  // ---- 小染书: a red oval button floating high over the table in the lobby; tapped, it opens a page with the three roles' rules
+  // ---- 小染书: a small red oval button floating beside the Storyteller's grimoire in the lobby; tapped, it opens a page with the three roles' rules
   const KIDF = '"HanziPen SC","Hannotate SC","Wawati SC","Yuanti SC","YouYuan","幼圆","Comic Sans MS","Chalkboard SE",' + THINF;      // the most childlike hand the device has
   const RB = {
     hans: { title: '小染书', btn: '小染书', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
@@ -30,14 +30,12 @@ boot = """<script>
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die while you are sober.', pukka: 'You are the Demon. Each night, choose a player: they are poisoned. The previously poisoned player dies, then becomes healthy.', heretic: 'Whoever wins, loses, and whoever loses, wins — even if you are dead (unless you are drunk or poisoned).' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
-  function drawBook(t, P, s) {      // a flat red oval floating in the air above the middle of the table, like a plain button with no shadow, its name in white handwriting
-    const q = P(0, 0, 6.4), rx = s * 1.25, ry = s * .62, x = q[0], y = q[1] + Math.sin(t * 1.7) * s * .12;
+  function drawBook(t, P, s) {      // a small flat red oval floating in the air just to the right of the Storyteller's grimoire, like a plain button with no shadow, its name in white
+    const q = P(2.0, -1.52, 2.05), rx = s * .72, ry = s * .36, x = q[0], y = q[1] + Math.sin(t * 1.6) * s * .06;
     ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, TAU); ctx.fillStyle = css([210, 48, 58]); ctx.fill();
-    const T = rb().btn, fs = T.length > 3 ? s * .34 : s * .5; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff';      // a light round stroke round the letters: soft, like marker, not too heavy
-    if (T.length <= 3) [...T].forEach((ch, k) => { const cx = x + (k - 1) * fs * 1.02, cy = y + [-.04, .05, -.02][k] * fs; ctx.save(); ctx.translate(cx, cy); ctx.rotate([-.1, .07, -.04][k]); ctx.strokeText(ch, 0, 0); ctx.fillText(ch, 0, 0); ctx.restore(); });      // each character a little crooked
-    else { ctx.save(); ctx.translate(x, y); ctx.rotate(-.04); ctx.strokeText(T, 0, 0); ctx.fillText(T, 0, 0); ctx.restore(); }
-    bookAt = [x, y, rx * 1.05]; }
+    const T = rb().btn, fs = T.length > 3 ? s * .22 : s * .3; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, y + fs * .03); ctx.fillText(T, x, y + fs * .03);      // straight, in white handwriting
+    bookAt = [x, y, rx * 1.1]; }
   function openBook() {      // the page about the three roles (only the roles); the cross at the top right closes it
     if (document.getElementById('rb3')) return; const R = rb(), d = document.createElement('div'); d.id = 'rb3';
     d.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(10,8,30,.55);display:flex;align-items:center;justify-content:center;padding:14px';
