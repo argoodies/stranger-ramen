@@ -32,9 +32,11 @@ boot = """<script>
   let bookAt = null;
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
-  // the opening's sounds, over the background music and nothing else: a low 咚 each for the table, the Storyteller and you, then 丁零定 for 小染书; its sparkle comes in silently
-  const dong = () => chime(50, 0, .3, 1.1), dingLingDing = () => { chime(81, 0, .16, 1.2); chime(86, .11, .13, .9); chime(83, .28, .16, 1.6); };
-  const APPEAR = [[0, dong], [.6, dong], [1.2, dong], [1.8, dingLingDing], [2.4, () => {}]], APPEAR_END = 3.0, APPEAR_TAP = 2.6;
+  // the opening's sounds, over the background music and nothing else, as in the Monument Valley 血染钟楼 video's opening (botc-video/make.py):
+  // 咚 — a chime that climbs with each thing that appears (table 62, Storyteller 66, you 69); then 丁零定 for 小染书 — a quick, higher three-note bell
+  // (74 78 81, 0.12 s apart, the video's sparkle); its diamond comes in silently
+  const dong = m => () => chime(m, 0, .22, 1.6), dingLingDing = () => [74, 78, 81].forEach((m, j) => chime(m, .12 * j, .14, 1.6));
+  const APPEAR = [[0, dong(62)], [.6, dong(66)], [1.2, dong(69)], [1.8, dingLingDing], [2.4, () => {}]], APPEAR_END = 3.0, APPEAR_TAP = 2.6;
   const ap = k => appear ? clamp((appear.t - APPEAR[k][0]) / .55) : 1;      // how far in the k-th thing has faded      // this visit: until 小染书 has been read only it sparkles; after that the Storyteller does
   let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
