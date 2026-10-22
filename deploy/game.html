@@ -1247,135 +1247,6 @@ function bowlTopMini(x, y, r, b) {
   if (b.cilantro) ell(x + r * .12, y + r * .14, r * .16, r * .07, [70, 160, 90]);
 }
 
-// ------------------------------------------------------------ inside the clocktower: a three-player game
-// Sailor / Pukka / Heretic, one each. Rules follow the official ability texts:
-//   Sailor (Townsfolk): each night choose an alive player: either you or they are drunk until dusk. You can't die.
-//   Pukka (Demon): each night choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.
-//   Heretic (Outsider): whoever wins, loses & whoever loses, wins, even if you are dead.
-const RN = { sailor: '水手', pukka: '普卡', heretic: '异端分子' };
-const ABIL = {
-  sailor: '每个夜晚，你要选一名存活的玩家：你和他之中，有一人会醉酒到下个黄昏。只要你清醒，你就不会死。',
-  pukka: '你是恶魔。每个夜晚，你要选一名玩家：他中毒。上一个因你中毒的人会在这时死去，然后恢复健康。',
-  heretic: '只要你没有醉酒或中毒，这一局赢的算输、输的算赢——哪怕你已经死了。',
-};
-const stN = i => i === 0 ? '你' : i === 1 ? '左边那位' : '右边那位', npcN = (v, i) => i === v ? '我' : i === 0 ? '你' : '他', BLOOK = [{ kind: 'chef', apron: [220, 80, 80] }, { kind: 'ida', hat: [90, 150, 230] }, { kind: 'ida', hat: [240, 190, 110] }];
-const BG = { run: 0, auto: false, roles: [], alive: [], drunk: -1, poisoned: -1, night: 0, dark: 0, isNight: false, bubble: null, wait: null, votes: null, reveal: false, over: false, result: null };
-const BHIT = {};
-function bsay(who, txt) { return new Promise(res => { if (BG.auto) return res(); BG.bubble = { who, text: txt }; BG.wait = { type: 'say', res }; }); }
-function bpick(ok, txt, blank) { return new Promise(res => { if (BG.auto) { const c = [0, 1, 2, 'st'].filter(ok); if (blank !== undefined) c.push(blank); return res(pick(c)); } BG.bubble = { who: 'st', text: txt }; BG.wait = { type: 'pick', ok, res, blank }; }); }
-function botcTap(x, y) {
-  const w = BG.wait; if (!w) return;
-  if (w.type === 'say') { BG.wait = null; chime(pick([69, 74, 76]), 0, .07, .6); w.res(); return; }
-  let best = null, bd = 1e9; for (const k of [0, 1, 2, 'st']) { const h = BHIT[k]; if (!h) continue; const d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.2 && d < bd) { bd = d; best = k; } }
-  if (best == null || !w.ok(best)) { if (w.blank !== undefined) { BG.wait = null; chime(57, 0, .1, .8); w.res(w.blank); } else if (best != null) chime(45, 0, .1, .3); return; }
-  BG.wait = null; chime(best === 'st' ? 62 : 74, 0, .16, 1.2); if (best !== 'st') BG.pop = { who: best, t: 0 }; w.res(best);
-}
-async function playBotc() {
-  const g = BG, run = ++g.run, ST = 'st', live = () => g.alive.filter(Boolean).length;
-  const roles = ['sailor', 'pukka', 'heretic']; for (let i = 2; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [roles[i], roles[j]] = [roles[j], roles[i]]; }
-  Object.assign(g, { snaps: [], roles, alive: [true, true, true], drunk: -1, poisoned: -1, night: 0, isNight: false, votes: null, reveal: false, revealT: 0, showMine: false, deathBy: [null, null, null], gonePoison: -1, goneDrunk: -1, deadPoison: -1, over: false, result: null, log: [] });
-  const si = roles.indexOf('sailor'), pi = roles.indexOf('pukka'), hi = roles.indexOf('heretic');
-  // the Pukka's poison only works while the Pukka is sober. A player the Pukka kills is still poisoned at the time of death
-  // (deadPoison), so their ability stays off: a Heretic killed this way does not flip the result.
-  const poisonedNow = i => (g.poisoned === i || g.deadPoison === i) && g.alive[pi] && g.drunk !== pi;
-  const sailorSafe = () => g.drunk !== si && !poisonedNow(si);
-  const win = () => !g.alive[pi] ? 'good' : live() <= 2 ? 'evil' : null;
-  // a dead character's tokens leave play: the Pukka's single poison token, the Sailor's drunk token
-  const clean = () => { if (!g.alive[pi] && g.poisoned >= 0) { if (g.drunk !== pi) g.gonePoison = g.poisoned; /* a Pukka who dies drunk leaves no token behind: his tokens were already off the table */ g.poisoned = -1; } if (!g.alive[si] && g.drunk >= 0) { g.goneDrunk = g.drunk; g.drunk = -1; } };
-  const recap = [], nm = i => stN(i) + '（' + RN[roles[i]] + '）'; g.recap = recap;
-  const claim = [null, null, null], lastPick = [null, null, null], bluff = Math.random() < .5 ? 'sailor' : 'heretic';
-  await bsay(ST, S().welcome);
-  g.showMine = true; if (!g.auto) { chime(74, 0, .16, 1.4); chime(81, .1, .14, 1.4); }
-
-  let raw = null;
-  while (run === g.run) {
-    // ---- night
-    g.night++; g.isNight = true; g.votes = null; g.drunk = -1; let died = -1, rec = '第 ' + g.night + ' 夜。'; const aud = { p0: g.poisoned, sailorPoisoned: g.alive[si] && poisonedNow(si) };
-    await bsay(ST, S().night);
-    if (g.alive[si]) {
-      const works = !poisonedNow(si);
-      const tgt = si === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickSailor)
-        : (Math.random() < .25 ? si : pick([0, 1, 2].filter(k => k !== si && g.alive[k])));
-      lastPick[si] = tgt;
-      if (works) g.drunk = tgt === si ? si : (Math.random() < .5 ? tgt : si);
-      rec += works ? nm(si) + '选了' + (tgt === si ? '自己' : nm(tgt)) + '，醉的是' + nm(g.drunk) + '。' : nm(si) + '中着毒，能力没有生效。';
-      if (si === 0) await bsay(ST, S().ok);
-    }
-    if (g.alive[pi]) {
-      const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickPukka)
-        : pick([0, 1, 2].filter(k => k !== pi && g.alive[k]));      // a computer Pukka never poisons himself
-      lastPick[pi] = tgt;
-      if (g.drunk !== pi && g.poisoned !== pi) {
-        const prev = g.poisoned;
-        // poisoning himself still lands, but a Pukka poisoned that night cannot make the last victim die
-        if (tgt !== pi && prev >= 0 && g.alive[prev]) { g.alive[prev] = false; g.deathBy[prev] = 'night'; g.deadPoison = prev; died = prev; }
-        g.poisoned = tgt; if (tgt === si) g.drunk = -1;
-        rec += nm(pi) + '让' + (tgt === pi ? '自己' : nm(tgt)) + '中了毒' + (died >= 0 ? '；上一个中毒的' + nm(died) + '毒发身亡。' : tgt === pi && prev >= 0 && prev !== pi ? '；自己中了毒，上一个中毒的人没有毒发。' : '。'); clean();
-        aud.self = tgt === pi; aud.prevAlive = prev >= 0 && prev !== pi;
-      }
-      else rec += nm(pi) + (g.drunk === pi ? '醉了' : '中着自己的毒') + '，没能下毒，也没有人毒发身亡。';
-      if (pi === 0) await bsay(ST, S().ok);
-    }
-
-    recap.push(rec); g.snaps.push({ night: true, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); aud.pukkaDrunk = g.alive[pi] && g.drunk === pi; aud.both = g.alive[si] && g.poisoned === si && g.drunk >= 0; aud.p1 = g.poisoned; aud.died = died; aud.drunk = g.drunk; (g.audit = g.audit || []).push(aud);
-    // a death in the night ends a three-player game on the spot: the Storyteller announces it and the result while it is still night
-    if (died >= 0) { await bsay(ST, S().nightDied(died)); raw = win() || 'evil'; break; }
-    g.isNight = false;
-    await bsay(ST, S().dawnQuiet);
-    if ((raw = win())) break;
-    if (g.night > 12) { raw = 'evil'; break; }
-    // ---- day: the other two say who they are (the Pukka lies)
-    for (const v of [1, 2]) if (g.alive[v]) {
-      const r = roles[v] === 'pukka' ? bluff : roles[v]; claim[v] = r;
-      const t = roles[v] === 'pukka' ? pick([0, 1, 2].filter(k => k !== v)) : lastPick[v];
-      await bsay(v, r === 'sailor' ? S().sailorSay(v, t) : S().hereticSay);
-    }
-    const other = v => 3 - v, hereticOn = g.drunk !== hi && !poisonedNow(hi);
-    const suspect = v => claim[other(v)] === roles[v] ? other(v) : (v + g.night) % 2 ? 0 : other(v);
-    const wants = (v, nom) => roles[v] === 'sailor' ? nom === suspect(v) : roles[v] === 'heretic' ? nom !== suspect(v) : (hereticOn ? nom === v : nom !== v);
-    // ---- nomination and vote
-    // only you may nominate, and you must: tapping empty space does nothing until you pick a player
-    let nom = await bpick(k => k !== ST && g.alive[k], S().nomPrompt); const nominator = 0;
-    await bsay(0, S().myNom(nom));      // you say it out loud
-    if (nom != null) {
-      // the count goes round clockwise, starting with the player after the nominee and ending with the nominee;
-      // each player's answer shows as it is given. Whoever nominated votes for it automatically, but still says so in turn.
-      const votes = [null, null, null]; g.votes = votes; g.voteOrder = [];
-      for (const v of [(nom + 1) % 3, (nom + 2) % 3, nom]) if (g.alive[v]) {
-        g.voteOrder.push(v);
-        if (v === nominator) votes[v] = true;
-        else if (v === 0) votes[v] = (await bpick(k => k === nom, S().votePrompt, 'no')) === nom;
-        else votes[v] = wants(v, nom);
-        await bsay(v, v === 0 ? (votes[v] ? S().myVote : S().myNoVote) : (votes[v] ? S().iVote : S().iDont));
-      }
-      const yes = votes.filter(x => x === true).length, need = Math.ceil(live() / 2);
-      const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
-      const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
-      if (yes >= need) {
-        if (roles[nom] === 'sailor' && sailorSafe()) { if (nom === 0 && (!g.auto || g.testBadges)) unlockBadge('sailor'); recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
-        else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, S().voteExec(yes, nom)); }
-      } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, S().voteFail(yes, need)); }
-      g.votes = null;
-      if ((raw = win())) break;
-    } else { g.snaps.push({ night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); recap.push('第 ' + g.night + ' 天。没有人被提名。'); await bsay(ST, S().noNom); }
-  }
-  if (run !== g.run) return null;
-  // ---- the end: apply the Heretic
-  const hereticOn = g.drunk !== hi && !poisonedNow(hi), fin = hereticOn ? (raw === 'good' ? 'evil' : 'good') : raw, mine = roles[0] === 'pukka' ? 'evil' : 'good';
-  g.reveal = true; g.revealT = 0; g.pukkaSober = g.alive[pi] && g.drunk !== pi; if (!g.auto) [62, 69, 74].forEach((m, k) => chime(m, k * .15, .16, 1.6));
-  g.result = { raw, fin, hereticOn, nights: g.night, won: mine === fin };
-  if (!g.auto || g.testBadges) {
-    if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0) unlockBadge('pukka');      // won with two poison marks on the table
-    if (roles[0] === 'heretic' && mine === fin && g.deathBy[0] === 'exec') unlockBadge('heretic');                                                // nominated yourself, executed, and won
-  }
-  g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
-  g.over = true; if (!g.auto) resultMusic(mine === fin);
-  await bsay(ST, fin === 'good' ? S().goodWins : S().evilWins);
-  await bsay(ST, S().bye);
-  await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
-  if (!g.auto && run === g.run && mode === 'tower') leaveTower();
-  return g.result;
-}
 // round character token, as in the video: cream disc + flat icon (blue = good, red = evil)
 function roleToken(x, y, r, role, a = 1, mono = null, thin = false) {
   if (r <= 1) return;
@@ -1404,16 +1275,6 @@ function roleToken(x, y, r, role, a = 1, mono = null, thin = false) {
     bar(c, 3.0, .125); bar(mono ? [128, 86, 58] : [244, 232, 208], 1.25, .06);
   }
   ctx.restore();
-}
-// the shroud that hangs over a dead player's token
-function shroud(x, y, r, a = 1) { const w = r * .42, t0 = y - r * 1.3, t1 = y + r * .05; poly([[x - w, t0], [x + w, t0], [x + w, t1], [x, t1 - r * .28], [x - w, t1]], [28, 22, 40], .93 * a); poly([[x - w, t0], [x + w, t0], [x + w, t0 + r * .16], [x - w, t0 + r * .16]], [80, 70, 100], a); }
-// small reminder token: 醉 / 毒
-function reminder(x, y, r, ch, c, a = 1) { glow(x, y, r * 1.8, c, .5 * a); circ(x, y, r, [40, 30, 64], a); circ(x, y, r * .84, c, a); text(ch, x, y + .5, r * 1.15, [255, 255, 255], a, 'center', true); }
-// the tune when the result is announced: bright if you won, wistful if you lost
-function resultMusic(won) {
-  if (!AC) return;
-  if (won) { [62, 66, 69, 74, 78, 81, 86, 90].forEach((m, k) => chime(m, k * .11, .2, 2.2)); pad([50, 57, 62, 66, 69, 74], AC.currentTime + .1, 6); [74, 78, 81].forEach(m => chime(m, 1.1, .16, 3)); bell(293.6, .14); }
-  else { [69, 65, 62, 60, 57, 53, 50].forEach((m, k) => chime(m, k * .42, .18, 2.8)); pad([38, 45, 53, 57, 60], AC.currentTime + .1, 7); setTimeout(() => bell(73.4, .2), 2600); }
 }
 // ---- inside the clocktower: a small dim slab of floor, a torch standing on it and the man who keeps it. Ask him, and he shows you the view from the top:
 // a few seconds of the whole town from above, going about its business — with a shooting star if it is night — then two strokes of the bell.
@@ -1498,72 +1359,6 @@ function drawTowerView(t, front) {      // called twice a frame: behind the town
   if (front && V.t > TVIEW) { const d = V.t - TVIEW, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
 }
 
-// ---- what follows down to the library is the old three-player table game: nothing leads to it any more
-function drawBotc(t, dt) {
-  const g = BG; g.dark = lerp(g.dark, g.isNight ? 1 : 0, 1 - Math.pow(0.03, dt));
-  TINT = [30, 30, 90]; TK = lerp(0.04, 0.34, g.dark); SHADOW = [58, 40, 96];
-  drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark);
-  const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [252, 244, 220], g.dark); glow(mx, my, 130, sc, .45); circ(mx, my, 22, sc);
-  const s = Math.min(W / 11.2, (H - 250) / 8.6), v = new View(W / 2, H * .6, s), P = v.P.bind(v);
-  const top = [92, 168, 162], under = [70, 96, 130];
-  v.disc(0, 0, -3.6, 1.1, 1.1, under); v.disc(0, 0, -2.5, 2.3, .9, under); v.disc(0, 0, -1.6, 3.4, 1.0, mix(under, top, .3)); v.disc(0, 0, -.6, 4.3, .6, top); v.disc(0, 0, 0, 2.3, 0, [120, 190, 180]);
-  for (let i = 0; i < 12; i++) { const q = TAU * i / 12; line([P(3.95 * Math.cos(q), 3.95 * Math.sin(q)), P(4.18 * Math.cos(q), 4.18 * Math.sin(q))], tint(mix(top, [255, 255, 255], .6)), s * .07); }
-  const K = s * 1.25, seat = i => { const q = (45 + 120 * i) * Math.PI / 180; return [3.0 * Math.cos(q), 3.0 * Math.sin(q)]; };
-  const w = g.wait, canPick = k => w && w.type === 'pick' && w.ok(k), pulse = .5 + .5 * Math.sin(t * 5);
-  const items = [0, 1, 2].map(i => ({ k: seat(i)[0] + seat(i)[1], i })); items.push({ k: 0, i: 'st' }); const toks = [];
-  if (g.reveal) g.revealT += dt;
-  for (const k of [0, 1, 2, 'st']) delete BHIT[k];
-  items.sort((a, b) => a.k - b.k).forEach(({ i }) => {
-    if (i === 'st') {
-      v.disc(0, 0, 0, .95, .3, [240, 220, 190]); const p = P(0, 0, .3);
-      if (canPick('st')) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .9, s * .45, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .5 + .4 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }
-      glow(p[0], p[1] - K * .8, K * 1.4, [200, 170, 255], .3 + .3 * g.dark); fig(p[0], p[1], K * 1.2, { kind: 'teller', body: [132, 100, 172], hat: [70, 52, 100] });
-      const bz = 1.9 + .08 * Math.sin(t * 1.6); v.box(.75, -.9, bz, .7, .55, .12, [72, 56, 104]); BHIT.st = [p[0], p[1] - K * .8, K * .95];
-      return;
-    }
-    const [x, y] = seat(i), p = P(x, y), dead = !g.alive[i], asleep = g.dark > .5 && !g.reveal && !(i === 0 && w && w.type === 'pick');
-    if (canPick(i)) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * (1 + .06 * pulse), s * .35 * (1 + .06 * pulse), 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .5 + .4 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }
-    if (g.pop && g.pop.who === i) { const u = g.pop.t / .45, k2 = 1 + .55 * eout(u); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * k2, s * .35 * k2, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .95 * (1 - u) * (1 - u)); ctx.lineWidth = 3.5 * (1 - u * .6); ctx.stroke(); g.pop.t += dt; if (g.pop.t >= .45) g.pop = null; }
-    if (i === 0) glow(p[0], p[1] - K * .6, K * 1.2, [255, 240, 200], .3);
-    const look = dead ? { kind: 'bare', body: [236, 236, 255], head: [236, 236, 255], a: .45 } : Object.assign({}, BLOOK[i], asleep ? { a: .55 } : {});
-    fig(p[0], p[1], K, look);
-    if (dead) { ctx.beginPath(); ctx.ellipse(p[0], p[1] - K * 1.33, K * .2, K * .06, 0, 0, TAU); ctx.strokeStyle = css([255, 250, 220], .8); ctx.lineWidth = 2; ctx.stroke(); }
-    if (g.votes && g.votes[i] != null) { const vx = p[0] + K * .62, vy = p[1] - K * 1.1; if (g.votes[i]) { glow(vx, vy, 24, [255, 214, 110], .7); poly([[vx, vy - 13], [vx + 9, vy], [vx, vy + 13], [vx - 9, vy]], [255, 214, 110]); } else line([[vx - 7, vy], [vx + 7, vy]], [200, 190, 220], 3, .8); }
-    toks.push(i);
-    BHIT[i] = [p[0], p[1] - K * .8, K * .8];
-  });
-  if (g.dark > .02) { ctx.fillStyle = css([10, 10, 40], .3 * g.dark); ctx.fillRect(0, 0, W, H); }
-  // tokens over heads: your own role all game long; at the end everyone's role, shrouds for the dead, and 醉 / 毒 reminders
-  const R = clamp(s * .62, 17, 30);
-  for (const i of toks) {
-    const [x, y] = seat(i), p = P(x, y), tx = p[0], ty = p[1] - K * 1.72 - R - 4 + 3 * Math.sin(t * 2 + i);
-    if (g.reveal) {
-      const pp = pop((g.revealT - i * .25) / .45); if (pp <= 0) continue;
-      roleToken(tx, ty, R * pp, g.roles[i]);
-      if (!g.alive[i]) shroud(tx, ty, R * pp, clamp((g.revealT - 1.0 - i * .2) / .4));
-      const ra = clamp((g.revealT - 1.5) / .4); let k = 0;
-      if (g.drunk === i) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'sailor', ra);
-      // one Pukka token for the poison that killed them, one for tonight's poison: the same player can carry both
-      if (g.deadPoison === i && g.pukkaSober) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra);
-      if (g.poisoned === i && g.pukkaSober) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra);
-      if (g.goneDrunk === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'sailor', ra); shroud(mx, my, R * .56, ra); }
-      if (g.gonePoison === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'pukka', ra); shroud(mx, my, R * .56, ra); }
-    } else if (i === 0 && g.showMine) roleToken(tx, ty, R, g.roles[0]);
-  }
-  // what is being said
-  const b = g.bubble;
-  if (b && BHIT[b.who]) {
-    // a speech bubble right beside whoever is talking
-    const h = BHIT[b.who], fs = clamp(W * .04, 13.5, 17), maxw = Math.min(W - 60, 300); ctx.font = FONT(fs, true);
-    const lines = wrapText(b.text, maxw);
-    const lh = fs * 1.45, cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 26, bh = lines.length * lh + 16;
-    const top = b.who === 'st' ? h[1] - K * 1.12 : h[1] - K * .95, bx = clamp(h[0] - cw / 2, 8, W - cw - 8), by = top - bh - 9;
-    ctx.fillStyle = css([250, 246, 238], .97); rrect(bx, by, cw, bh, 13); ctx.fill();
-    poly([[h[0] - 7, by + bh - 1], [h[0] + 7, by + bh - 1], [h[0], by + bh + 9]], [250, 246, 238], .97);
-    lines.forEach((l, k) => text(l, bx + cw / 2, by + 8 + lh * (k + .5), fs, [50, 36, 70], 1, 'center', true));
-    if (w && w.type === 'say') text('▾', bx + cw - 11, by + bh - 9 + 2 * Math.sin(t * 5), 11, [150, 130, 170], .9);
-  }
-}
 
 // ------------------------------------------------------------ the little library on the right
 const LN = 4, lib = { x: 1.4, y: 3.5, path: [], step: 0, say: '', sayT: 0, pending: null }, LHIT = {};
@@ -2530,23 +2325,8 @@ if (location.hash) {
   if (location.hash === '#langmenu') { zoomOut = zoomTarget = 1; setTimeout(() => $('langMenu').classList.add('open'), 300); }
   if (location.hash === '#icon') { mode = 'icon'; document.getElementById('top').style.display = 'none'; }
   if (location.hash === '#far') { zoomOut = zoomTarget = 1; }
-  if (location.hash === '#botc') setTimeout(async () => { BG.auto = true; const tally = {}; let drunkDeaths = 0, drunkDeathTokens = 0; const chk = () => { const g = BG, pi = g.roles.indexOf('pukka'); if (!g.alive[pi] && g.drunk === pi) { drunkDeaths++; if (g.gonePoison >= 0 || g.poisoned >= 0) drunkDeathTokens++; } }; let n = 0, maxN = 0, nightEnds = 0, killedHeretic = 0, killedHereticFlipped = 0, endedAtNight = 0; for (let k = 0; k < 400; k++) { const r = await playBotc(); n++; chk(); if (BG.deadPoison >= 0) { nightEnds++; if (BG.isNight) endedAtNight++; if (BG.roles[BG.deadPoison] === 'heretic') { killedHeretic++; if (r.hereticOn) killedHereticFlipped++; } } maxN = Math.max(maxN, r.nights); const key = BG.roles[0] + ':' + r.raw + '>' + r.fin + (r.hereticOn ? '(H)' : ''); tally[key] = (tally[key] || 0) + 1; } const A = BG.audit, pd = A.filter(a => a.pukkaDrunk), sp = A.filter(a => a.sailorPoisoned); document.title = 'pukkaDiedDrunk=' + drunkDeaths + ' tokensShown=' + drunkDeathTokens + ' ; nightKills=' + nightEnds + ' endedAtNight=' + endedAtNight + ' killedHeretic=' + killedHeretic + ' flippedAnyway=' + killedHereticFlipped + ' ; nights=' + A.length + ' pukkaDrunk=' + pd.length + ' bad=' + pd.filter(a => a.p1 !== a.p0 || a.died >= 0).length + ' sailorPoisoned=' + sp.length + ' bad=' + sp.filter(a => a.drunk !== -1).length + ' ; games=' + n + ' maxNights=' + maxN + ' selfPoisonNights=' + A.filter(a => a.self).length + ' diedOnSelfPoison=' + A.filter(a => a.self && a.died >= 0).length + ' sailorPoisonedWithDrunkToken=' + A.filter(a => a.both).length + ' ' + JSON.stringify(tally); }, 300);
   if (location.hash === '#liblit') setTimeout(() => { goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); fade = 0; lib.x = 1.5; lib.y = 2.2; lib.lit = 1; }, 300);
   if (location.hash === '#libview2') setTimeout(() => { goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); fade = 0; drawLib(1); lib.x = 2.5; lib.y = 1.5; lib.pending = 'shelf'; libArrive(); }, 300);
-  if (location.hash === '#botcorder') setTimeout(async () => { BG.auto = true; const log = []; let bad = 0, n = 0; for (let k = 0; k < 300; k++) { BG.voteOrder = null; await playBotc(); } document.title = 'ok'; }, 300);
-  if (location.hash === '#botcnightend') setTimeout(async () => { mode = 'tower'; fade = 0; BG.auto = true; for (let k = 0; k < 400; k++) { const r = await playBotc(); if (BG.deadPoison >= 0 && (location.search.includes('her') ? BG.roles[BG.deadPoison] === 'heretic' : true) && (location.search.includes('twice') ? BG.poisoned === BG.deadPoison : true)) { BG.revealT = 5; BG.dark = 1; BG.bubble = { who: 'st', text: r.fin === 'good' ? S().goodWins : S().evilWins }; document.title = 'killed=' + BG.roles[BG.deadPoison] + ' raw=' + r.raw + ' fin=' + r.fin + ' hereticOn=' + r.hereticOn; break; } } }, 300);
-  if (location.hash === '#stats') setTimeout(async () => { BG.auto = true; const N = 6000, c = {}; const inc = k => c[k] = (c[k] || 0) + 1;
-    for (let k = 0; k < N; k++) { const r = await playBotc(), g = BG, pi = g.roles.indexOf('pukka'), hi = g.roles.indexOf('heretic'), si = g.roles.indexOf('sailor'), me = g.roles[0];
-      const end = g.deadPoison >= 0 ? 'night:' + g.roles[g.deadPoison] : !g.alive[pi] ? 'exec:pukka' : 'exec:' + g.roles[g.alive.indexOf(false)];
-      inc('end|' + end); inc('raw|' + r.raw); inc('fin|' + r.fin); inc('flip|' + (r.hereticOn ? 'yes' : g.deadPoison === hi ? 'no:killedPoisoned' : g.drunk === hi ? 'no:drunk' : 'no:poisoned')); inc('nights|' + r.nights);
-      inc('path|' + end + ' > ' + (r.hereticOn ? 'flip' : 'noflip') + ' > ' + r.fin); inc('me|' + me + ':' + (r.won ? 'win' : 'lose')); inc('endNight' + r.nights + '|' + (g.deadPoison >= 0 ? 'night' : 'day')); }
-    document.title = JSON.stringify({ N, c }); }, 300);
-  if (location.hash === '#paths') setTimeout(async () => { BG.auto = true; const N = 20000, c = {}, R = { sailor: '水手', pukka: '普卡', heretic: '异端' };
-    for (let k = 0; k < N; k++) { const r = await playBotc(), g = BG, pi = g.roles.indexOf('pukka'), rn = i => i < 0 || i == null ? '无' : R[g.roles[i]], sober = g.alive[pi] && g.drunk !== pi;
-      const steps = g.snaps.map((sn, j) => sn.night ? '夜' + sn.n + '[醉:' + rn(sn.drunk) + ' 毒:' + rn(sn.poisoned) + (j === g.snaps.length - 1 && g.deadPoison >= 0 ? ' 死:' + rn(g.deadPoison) : '') + ']' : '日' + sn.n + '[' + (sn.exec != null ? '处决' + rn(sn.exec) : '无处决') + ']').join(' ');
-      const toks = ['sailor', 'pukka', 'heretic'].map(role => { const i = g.roles.indexOf(role), t = []; if (!g.alive[i]) t.push('幕布'); if (g.drunk === i) t.push('醉'); if (sober && g.deadPoison === i) t.push('毒'); if (sober && g.poisoned === i) t.push('毒'); if (g.goneDrunk === i) t.push('醉(盖幕布)'); if (g.gonePoison === i) t.push('毒(盖幕布)'); return R[role] + ':' + (t.join('+') || '无'); }).join(' ');
-      const key = steps + ' => ' + (r.hereticOn ? '颠倒' : '不颠倒') + ' => ' + (r.fin === 'good' ? '善良胜' : '邪恶胜') + ' || ' + toks; c[key] = (c[key] || 0) + 1; }
-    const top = Object.entries(c).sort((a, b) => b[1] - a[1]); document.title = JSON.stringify({ N, kinds: top.length, top: top.slice(0, 16) }); }, 300);
   if (location.hash === '#self') setTimeout(() => { const log = []; enterStall(); const mk = () => { act('boil'); stall.potT = 9; updateStall(0.01); act('scoop'); act('put'); act('soup'); }; for (let n = 0; n < 3; n++) { stall.seats = [null, null, null]; spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); const i = waiting()[0], want = stall.seats[i].want; mk(); for (const q of ['chili', 'cilantro', 'beef']) if (want[q]) act(q); act('serve', i); } log.push('sinceSelf=' + stall.sinceSelf); stall.seats = [null, null, null]; for (let q = 0; q < 40; q++) updateStall(1); log.push('customersWhileDue=' + stall.seats.filter(Boolean).length + ' hint=' + hintKey()); act('boil'); const h1 = hintKey(); stall.potT = 9; updateStall(0.01); act('scoop'); const h2 = hintKey(); act('put'); act('soup'); const h3 = hintKey(); grab('bowl'); log.push('selfHints=' + [h1, h2, h3, hintKey()].join(',')); barTap(); log.push('hintBowlOnBar=' + hintKey()); stall.bowl = Object.assign({}, stall.myBowl); stall.myBowl = null; setHold('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); log.push('myBowl=' + !!stall.myBowl); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); log.push('eating=' + (stall.eatT > 0)); updateStall(3); mk(); grab('bowl'); drawStall(1); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); log.push('secondOwnBowl=' + !!stall.myBowl); stallTap(HIT.bar[0], HIT.bar[1]); walkPend(); updateStall(3); log.push('hintAfterEating=' + hintKey()); log.push('after: myBowl=' + !!stall.myBowl + ' done=' + stall.done + ' say=' + stall.ownSay + ' exitHit=' + !!HIT.exit); stall.seats = [null, null, null]; for (let q = 0; q < 60; q++) updateStall(1); log.push('customersAfterDone=' + stall.seats.filter(Boolean).length); leaveStall(); enterStall(); for (let q = 0; q < 6; q++) updateStall(1); log.push('reenter customers=' + stall.seats.filter(Boolean).length + ' done=' + stall.done); drawStall(1); stallTap(HIT.exit[0], HIT.exit[1]); log.push('tapExit mode=' + mode + ' leaving=' + stall.leaving); let hitFurn = 0, steps = 0; for (; steps < 200 && mode === 'stall'; steps++) { updateStall(0.05); if (shopBlocked(stall.owner.x, stall.owner.y)) hitFurn++; } log.push('walkedOut mode=' + mode + ' steps=' + steps + ' throughFurniture=' + hitFurn); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#bump') setTimeout(() => { const log = []; while (npcs.length < 2) npcs.push({ x: 8.5, y: 1.5, path: [], wait: 999, look: randomLook(), step: 0 }); npcs.forEach((n, k) => { n.path = []; n.wait = 999; n.x = 8.5 + k % 3; n.y = -.5 + (k / 3 | 0); }); const a = npcs[0]; a.x = .5; a.y = 3.5; player.x = -.5; player.y = 3.5; player.path = bfs([-1, 3], [2, 3]).slice(1); let overlap = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (Math.floor(player.x) === 0 && Math.floor(player.y) === 3) overlap++; } log.push('walkAround overlap=' + overlap + ' at=' + cellOf(player)); const b = npcs[1]; b.x = 4.5; b.y = 3.5; b.wait = 0; b.path = bfs([4, 3], [1, 3]).slice(1); let ov2 = 0; for (let k = 0; k < 300; k++) { updateWorld(0.03); if (cellOf(b) + '' === cellOf(player) + '' || cellOf(b) + '' === cellOf(a) + '') ov2++; } log.push('npc overlap=' + ov2); drawWorld(1, 0.01); const p = wv.P(a.x, a.y); worldTap(p[0], p[1] - wv.s * .5); log.push('hello=' + a.say); enterStall(); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); act('soup'); log.push('barEarly=' + barTap() + ' say=' + stall.ownSay); document.title = log.join(' ; '); }, 500);
   if (location.hash === '#lib') setTimeout(() => { const log = []; goDoor('lib'); for (let k = 0; k < 400 && mode === 'world'; k++) updateWorld(0.05); log.push('enter=' + mode); fade = 0; drawLib(1); const fp = lv.P(3.5, 2.5); libTap(fp[0], fp[1]); for (let k = 0; k < 200 && lib.path.length; k++) updateLib(0.05); log.push('walk=' + cellOf(lib)); const sh = LHIT.shelf; libTap((sh[0] + sh[2]) / 2, (sh[1] + sh[3]) / 2); for (let k = 0; k < 200 && (lib.path.length || lib.pending); k++) updateLib(0.05); log.push('shelf at ' + cellOf(lib) + ' say=' + lib.say + ' ' + (lib.sayT > 0)); drawLib(1); libTap(LHIT.exit[0], LHIT.exit[1]); for (let k = 0; k < 200 && mode === 'lib'; k++) updateLib(0.05); log.push('exit=' + mode + ' at ' + cellOf(player)); document.title = log.join(' ; '); }, 500);

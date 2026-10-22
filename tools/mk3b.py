@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build deploy/3b.html: the three-player game from the clock tower, on its own.
 
-It is index.html with a small script added at the end that skips the title and the town,
+It is index.html with tools/botc3.js (the three-player game, which the main game no longer has) and a small script added at the end that skips the title and the town,
 opens on a quiet lobby at the tower's table (you and the Storyteller; tap to stroll, tap him to
 start; the language button top right; 小染书 always in simplified characters), plays the tower's game with its music and sounds, and fades back to the lobby when it ends. Served at /3b.
 usage: tools/mk3b.py
@@ -98,6 +98,8 @@ boot = """<script>
 LANG_SHOW = "const show = mode === 'title' || (mode === 'world' && zoomTarget > .5)"
 assert src.count(LANG_SHOW) == 1, 'language-button rule not found in index.html'
 src = src.replace(LANG_SHOW, LANG_SHOW + ' || !!window.__3bLang', 1)      # /3b: the language button also shows in its lobby
+botc3 = open(os.path.join(ROOT, 'tools', 'botc3.js'), encoding='utf-8').read()      # the three-player game itself: no longer in index.html
+boot = '<script>\n' + botc3 + '\n</script>\n' + boot
 i = src.rfind('</body>')
 out = src[:i] + boot + src[i:] if i >= 0 else src + boot
 out = out.replace('<title>', '<title>三人染 · ', 1) if '<title>' in out else out
