@@ -2633,10 +2633,9 @@ if (location.hash) {
   let bookAt = null;
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
-  // four sounds, from the opening of the Monument Valley 血染钟楼 video (botc-video/make.py, its title scene): a rising chime each for the table, the Storyteller and you
-  // (62 66 69), and for 小染书 the tower bell with its quick sparkle of four high chimes; the sparkle over 小染书 then appears silently
-  const APPEAR = [[0, () => chime(62, 0, .2, 1.6)], [.6, () => chime(66, 0, .2, 1.6)], [1.2, () => chime(69, 0, .2, 1.6)],
-    [1.8, () => { bell(146.8, .26); [74, 78, 81, 86].forEach((m, j) => chime(m, .12 * j, .12, 1.6)); }], [2.4, () => {}]], APPEAR_END = 3.0, APPEAR_TAP = 2.6;
+  // the opening's sounds, over the background music and nothing else: a low 咚 each for the table, the Storyteller and you, then 丁零定 for 小染书; its sparkle comes in silently
+  const dong = () => chime(50, 0, .3, 1.1), dingLingDing = () => { chime(81, 0, .16, 1.2); chime(86, .11, .13, .9); chime(83, .28, .16, 1.6); };
+  const APPEAR = [[0, dong], [.6, dong], [1.2, dong], [1.8, dingLingDing], [2.4, () => {}]], APPEAR_END = 3.0, APPEAR_TAP = 2.6;
   const ap = k => appear ? clamp((appear.t - APPEAR[k][0]) / .55) : 1;      // how far in the k-th thing has faded      // this visit: until 小染书 has been read only it sparkles; after that the Storyteller does
   let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
