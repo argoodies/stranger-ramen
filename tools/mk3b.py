@@ -19,31 +19,33 @@ boot = """<script>
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
-  // ---- 小染书: a red capsule beside the Storyteller in the lobby; tapped, he tells you about the three roles, one bubble each, a token for each name
+  // ---- 小染书: a red capsule beside the Storyteller in the lobby; tapped, he tells you about the three roles in one bubble, a token for each name
   const KIDF = '"HanziPen SC","Hannotate SC","Wawati SC","Yuanti SC","YouYuan","幼圆","Comic Sans MS","Chalkboard SE",' + THINF;      // the most childlike hand the device has
-  const RB = {
+  const RB = {      // ability texts: the wording of MELO's 三人血染 script
     hans: { title: '小染书', btn: '小染书', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
-      abil: ABIL },
+      abil: { sailor: '每个夜晚，你要选择一名存活的玩家：你或他之一会醉酒直到下个黄昏。你不会死亡。', heretic: '反转善良邪恶的胜负条件，即使你已死亡。', pukka: '每个夜晚，你要选择一名玩家：他中毒。上个因你的能力中毒的玩家会死亡并恢复健康。' } },
     hant: { title: '小染書', btn: '小染書', team: { sailor: '鎮民 · 善良', pukka: '惡魔 · 邪惡', heretic: '外來者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '異端分子' },
-      abil: { sailor: '每個夜晚，你要選一名存活的玩家：你和他之中，有一人會醉酒到下個黃昏。只要你清醒，你就不會死。', pukka: '你是惡魔。每個夜晚，你要選一名玩家：他中毒。上一個因你中毒的人會在這時死去，然後恢復健康。', heretic: '只要你沒有醉酒或中毒，這一局贏的算輸、輸的算贏——哪怕你已經死了。' } },
+      abil: { sailor: '每個夜晚，你要選擇一名存活的玩家：你或他之一會醉酒直到下個黃昏。你不會死亡。', heretic: '反轉善良邪惡的勝負條件，即使你已死亡。', pukka: '每個夜晚，你要選擇一名玩家：他中毒。上個因你的能力中毒的玩家會死亡並恢復健康。' } },
     en: { title: 'Rule Book', btn: 'Rules', team: { sailor: 'Townsfolk · Good', pukka: 'Demon · Evil', heretic: 'Outsider · Good' }, name: { sailor: 'Sailor', pukka: 'Pukka', heretic: 'Heretic' },
-      abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die while you are sober.', pukka: 'You are the Demon. Each night, choose a player: they are poisoned. The previously poisoned player dies, then becomes healthy.', heretic: 'Whoever wins, loses, and whoever loses, wins — even if you are dead (unless you are drunk or poisoned).' } } };
+      abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
-  let intro = null;      // the Storyteller telling you about the roles, one bubble at a time: Sailor, Heretic, Pukka
+  let intro = null;      // the Storyteller telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
     const q = P(1.1, -.62, 2.0), w = s * 1.2, h = s * .44, x = q[0], y = q[1] + Math.sin(t * 1.6) * s * .06;
     ctx.fillStyle = css([210, 48, 58]); rrect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
     const T = rb().btn, fs = T.length > 3 ? s * .22 : s * .27; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
-    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, y + fs * .03); ctx.fillText(T, x, y + fs * .03);
+    ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(T), ty = y + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;      // centred on the ink itself, whatever the font's own metrics
+    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, ty); ctx.fillText(T, x, ty);
     bookAt = [x, y, w * .6]; }
-  function tokenBubble(x, topY, role, txt, al) {      // a speech bubble with the role's token where its name would be, then what it does
-    const fs = clamp(W * .036, 12.5, 15), R = fs * 1.35, pad = 11, gap = 10, maxw = Math.min(W * .74, 300) - R * 2 - gap; ctx.font = FONT(fs, true);
-    const lines = wrapText(txt, maxw), lh = fs * 1.38, tw = Math.max(...lines.map(l => ctx.measureText(l).width)), cw = pad * 2 + R * 2 + gap + tw, bh = Math.max(lines.length * lh, R * 2) + pad * 2, bx = clamp(x - cw / 2, 8, W - cw - 8), by = topY - bh - 8, tx = clamp(x, bx + 17, bx + cw - 17);
+  function tokenBubble(x, topY, al) {      // one speech bubble with all three roles in turn (Sailor, Heretic, Pukka): each a token where its name would be, then what it does
+    const fs = clamp(W * .036, 12.5, 15), R = fs * 1.3, pad = 12, gap = 10, rowGap = 10, cw = Math.min(W - 16, 340), maxw = cw - pad * 2 - R * 2 - gap, lh = fs * 1.38; ctx.font = FONT(fs, true);
+    const rows = INTRO.map(id => { const lines = wrapText(rb().abil[id], maxw); return { id, lines, h: Math.max(lines.length * lh, R * 2) }; });
+    const bh = pad * 2 + rows.reduce((a, r) => a + r.h, 0) + rowGap * (rows.length - 1), bx = clamp(x - cw / 2, 8, W - cw - 8), by = Math.max(8, topY - bh - 8), tx = clamp(x, bx + 17, bx + cw - 17);
     ctx.fillStyle = css([250, 246, 238], .97 * al); rrect(bx, by, cw, bh, 11); ctx.moveTo(tx + 6, by + bh - 3); ctx.lineTo(tx, by + bh + 8); ctx.lineTo(tx - 6, by + bh - 3); ctx.closePath(); ctx.fill('nonzero');
-    ctx.save(); ctx.globalAlpha *= al; roleToken(bx + pad + R, by + bh / 2, R, role); ctx.restore();
-    const ty0 = by + bh / 2 - lines.length * lh / 2; lines.forEach((l, k) => text(l, bx + pad + R * 2 + gap, ty0 + lh * (k + .5), fs, [50, 36, 70], al, 'left', true)); }
+    let yy = by + pad; for (const r of rows) { ctx.save(); ctx.globalAlpha *= al; roleToken(bx + pad + R, yy + r.h / 2, R, r.id); ctx.restore();
+      const ty0 = yy + r.h / 2 - r.lines.length * lh / 2; r.lines.forEach((l, k) => text(l, bx + pad + R * 2 + gap, ty0 + lh * (k + .5), fs, [50, 36, 70], al, 'left', true)); yy += r.h + rowGap; } }
   function drawLobby(t, dt) {
     BG.dark = lerp(BG.dark, 0, 1 - Math.pow(.03, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
     drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark);
@@ -65,7 +67,7 @@ boot = """<script>
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
     if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
-    if (intro) { intro.t += dt; const p = P(0, 0, .3), id = INTRO[intro.i]; tokenBubble(p[0], p[1] - K * 1.6 * 1.2, id, rb().abil[id], clamp(intro.t * 4)); }      // his account of the roles, one at a time
+    if (intro) { intro.t += dt; const p = P(0, 0, .3); tokenBubble(p[0], p[1] - K * 1.6 * 1.2, clamp(intro.t * 4)); }      // his account of the roles, all in one bubble
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
@@ -76,7 +78,7 @@ boot = """<script>
         if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
-    if (intro) { if (intro.t > .25) { if (++intro.i >= INTRO.length) intro = null; else intro.t = 0; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap moves him on to the next role; after the Pukka he is done
+    if (intro) { if (intro.t > .25) { intro = null; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and he is done
     if (bookAt && Math.abs(x - bookAt[0]) < bookAt[2] && Math.abs(y - bookAt[1]) < bookAt[2] * .6) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: he tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { const r = Math.hypot(me.x, me.y) || 1; me.tx = me.x / r * 1.45; me.ty = me.y / r * 1.45; me.talk = true; chime(69, 0, .07, .8); return; }      // to the Storyteller, to talk
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
