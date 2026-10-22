@@ -19,7 +19,7 @@ boot = """<script>
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
-  // ---- 小染书: a red capsule beside the Storyteller in the lobby; tapped, he tells you about the three roles in one bubble, a token for each name
+  // ---- 小染书: a red capsule beside the Storyteller in the lobby; tapped, it tells you about the three roles itself in one bubble, a token for each name
   const KIDF = '"HanziPen SC","Hannotate SC","Wawati SC","Yuanti SC","YouYuan","幼圆","Comic Sans MS","Chalkboard SE",' + THINF;      // the most childlike hand the device has
   const RB = {      // ability texts: the wording of MELO's 三人血染 script
     hans: { title: '小染书', btn: '小染书', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
@@ -30,7 +30,7 @@ boot = """<script>
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
-  let intro = null;      // the Storyteller telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
+  let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
     const q = P(1.1, -.62, 2.0), w = s * 1.2, h = s * .44, x = q[0], y = q[1] + Math.sin(t * 1.6) * s * .06;
@@ -67,7 +67,7 @@ boot = """<script>
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
     if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
-    if (intro) { intro.t += dt; const p = P(0, 0, .3); tokenBubble(p[0], p[1] - K * 1.6 * 1.2, clamp(intro.t * 4)); }      // his account of the roles, all in one bubble
+    if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[1] - s * .26, clamp(intro.t * 4)); }      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
@@ -79,7 +79,7 @@ boot = """<script>
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
     if (intro) { if (intro.t > .25) { intro = null; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and he is done
-    if (bookAt && Math.abs(x - bookAt[0]) < bookAt[2] && Math.abs(y - bookAt[1]) < bookAt[2] * .6) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: he tells you about the roles
+    if (bookAt && Math.abs(x - bookAt[0]) < bookAt[2] && Math.abs(y - bookAt[1]) < bookAt[2] * .6) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { const r = Math.hypot(me.x, me.y) || 1; me.tx = me.x / r * 1.45; me.ty = me.y / r * 1.45; me.talk = true; chime(69, 0, .07, .8); return; }      // to the Storyteller, to talk
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
   leaveTower = () => { if (!tr) tr = { t: 0, to: 'lobby' }; };      // a game over: fade back to the lobby
