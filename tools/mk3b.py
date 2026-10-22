@@ -40,7 +40,7 @@ boot = """<script>
     ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(T), ty = y + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;      // centred on the ink itself, whatever the font's own metrics
     ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, ty); ctx.fillText(T, x, ty);
     if (!intro && !seenBook) { const yy = y - h * .5 - s * .32 - Math.abs(Math.sin(t * 3 + 1)) * s * .1, r = s * .1; glow(x, yy, r * 4, [255, 236, 170], .7); poly([[x, yy - r * 1.3], [x + r, yy], [x, yy + r * 1.3], [x - r, yy]], [255, 236, 170]); }      // a bright diamond bobbing over it too, like the one over the Storyteller: tap me
-    bookAt = [x, y, x - w * .62, x + w * 1.05, y - h * .5 - s * .8, y + h * .5 + s * .85]; }      // where a tap counts: well past the capsule to the right, up over its diamond and a good way below; on the left only just past its end, so a tap by the Storyteller still reaches him
+    bookAt = [x, y, x - w * .62, x + w * 1.05, y - h * .5 - s * .8, y + h * .5 + s * .85, q[1]]; }      // [6]: where it rests, without the bob      // where a tap counts: well past the capsule to the right, up over its diamond and a good way below; on the left only just past its end, so a tap by the Storyteller still reaches him
   function tokenBubble(x, topY, al) {      // one speech bubble with all three roles in turn (Sailor, Heretic, Pukka): each a token where its name would be, then what it does
     const fs = clamp(W * .036, 12.5, 15), R = fs * 1.3, pad = 12, gap = 10, rowGap = 10, cw = Math.min(W - 16, 340), maxw = cw - pad * 2 - R * 2 - gap, lh = fs * 1.38; ctx.font = FONT(fs, true);
     const rows = INTRO.map(id => { const lines = wrapText(rb().abil[id], maxw); return { id, lines, h: Math.max(lines.length * lh, R * 2) }; });
@@ -69,7 +69,7 @@ boot = """<script>
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
     if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
-    if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[1] - s * .26, clamp(intro.t * 4)); }      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
+    if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
