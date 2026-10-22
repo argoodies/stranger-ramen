@@ -7,6 +7,12 @@ start; the language button top right; 小染书 always in simplified characters)
 usage: tools/mk3b.py
 """
 import os
+import re
+def check_comments(code, where):      # a '//' comment runs to the end of its line: code put after one on the same line is silently lost (it has broken the game several times)
+    for n, line in enumerate(code.split('\n'), 1):
+        m = re.search(r'\s{2,}//', line)
+        if m and re.search(r'(\bif \(|\breturn\b|\bconst |\blet |\bfor \(|[a-zA-Z_]\w*\([^)]*\);\s*\S)', line[m.end():]):
+            raise SystemExit(f'{where}:{n}: code after a // comment would be lost:\n  {line.strip()[:200]}')
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
 boot = """<script>
@@ -91,7 +97,7 @@ boot = """<script>
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
         if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
-  towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return;      // nothing to tap until everything has appeared (the bell may still be ringing out) if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
+  towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
@@ -112,6 +118,7 @@ LANG_SHOW = "const show = mode === 'title' || (mode === 'world' && zoomTarget > 
 assert src.count(LANG_SHOW) == 1, 'language-button rule not found in index.html'
 src = src.replace(LANG_SHOW, LANG_SHOW + ' || !!window.__3bLang', 1)      # /3b: the language button also shows in its lobby
 botc3 = open(os.path.join(ROOT, 'tools', 'botc3.js'), encoding='utf-8').read()      # the three-player game itself: no longer in index.html
+check_comments(boot, 'mk3b boot script')
 boot = '<script>\n' + botc3 + '\n</script>\n' + boot
 KICK = "\nrequestAnimationFrame(frame);\n</script>"
 assert src.count(KICK) == 1, 'frame kick-off not found in index.html'
