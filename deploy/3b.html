@@ -2606,7 +2606,7 @@ requestAnimationFrame(frame);
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
-  // ---- 小染书: a small red oval button floating beside the Storyteller's grimoire in the lobby; tapped, it opens a page with the three roles' rules
+  // ---- 小染书: a red capsule beside the Storyteller in the lobby; tapped, he tells you about the three roles, one bubble each, a token for each name
   const KIDF = '"HanziPen SC","Hannotate SC","Wawati SC","Yuanti SC","YouYuan","幼圆","Comic Sans MS","Chalkboard SE",' + THINF;      // the most childlike hand the device has
   const RB = {
     hans: { title: '小染书', btn: '小染书', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
@@ -2617,24 +2617,20 @@ requestAnimationFrame(frame);
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die while you are sober.', pukka: 'You are the Demon. Each night, choose a player: they are poisoned. The previously poisoned player dies, then becomes healthy.', heretic: 'Whoever wins, loses, and whoever loses, wins — even if you are dead (unless you are drunk or poisoned).' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
-  function drawBook(t, P, s) {      // a small flat red oval floating in the air just to the right of the Storyteller's grimoire, like a plain button with no shadow, its name in white
-    const q = P(2.0, -1.52, 2.05), rx = s * .72, ry = s * .36, x = q[0], y = q[1] + Math.sin(t * 1.6) * s * .06;
-    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, TAU); ctx.fillStyle = css([210, 48, 58]); ctx.fill();
-    const T = rb().btn, fs = T.length > 3 ? s * .22 : s * .3; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
-    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, y + fs * .03); ctx.fillText(T, x, y + fs * .03);      // straight, in white handwriting
-    bookAt = [x, y, rx * 1.1]; }
-  function openBook() {      // the page about the three roles (only the roles); the cross at the top right closes it
-    if (document.getElementById('rb3')) return; const R = rb(), d = document.createElement('div'); d.id = 'rb3';
-    d.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(10,8,30,.55);display:flex;align-items:center;justify-content:center;padding:14px';
-    const card = document.createElement('div'); card.style.cssText = `position:relative;background:#fbf4e8;color:#3a2a44;border-radius:16px;max-width:380px;width:100%;max-height:86vh;overflow:auto;padding:20px 18px 18px;font:15px/1.55 ${THINF};box-shadow:0 10px 40px rgba(0,0,0,.35)`; d.appendChild(card);
-    const x = document.createElement('button'); x.setAttribute('aria-label', 'close'); x.style.cssText = 'position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(58,42,68,.1);color:#3a2a44;display:flex;align-items:center;justify-content:center;padding:0';
-    x.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>'; x.onclick = () => { d.remove(); chime(62, 0, .08, .6); }; card.appendChild(x);
-    const h = document.createElement('div'); h.textContent = R.title; h.style.cssText = `font:700 24px ${KIDF};color:#c82c34;margin:0 40px 12px 2px`; card.appendChild(h);
-    for (const id of ['sailor', 'pukka', 'heretic']) { const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:12px;align-items:flex-start;margin:10px 0';
-      const cv2 = document.createElement('canvas'), RR = 2; cv2.width = cv2.height = 56 * RR; cv2.style.cssText = 'position:static;display:block;width:56px;height:56px;flex:none'; const real = ctx; ctx = cv2.getContext('2d'); ctx.scale(RR, RR); try { roleToken(28, 28, 24, id); } finally { ctx = real; } row.appendChild(cv2);
-      const tx = document.createElement('div'); tx.innerHTML = `<div style="font-weight:600;font-size:16px">${R.name[id]} <span style="font-weight:400;font-size:12px;opacity:.6;margin-left:4px">${R.team[id]}</span></div><div>${R.abil[id]}</div>`; row.appendChild(tx); card.appendChild(row); }
-    document.body.appendChild(d); chime(74, 0, .12, 1); chime(79, .1, .1, 1); }
-  window.__rb3 = openBook;
+  let intro = null;      // the Storyteller telling you about the roles, one bubble at a time: Sailor, Heretic, Pukka
+  const INTRO = ['sailor', 'heretic', 'pukka'];
+  function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
+    const q = P(1.1, -.62, 2.0), w = s * 1.2, h = s * .44, x = q[0], y = q[1] + Math.sin(t * 1.6) * s * .06;
+    ctx.fillStyle = css([210, 48, 58]); rrect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
+    const T = rb().btn, fs = T.length > 3 ? s * .22 : s * .27; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, y + fs * .03); ctx.fillText(T, x, y + fs * .03);
+    bookAt = [x, y, w * .6]; }
+  function tokenBubble(x, topY, role, txt, al) {      // a speech bubble with the role's token where its name would be, then what it does
+    const fs = clamp(W * .036, 12.5, 15), R = fs * 1.35, pad = 11, gap = 10, maxw = Math.min(W * .74, 300) - R * 2 - gap; ctx.font = FONT(fs, true);
+    const lines = wrapText(txt, maxw), lh = fs * 1.38, tw = Math.max(...lines.map(l => ctx.measureText(l).width)), cw = pad * 2 + R * 2 + gap + tw, bh = Math.max(lines.length * lh, R * 2) + pad * 2, bx = clamp(x - cw / 2, 8, W - cw - 8), by = topY - bh - 8, tx = clamp(x, bx + 17, bx + cw - 17);
+    ctx.fillStyle = css([250, 246, 238], .97 * al); rrect(bx, by, cw, bh, 11); ctx.moveTo(tx + 6, by + bh - 3); ctx.lineTo(tx, by + bh + 8); ctx.lineTo(tx - 6, by + bh - 3); ctx.closePath(); ctx.fill('nonzero');
+    ctx.save(); ctx.globalAlpha *= al; roleToken(bx + pad + R, by + bh / 2, R, role); ctx.restore();
+    const ty0 = by + bh / 2 - lines.length * lh / 2; lines.forEach((l, k) => text(l, bx + pad + R * 2 + gap, ty0 + lh * (k + .5), fs, [50, 36, 70], al, 'left', true)); }
   function drawLobby(t, dt) {
     BG.dark = lerp(BG.dark, 0, 1 - Math.pow(.03, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
     drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark);
@@ -2650,12 +2646,13 @@ requestAnimationFrame(frame);
     if (me.say && (me.say.t += dt) > 1.5 && !tr) { tr = { t: 0, to: 'game' }; }
     if (moving && !me.talk) { const q = P(me.tx, me.ty); ell(q[0], q[1], s * .26 * 1.25, s * .13 * 1.25, [255, 240, 200], .4); }      // where you are walking to: a ring on the ground
     const pulse = .5 + .5 * Math.sin(t * 5), drawSt = () => { v.disc(0, 0, 0, .95, .3, [240, 220, 190]); const p = P(0, 0, .3);
-        if (!me.say && !me.talk) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .9, s * .45, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .35 + .35 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }      // he is waiting for you
-        glow(p[0], p[1] - K * .8, K * 1.4, [200, 170, 255], .3); fig(p[0], p[1], K * 1.2, { kind: 'teller', body: [132, 100, 172], hat: [70, 52, 100] }); const bz = 1.9 + .08 * Math.sin(t * 1.6); v.box(.75, -.9, bz, .7, .55, .12, [72, 56, 104]); lv.st = [p[0], p[1] - K * .8, K * .95];
-        if (!me.say && !me.talk) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
+        if (!me.say && !me.talk && !intro) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .9, s * .45, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .35 + .35 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }      // he is waiting for you
+        glow(p[0], p[1] - K * .8, K * 1.4, [200, 170, 255], .3); fig(p[0], p[1], K * 1.2, { kind: 'teller', body: [132, 100, 172], hat: [70, 52, 100] }); lv.st = [p[0], p[1] - K * .8, K * .95];      // no grimoire beside him while you stroll: the 小染书 capsule lies there instead
+        if (!me.say && !me.talk && !intro) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
-    if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // 小染书, up in the air while you stroll
+    if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
+    if (intro) { intro.t += dt; const p = P(0, 0, .3), id = INTRO[intro.i]; tokenBubble(p[0], p[1] - K * 1.6 * 1.2, id, rb().abil[id], clamp(intro.t * 4)); }      // his account of the roles, one at a time
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
@@ -2666,14 +2663,15 @@ requestAnimationFrame(frame);
         if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
-    if (bookAt && Math.hypot(x - bookAt[0], y - bookAt[1]) < bookAt[2]) return openBook();      // 小染书
+    if (intro) { if (intro.t > .25) { if (++intro.i >= INTRO.length) intro = null; else intro.t = 0; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap moves him on to the next role; after the Pukka he is done
+    if (bookAt && Math.abs(x - bookAt[0]) < bookAt[2] && Math.abs(y - bookAt[1]) < bookAt[2] * .6) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: he tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { const r = Math.hypot(me.x, me.y) || 1; me.tx = me.x / r * 1.45; me.ty = me.y / r * 1.45; me.talk = true; chime(69, 0, .07, .8); return; }      // to the Storyteller, to talk
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
   leaveTower = () => { if (!tr) tr = { t: 0, to: 'lobby' }; };      // a game over: fade back to the lobby
   const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter', 'lang']) { const el = $(id); if (el) el.style.display = 'none'; }
     mode = 'tower'; tw.view = null; fade = 1; BG.dark = 0; BG.isNight = false; };
   if (!location.hash) setTimeout(go, 0);
-  window.__3b = { me, get lobby() { return lobby; }, get tr() { return tr; }, get book() { return bookAt; } };      // for tests
+  window.__3b = { me, get lobby() { return lobby; }, get tr() { return tr; }, get book() { return bookAt; }, get intro() { return intro; } };      // for tests
 })();
 </script>
 </body>
