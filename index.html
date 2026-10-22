@@ -1692,13 +1692,12 @@ function windRings(x, y, k, sp, front, al) {      // the three bands of wind tur
     for (let m = 0; m <= N; m++) { const g = a0 + 3.6 * m / N, inFront = Math.sin(g) > 0, px = x + Math.cos(g) * rx, py = cy + Math.sin(g) * ry; if (inFront === front) { if (open) ctx.lineTo(px, py); else { ctx.moveTo(px, py); open = true; } } else open = false; }      // lower half of the ellipse on screen = the side toward us
     ctx.stroke(); } ctx.restore(); }
 function storyHe(x, y, K, o = {}) { const t = performance.now() / 1000, A = o.a == null ? 1 : o.a; windRings(x, y, K, t * 3, false, .75 * A); fig(x, y, K, Object.assign({ kind: 'plain', body: [206, 230, 236], head: [226, 238, 240] }, o)); drawWhiteHair(x, y, K, A); drawCrown(x, y - K * 1.27, K, [206, 230, 236], A); windRings(x, y, K, t * 3, true, .75 * A); }      // in the story he wears his crown all the way through, as in the fight      // he wears the whirlwinds' pale robe, years before the crown, the wind always turning about him      // he wears the whirlwinds' pale robe, years before the crown
-function oliveSprig(x, hy, hr) {      // the Virgin's olive branch, lying over the top of her hair: a curved stem, slim leaves along it, two dark olives
-  const G1 = [118, 150, 76], G2 = [146, 178, 98], pts = []; for (let i = 0; i <= 10; i++) { const u = i / 10, a = Math.PI * (1.12 + .76 * u); pts.push([x + Math.cos(a) * hr * 1.12, hy - hr * .32 + Math.sin(a) * hr * .92]); }
-  line(pts, [104, 92, 60], Math.max(1, hr * .1));
-  for (let i = 1; i < 10; i += 1.6) { const k = Math.floor(i), [px, py] = pts[k], [qx, qy] = pts[Math.min(10, k + 1)], ang = Math.atan2(qy - py, qx - px), side = (k % 2 ? 1 : -1), la = ang + side * .9;
-    ctx.save(); ctx.translate(px, py); ctx.rotate(la); ctx.beginPath(); ctx.ellipse(hr * .26, 0, hr * .27, hr * .1, 0, 0, TAU); ctx.fillStyle = css(k % 3 ? G1 : G2); ctx.fill(); ctx.restore(); }
-  for (const k of [4, 7]) { const [px, py] = pts[k]; circ(px, py - hr * .06, hr * .1, [70, 66, 52]); } }
-function storyShe(x, y, K) { const hy = y - 1.01 * K, hr = .17 * K; for (const sg of [-1, 1]) poly([[x + sg * hr * .6, hy - hr * .5], [x + sg * hr * 1.35, hy], [x + sg * hr * 1.5, hy + hr * 2.1], [x + sg * hr * .8, hy + hr * 1.6]], [156, 186, 240]); fig(x, y, K, { kind: 'plain', body: [226, 234, 252] }); ctx.beginPath(); ctx.ellipse(x, hy - hr * .25, hr * 1.22, hr * .95, 0, Math.PI, TAU); ctx.fillStyle = css([156, 186, 240]); ctx.fill(); oliveSprig(x, hy, hr); }      // the Virgin, as she is in the church, an olive branch on her head
+function blueWreath(x, hy, hr) {      // the Virgin's wreath: a ring of leaves round the top of her head, all in the blue of her hair, a deeper blue for the leaves that turn away
+  const cy = hy - hr * .42, rx = hr * 1.18, ry = hr * .38, HAIR = [156, 186, 240], DEEP = [118, 150, 222], n = 14;
+  for (const back of [true, false]) for (let i = 0; i < n; i++) { const a = TAU * i / n, sn = Math.sin(a); if ((sn < 0) !== back) continue;      // the back of the ring first, then the front over it
+    const px = x + Math.cos(a) * rx, py = cy + sn * ry, la = a + Math.PI / 2 + (i % 2 ? .5 : -.5);
+    ctx.save(); ctx.translate(px, py); ctx.rotate(la); ctx.beginPath(); ctx.ellipse(0, 0, hr * .3, hr * .12, 0, 0, TAU); ctx.fillStyle = css(back ? DEEP : (i % 3 ? HAIR : mix(HAIR, [255, 255, 255], .25))); ctx.fill(); ctx.restore(); } }
+function storyShe(x, y, K) { const hy = y - 1.01 * K, hr = .17 * K; for (const sg of [-1, 1]) poly([[x + sg * hr * .6, hy - hr * .5], [x + sg * hr * 1.35, hy], [x + sg * hr * 1.5, hy + hr * 2.1], [x + sg * hr * .8, hy + hr * 1.6]], [156, 186, 240]); fig(x, y, K, { kind: 'plain', body: [226, 234, 252] }); ctx.beginPath(); ctx.ellipse(x, hy - hr * .25, hr * 1.22, hr * .95, 0, Math.PI, TAU); ctx.fillStyle = css([156, 186, 240]); ctx.fill(); blueWreath(x, hy, hr); }      // the Virgin, as she is in the church, a wreath of blue leaves on her head
 function storyFlower(x, y, K) { const hy = y - 1.01 * K, hr = .17 * K; for (const sg of [-1, 1]) circ(x + sg * hr * 1.05, hy - hr * .35, hr * .55, [150, 96, 70]); fig(x, y, K, { kind: 'plain', body: [252, 204, 214] }); ctx.beginPath(); ctx.ellipse(x, hy - hr * .2, hr * 1.08, hr * .9, 0, Math.PI, TAU); ctx.fillStyle = css([150, 96, 70]); ctx.fill();
   const bx = x + K * .34, by = y - K * .3; poly([[bx - K * .16, by], [bx + K * .16, by], [bx + K * .12, by + K * .18], [bx - K * .12, by + K * .18]], [176, 124, 84]); [[236, 96, 110], [250, 200, 90], [240, 150, 190], [250, 246, 240]].forEach((fc, i) => circ(bx - K * .12 + i * K * .08, by - K * .04 - (i % 2) * K * .05, K * .06, fc)); }      // the flower girl, with her basket
 function drawMagnifier(hx, hy, K, dx = 0, dy = -1) {      // a magnifying glass held at (hx, hy): a short dark handle, then the round lens beyond it along (dx, dy)
@@ -1792,10 +1791,12 @@ function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the ai
   sc.lines.forEach(([who, a, b0], j) => { const b = b0 >= .9 ? 9 : b0; if (u < a || u > b) return;      // a closing line stays up through the hold
  const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
 }
-function oldPaper() {      // the story's frame: a faint warm wash over the whole picture and the yellow-brown of an old letter creeping in from its edges, darkest in the corners
-  const R = Math.hypot(W, H) / 2, g = ctx.createRadialGradient(W / 2, H / 2, R * .42, W / 2, H / 2, R);
-  g.addColorStop(0, 'rgba(232,204,150,0)'); g.addColorStop(.55, 'rgba(222,188,124,.32)'); g.addColorStop(.85, 'rgba(196,152,88,.62)'); g.addColorStop(1, 'rgba(150,106,56,.82)');
-  ctx.save(); ctx.fillStyle = 'rgba(236,210,160,.07)'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+function oldPaper() {      // the story's frame, an old letter: only round the middle does the scene keep its colours; further out it turns to the yellow-brown of old paper (a 'color' blend: the picture's light and dark, the paper's hue), with a warm wash over it and the corners darkest
+  const R = Math.hypot(W, H) / 2, cx = W / 2, cy = H / 2, rg = (stops) => { const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R); for (const [o, c] of stops) g.addColorStop(o, c); return g; };
+  ctx.save();
+  ctx.globalCompositeOperation = 'color'; ctx.fillStyle = rg([[0, 'rgba(176,132,70,0)'], [.24, 'rgba(176,132,70,0)'], [.48, 'rgba(176,132,70,.75)'], [.7, 'rgba(176,132,70,.95)'], [1, 'rgba(176,132,70,1)']]); ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = rg([[0, 'rgba(240,214,160,.04)'], [.3, 'rgba(240,214,160,.08)'], [.6, 'rgba(232,200,140,.3)'], [.85, 'rgba(206,162,96,.55)'], [1, 'rgba(150,106,56,.8)']]); ctx.fillRect(0, 0, W, H);
+  ctx.restore(); }
 function drawStory(t) {      // one scene, in the town or the church as they were
   const c = church, st = c.story, i = st.i;
   if (i < 0) { c.storyIn = true; drawChurch(t, 0); c.storyIn = false; ctx.fillStyle = css([6, 4, 16], clamp(st.t / 1.6)); ctx.fillRect(0, 0, W, H); return; }      // first the church goes dark
@@ -2127,7 +2128,7 @@ function drawChurch(t, dt) {
     const q = P(n.x + .14, n.y + .14), y = q[1] - (n.a < 1 ? (1 - ease(n.a)) * s * .5 : Math.abs(Math.sin(t * 5 + n.y)) * s * .06), x = q[0], hy = y - 1.01 * K, hr = .17 * K;
     ctx.save(); ctx.globalAlpha = ease(n.a); if (n.a < 1) glow(x, y - K * .7, K * 2.2, [255, 240, 200], 1 - n.a);      // taking shape out of the light
     if (n.who === 'saint') { fig(x, y, K, { kind: 'plain', body: [250, 238, 200] }); halo(x, hy, hr); }
-    else if (n.who === 'virgin') { for (const sg of [-1, 1]) poly([[x + sg * hr * .6, hy - hr * .5], [x + sg * hr * 1.35, hy], [x + sg * hr * 1.5, hy + hr * 2.1], [x + sg * hr * .8, hy + hr * 1.6]], [156, 186, 240]); fig(x, y, K, { kind: 'plain', body: [226, 234, 252] }); ctx.beginPath(); ctx.ellipse(x, hy - hr * .25, hr * 1.22, hr * .95, 0, Math.PI, TAU); ctx.fillStyle = css([156, 186, 240]); ctx.fill(); oliveSprig(x, hy, hr); }
+    else if (n.who === 'virgin') { for (const sg of [-1, 1]) poly([[x + sg * hr * .6, hy - hr * .5], [x + sg * hr * 1.35, hy], [x + sg * hr * 1.5, hy + hr * 2.1], [x + sg * hr * .8, hy + hr * 1.6]], [156, 186, 240]); fig(x, y, K, { kind: 'plain', body: [226, 234, 252] }); ctx.beginPath(); ctx.ellipse(x, hy - hr * .25, hr * 1.22, hr * .95, 0, Math.PI, TAU); ctx.fillStyle = css([156, 186, 240]); ctx.fill(); blueWreath(x, hy, hr); }
     else if (n.who === 'exorcist') { fig(x, y, K, { kind: 'teller', body: [62, 72, 122], hat: [42, 48, 88] }); line([[x, y - K * .74], [x, y - K * .44]], [250, 220, 140], Math.max(1.5, K * .05)); line([[x - K * .08, y - K * .64], [x + K * .08, y - K * .64]], [250, 220, 140], Math.max(1.5, K * .05)); }
     else storyFlower(x, y, K * FLOWER_K);      // the flower girl, the same size as in the story
     ctx.restore(); n.at = [x, y];
