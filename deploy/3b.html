@@ -2637,7 +2637,7 @@ if (location.hash) {
   // 咚 — a chime that climbs with each thing that appears (table 62, Storyteller 66, you 69); then 丁零定 for 小染书 — a quick, higher three-note bell
   // (74 78 81, 0.12 s apart, the video's sparkle); its diamond comes in silently
   const dong = m => () => chime(m, 0, .22, 1.6), dingLingDing = () => [74, 78, 81].forEach((m, j) => chime(m, .12 * j, .14, 1.6));
-  const APPEAR = [[0, dong(62)], [.6, dong(66)], [1.2, dong(69)], [1.8, dingLingDing], [2.4, () => {}]], APPEAR_END = 3.0, APPEAR_TAP = 2.6;
+  const APPEAR = [[.5, dong(62)], [1.1, dong(66)], [1.7, dong(69)], [2.3, dingLingDing], [2.9, () => {}]], APPEAR_END = 3.5, APPEAR_TAP = 3.1;      // half a second of empty sky first
   const ap = k => appear ? clamp((appear.t - APPEAR[k][0]) / .55) : 1;      // how far in the k-th thing has faded      // this visit: until 小染书 has been read only it sparkles; after that the Storyteller does
   let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
