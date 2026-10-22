@@ -30,7 +30,10 @@ boot = """<script>
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
-  let seenBook = false;      // this visit: until 小染书 has been read only it sparkles; after that the Storyteller does
+  let seenBook = false;
+  let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
+  const APPEAR = [[0, () => bell(146.8, .12)], [.6, () => chime(62, 0, .12, 1.4)], [1.2, () => chime(66, 0, .12, 1.4)], [1.8, () => chime(69, 0, .12, 1.4)], [2.4, () => { chime(74, 0, .12, 1.6); chime(81, .1, .1, 1.6); }]], APPEAR_END = 3.0;
+  const ap = k => appear ? clamp((appear.t - APPEAR[k][0]) / .55) : 1;      // how far in the k-th thing has faded      // this visit: until 小染书 has been read only it sparkles; after that the Storyteller does
   let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
@@ -39,7 +42,7 @@ boot = """<script>
     const T = rb().btn, fs = T.length > 3 ? s * .22 : s * .27; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
     ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(T), ty = y + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;      // centred on the ink itself, whatever the font's own metrics
     ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, ty); ctx.fillText(T, x, ty);
-    if (!intro && !seenBook) { const yy = y - h * .5 - s * .32 - Math.abs(Math.sin(t * 3 + 1)) * s * .1, r = s * .1; glow(x, yy, r * 4, [255, 236, 170], .7); poly([[x, yy - r * 1.3], [x + r, yy], [x, yy + r * 1.3], [x - r, yy]], [255, 236, 170]); }      // a bright diamond bobbing over it too, like the one over the Storyteller: tap me
+    if (!intro && !seenBook && ap(4) > 0) { ctx.globalAlpha *= ap(4) / Math.max(.001, ap(3)); const yy = y - h * .5 - s * .32 - Math.abs(Math.sin(t * 3 + 1)) * s * .1, r = s * .1; glow(x, yy, r * 4, [255, 236, 170], .7); poly([[x, yy - r * 1.3], [x + r, yy], [x, yy + r * 1.3], [x - r, yy]], [255, 236, 170]); }      // a bright diamond bobbing over it too, like the one over the Storyteller: tap me
     bookAt = [x, y, x - w * .62, x + w * 1.05, y - h * .5 - s * .8, y + h * .5 + s * .85, q[1]]; }      // [6]: where it rests, without the bob      // where a tap counts: well past the capsule to the right, up over its diamond and a good way below; on the left only just past its end, so a tap by the Storyteller still reaches him
   function tokenBubble(x, topY, al) {      // one speech bubble with all three roles in turn (Sailor, Heretic, Pukka): each a token where its name would be, then what it does
     const fs = clamp(W * .036, 12.5, 15), R = fs * 1.3, pad = 12, gap = 10, rowGap = 10, cw = Math.min(W - 16, 340), maxw = cw - pad * 2 - R * 2 - gap, lh = fs * 1.38; ctx.font = FONT(fs, true);
@@ -51,10 +54,14 @@ boot = """<script>
   function drawLobby(t, dt) {
     BG.dark = lerp(BG.dark, 0, 1 - Math.pow(.03, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
     drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark);
-    const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [252, 244, 220], g.dark); glow(mx, my, 130, sc, .45); circ(mx, my, 22, sc);
+    const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [252, 244, 220], g.dark); glow(mx, my, 130, sc, .45); circ(mx, my, 22, sc); drawGeese3(t, g.dark);
+    if (appear) { appear.t += dt; while (appear.said < APPEAR.length && appear.t >= APPEAR[appear.said][0]) APPEAR[appear.said++][1](); if (appear.t >= APPEAR_END) appear = null; }
+    const fadeT = ap(0) < 1, realCtx = ctx; let tc = null;      // while it fades in, the table is drawn whole onto a canvas of its own and laid over the sky, so its layers don't show through one another
+    if (fadeT) { tc = tableCv || (tableCv = document.createElement('canvas')); if (tc.width !== cv.width || tc.height !== cv.height) { tc.width = cv.width; tc.height = cv.height; } ctx = tc.getContext('2d'); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, tc.width, tc.height); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
     const v = lv = view(), s = v.s, P = v.P.bind(v), top = [92, 168, 162], under = [70, 96, 130], K = s * 1.25;
     v.disc(0, 0, -3.6, 1.1, 1.1, under); v.disc(0, 0, -2.5, 2.3, .9, under); v.disc(0, 0, -1.6, 3.4, 1.0, mix(under, top, .3)); v.disc(0, 0, -.6, 4.3, .6, top); v.disc(0, 0, 0, 2.3, 0, [120, 190, 180]);
     for (let i = 0; i < 12; i++) { const q = TAU * i / 12; line([P(3.95 * Math.cos(q), 3.95 * Math.sin(q)), P(4.18 * Math.cos(q), 4.18 * Math.sin(q))], tint(mix(top, [255, 255, 255], .6)), s * .07); }
+    if (fadeT) { ctx = realCtx; ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = ap(0); ctx.drawImage(tc, 0, 0); ctx.restore(); }
     // walking: straight to where you tapped, at a stroll, with a little hop
     const dx = me.tx - me.x, dy = me.ty - me.y, d = Math.hypot(dx, dy), moving = d > .03;
     if (moving) { const st = Math.min(d, 2.6 * dt); me.x += dx / d * st; me.y += dy / d * st; { const r = Math.hypot(me.x, me.y); if (r < 1.35) { const q = Math.atan2(me.y, me.x) + Math.sign(dx * me.y - dy * me.x || 1) * -.06; me.x = Math.cos(q) * 1.35; me.y = Math.sin(q) * 1.35; } }      // the Storyteller's dais is solid: pushed out to its edge and a little round it, so a walk across slides round the dais
@@ -62,13 +69,13 @@ boot = """<script>
     else if (me.talk) { me.talk = false; me.say = { t: 0 }; chime(74, 0, .16, 1.4); chime(81, .1, .14, 1.4); }
     if (me.say && (me.say.t += dt) > 1.5 && !tr) { tr = { t: 0, to: 'game' }; }
     if (moving && !me.talk) { const q = P(me.tx, me.ty); ell(q[0], q[1], s * .26 * 1.25, s * .13 * 1.25, [255, 240, 200], .4); }      // where you are walking to: a ring on the ground
-    const pulse = .5 + .5 * Math.sin(t * 5), drawSt = () => { v.disc(0, 0, 0, .95, .3, [240, 220, 190]); const p = P(0, 0, .3);
+    const pulse = .5 + .5 * Math.sin(t * 5), drawSt = () => { ctx.save(); ctx.globalAlpha *= ap(1); v.disc(0, 0, 0, .95, .3, [240, 220, 190]); const p = P(0, 0, .3);
         if (!me.say && !me.talk && !intro) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .9, s * .45, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .35 + .35 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }      // he is waiting for you
-        glow(p[0], p[1] - K * .8, K * 1.4, [200, 170, 255], .3); fig(p[0], p[1], K * 1.2, { kind: 'teller', body: [132, 100, 172], hat: [70, 52, 100] }); lv.st = [p[0], p[1] - K * .8, K * .95];      // no grimoire beside him while you stroll: the 小染书 capsule lies there instead
+        glow(p[0], p[1] - K * .8, K * 1.4, [200, 170, 255], .3); fig(p[0], p[1], K * 1.2, { kind: 'teller', body: [132, 100, 172], hat: [70, 52, 100] }); lv.st = [p[0], p[1] - K * .8, K * .95]; ctx.restore();      // no grimoire beside him while you stroll: the 小染书 capsule lies there instead
         if (!me.say && !me.talk && !intro && seenBook) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
-      drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); };
+      drawMe = () => { ctx.save(); ctx.globalAlpha *= ap(2); const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); ctx.restore(); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
-    if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
+    if (!me.say && !me.talk) { ctx.save(); ctx.globalAlpha *= ap(3); drawBook(t, P, s); ctx.restore(); } else bookAt = null;      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
   }
@@ -80,7 +87,7 @@ boot = """<script>
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
         if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
-  towerTap = (x, y) => { if (tr) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
+  towerTap = (x, y) => { if (tr || appear) return;      // nothing to tap until everything has appeared if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
@@ -91,6 +98,7 @@ boot = """<script>
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));z-index:20';      // the language button in the bottom-right corner, its menu opening upward
     box.appendChild($('lang')); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; box.appendChild(m); document.body.appendChild(box); };
   if (!location.hash) go();      // at once, before the first frame: straight onto the table in the air, no fade, no title, no town
+  requestAnimationFrame(frame);      // only now do the frames begin
   window.__3b = { me, get lobby() { return lobby; }, get tr() { return tr; }, get book() { return bookAt; }, get intro() { return intro; } };      // for tests
 })();
 </script>
@@ -100,6 +108,10 @@ assert src.count(LANG_SHOW) == 1, 'language-button rule not found in index.html'
 src = src.replace(LANG_SHOW, LANG_SHOW + ' || !!window.__3bLang', 1)      # /3b: the language button also shows in its lobby
 botc3 = open(os.path.join(ROOT, 'tools', 'botc3.js'), encoding='utf-8').read()      # the three-player game itself: no longer in index.html
 boot = '<script>\n' + botc3 + '\n</script>\n' + boot
+KICK = "\nrequestAnimationFrame(frame);\n</script>"
+assert src.count(KICK) == 1, 'frame kick-off not found in index.html'
+src = src.replace(KICK, "\n</script>", 1)      # /3b: the main game must not draw a frame (its title over the town) before /3b has taken over; the boot script starts the frames
+src = src.replace('</head>', '<style>html,body{background:linear-gradient(rgb(226,150,130),rgb(214,166,156) 45%,rgb(96,140,150))}#title{display:none!important}</style>\n</head>', 1)      # the lobby's daytime sky behind the page, never the night navy, and never the title
 i = src.rfind('</body>')
 out = src[:i] + boot + src[i:] if i >= 0 else src + boot
 out = out.replace('<title>', '<title>三人染 · ', 1) if '<title>' in out else out

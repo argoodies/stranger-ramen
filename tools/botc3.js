@@ -143,11 +143,13 @@ function resultMusic(won) {
 }
 
 // ---- what follows down to the library is the old three-player table game: nothing leads to it any more
+function drawGeese3(t, n) {      // three geese crossing the sky, exactly as over the town in the main game: white by day, a soft grey by night (n: how far into the night)
+  for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], n), 2, lerp(.95, .7, n)); } }
 function drawBotc(t, dt) {
   const g = BG; g.dark = lerp(g.dark, g.isNight ? 1 : 0, 1 - Math.pow(0.03, dt));
   TINT = [30, 30, 90]; TK = lerp(0.04, 0.34, g.dark); SHADOW = [58, 40, 96];
   drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark);
-  const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [252, 244, 220], g.dark); glow(mx, my, 130, sc, .45); circ(mx, my, 22, sc);
+  const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [252, 244, 220], g.dark); glow(mx, my, 130, sc, .45); circ(mx, my, 22, sc); drawGeese3(t, g.dark);
   const s = Math.min(W / 11.2, (H - 250) / 8.6), v = new View(W / 2, H * .6, s), P = v.P.bind(v);
   const top = [92, 168, 162], under = [70, 96, 130];
   v.disc(0, 0, -3.6, 1.1, 1.1, under); v.disc(0, 0, -2.5, 2.3, .9, under); v.disc(0, 0, -1.6, 3.4, 1.0, mix(under, top, .3)); v.disc(0, 0, -.6, 4.3, .6, top); v.disc(0, 0, 0, 2.3, 0, [120, 190, 180]);
