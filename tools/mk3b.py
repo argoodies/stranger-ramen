@@ -3,7 +3,7 @@
 
 It is index.html with a small script added at the end that skips the title and the town,
 opens on a quiet lobby at the tower's table (you and the Storyteller; tap to stroll, tap him to
-start), plays the tower's game with its music and sounds, and fades back to the lobby when it ends. Served at /3b.
+start; the language button top right; 小染书 always in simplified characters), plays the tower's game with its music and sounds, and fades back to the lobby when it ends. Served at /3b.
 usage: tools/mk3b.py
 """
 import os
@@ -24,9 +24,9 @@ boot = """<script>
   const RB = {      // ability texts: the wording of MELO's 三人血染 script
     hans: { title: '小染书', btn: '小染书', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
       abil: { sailor: '每个夜晚，你要选择一名存活的玩家：你或他之一会醉酒直到下个黄昏。你不会死亡。', heretic: '反转善良邪恶的胜负条件，即使你已死亡。', pukka: '每个夜晚，你要选择一名玩家：他中毒。上个因你的能力中毒的玩家会死亡并恢复健康。' } },
-    hant: { title: '小染書', btn: '小染書', team: { sailor: '鎮民 · 善良', pukka: '惡魔 · 邪惡', heretic: '外來者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '異端分子' },
+    hant: { title: '小染書', btn: '小染书', team: { sailor: '鎮民 · 善良', pukka: '惡魔 · 邪惡', heretic: '外來者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '異端分子' },
       abil: { sailor: '每個夜晚，你要選擇一名存活的玩家：你或他之一會醉酒直到下個黃昏。你不會死亡。', heretic: '反轉善良邪惡的勝負條件，即使你已死亡。', pukka: '每個夜晚，你要選擇一名玩家：他中毒。上個因你的能力中毒的玩家會死亡並恢復健康。' } },
-    en: { title: 'Rule Book', btn: 'Rules', team: { sailor: 'Townsfolk · Good', pukka: 'Demon · Evil', heretic: 'Outsider · Good' }, name: { sailor: 'Sailor', pukka: 'Pukka', heretic: 'Heretic' },
+    en: { title: 'Rule Book', btn: '小染书', team: { sailor: 'Townsfolk · Good', pukka: 'Demon · Evil', heretic: 'Outsider · Good' }, name: { sailor: 'Sailor', pukka: 'Pukka', heretic: 'Heretic' },
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
@@ -73,6 +73,7 @@ boot = """<script>
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
   drawTowerRoom = T => { const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
+    window.__3bLang = lobby && !tr;      // the language button, top right, while the lobby is up
     if (lobby) drawLobby(T, dt); else drawBotc(T, dt);
     if (tr) { tr.t += dt; ctx.fillStyle = css([6, 4, 16], clamp(tr.t / .7)); ctx.fillRect(0, 0, W, H);      // down to black, then the other scene
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
@@ -84,13 +85,16 @@ boot = """<script>
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { const r = Math.hypot(me.x, me.y) || 1; me.tx = me.x / r * 1.45; me.ty = me.y / r * 1.45; me.talk = true; chime(69, 0, .07, .8); return; }      // to the Storyteller, to talk
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
   leaveTower = () => { if (!tr) tr = { t: 0, to: 'lobby' }; };      // a game over: fade back to the lobby
-  const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter', 'lang']) { const el = $(id); if (el) el.style.display = 'none'; }
+  const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter']) { const el = $(id); if (el) el.style.display = 'none'; }
     mode = 'tower'; tw.view = null; fade = 1; BG.dark = 0; BG.isNight = false; };
   if (!location.hash) setTimeout(go, 0);
   window.__3b = { me, get lobby() { return lobby; }, get tr() { return tr; }, get book() { return bookAt; }, get intro() { return intro; } };      // for tests
 })();
 </script>
 """
+LANG_SHOW = "const show = mode === 'title' || (mode === 'world' && zoomTarget > .5)"
+assert src.count(LANG_SHOW) == 1, 'language-button rule not found in index.html'
+src = src.replace(LANG_SHOW, LANG_SHOW + ' || !!window.__3bLang', 1)      # /3b: the language button also shows in its lobby
 i = src.rfind('</body>')
 out = src[:i] + boot + src[i:] if i >= 0 else src + boot
 out = out.replace('<title>', '<title>三人染 · ', 1) if '<title>' in out else out
