@@ -101,6 +101,7 @@ boot = """<script>
     mode = 'tower'; tw.view = null; fade = 0; BG.dark = 0; BG.isNight = false;
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));z-index:20';      // the language button in the bottom-right corner, its menu opening upward
     box.appendChild($('lang')); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; box.appendChild(m); document.body.appendChild(box); };
+  window.__3bQuietMs = performance.now() + (APPEAR_END + .1) * 1000;      // no melody notes from the music until the opening is over
   if (!location.hash) go();      // at once, before the first frame: straight onto the table in the air, no fade, no title, no town
   requestAnimationFrame(frame);      // only now do the frames begin
   window.__3b = { me, get lobby() { return lobby; }, get tr() { return tr; }, get book() { return bookAt; }, get intro() { return intro; } };      // for tests
@@ -116,6 +117,9 @@ KICK = "\nrequestAnimationFrame(frame);\n</script>"
 assert src.count(KICK) == 1, 'frame kick-off not found in index.html'
 src = src.replace(KICK, "\n</script>", 1)      # /3b: the main game must not draw a frame (its title over the town) before /3b has taken over; the boot script starts the frames
 src = src.replace('</head>', '<style>html,body{background:linear-gradient(rgb(226,150,130),rgb(214,166,156) 45%,rgb(96,140,150))}#title{display:none!important}</style>\n</head>', 1)      # the lobby's daytime sky behind the page, never the night navy, and never the title
+MEL = "const t = nextBar + i * 0.6 - AC.currentTime; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);"
+assert src.count(MEL) == 1, 'music melody line not found in index.html'
+src = src.replace(MEL, "const t = nextBar + i * 0.6 - AC.currentTime; if (window.__3bQuietMs && performance.now() + t * 1000 < window.__3bQuietMs) continue; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);", 1)      # /3b: the music's little melody notes keep out of the opening's 咚 咚 咚 丁零定 (the chord underneath plays on)
 i = src.rfind('</body>')
 out = src[:i] + boot + src[i:] if i >= 0 else src + boot
 out = out.replace('<title>', '<title>三人染 · ', 1) if '<title>' in out else out

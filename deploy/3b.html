@@ -456,7 +456,7 @@ function musicTick() {
     pad(ch, nextBar, 8.5);
     for (let i = 0; i < 10; i++) if (Math.random() < (mode === 'stall' ? 0.3 : 0.4)) {
       melIdx = clamp(melIdx + pick([-2, -1, -1, 1, 1, 2]), 0, sc.length - 1);
-      const t = nextBar + i * 0.6 - AC.currentTime; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);
+      const t = nextBar + i * 0.6 - AC.currentTime; if (window.__3bQuietMs && performance.now() + t * 1000 < window.__3bQuietMs) continue; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);
     }
     nextBar += 6;
   }
@@ -2702,6 +2702,7 @@ if (location.hash) {
     mode = 'tower'; tw.view = null; fade = 0; BG.dark = 0; BG.isNight = false;
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));z-index:20';      // the language button in the bottom-right corner, its menu opening upward
     box.appendChild($('lang')); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; box.appendChild(m); document.body.appendChild(box); };
+  window.__3bQuietMs = performance.now() + (APPEAR_END + .1) * 1000;      // no melody notes from the music until the opening is over
   if (!location.hash) go();      // at once, before the first frame: straight onto the table in the air, no fade, no title, no town
   requestAnimationFrame(frame);      // only now do the frames begin
   window.__3b = { me, get lobby() { return lobby; }, get tr() { return tr; }, get book() { return bookAt; }, get intro() { return intro; } };      // for tests
