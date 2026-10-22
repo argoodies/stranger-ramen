@@ -23,26 +23,22 @@ boot = """<script>
   const KIDF = '"HanziPen SC","Hannotate SC","Wawati SC","Yuanti SC","YouYuan","幼圆","Comic Sans MS","Chalkboard SE",' + THINF;      // the most childlike hand the device has
   const RB = {
     hans: { title: '小染书', btn: '小染书', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
-      abil: ABIL, how: ['三个人，水手、普卡、异端分子各一名。你只知道自己的角色。', '夜晚：水手先行动，然后是普卡。', '白天：只有你可以提名一个人，大家举手投票，票数够了就处决。', '普卡死了，善良获胜；只剩两个人活着，邪恶获胜。', '异端分子没醉也没中毒时，结果会反过来。'], howT: '怎么玩' },
+      abil: ABIL },
     hant: { title: '小染書', btn: '小染書', team: { sailor: '鎮民 · 善良', pukka: '惡魔 · 邪惡', heretic: '外來者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '異端分子' },
-      abil: { sailor: '每個夜晚，你要選一名存活的玩家：你和他之中，有一人會醉酒到下個黃昏。只要你清醒，你就不會死。', pukka: '你是惡魔。每個夜晚，你要選一名玩家：他中毒。上一個因你中毒的人會在這時死去，然後恢復健康。', heretic: '只要你沒有醉酒或中毒，這一局贏的算輸、輸的算贏——哪怕你已經死了。' },
-      how: ['三個人，水手、普卡、異端分子各一名。你只知道自己的角色。', '夜晚：水手先行動，然後是普卡。', '白天：只有你可以提名一個人，大家舉手投票，票數夠了就處決。', '普卡死了，善良獲勝；只剩兩個人活著，邪惡獲勝。', '異端分子沒醉也沒中毒時，結果會反過來。'], howT: '怎麼玩' },
+      abil: { sailor: '每個夜晚，你要選一名存活的玩家：你和他之中，有一人會醉酒到下個黃昏。只要你清醒，你就不會死。', pukka: '你是惡魔。每個夜晚，你要選一名玩家：他中毒。上一個因你中毒的人會在這時死去，然後恢復健康。', heretic: '只要你沒有醉酒或中毒，這一局贏的算輸、輸的算贏——哪怕你已經死了。' } },
     en: { title: 'Rule Book', btn: 'Rules', team: { sailor: 'Townsfolk · Good', pukka: 'Demon · Evil', heretic: 'Outsider · Good' }, name: { sailor: 'Sailor', pukka: 'Pukka', heretic: 'Heretic' },
-      abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die while you are sober.', pukka: 'You are the Demon. Each night, choose a player: they are poisoned. The previously poisoned player dies, then becomes healthy.', heretic: 'Whoever wins, loses, and whoever loses, wins — even if you are dead (unless you are drunk or poisoned).' },
-      how: ['Three players: one Sailor, one Pukka, one Heretic. You only know your own role.', 'At night the Sailor acts first, then the Pukka.', 'By day only you may nominate; everyone votes by raising a hand, and enough votes means an execution.', 'If the Pukka dies, Good wins; if only two players are left alive, Evil wins.', 'While the Heretic is neither drunk nor poisoned, the result is turned around.'], howT: 'How to play' } };
+      abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die while you are sober.', pukka: 'You are the Demon. Each night, choose a player: they are poisoned. The previously poisoned player dies, then becomes healthy.', heretic: 'Whoever wins, loses, and whoever loses, wins — even if you are dead (unless you are drunk or poisoned).' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
-  function drawBook(t, P, s) {      // a flat red oval floating in the air above the middle of the table, like a plain button, its name in thick white handwriting
+  function drawBook(t, P, s) {      // a flat red oval floating in the air above the middle of the table, like a plain button with no shadow, its name in white handwriting
     const q = P(0, 0, 6.4), rx = s * 1.25, ry = s * .62, x = q[0], y = q[1] + Math.sin(t * 1.7) * s * .12;
-    glow(x, y, rx * 1.6, [255, 200, 190], .3);
-    ctx.beginPath(); ctx.ellipse(x, y + s * .07, rx, ry, 0, 0, TAU); ctx.fillStyle = css([150, 30, 40]); ctx.fill();      // a thin darker rim below, so it sits like a button
     ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, TAU); ctx.fillStyle = css([210, 48, 58]); ctx.fill();
-    const T = rb().btn, fs = T.length > 3 ? s * .34 : s * .5; ctx.font = `800 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .12; ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff';      // drawn with a round stroke round the letters too: thick, soft, like marker
+    const T = rb().btn, fs = T.length > 3 ? s * .34 : s * .5; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff';      // a light round stroke round the letters: soft, like marker, not too heavy
     if (T.length <= 3) [...T].forEach((ch, k) => { const cx = x + (k - 1) * fs * 1.02, cy = y + [-.04, .05, -.02][k] * fs; ctx.save(); ctx.translate(cx, cy); ctx.rotate([-.1, .07, -.04][k]); ctx.strokeText(ch, 0, 0); ctx.fillText(ch, 0, 0); ctx.restore(); });      // each character a little crooked
     else { ctx.save(); ctx.translate(x, y); ctx.rotate(-.04); ctx.strokeText(T, 0, 0); ctx.fillText(T, 0, 0); ctx.restore(); }
     bookAt = [x, y, rx * 1.05]; }
-  function openBook() {      // the page about the three roles; the cross at the top right closes it
+  function openBook() {      // the page about the three roles (only the roles); the cross at the top right closes it
     if (document.getElementById('rb3')) return; const R = rb(), d = document.createElement('div'); d.id = 'rb3';
     d.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(10,8,30,.55);display:flex;align-items:center;justify-content:center;padding:14px';
     const card = document.createElement('div'); card.style.cssText = `position:relative;background:#fbf4e8;color:#3a2a44;border-radius:16px;max-width:380px;width:100%;max-height:86vh;overflow:auto;padding:20px 18px 18px;font:15px/1.55 ${THINF};box-shadow:0 10px 40px rgba(0,0,0,.35)`; d.appendChild(card);
@@ -52,8 +48,6 @@ boot = """<script>
     for (const id of ['sailor', 'pukka', 'heretic']) { const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:12px;align-items:flex-start;margin:10px 0';
       const cv2 = document.createElement('canvas'), RR = 2; cv2.width = cv2.height = 56 * RR; cv2.style.cssText = 'position:static;display:block;width:56px;height:56px;flex:none'; const real = ctx; ctx = cv2.getContext('2d'); ctx.scale(RR, RR); try { roleToken(28, 28, 24, id); } finally { ctx = real; } row.appendChild(cv2);
       const tx = document.createElement('div'); tx.innerHTML = `<div style="font-weight:600;font-size:16px">${R.name[id]} <span style="font-weight:400;font-size:12px;opacity:.6;margin-left:4px">${R.team[id]}</span></div><div>${R.abil[id]}</div>`; row.appendChild(tx); card.appendChild(row); }
-    const ht = document.createElement('div'); ht.textContent = R.howT; ht.style.cssText = 'font-weight:600;font-size:16px;margin:16px 0 6px'; card.appendChild(ht);
-    const ul = document.createElement('ul'); ul.style.cssText = 'margin:0;padding-left:20px'; for (const line of R.how) { const li = document.createElement('li'); li.textContent = line; li.style.margin = '3px 0'; ul.appendChild(li); } card.appendChild(ul);
     document.body.appendChild(d); chime(74, 0, .12, 1); chime(79, .1, .1, 1); }
   window.__rb3 = openBook;
   function drawLobby(t, dt) {
