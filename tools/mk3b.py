@@ -19,32 +19,29 @@ boot = """<script>
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
-  // ---- the little red book: floating high over the table in the lobby; tapped, it opens a page with the three roles' rules
+  // ---- 小染书: a red oval button floating high over the table in the lobby; tapped, it opens a page with the three roles' rules
   const KIDF = '"HanziPen SC","Hannotate SC","Wawati SC","Yuanti SC","YouYuan","幼圆","Comic Sans MS","Chalkboard SE",' + THINF;      // the most childlike hand the device has
   const RB = {
-    hans: { title: '小红本', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
+    hans: { title: '小染书', btn: '小染书', team: { sailor: '镇民 · 善良', pukka: '恶魔 · 邪恶', heretic: '外来者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '异端分子' },
       abil: ABIL, how: ['三个人，水手、普卡、异端分子各一名。你只知道自己的角色。', '夜晚：水手先行动，然后是普卡。', '白天：只有你可以提名一个人，大家举手投票，票数够了就处决。', '普卡死了，善良获胜；只剩两个人活着，邪恶获胜。', '异端分子没醉也没中毒时，结果会反过来。'], howT: '怎么玩' },
-    hant: { title: '小紅本', team: { sailor: '鎮民 · 善良', pukka: '惡魔 · 邪惡', heretic: '外來者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '異端分子' },
+    hant: { title: '小染書', btn: '小染書', team: { sailor: '鎮民 · 善良', pukka: '惡魔 · 邪惡', heretic: '外來者 · 善良' }, name: { sailor: '水手', pukka: '普卡', heretic: '異端分子' },
       abil: { sailor: '每個夜晚，你要選一名存活的玩家：你和他之中，有一人會醉酒到下個黃昏。只要你清醒，你就不會死。', pukka: '你是惡魔。每個夜晚，你要選一名玩家：他中毒。上一個因你中毒的人會在這時死去，然後恢復健康。', heretic: '只要你沒有醉酒或中毒，這一局贏的算輸、輸的算贏——哪怕你已經死了。' },
       how: ['三個人，水手、普卡、異端分子各一名。你只知道自己的角色。', '夜晚：水手先行動，然後是普卡。', '白天：只有你可以提名一個人，大家舉手投票，票數夠了就處決。', '普卡死了，善良獲勝；只剩兩個人活著，邪惡獲勝。', '異端分子沒醉也沒中毒時，結果會反過來。'], howT: '怎麼玩' },
-    en: { title: 'Little Red Book', team: { sailor: 'Townsfolk · Good', pukka: 'Demon · Evil', heretic: 'Outsider · Good' }, name: { sailor: 'Sailor', pukka: 'Pukka', heretic: 'Heretic' },
+    en: { title: 'Rule Book', btn: 'Rules', team: { sailor: 'Townsfolk · Good', pukka: 'Demon · Evil', heretic: 'Outsider · Good' }, name: { sailor: 'Sailor', pukka: 'Pukka', heretic: 'Heretic' },
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die while you are sober.', pukka: 'You are the Demon. Each night, choose a player: they are poisoned. The previously poisoned player dies, then becomes healthy.', heretic: 'Whoever wins, loses, and whoever loses, wins — even if you are dead (unless you are drunk or poisoned).' },
       how: ['Three players: one Sailor, one Pukka, one Heretic. You only know your own role.', 'At night the Sailor acts first, then the Pukka.', 'By day only you may nominate; everyone votes by raising a hand, and enough votes means an execution.', 'If the Pukka dies, Good wins; if only two players are left alive, Evil wins.', 'While the Heretic is neither drunk nor poisoned, the result is turned around.'], howT: 'How to play' } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null;
-  function drawBook(t, P, s) {      // a closed red book standing in the air above the middle of the table, gently bobbing, its title in white
-    const q = P(0, 0, 6.4), w = s * 1.5, h = s * 1.95, x = q[0] - w / 2, y = q[1] - h / 2 + Math.sin(t * 1.7) * s * .12, tilt = Math.sin(t * 1.1) * .04;
-    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(tilt); ctx.translate(-w / 2, -h / 2);
-    glow(w / 2, h / 2, w * 1.3, [255, 220, 210], .35);
-    ctx.fillStyle = css([246, 238, 226]); rrect(w * .1, h * .05, w * .94, h * .97, s * .08); ctx.fill();      // the pages, peeking out at the side and the foot
-    ctx.fillStyle = css([200, 44, 52]); rrect(0, 0, w * .96, h * .96, s * .1); ctx.fill();      // the red cover
-    ctx.fillStyle = css([158, 28, 40]); rrect(0, 0, w * .16, h * .96, s * .1); ctx.fill();      // the spine
-    ctx.strokeStyle = css([255, 214, 140], .7); ctx.lineWidth = Math.max(1, s * .03); ctx.strokeRect(w * .25, h * .1, w * .62, h * .76);      // a thin gold border
-    const chars = [...rb().title], en = chars.length > 3, fs = en ? s * .3 : s * .42;
-    ctx.font = `700 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
-    if (en) { const words = rb().title.split(' '); words.forEach((wd, k) => { ctx.save(); ctx.translate(w * .56, h * (.32 + k * .2)); ctx.rotate((k % 2 ? 1 : -1) * .06); ctx.fillText(wd, 0, 0); ctx.restore(); }); }
-    else chars.forEach((ch, k) => { ctx.save(); ctx.translate(w * .56 + (k === 1 ? s * .05 : -s * .03), h * (.27 + k * .22)); ctx.rotate([-.12, .09, -.05][k] || 0); ctx.fillText(ch, 0, 0); ctx.restore(); });      // the three characters stacked down the cover, each a little crooked, as a child writes
-    ctx.restore(); bookAt = [q[0], y + h / 2, Math.max(w, h) * .65]; }
+  function drawBook(t, P, s) {      // a flat red oval floating in the air above the middle of the table, like a plain button, its name in thick white handwriting
+    const q = P(0, 0, 6.4), rx = s * 1.25, ry = s * .62, x = q[0], y = q[1] + Math.sin(t * 1.7) * s * .12;
+    glow(x, y, rx * 1.6, [255, 200, 190], .3);
+    ctx.beginPath(); ctx.ellipse(x, y + s * .07, rx, ry, 0, 0, TAU); ctx.fillStyle = css([150, 30, 40]); ctx.fill();      // a thin darker rim below, so it sits like a button
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, TAU); ctx.fillStyle = css([210, 48, 58]); ctx.fill();
+    const T = rb().btn, fs = T.length > 3 ? s * .34 : s * .5; ctx.font = `800 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round'; ctx.lineWidth = fs * .12; ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff';      // drawn with a round stroke round the letters too: thick, soft, like marker
+    if (T.length <= 3) [...T].forEach((ch, k) => { const cx = x + (k - 1) * fs * 1.02, cy = y + [-.04, .05, -.02][k] * fs; ctx.save(); ctx.translate(cx, cy); ctx.rotate([-.1, .07, -.04][k]); ctx.strokeText(ch, 0, 0); ctx.fillText(ch, 0, 0); ctx.restore(); });      // each character a little crooked
+    else { ctx.save(); ctx.translate(x, y); ctx.rotate(-.04); ctx.strokeText(T, 0, 0); ctx.fillText(T, 0, 0); ctx.restore(); }
+    bookAt = [x, y, rx * 1.05]; }
   function openBook() {      // the page about the three roles; the cross at the top right closes it
     if (document.getElementById('rb3')) return; const R = rb(), d = document.createElement('div'); d.id = 'rb3';
     d.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(10,8,30,.55);display:flex;align-items:center;justify-content:center;padding:14px';
@@ -79,7 +76,7 @@ boot = """<script>
         if (!me.say && !me.talk) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
-    if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // the little red book, up in the air while you stroll
+    if (!me.say && !me.talk) drawBook(t, P, s); else bookAt = null;      // 小染书, up in the air while you stroll
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
@@ -90,7 +87,7 @@ boot = """<script>
         if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;
-    if (bookAt && Math.hypot(x - bookAt[0], y - bookAt[1]) < bookAt[2]) return openBook();      // the little red book
+    if (bookAt && Math.hypot(x - bookAt[0], y - bookAt[1]) < bookAt[2]) return openBook();      // 小染书
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { const r = Math.hypot(me.x, me.y) || 1; me.tx = me.x / r * 1.45; me.ty = me.y / r * 1.45; me.talk = true; chime(69, 0, .07, .8); return; }      // to the Storyteller, to talk
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
   leaveTower = () => { if (!tr) tr = { t: 0, to: 'lobby' }; };      // a game over: fade back to the lobby
