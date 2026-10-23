@@ -2665,7 +2665,7 @@ if (location.hash) {
   let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
-    const px = v => Math.round(v * DPR) / DPR, q = P(1.1, -.62, 2.0), w = s * 1.38, h = s * .5, x = px(q[0]), y = px(q[1] + Math.sin(t * 1.6) * s * .06);      // snapped to whole device pixels: as it bobs, the lettering never lands between pixels and smears
+    const px = v => Math.round(v * DPR) / DPR, q = P(1.1, -.62, 2.0), w = s * 1.38, h = s * .5, x = px(q[0]), y = px(q[1]);      // still (no bob), on whole device pixels: the lettering stays crisp
     ctx.fillStyle = css([210, 48, 58]); rrect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
     const T = rb().btn, fs = T.length > 3 ? s * .25 : s * .31; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
     ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(T), ty = px(y + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);      // centred on the ink itself, whatever the font's own metrics
