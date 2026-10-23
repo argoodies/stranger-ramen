@@ -1788,13 +1788,15 @@ function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the ai
  const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
 }
 let pairCv = null;      // scratch canvas: the two of them, faded in whole at the start of the story
-function oldPaper(cool) {      // the story is a memory, toned evenly over the whole picture: warm gold while all is well; from the accusation on, at once, a cold cyan-grey. A saturation blend takes most of the colour out, a 'color' blend tints what is left, a faint haze over it
+function oldPaper(c) {      // the story is a memory, toned evenly over the whole picture; c: how cold it has grown, 0 warm gold (all is well) … 1 cold cyan-grey (from the execution on). A saturation blend takes colour out, a 'color' blend tints what is left, a faint haze over it; every value eases between the two moods
+  const L = (a, b) => a + (b - a) * c, mixc = (a, b) => a.map((v, k) => Math.round(v + (b[k] - v) * c));
   ctx.save();
-  ctx.globalCompositeOperation = 'saturation'; ctx.fillStyle = cool ? 'rgba(128,128,128,.62)' : 'rgba(128,128,128,.42)'; ctx.fillRect(0, 0, W, H);
-  ctx.globalCompositeOperation = 'color'; ctx.fillStyle = cool ? 'rgba(96,138,146,.3)' : 'rgba(214,168,86,.32)'; ctx.fillRect(0, 0, W, H);
-  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = cool ? 'rgba(190,214,218,.06)' : 'rgba(255,230,170,.08)'; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'saturation'; ctx.fillStyle = `rgba(128,128,128,${L(.42, .62)})`; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'color'; ctx.fillStyle = `rgba(${mixc([214, 168, 86], [96, 138, 146]).join(',')},${L(.32, .3)})`; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(${mixc([255, 230, 170], [190, 214, 218]).join(',')},${L(.08, .06)})`; ctx.fillRect(0, 0, W, H);
   ctx.restore(); }
-const STORY_COLD = () => STORY.findIndex(sc => sc.at === 'church' && sc.lines.some(l => l[0] === 'inv'));      // the accusation: the memory turns cold from here on
+const STORY_CHILL = [[4, 0, .25], [5, .25, .5], [6, .5, .75], [7, .75, 1]];      // [scene, coldness at its start, at its end]: the farewell before she goes to sing, the singing, the accusation, the execution; before them warm gold, after them cyan-grey
+function storyChill(i, u) { if (i < STORY_CHILL[0][0]) return 0; for (const [k, a, b] of STORY_CHILL) if (k === i) return a + (b - a) * ease(u); return 1; }
 function drawStory(t) {      // one scene, in the town or the church as they were
   const c = church, st = c.story, i = st.i;
   if (i < 0) { c.storyIn = true; drawChurch(t, 0); c.storyIn = false; ctx.fillStyle = css([6, 4, 16], clamp(st.t / 1.6)); ctx.fillRect(0, 0, W, H); return; }      // first the church goes dark
@@ -1812,7 +1814,7 @@ function drawStory(t) {      // one scene, in the town or the church as they wer
     [player.x, player.y, zoomOut, zoomTarget, camX, camY, G.n, hideChef] = keep; npcs.push(...crowd); }
   else { const p = c.p, keep = [p.x, p.y, c.lit, c.cam && c.cam.slice()], today = { foes: c.foes, stains: c.stains, fx: c.fx, shots: c.shots, waves: c.waves, cones: c.cones, chest: c.chest, npcs: c.npcs, torchOn: c.torchOn, torchF: c.torchF }; Object.assign(c, { foes: [], stains: [], fx: [], shots: [], waves: [], cones: [], chest: null, npcs: [], torchOn: false, torchF: 0 }); p.x = sc.cam[0] + 1.4; p.y = sc.cam[1]; c.lit = typeof sc.lit === 'function' ? sc.lit(u) : sc.lit; c.lamp = typeof sc.lamp === 'function' ? sc.lamp(u) : sc.lamp || 0; c.cam = null; c.storyIn = true; drawChurch(t, 1); c.storyIn = false; c.lamp = 0; [p.x, p.y, c.lit] = keep; c.cam = keep[3]; Object.assign(c, today); }      // years ago: none of today's fight in it
   storyHook = storyAfter = storySky = null; storyRain = false; storyPan = 0;
-  oldPaper(i >= STORY_COLD());      // all of it long ago, a memory: warm gold until the accusation, cold cyan-grey from it on
+  oldPaper(storyChill(i, u));      // all of it long ago, a memory: warm gold, growing colder from the farewell through the singing and the accusation to cyan-grey by the execution
   ctx.fillStyle = css([6, 4, 16], 1 - sa); ctx.fillRect(0, 0, W, H);      // each scene fades in from black and out to it
   if (st.card) { const cd = st.card, sh = ctx.createRadialGradient(W / 2, H * .44, 0, W / 2, H * .44, W * .62); sh.addColorStop(0, css([6, 4, 16], .55 * clamp(cd.t / .8))); sh.addColorStop(1, css([6, 4, 16], 0)); ctx.save(); ctx.translate(0, H * .44); ctx.scale(1, .45); ctx.translate(0, -H * .44); ctx.fillStyle = sh; ctx.fillRect(0, 0, W, H * 2); ctx.restore(); drawChapter(t, cd.t, true); if (cd.t > 1.6) tapHint('tapGo', cd.t - 1.6);      // over the rain and the drawing back: a soft shade so it reads over the town, the chapter's card, then "tap anywhere to continue"
     if (cd.out != null) { ctx.fillStyle = css([6, 4, 16], clamp(cd.out)); ctx.fillRect(0, 0, W, H); } }      // tapped: down to black
