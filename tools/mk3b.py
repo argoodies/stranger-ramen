@@ -47,10 +47,10 @@ boot = """<script>
   let intro = null;      // 小染书 telling you about the roles, all in one bubble: Sailor, Heretic, Pukka
   const INTRO = ['sailor', 'heretic', 'pukka'];
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
-    const q = P(1.1, -.62, 2.0), w = s * 1.38, h = s * .5, x = q[0], y = q[1] + Math.sin(t * 1.6) * s * .06;
+    const px = v => Math.round(v * DPR) / DPR, q = P(1.1, -.62, 2.0), w = s * 1.38, h = s * .5, x = px(q[0]), y = px(q[1] + Math.sin(t * 1.6) * s * .06);      // snapped to whole device pixels: as it bobs, the lettering never lands between pixels and smears
     ctx.fillStyle = css([210, 48, 58]); rrect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
     const T = rb().btn, fs = T.length > 3 ? s * .25 : s * .31; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
-    ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(T), ty = y + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;      // centred on the ink itself, whatever the font's own metrics
+    ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(T), ty = px(y + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);      // centred on the ink itself, whatever the font's own metrics
     ctx.lineJoin = 'round'; ctx.lineWidth = fs * .04; ctx.strokeStyle = '#fff'; ctx.strokeText(T, x, ty); ctx.fillText(T, x, ty);
     if (!intro && !seenBook && ap(4) > 0) { ctx.globalAlpha *= ap(4); const yy = y - h * .5 - s * .32 - Math.abs(Math.sin(t * 3 + 1)) * s * .1, r = s * .1; glow(x, yy, r * 4, [255, 236, 170], .7); poly([[x, yy - r * 1.3], [x + r, yy], [x, yy + r * 1.3], [x - r, yy]], [255, 236, 170]); }      // a bright diamond bobbing over it too, like the one over the Storyteller: tap me
     bookAt = [x, y, x - w * .62, x + w * 1.05, y - h * .5 - s * .8, y + h * .5 + s * .85, q[1]]; }      // [6]: where it rests, without the bob      // where a tap counts: well past the capsule to the right, up over its diamond and a good way below; on the left only just past its end, so a tap by the Storyteller still reaches him
