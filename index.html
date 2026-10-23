@@ -1787,11 +1787,11 @@ function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the ai
  const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
 }
 let pairCv = null;      // scratch canvas: the two of them, faded in whole at the start of the story
-function oldPaper() {      // the story's frame, an old letter: only round the middle does the scene keep its colours; further out it turns to the yellow-brown of old paper (a 'color' blend: the picture's light and dark, the paper's hue), with a warm wash over it and the corners darkest
-  const R = Math.hypot(W, H) / 2, cx = W / 2, cy = H / 2, rg = (stops) => { const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R); for (const [o, c] of stops) g.addColorStop(o, c); return g; };
+function oldPaper() {      // the story is a memory: the whole picture, evenly, drained of most of its colour and cooled — a saturation blend takes the colour down, a soft blue-grey 'color' blend cools what is left, a faint cool haze over it
   ctx.save();
-  ctx.globalCompositeOperation = 'color'; ctx.fillStyle = rg([[0, 'rgba(176,132,70,0)'], [.24, 'rgba(176,132,70,0)'], [.48, 'rgba(176,132,70,.75)'], [.7, 'rgba(176,132,70,.95)'], [1, 'rgba(176,132,70,1)']]); ctx.fillRect(0, 0, W, H);
-  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = rg([[0, 'rgba(240,214,160,.04)'], [.3, 'rgba(240,214,160,.08)'], [.6, 'rgba(232,200,140,.3)'], [.85, 'rgba(206,162,96,.55)'], [1, 'rgba(150,106,56,.8)']]); ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'saturation'; ctx.fillStyle = 'rgba(128,128,128,.6)'; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'color'; ctx.fillStyle = 'rgba(112,140,178,.22)'; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = 'rgba(196,212,232,.06)'; ctx.fillRect(0, 0, W, H);
   ctx.restore(); }
 function drawStory(t) {      // one scene, in the town or the church as they were
   const c = church, st = c.story, i = st.i;
@@ -1810,7 +1810,7 @@ function drawStory(t) {      // one scene, in the town or the church as they wer
     [player.x, player.y, zoomOut, zoomTarget, camX, camY, G.n, hideChef] = keep; npcs.push(...crowd); }
   else { const p = c.p, keep = [p.x, p.y, c.lit, c.cam && c.cam.slice()], today = { foes: c.foes, stains: c.stains, fx: c.fx, shots: c.shots, waves: c.waves, cones: c.cones, chest: c.chest, npcs: c.npcs, torchOn: c.torchOn, torchF: c.torchF }; Object.assign(c, { foes: [], stains: [], fx: [], shots: [], waves: [], cones: [], chest: null, npcs: [], torchOn: false, torchF: 0 }); p.x = sc.cam[0] + 1.4; p.y = sc.cam[1]; c.lit = typeof sc.lit === 'function' ? sc.lit(u) : sc.lit; c.lamp = typeof sc.lamp === 'function' ? sc.lamp(u) : sc.lamp || 0; c.cam = null; c.storyIn = true; drawChurch(t, 1); c.storyIn = false; c.lamp = 0; [p.x, p.y, c.lit] = keep; c.cam = keep[3]; Object.assign(c, today); }      // years ago: none of today's fight in it
   storyHook = storyAfter = storySky = null; storyRain = false; storyPan = 0;
-  oldPaper();      // all of it long ago: the edges of the picture yellowed like an old letter
+  oldPaper();      // all of it long ago: the whole picture low in colour and cool, a memory
   ctx.fillStyle = css([6, 4, 16], 1 - sa); ctx.fillRect(0, 0, W, H);      // each scene fades in from black and out to it
   if (st.card) { const cd = st.card, sh = ctx.createRadialGradient(W / 2, H * .44, 0, W / 2, H * .44, W * .62); sh.addColorStop(0, css([6, 4, 16], .55 * clamp(cd.t / .8))); sh.addColorStop(1, css([6, 4, 16], 0)); ctx.save(); ctx.translate(0, H * .44); ctx.scale(1, .45); ctx.translate(0, -H * .44); ctx.fillStyle = sh; ctx.fillRect(0, 0, W, H * 2); ctx.restore(); drawChapter(t, cd.t, true); if (cd.t > 1.6) tapHint('tapGo', cd.t - 1.6);      // over the rain and the drawing back: a soft shade so it reads over the town, the chapter's card, then "tap anywhere to continue"
     if (cd.out != null) { ctx.fillStyle = css([6, 4, 16], clamp(cd.out)); ctx.fillRect(0, 0, W, H); } }      // tapped: down to black
