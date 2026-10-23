@@ -143,6 +143,13 @@ function resultMusic(won) {
 }
 
 // ---- what follows down to the library is the old three-player table game: nothing leads to it any more
+let fadeCv = null;
+function fadedDraw(a, fn) {      // draw something made of overlapping pieces at less than full opacity without its pieces showing through one another: drawn whole onto a canvas of its own, then laid over the picture at opacity a
+  if (a <= 0) return; if (a >= 1) { ctx.save(); try { fn(); } finally { ctx.restore(); } return; }      // whatever fn changes (opacity, blend) stays inside it
+  const real = ctx, oc = fadeCv || (fadeCv = document.createElement('canvas')); if (oc.width !== cv.width || oc.height !== cv.height) { oc.width = cv.width; oc.height = cv.height; }
+  ctx = oc.getContext('2d'); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, oc.width, oc.height); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalAlpha = 1;
+  ctx.save(); try { fn(); } finally { ctx.restore(); ctx = real; }
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha *= a; ctx.drawImage(oc, 0, 0); ctx.restore(); }
 function drawGeese3(t, n) {      // three geese crossing the sky, exactly as over the town in the main game: white by day, a soft grey by night (n: how far into the night)
   for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], n), 2, lerp(.95, .7, n)); } }
 function drawBotc(t, dt) {
@@ -172,7 +179,7 @@ function drawBotc(t, dt) {
     if (g.pop && g.pop.who === i) { const u = g.pop.t / .45, k2 = 1 + .55 * eout(u); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * k2, s * .35 * k2, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .95 * (1 - u) * (1 - u)); ctx.lineWidth = 3.5 * (1 - u * .6); ctx.stroke(); g.pop.t += dt; if (g.pop.t >= .45) g.pop = null; }
     if (i === 0) glow(p[0], p[1] - K * .6, K * 1.2, [255, 240, 200], .3);
     const look = dead ? { kind: 'bare', body: [236, 236, 255], head: [236, 236, 255], a: .45 } : Object.assign({}, BLOOK[i], asleep ? { a: .55 } : {});
-    fig(p[0], p[1], K, look);
+    fadedDraw(look.a == null ? 1 : look.a, () => fig(p[0], p[1], K, Object.assign({}, look, { a: 1 })));      // asleep or dead: faded as a whole, so the hat never shows the head through it
     if (dead) { ctx.beginPath(); ctx.ellipse(p[0], p[1] - K * 1.33, K * .2, K * .06, 0, 0, TAU); ctx.strokeStyle = css([255, 250, 220], .8); ctx.lineWidth = 2; ctx.stroke(); }
     if (g.votes && g.votes[i] != null) { const vx = p[0] + K * .62, vy = p[1] - K * 1.1; if (g.votes[i]) { glow(vx, vy, 24, [255, 214, 110], .7); poly([[vx, vy - 13], [vx + 9, vy], [vx, vy + 13], [vx - 9, vy]], [255, 214, 110]); } else line([[vx - 7, vy], [vx + 7, vy]], [200, 190, 220], 3, .8); }
     toks.push(i);
