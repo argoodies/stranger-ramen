@@ -53,7 +53,7 @@ jobs:
 
       - name: Restore Command Line Tools
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ~/clt
           key: ${{ steps.clt.outputs.key }}
@@ -68,14 +68,22 @@ jobs:
           rm "$RUNNER_TEMP/clt.zip"
           du -sh ~/clt
 
+      - name: Cache Command Line Tools
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/clt
+          key: ${{ steps.clt.outputs.key }}
+
       - name: Build
         env:
           RUN: ${{ github.run_number }}
         run: |
           set -eo pipefail
-          CLT=$(dirname "$(find ~/clt -maxdepth 4 -type f -name hvigorw -path '*bin*' | head -1)")/..
-          CLT=$(cd "$CLT" && pwd); echo "tools: $CLT"; ls "$CLT"
-          export PATH="$CLT/bin:$CLT/tool/node/bin:$PATH"
+          CLT=$(find ~/clt -maxdepth 2 -type d -name command-line-tools | head -1); CLT=${CLT:-$HOME/clt}
+          echo "tools: $CLT"; ls "$CLT"; ls "$CLT/bin" || true
+          export PATH="$CLT/bin:$CLT/ohpm/bin:$CLT/hvigor/bin:$CLT/tool/node/bin:$PATH"
+          which ohpm hvigorw node; node -v
           export DEVECO_SDK_HOME="$CLT/sdk"
           echo "CLT=$CLT" >> "$GITHUB_ENV"
           # the game itself, and the version: name from the Android build, code from the run number
