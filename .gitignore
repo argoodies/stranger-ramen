@@ -7,3 +7,5 @@ android/app/src/main/assets/index.html
 android/.gradle/
 android/app/build/
 deploy/*.apk
+deploy/*.hap
+deploy/harmony.html
