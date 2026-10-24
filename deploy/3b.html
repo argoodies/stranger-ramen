@@ -526,7 +526,9 @@ let wv = new View(0, 0, 40), zoomOut = 1, zoomTarget = 1, camX = 0, camY = 0;
 const TITLE_UP = 1.55;      // seconds until the title has faded in (see the title's drawing): only then the "tap anywhere to start" hint, and only then may a tap start
 let starCache = null;
 let moonAt = null;      // set while the town sky is drawn, so the stars keep clear of the moon
+let skyCols = null;
 function drawSky(top, mid, bot, t, starA = 1) {
+  skyCols = [top, mid, bot];      // kept so things drawn over the sky can take its exact colour
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css(top)); g.addColorStop(.5, css(mid)); g.addColorStop(1, css(bot));
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   if (!starCache) { starCache = []; for (let i = 0; i < 90; i++) starCache.push([Math.random() * W, Math.random() * H * 0.7, rnd(0.6, 1.8), rnd(0, TAU)]); }
@@ -775,7 +777,7 @@ function drawWorld(t, dt) {
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
     if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
     const tt = titleT0 == null ? -1 : titleT0;
-    { const u = ease(clamp((tt - .35) / 1.2)); if (u > 0) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0)'; const x1 = x0 + gap * (chars.length - 1), cx = (x0 + x1) / 2, rx = (x1 - x0) / 2 + fs * 1.9, ry = fs * 1.9; ctx.translate(cx, y); ctx.scale(1, ry / rx); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx); g.addColorStop(0, `rgba(10,8,32,${.58 * u})`); g.addColorStop(.6, `rgba(10,8,32,${.4 * u})`); g.addColorStop(1, 'rgba(10,8,32,0)'); ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2); ctx.restore();      // a soft dark haze behind the letters, so the stars don't fight with them
+    { const u = ease(clamp((tt - .35) / 1.2)); if (u > 0) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0)'; const x1 = x0 + gap * (chars.length - 1), cx = (x0 + x1) / 2, rx = (x1 - x0) / 2 + fs * 1.9, ry = fs * 1.9, f = clamp(y / H), sc = skyCols ? (f < .5 ? mix(skyCols[0], skyCols[1], f * 2) : mix(skyCols[1], skyCols[2], f * 2 - 1)) : [30, 30, 70]; ctx.translate(cx, y); ctx.scale(1, ry / rx); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx); g.addColorStop(0, css(sc, .92 * u)); g.addColorStop(.6, css(sc, .75 * u)); g.addColorStop(1, css(sc, 0)); ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2); ctx.restore();      // a haze of the night sky's own colour behind the letters: the stars there fade out, and nothing else shows
       ctx.fillStyle = `rgba(255,255,255,${.96 * u})`; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y)); } } ctx.restore();
     if (tt >= TITLE_UP) tapHint('tapStart', tt - TITLE_UP);      // as soon as the title is up: "tap anywhere to start"      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
