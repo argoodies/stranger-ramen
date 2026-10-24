@@ -11,7 +11,7 @@ for l in locs['data']:
     for k in ('description', 'whatsNew', 'promotionalText', 'keywords'):
         v = a.get(k) or ''
         if 'Clocktower Ramen' in v: new[k] = v.replace('Clocktower Ramen', 'Ramen Puzzle')
-    new['supportUrl'] = BASE + '/support'; new['marketingUrl'] = BASE + '/download'
+    new['supportUrl'] = BASE + '/support'; new['marketingUrl'] = BASE + '/support'
     st, d = call('PATCH', f"/v1/appStoreVersionLocalizations/{l['id']}", {'data': {'type': 'appStoreVersionLocalizations', 'id': l['id'], 'attributes': new}})
     print('version loc', a['locale'], st, sorted(new), json.dumps(d.get('errors', ''), ensure_ascii=False)[:300])
 st, infos = call('GET', f'/v1/apps/{APP}/appInfos?limit=10')
