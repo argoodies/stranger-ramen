@@ -1120,7 +1120,8 @@ function drawStall(t) {
     else if (hd === 'chili') { ell(hp[0], hp[1], s * .13, s * .09, [236, 232, 240]); for (let i = 0; i < 4; i++) circ(hp[0] + Math.cos(i * 1.7) * s * .06, hp[1] - s * .03 + Math.sin(i * 1.7) * s * .03, s * .035, [220, 40, 40]); }
     else if (hd === 'cilantro') { for (let i = 0; i < 5; i++) ell(hp[0] + Math.cos(i * 1.3) * s * .08, hp[1] - s * .04 * (i % 3), s * .09, s * .06, i % 2 ? [96, 186, 106] : [62, 152, 86]); }
     else if (hd === 'beef') { ctx.save(); ctx.translate(hp[0], hp[1]); ctx.rotate(-.5); ctx.fillStyle = css([150, 86, 62]); rrect(-s * .15, -s * .06, s * .3, s * .12, s * .05); ctx.fill(); ctx.fillStyle = css([190, 124, 96]); rrect(-s * .1, -s * .02, s * .2, s * .035, s * .015); ctx.fill(); ctx.restore(); }
-    else if (hd === 'bowl') bowlTopMini(hp[0] - s * .12, hp[1] + s * .08, s * .36 * 1.2247, st.bowl);
+    else if (hd === 'bowl') { const bx = hp[0] - s * .12, by = hp[1] + s * .08; bowlTopMini(bx, by, s * .36 * 1.2247, st.bowl);
+      if (st.bowl.soup) for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3) % 1; circ(bx + Math.sin(t * 1.3 + i * 2) * s * .1, by - s * (.12 + .75 * ph), s * (.06 + .1 * ph), [255, 252, 248], .55 * (1 - ph)); } }      // a bowl with soup in it steams in his hands too, as it does on the counter
   };
   const ow = st.owner, inFront = ow.y > 2.4 && !(ow.x < 1.9 && ow.y < 3.05), binFirst = inFront && ow.x + ow.y > 4.45 + 3.0; if (!inFront) drawOwner();      // in front of the prep table only when past its front edge (beside its left end, the table is nearer); in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings
