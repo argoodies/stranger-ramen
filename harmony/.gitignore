@@ -1,0 +1,11 @@
+node_modules/
+oh_modules/
+.hvigor/
+build/
+entry/build/
+entry/src/main/resources/rawfile/index.html
+oh-package-lock.json5
+local.properties
+*.p12
+*.cer
+*.p7b
