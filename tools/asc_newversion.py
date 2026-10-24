@@ -1,9 +1,10 @@
 """Create the next App Store version from a processed build, fill in "what's new", make sure every
 language has screenshots (re-uploading from a folder if they were not carried over), and attach the build.
-usage: asc_newversion.py <versionString> <buildNumber> <screenshotDir>   — then run asc_submit.py <versionId> --submit"""
+usage: asc_newversion.py <versionString> <buildNumber> <screenshotDir> [--replace]   — then run asc_submit.py <versionId> --submit
+  --replace: drop the carried-over screenshots and upload every iphone_N / ipad_N in screenshotDir (or screenshotDir/<locale>), in order"""
 import sys, json, os, hashlib, urllib.request
 sys.path.insert(0, '/root'); from asc_api import req
-APP = '6782641107'; ver, bn, shots = sys.argv[1], sys.argv[2], sys.argv[3]
+APP = '6782641107'; ver, bn, shots = sys.argv[1], sys.argv[2], sys.argv[3]; REPLACE = '--replace' in sys.argv
 def must(m, p, b=None):
     st, tx = req(m, p, b); d = json.loads(tx) if tx.strip().startswith('{') else {}
     if st not in (200, 201, 204): print('!!', m, p, st, json.dumps(d.get('errors', d), ensure_ascii=False)[:800]); raise SystemExit(1)
@@ -14,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- A little coffee house at the end of the path: coffee by day, something else by night, and a white cat to pet\n- The church now sits lower, reached by four floating stepping stones\n- A bowl without soup can be served now, though the customer will say so\n- A new app icon, and many small touches across the town",
-       'zh-Hant': "· 小路盡頭開了一間小咖啡屋：白天喝咖啡，晚上換個口味，還有一隻可以摸的小白貓\n· 教堂沉到了更低的地方，要踩著四塊懸空的石階走下去\n· 沒加湯的麵也能端給客人了，只是會被吐槽\n· 換了新的圖示，小鎮還有許多畫面細節的調整",
-       'zh-Hans': "· 小路尽头开了一间小咖啡屋：白天喝咖啡，晚上换个口味，还有一只可以摸的小白猫\n· 教堂沉到了更低的地方，要踩着四块悬空的石阶走下去\n· 没加汤的面也能端给客人了，只是会被吐槽\n· 换了新的图标，小镇还有许多画面细节的调整"}
+NEW = {'en-US': "- Each time you open the game, a gold diamond over the ramen shop shows you where to begin\n- A bowl of soup now steams in the chef's hands as he carries it\n- The church: the steps out appear only after you open the chest and talk to whoever comes; lighting the torch again starts the next round\n- The stars behind the title are dimmer, so it reads more clearly",
+       'zh-Hant': "· 每次打開遊戲，拉麵店上方會有金色的菱形，告訴你從哪裡開始\n· 端起來的湯麵也會冒熱氣了\n· 教堂：打開寶箱、和來訪的人說過話之後，門口才會出現離開的台階；再次點燃火把就進入下一關\n· 標題後方的星光更暗，標題更清楚",
+       'zh-Hans': "· 每次打开游戏，拉面店上方会有金色的菱形，告诉你从哪里开始\n· 端起来的汤面也会冒热气了\n· 教堂：打开宝箱、和来访的人说过话之后，门口才会出现离开的台阶；再次点燃火把就进入下一关\n· 标题后方的星光更暗，标题更清楚"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
@@ -32,12 +33,14 @@ for l in must('GET', f'/v1/appStoreVersions/{VID}/appStoreVersionLocalizations')
     have = {s['attributes']['screenshotDisplayType']: len(s['relationships']['appScreenshots']['data']) for s in sets}
     print(lc, 'whatsNew set; screenshots carried over:', have)
     for typ, pre in (('APP_IPHONE_67', 'iphone'), ('APP_IPAD_PRO_3GEN_129', 'ipad')):
-        if have.get(typ): continue
+        if have.get(typ) and not REPLACE: continue
         for s in sets:
             if s['attributes']['screenshotDisplayType'] == typ: must('DELETE', f"/v1/appScreenshotSets/{s['id']}")
         sid = must('POST', '/v1/appScreenshotSets', {'data': {'type': 'appScreenshotSets', 'attributes': {'screenshotDisplayType': typ}, 'relationships': {'appStoreVersionLocalization': {'data': {'type': 'appStoreVersionLocalizations', 'id': lid}}}}})['data']['id']
-        for i in range(1, 7): upload(sid, f'{shots}/{pre}_{i}.png')
-        print(lc, typ, 'uploaded 6')
+        src = f'{shots}/{lc}' if os.path.isdir(f'{shots}/{lc}') else shots      # per-language folders when present
+        n = 0
+        while os.path.exists(f'{src}/{pre}_{n + 1}.png'): n += 1; upload(sid, f'{src}/{pre}_{n}.png')
+        print(lc, typ, 'uploaded', n)
 must('PATCH', f'/v1/appStoreVersions/{VID}/relationships/build', {'data': {'type': 'builds', 'id': b[0]['id']}})
 print('build on version', must('GET', f'/v1/appStoreVersions/{VID}/build?fields[builds]=version')['data']['attributes']['version'])
 print('VERSION_ID', VID)
