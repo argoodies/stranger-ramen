@@ -525,13 +525,12 @@ let wv = new View(0, 0, 40), zoomOut = 1, zoomTarget = 1, camX = 0, camY = 0;
 const TITLE_UP = 1.55;      // seconds until the title has faded in (see the title's drawing): only then the "tap anywhere to start" hint, and only then may a tap start
 let starCache = null;
 let moonAt = null;      // set while the town sky is drawn, so the stars keep clear of the moon
-let skyCols = null;
+let titleBox = null;      // where the title's letters sit (and how far they have faded in), so the stars behind them can go dim
 function drawSky(top, mid, bot, t, starA = 1) {
-  skyCols = [top, mid, bot];      // kept so things drawn over the sky can take its exact colour
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css(top)); g.addColorStop(.5, css(mid)); g.addColorStop(1, css(bot));
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   if (!starCache) { starCache = []; for (let i = 0; i < 90; i++) starCache.push([Math.random() * W, Math.random() * H * 0.7, rnd(0.6, 1.8), rnd(0, TAU)]); }
-  for (const [x, y, r, ph] of starCache) { const m = moonAt ? clamp((Math.hypot(x - moonAt[0], y - moonAt[1]) - 100) / 110) : 1; if (m > 0) circ(x, y, r, [255, 250, 230], m * starA * (0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + ph)))); }      // no stars show in the moon's glow
+  for (const [x, y, r, ph] of starCache) { let m = moonAt ? clamp((Math.hypot(x - moonAt[0], y - moonAt[1]) - 100) / 110) : 1; if (mode === 'title' && titleBox) { const b = titleBox, dx = Math.max(0, Math.abs(x - b.cx) - b.hw) / (b.fs * 1.5), dy = Math.max(0, Math.abs(y - b.y) - b.fs * 1.1) / (b.fs * 1.5); m *= 1 - b.u * .9 * (1 - clamp(Math.hypot(dx, dy))); } if (m > 0) circ(x, y, r, [255, 250, 230], m * starA * (0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + ph)))); }      // no stars show in the moon's glow; behind the title they are only faint
 }
 const SKYD = [[226, 150, 130], [214, 166, 156], [96, 140, 150]], SKYN = [[30, 44, 84], [46, 38, 84], [18, 18, 46]];
 function skyNow(t, dark = 0, stars = 1) { const n = G.n, d = [20, 16, 44]; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); }
@@ -776,8 +775,7 @@ function drawWorld(t, dt) {
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
     if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
     const tt = titleT0 == null ? -1 : titleT0;
-    { const u = ease(clamp((tt - .35) / 1.2)); if (u > 0) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0)'; const x1 = x0 + gap * (chars.length - 1), cx = (x0 + x1) / 2, rx = (x1 - x0) / 2 + fs * 1.9, ry = fs * 1.9, f = clamp(y / H), sc = skyCols ? (f < .5 ? mix(skyCols[0], skyCols[1], f * 2) : mix(skyCols[1], skyCols[2], f * 2 - 1)) : [30, 30, 70]; ctx.translate(cx, y); ctx.scale(1, ry / rx); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx); g.addColorStop(0, css(sc, .92 * u)); g.addColorStop(.6, css(sc, .75 * u)); g.addColorStop(1, css(sc, 0)); ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2); ctx.restore();      // a haze of the night sky's own colour behind the letters: the stars there fade out, and nothing else shows
-      ctx.fillStyle = `rgba(255,255,255,${.96 * u})`; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y)); } } ctx.restore();
+    { const u = ease(clamp((tt - .35) / 1.2)); titleBox = { cx: x0 + gap * (chars.length - 1) / 2, hw: gap * (chars.length - 1) / 2 + fs * .6, y, fs, u }; if (u > 0) { ctx.fillStyle = `rgba(255,255,255,${.96 * u})`; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; chars.forEach((ch, k) => ctx.fillText(ch, x0 + gap * k, y)); } } ctx.restore();
     if (tt >= TITLE_UP) tapHint('tapStart', tt - TITLE_UP);      // as soon as the title is up: "tap anywhere to start"      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
   if (mode === 'world' && zoomTarget > .5 && !bag.open) { if (zoomHintT0 == null) zoomHintT0 = t; tapHint('tapGo', t - zoomHintT0); } else zoomHintT0 = null;      // the zoomed-out view of the town: a tap anywhere goes back in
