@@ -134,9 +134,9 @@ const STR = {
       ft: ['水晶球说，教堂里面有恶魔。', '我昨晚查了两个人……算了，不说了。', '等等？图书馆里面难道也有恶魔？'],
       drunk: ['嗝……再来一杯。', '我没醉……没醉。', '钟楼怎么有两座？'], crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降临时，记得闭上眼睛。', '钟楼顶上的风景不错，上去看看？', '我的本子里可没有写你的坏话。'],
       demon: ['我真的只是路过。', '别这么看我，我是好人。', '今晚……你睡得沉吗？'], scarlet: ['别怕，有姐姐在。', '你猜我是好人还是坏人？'] },
-    beefY: ['牛肉面', '来碗牛肉面', '要牛肉面'], beefN: ['拉面', '来碗拉面', '要拉面'], clearN: ['清汤面', '来碗清汤面', '要清汤面'],
-    chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '别放辣', '不吃辣'],
-    cilY: ['加香菜', '放香菜', '多点香菜'], cilN: ['不要香菜', '别放香菜', '香菜不要'],
+    ordLead: ['', '', '老板，', '你好，'], ordEnd: ['。', '！', '～'],
+    ordDish: { beef: ['来碗牛肉面', '要一碗牛肉面', '一碗牛肉面'], ramen: ['来碗拉面', '要一碗拉面', '一碗拉面'], clear: ['来碗清汤面', '要一碗清汤面', '一碗清汤面'] },
+    ordTop: { yy: ['要辣，香菜多放点', '加辣，再来点香菜', '辣一点，多放香菜'], yn: ['要辣，别放香菜', '加辣，香菜就不要了', '辣一点，不要香菜'], ny: ['不要辣，多放点香菜', '别放辣，加点香菜', '不吃辣，香菜多来点'], nn: ['辣和香菜都不要', '不要辣，也别放香菜', '不放辣，香菜也不要'] },
     sayOk: ['好吃！', '就是这个味！', '暖和了～', '谢谢老板！'], sayBad: ['嗯…这不是我点的', '好像不太对？'], later: '下次再来吧…',
     hungryFirst: '有点饿了。先给自己做一碗，放到吧台上。', hungry: '有点饿了，给自己做一碗吧。',
     notYet: ['客人还没招呼完呢。', '先把客人招呼好吧。', '还不饿，等会儿再吃。'], yum: ['真香。', '再来一碗也行。', '还是自己做的合口味。'], full: '吃饱了，出去走走吧。',
@@ -163,9 +163,9 @@ const STR = {
       ft: ['水晶球說，教堂裡面有惡魔。', '我昨晚查了兩個人……算了，不說了。', '等等？圖書館裡面難道也有惡魔？'],
       drunk: ['嗝……再來一杯。', '我沒醉……沒醉。', '鐘樓怎麼有兩座？'], crow: ['嘎。', '嘎嘎？', '……嘎。'], teller: ['夜晚降臨時，記得閉上眼睛。', '鐘樓頂上的風景不錯，上去看看？', '我的本子裡可沒有寫你的壞話。'],
       demon: ['我真的只是路過。', '別這麼看我，我是好人。', '今晚……你睡得沉嗎？'], scarlet: ['別怕，有姐姐在。', '你猜我是好人還是壞人？'] },
-    beefY: ['牛肉麵', '來碗牛肉麵', '要牛肉麵'], beefN: ['拉麵', '來碗拉麵', '要拉麵'], clearN: ['清湯麵', '來碗清湯麵', '要清湯麵'],
-    chiliY: ['要辣', '多放辣', '加辣'], chiliN: ['不要辣', '別放辣', '不吃辣'],
-    cilY: ['加香菜', '放香菜', '多點香菜'], cilN: ['不要香菜', '別放香菜', '香菜不要'],
+    ordLead: ['', '', '老闆，', '你好，'], ordEnd: ['。', '！', '～'],
+    ordDish: { beef: ['來碗牛肉麵', '要一碗牛肉麵', '一碗牛肉麵'], ramen: ['來碗拉麵', '要一碗拉麵', '一碗拉麵'], clear: ['來碗清湯麵', '要一碗清湯麵', '一碗清湯麵'] },
+    ordTop: { yy: ['要辣，香菜多放點', '加辣，再來點香菜', '辣一點，多放香菜'], yn: ['要辣，別放香菜', '加辣，香菜就不要了', '辣一點，不要香菜'], ny: ['不要辣，多放點香菜', '別放辣，加點香菜', '不吃辣，香菜多來點'], nn: ['辣和香菜都不要', '不要辣，也別放香菜', '不放辣，香菜也不要'] },
     sayOk: ['好吃！', '就是這個味！', '暖和了～', '謝謝老闆！'], sayBad: ['嗯…這不是我點的', '好像不太對？'], later: '下次再來吧…',
     hungryFirst: '有點餓了。先給自己做一碗，放到吧台上。', hungry: '有點餓了，給自己做一碗吧。',
     notYet: ['客人還沒招呼完呢。', '先把客人招呼好吧。', '還不餓，等會兒再吃。'], yum: ['真香。', '再來一碗也行。', '還是自己做的合口味。'], full: '吃飽了，出去走走吧。',
@@ -192,9 +192,9 @@ const STR = {
       ft: ['My crystal ball says there is a demon in the church.', 'I checked two players last night… never mind.', 'Wait… could there be a demon in the library too?'],
       drunk: ['Hic… one more.', "I'm not drunk… not drunk.", 'Why are there two clocktowers?'], crow: ['Caw.', 'Caw caw?', '…caw.'], teller: ['When night falls, remember to close your eyes.', 'The view from the top of the clocktower is something. Come and see?', 'My notebook says nothing bad about you.'],
       demon: ['Just passing through. Really.', "Don't look at me like that. I'm one of the good ones.", 'Tonight… are you a heavy sleeper?'], scarlet: ["Don't worry, I'm right here.", 'Guess: am I good or evil?'] },
-    beefY: ['Beef noodles', 'A beef noodle bowl', 'Beef noodles, please'], beefN: ['Ramen', 'A bowl of ramen', 'Ramen, please'], clearN: ['Clear soup noodles', 'A clear soup noodle bowl', 'Clear soup noodles, please'],
-    chiliY: ['with chili', 'extra chili', 'make it spicy'], chiliN: ['no chili', 'hold the chili', 'not spicy'],
-    cilY: ['with cilantro', 'add cilantro', 'extra cilantro'], cilN: ['no cilantro', 'hold the cilantro', 'skip the cilantro'],
+    ordLead: ['', '', 'Hi! ', 'Chef, '], ordEnd: [', please.', '!', ', thanks.'],
+    ordDish: { beef: ['a bowl of beef noodles', 'beef noodles', 'one bowl of beef noodles'], ramen: ['a bowl of ramen', 'ramen', 'one bowl of ramen'], clear: ['a bowl of clear soup noodles', 'clear soup noodles', 'one bowl of clear soup noodles'] },
+    ordTop: { yy: ['spicy with extra cilantro', 'make it spicy, and lots of cilantro', 'spicy, plenty of cilantro'], yn: ['spicy, no cilantro', 'make it spicy, hold the cilantro', 'spicy, skip the cilantro'], ny: ['not spicy, extra cilantro', 'no chili, but lots of cilantro', 'mild, with cilantro'], nn: ['no chili and no cilantro', 'not spicy, and hold the cilantro', 'nothing spicy and no cilantro'] },
     sayOk: ['Delicious!', 'Just right!', 'So warming~', 'Thanks, chef!'], sayBad: ["Hmm… that's not my order.", "That's not quite right?"], later: 'Maybe next time…',
     hungryFirst: "I'm getting hungry. My own bowl first, on the bar.", hungry: "I'm getting hungry. Time for a bowl of my own.",
     notYet: ['Customers first.', 'Let me look after the customers first.', 'Not hungry yet.'], yum: ['Mmm.', 'One more would not hurt.', 'Nothing beats my own cooking.'], full: "I'm full. Time for a walk.",
@@ -840,7 +840,11 @@ function knock() { if (!AC) return; const t = AC.currentTime; tone(150, t, .1, .
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
 stall.bowl = emptyBowl();
 const SEATX = [1.2, 2.5, 3.8], CUSTY = -0.45;
-function orderText(w) { const L = S(); return [pick(w.beef ? L.beefY : w.chili ? L.beefN : L.clearN), pick(w.chili ? L.chiliY : L.chiliN), pick(w.cilantro ? L.cilY : L.cilN)].join('\n'); }      // no beef and no chili: a bowl of clear soup noodles
+function orderText(w) {      // one spoken sentence: (greeting) + the noodles + chili and cilantro said together
+  const L = S(), lead = pick(L.ordLead), dish = pick(L.ordDish[w.beef ? 'beef' : w.chili ? 'ramen' : 'clear']), top = pick(L.ordTop[(w.chili ? 'y' : 'n') + (w.cilantro ? 'y' : 'n')]);
+  const d = LANG === 'en' && (!lead || lead.endsWith('! ')) ? dish[0].toUpperCase() + dish.slice(1) : dish;      // English: a capital at the start of a sentence
+  return lead + d + (LANG === 'en' ? ', ' : '，') + top + pick(L.ordEnd);
+}      // no beef and no chili: a bowl of clear soup noodles
 function spawnCustomer() {
   const free = [0, 1, 2].filter(i => !stall.seats[i]); if (!free.length) return;
   const look = randomLook(), w = { chili: Math.random() < .5, cilantro: Math.random() < .5, beef: Math.random() < .55 };
@@ -1155,11 +1159,15 @@ function drawStall(t) {
     const c = st.seats[i]; if (!c || a < .5) continue;
     const order = c.state === 'wait' || c.state === 'arrive', txt = order ? c.text : c.say; if (!txt) continue;
     ctx.font = FONT(fs, true);
-    const lines = order ? txt.split('\n') : wrapText(txt, Math.min(W * .62, 250));      // what they say after eating gets the same width as anyone else's bubble
+    const lines = wrapText(txt, Math.min(W * .62, 250));      // orders and after-meal lines alike: one sentence, wrapped only where the bubble runs out of room
     const cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 18, bh = lines.length * lh + 12, fadeA = order ? clamp(1.25 - c.wait / waitMax() * .5) : 1, bx = clamp(hx - cw / 2, 6, W - cw - 6);
     let by = hy0 - 8 - bh; for (let n = 0; n < 60 && placed.some(r => bx < r[0] + r[2] + 4 && bx + cw + 4 > r[0] && by < r[1] + r[3] + 4 && by + bh + 4 > r[1]); n++) by -= 5;
-    placed.push([bx, by, cw, bh]);
-    const tx = clamp(hx, bx + 12, bx + cw - 12); ctx.fillStyle = css([250, 246, 238], .96 * fadeA); rrect(bx, by, cw, bh, 10); ctx.fill(); poly([[tx - 5, by + bh - 1], [tx + 5, by + bh - 1], [hx, hy0 - 1]], [250, 246, 238], .96 * fadeA);
+    placed.push([bx, by, cw, bh, lines, fadeA, hx, hy0]);
+  }
+  // tails first, then the bubbles over them: a long tail reaching down never shows across another bubble
+  for (const [bx, by, cw, bh, , fadeA, hx, hy0] of placed) { const tx = clamp(hx, bx + 12, bx + cw - 12); poly([[tx - 5, by + bh - 1], [tx + 5, by + bh - 1], [hx, hy0 - 1]], [250, 246, 238], .96 * fadeA); }
+  for (const [bx, by, cw, bh, lines, fadeA] of placed) {
+    ctx.fillStyle = css([250, 246, 238], .96 * fadeA); rrect(bx, by, cw, bh, 10); ctx.fill();
     lines.forEach((l, k) => text(l, bx + cw / 2, by + 6 + lh * (k + .5), fs, [50, 36, 70], 1, 'center', true));
   }
   if (st.board) { drawBoard(t); return; }
