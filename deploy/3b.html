@@ -497,14 +497,15 @@ function bfs(from, to, avoid) {
   }
   return null;
 }
-function nearestWalkable(x, y, offPath) {      // offPath: only grass, never the paved path (where the townsfolk like to stroll)
+function nearestWalkable(x, y, offPath, island) {      // offPath: only grass, never the paved path (where the townsfolk like to stroll); island: only the main island, never the dark walkways out to the coffee house and the church
   let best = null, bd = 1e9;
-  for (let i = -5; i < 11; i++) for (let j = -5; j < (offPath ? 5 : 6); j++) if (walkable(i, j) && !(offPath && PATH.has(key(i, j)))) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
+  for (let i = -5; i < 11; i++) for (let j = -5; j < (offPath ? 5 : 6); j++) if (walkable(i, j) && !(offPath && PATH.has(key(i, j))) && !(island && (i >= 5 || j >= 5))) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
   return best;
 }
 const player = { x: -0.5, y: 3.5, path: [], enter: false, step: 0 };
 const npcs = [];
-for (let n = 0; n < 1; n++) { const c = nearestWalkable(rnd(-4, 4), rnd(-4, 4), true); npcs.push({ x: c[0] + .5, y: c[1] + .5, path: [], wait: rnd(0, 4), look: randomLook(), step: 0 }); }
+for (let n = 0; n < 1; n++) { const c = nearestWalkable(rnd(-4, 4), rnd(-4, 4), true, true);      // townsfolk appear on the island's grass: never on the stone path, never on the dark walkways
+  npcs.push({ x: c[0] + .5, y: c[1] + .5, path: [], wait: rnd(0, 4), look: randomLook(), step: 0 }); }
 function cellOf(p) { return [Math.floor(p.x), Math.floor(p.y)]; }
 const sameCell = (a, i, j) => Math.floor(a.x) === i && Math.floor(a.y) === j;
 function taken(i, j, self) {
@@ -1155,7 +1156,7 @@ function drawStall(t) {
     const c = st.seats[i]; if (!c || a < .5) continue;
     const order = c.state === 'wait' || c.state === 'arrive', txt = order ? c.text : c.say; if (!txt) continue;
     ctx.font = FONT(fs, true);
-    const lines = order ? txt.split('\n') : wrapText(txt, LANG === 'en' ? fs * 7.5 : fs * 5.2);
+    const lines = order ? txt.split('\n') : wrapText(txt, Math.min(W * .62, 250));      // what they say after eating gets the same width as anyone else's bubble
     const cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 18, bh = lines.length * lh + 12, fadeA = order ? clamp(1.25 - c.wait / waitMax() * .5) : 1, bx = clamp(hx - cw / 2, 6, W - cw - 6);
     let by = hy0 - 8 - bh; for (let n = 0; n < 60 && placed.some(r => bx < r[0] + r[2] + 4 && bx + cw + 4 > r[0] && by < r[1] + r[3] + 4 && by + bh + 4 > r[1]); n++) by -= 5;
     placed.push([bx, by, cw, bh]);
@@ -1247,7 +1248,18 @@ function boardUp() {
 }
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]); ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, b.soup ? [226, 160, 84] : [248, 246, 240]);
-  if (b.noodle) ell(x, y, r * .5, r * .28, [250, 232, 170]);
+  if (b.noodle) {      // an oval nest of noodles, with the strands showing: wavy lines curling across it, light and shaded in turn
+    const nx = r * .5, ny = r * .28, lw = Math.max(.8, r * .05);
+    ell(x, y, nx, ny, [236, 206, 132]);
+    ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, nx * .97, ny * .94, 0, 0, TAU); ctx.clip();
+    for (let k = 0; k < 7; k++) {
+      const oy = (k / 6 - .5) * ny * 1.9, ph = k * 1.9, pts = [];
+      for (let j = 0; j <= 12; j++) { const u = j / 12; pts.push([x - nx * 1.05 + u * nx * 2.1, y + oy + (u - .5) * ny * .5 + Math.sin(u * Math.PI * 3.2 + ph) * ny * .2]); }
+      line(pts, k % 2 ? [255, 242, 196] : [214, 176, 98], lw);
+    }
+    ctx.restore();
+    ctx.beginPath(); ctx.ellipse(x, y, nx, ny, 0, 0, TAU); ctx.strokeStyle = css([206, 168, 92], .7); ctx.lineWidth = Math.max(.6, r * .025); ctx.stroke();
+  }
   if (b.beef) ell(x - r * .2, y - r * .08, r * .22, r * .1, [150, 86, 62]);
   if (b.chili) ell(x + r * .22, y - r * .1, r * .14, r * .07, [220, 40, 40]);
   if (b.cilantro) ell(x + r * .12, y + r * .14, r * .16, r * .07, [70, 160, 90]);
@@ -1833,7 +1845,7 @@ function storyStep(dt) {      // the story's clock: scene by scene; on the last,
   st.t += dt;
   if (st.i === STORY.length - 1 && st.t >= STORY[st.i].d) { st.t = STORY[st.i].d; st.card = { t: 0 }; return; }      // the card comes up in silence: only the rain
   const D = st.i < 0 ? 1.8 : STORY[st.i].d + STORY_HOLD;
-  if (st.t >= D) { st.i++; st.t = 0; if (st.i === 0) { const p = c.p; p.moving = false; p.target = null; p.tx = p.x; p.ty = p.y; } chime(pick([62, 65, 69, 72]), 0, .06, .8); }      // the chef stops where the story begins
+  if (st.t >= D) { st.i++; st.t = 0; if (st.i === 0) { const p = c.p; p.moving = false; p.target = null; p.tx = p.x; p.ty = p.y; } }      // the chef stops where the story begins; scene cuts are silent (no chime between scenes)
 }
 function drawChapter(t, u = church.chapter.t, hold = false) {      // the chapter's closing card, in the middle of the screen: two gold rules opening out from the centre, "Completed", the chapter, its name, glinting. Held, it stays up until it is tapped away
   const a = hold ? clamp(u / .8) : clamp(Math.min(u / .8, (CHAPTER_T - u) / .8)), open = eout(clamp(u / 1.1)), y = H * .44, G = [246, 220, 150], L = S();
