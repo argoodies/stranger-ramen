@@ -1255,17 +1255,12 @@ function boardUp() {
 }
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]); ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, b.soup ? [226, 160, 84] : [248, 246, 240]);
-  if (b.noodle) {      // an oval nest of noodles, with the strands showing: wavy lines curling across it, light and shaded in turn
-    const nx = r * .5, ny = r * .28, lw = Math.max(.8, r * .05);
-    ell(x, y, nx, ny, [236, 206, 132]);
-    ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, nx * .97, ny * .94, 0, 0, TAU); ctx.clip();
-    for (let k = 0; k < 7; k++) {
-      const oy = (k / 6 - .5) * ny * 1.9, ph = k * 1.9, pts = [];
-      for (let j = 0; j <= 12; j++) { const u = j / 12; pts.push([x - nx * 1.05 + u * nx * 2.1, y + oy + (u - .5) * ny * .5 + Math.sin(u * Math.PI * 3.2 + ph) * ny * .2]); }
-      line(pts, k % 2 ? [255, 242, 196] : [214, 176, 98], lw);
-    }
-    ctx.restore();
-    ctx.beginPath(); ctx.ellipse(x, y, nx, ny, 0, 0, TAU); ctx.strokeStyle = css([206, 168, 92], .7); ctx.lineWidth = Math.max(.6, r * .025); ctx.stroke();
+  if (b.noodle) {      // the noodles, Monument Valley flat: a pale oval lit from above in two flat tones, coiled by three smooth concentric arcs
+    const nx = r * .5, ny = r * .28;
+    ell(x, y, nx, ny, [236, 194, 118]);
+    ell(x, y - ny * .12, nx * .88, ny * .76, [246, 214, 146]);
+    ctx.lineCap = 'round'; ctx.lineWidth = Math.max(1, r * .065); ctx.strokeStyle = css([255, 242, 200]);
+    [[.76, 3.3, 6.1], [.52, 2.9, 5.6], [.28, 3.6, 6.5]].forEach(([k, a0, a1]) => { ctx.beginPath(); ctx.ellipse(x, y, nx * k, ny * k, 0, a0, a1); ctx.stroke(); });
   }
   if (b.beef) ell(x - r * .2, y - r * .08, r * .22, r * .1, [150, 86, 62]);
   if (b.chili) ell(x + r * .22, y - r * .1, r * .14, r * .07, [220, 40, 40]);

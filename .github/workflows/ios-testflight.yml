@@ -79,7 +79,8 @@ jobs:
           IPA=$(find "$RUNNER_TEMP/export-ios" -name "*.ipa" | head -1)
           echo "ipa=$IPA"
           xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee "$RUNNER_TEMP/altool-ios.log"
-          if grep -qiE 'ERROR:|Validation failed' "$RUNNER_TEMP/altool-ios.log"; then
+          # a transient App Store Connect 500 can log "ERROR:" even though the upload went through
+          if ! grep -q 'UPLOAD SUCCEEDED' "$RUNNER_TEMP/altool-ios.log" || grep -qi 'Validation failed' "$RUNNER_TEMP/altool-ios.log"; then
             echo "::error::altool upload to App Store Connect failed (see the validation details above)"
             exit 1
           fi
