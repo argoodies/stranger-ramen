@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- Each time you open the game, a gold diamond over the ramen shop shows you where to begin\n- A bowl of soup now steams in the chef's hands as he carries it\n- The church: the steps out appear only after you open the chest and talk to whoever comes; lighting the torch again starts the next round\n- The stars behind the title are dimmer, so it reads more clearly",
-       'zh-Hant': "· 每次打開遊戲，拉麵店上方會有金色的菱形，告訴你從哪裡開始\n· 端起來的湯麵也會冒熱氣了\n· 教堂：打開寶箱、和來訪的人說過話之後，門口才會出現離開的台階；再次點燃火把就進入下一關\n· 標題後方的星光更暗，標題更清楚",
-       'zh-Hans': "· 每次打开游戏，拉面店上方会有金色的菱形，告诉你从哪里开始\n· 端起来的汤面也会冒热气了\n· 教堂：打开宝箱、和来访的人说过话之后，门口才会出现离开的台阶；再次点燃火把就进入下一关\n· 标题后方的星光更暗，标题更清楚"}
+NEW = {'en-US': "- Customers now say their order as one sentence\n- Noodles in the bowl have a new look\n- After-meal lines are no longer squeezed into narrow bubbles, and bubbles no longer overlap each other\n- Eating your own bowl no longer plays two sounds at once\n- No more chime between the scenes of the cutscene\n- Islanders no longer appear on the stone path or the walkways to the coffee house and the church",
+       'zh-Hant': "· 客人點單改成一句完整的話\n· 碗裡的麵換了新畫法\n· 客人吃完說的話不再被擠成窄窄的幾行，多位客人的氣泡也不再互相遮擋\n· 吃自己那碗麵時，音效不再重疊\n· 過場動畫切換場景時不再有提示音\n· 島上的人不會再出現在石板路和通往酒館、教堂的小路上",
+       'zh-Hans': "· 客人点单改成一句完整的话\n· 碗里的面换了新画法\n· 客人吃完说的话不再被挤成窄窄的几行，多位客人的气泡也不再互相遮挡\n· 吃自己那碗面时，音效不再重叠\n· 过场动画切换场景时不再有提示音\n· 岛上的人不会再出现在石板路和通往酒馆、教堂的小路上"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
