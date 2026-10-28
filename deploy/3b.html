@@ -711,6 +711,7 @@ function drawBar(t) {
   { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55;      // a round, soft white cat, always on all four feet: when it pauses it simply stands still
       const [hx, hy] = catFigure(q, k, c, CAT_WHITE);
       BARHIT.cat = [q[0], q[1] - k * .4, s * .45]; c.at = [hx, hy]; } }); }
+  if (pet.where === 'bar') objs.push({ k: pet.rx + pet.ry + .02, d: () => { pet.at = catFigure(P(pet.rx, pet.ry), s * .5, pet, CAT_BLACK); } });      // the black cat, when it has followed the chef in
   { const per = Math.floor(G.t / HALF), up = per % 2 === 0 && bar.taken !== per, jt = jig('wobTable', 0); { const tq = P(.5, .5, .5); BARHIT.table = [tq[0], tq[1], s * .5]; }      // a little round table by the door, bare: a tap just rocks it (the iced coffee to take away stands at the left end of the counter, below)
     objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46 + jt, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5 + jt, .5, .66, .36, .06, [176, 124, 90]);
     } }); }
@@ -799,56 +800,75 @@ function drawWorld(t, dt) {
 let worldHint = 6, nearDoor = null, zoomHintT0 = null;      // zoomHintT0: when the zoomed-out view's hint first showed
 const DOORS = { stall: DOOR, tower: TDOOR, lib: LDOOR, church: CDOOR, bar: BDOOR }, goIn = w => w === 'stall' ? enterStall() : w === 'tower' ? enterTower() : w === 'church' ? enterChurch() : w === 'bar' ? enterBar() : enterLib();
 function goDoor(which) { const d = DOORS[which], p = bfs(cellOf(player), d); if (!p) return; player.path = p.slice(1); player.enter = which; if (!player.path.length) { player.enter = false; goIn(which); } }
-// ------------------------------------------------------------ the black cat: lives on the grass by the ramen shop's right-hand wall, and tags along when the chef wanders off
+// ------------------------------------------------------------ the black cat: lives on the grass by the ramen shop's right-hand wall. It moves as slowly as the coffee-house cat and mostly sits;
+// when the chef wanders off it ambles after him along his footsteps, and goes in wherever he goes (coffee house, library, tower, church), arriving in its own time
 const PET_HOME = { x0: -3.3, x1: -2.65, y0: 1.55, y1: 2.8 };      // the strip of grass outside the shop's right wall
-const pet = { x: -2.95, y: 2.2, tx: -2.95, ty: 2.2, t: 0, face: -1, sit: 3, meowT: 0, at: null, where: 'world', trail: [], cx: 0, cy: 0, ctx: 0, cty: 0, cd: 0, dash: null };
+const PET_SLOW = .55;      // the coffee-house cat's pace
+let petRoomsMemo = null;
+const petRooms = () => petRoomsMemo || (petRoomsMemo = {      // per room: the town door it goes in by, where it appears inside, the way out, and the floor it may walk on (built on first use: the tower and church constants are defined further down)
+  bar: { door: BDOOR, in: [.6, 2.1], out: [.5, 1.5], ok: (x, y) => x > .25 && x < 2.75 && y > .35 && y < 3.65 && !(x < 1.15 && y < 1.15) && !(x > 2.15 && Math.abs(y - (bar.whoAt || 0) - .5) < .65), chef: () => [bar.x, bar.y] },
+  lib: { door: LDOOR, in: [1.6, 3.2], out: [1.5, 3.5], ok: (x, y) => x > .3 && x < 3.7 && y > 1.25 && y < 3.7, chef: () => [lib.x, lib.y] },
+  tower: { door: TDOOR, in: [2.6, 3.0], out: [TEXIT[0], TEXIT[1]], ok: (x, y) => x > .45 && x < 3.55 && y > .45 && y < 3.55 && Math.hypot(x - TTORCH[0], y - TTORCH[1]) > .65 && Math.hypot(x - TMAN[0], y - TMAN[1]) > .65, chef: () => [tw.x, tw.y] },
+  church: { door: CDOOR, in: [CX1 - 1.8, CW / 2 + .6], out: [CX1 - .4, CW / 2], ok: (x, y) => x > CX0 + .3 && x < CX1 - .25 && y > CY0 + .2 && y < CY1 - .2, chef: () => [church.p.x, church.p.y] },
+});
+const pet = { x: -2.95, y: 2.2, tx: -2.95, ty: 2.2, t: 0, face: -1, sit: 3, meowT: 0, at: null, where: 'world', trail: [], rx: 0, ry: 0, rtx: 0, rty: 0, cd: 0, dash: null, dashT: 0 };
 const nearShop = () => mode === 'stall' || mode === 'title' || Math.hypot(player.x + 4.17, player.y - 2.15) < 2.6;      // inside the shop, or close by it outside
-function petStep(xk, yk, tx, ty, sp, dt) {      // move the cat a step toward a point (xk/yk name the coordinates it moves in: town or church); true once there
+function petStep(xk, yk, tx, ty, sp, dt) {      // move the cat a step toward a point (xk/yk name the coordinates it moves in: the town's or a room's); true once there
   const c = pet, dx = tx - c[xk], dy = ty - c[yk], d = Math.hypot(dx, dy); if (d < .04) return true;
   const st = Math.min(d, sp * dt); c[xk] += dx / d * st; c[yk] += dy / d * st; c.face = Math.sign(dx - dy) || c.face; return d - st < .04;
 }
+function petFollow(dt) {      // amble along the chef's footsteps; when it has caught up, sit
+  const c = pet, dp = Math.hypot(player.x - c.x, player.y - c.y);
+  while (c.trail.length > 1 && Math.hypot(c.trail[0][0] - c.x, c.trail[0][1] - c.y) < .15) c.trail.shift();
+  if ((mode === 'world' && dp < .9) || !c.trail.length) { c.sit = Math.max(c.sit, .3); return; }
+  c.sit = 0; petStep('x', 'y', c.trail[0][0], c.trail[0][1], PET_SLOW, dt);
+}
 function updatePet(dt) {
   const c = pet; c.t += dt; if (c.meowT > 0) c.meowT -= dt;
-  if (c.where !== 'world') return;      // inside the church it is moved by petChurch
-  if (mode === 'world') { const L = c.trail[c.trail.length - 1]; if (!L || Math.hypot(L[0] - player.x, L[1] - player.y) > .25) { c.trail.push([player.x, player.y]); if (c.trail.length > 400) c.trail.shift(); } }      // the chef's footsteps, for following
-  if (mode === 'world' && !nearShop()) {      // the chef has wandered off: follow along the way he went, a step or so behind
-    const dp = Math.hypot(player.x - c.x, player.y - c.y);
-    while (c.trail.length > 1 && Math.hypot(c.trail[0][0] - c.x, c.trail[0][1] - c.y) < .15) c.trail.shift();
-    if (dp < .9 || !c.trail.length) { c.sit = .3; return; }
-    c.sit = 0; petStep('x', 'y', c.trail[0][0], c.trail[0][1], dp > 3 ? 5.2 : 3.6, dt); return;
-  }
-  if (mode !== 'world' && mode !== 'stall' && mode !== 'title') { c.sit = Math.max(c.sit, .3); return; }      // the chef is in the coffee house, the library or the tower: wait by the door
-  // at home: pad about the grass by the wall, often sitting down; coming back from elsewhere it goes round the shop's corner, not through it
-  c.trail = [];
-  const inHome = c.x >= PET_HOME.x0 - .05 && c.x <= PET_HOME.x1 + .05 && c.y >= PET_HOME.y0 - .05 && c.y <= PET_HOME.y1 + .05;
-  if (c.sit > 0 && inHome) { c.sit -= dt; return; }
-  c.sit = 0;
-  let tx = c.tx, ty = c.ty;
-  if (c.x < -3.3 && c.y > 2.9) { tx = -2.95; ty = 3.25; } else if (c.x < -3.3 && c.y < 1.45) { tx = -2.95; ty = 1.2; }      // round the front or back corner first
-  if (petStep('x', 'y', tx, ty, inHome ? 1.1 : 3.4, dt) && tx === c.tx && ty === c.ty) { if (Math.random() < .55) c.sit = rnd(3, 8); c.tx = rnd(PET_HOME.x0, PET_HOME.x1); c.ty = rnd(PET_HOME.y0, PET_HOME.y1); }
-}
-function petMeow() { pet.meowT = 1.6; sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); }
-function petEnterChurch() {      // a cat that was following comes in too
-  if (pet.where !== 'world' || nearShop() || Math.hypot(pet.x - player.x, pet.y - player.y) > 4) return;
-  const p = church.p; Object.assign(pet, { where: 'church', cx: p.x - .9, cy: p.y + .5, sit: 0, dash: null, cd: rnd(15, 35) }); pet.ctx = pet.cx; pet.cty = pet.cy;
-}
-function petLeaveChurch() { if (pet.where !== 'church') return; Object.assign(pet, { where: 'world', x: player.x + .25, y: player.y + .25, trail: [], sit: .5, dash: null }); }
-function petChurch(dt) {      // in the church: it runs about; in a fight, about once a minute it pounces on a foe, which does no harm but dazes it for a second. Nothing ever aims at the cat
-  const c = church, m = pet; if (m.where !== 'church' || c.story) return;
-  const live = c.fight && c.freeze <= 0 ? c.foes.filter(e => e.hp > 0 && !(e.app > 0) && !e.inv && e.kind !== 'adv' && e.wave === c.wave) : [];
-  if (m.dash) {
-    const e = m.dash; if (!live.includes(e)) { m.dash = null; return; }
-    m.sit = 0;
-    if (petStep('cx', 'cy', e.x, e.y, 6.5, dt) || Math.hypot(e.x - m.cx, e.y - m.cy) < .55) {
-      e.stun = Math.max(e.stun || 0, 1); e.wind = 0; e.dash = 0; e.combo = 0;
-      c.fx.push({ k: 'poof', x: e.x, y: e.y, t: 0, T: .4, c: [70, 60, 96] }); noise(.12, .22, 3200, 900); petMeow();
-      m.dash = null; m.cd = rnd(50, 70); m.ctx = clamp(m.cx + rnd(-2, 2), CX0 + .3, CX1 - .3); m.cty = clamp(m.cy + rnd(-2, 2), CY0 + .2, CY1 - .2);
+  if (mode === 'world') { const L = c.trail[c.trail.length - 1]; if (!L || Math.hypot(L[0] - player.x, L[1] - player.y) > .25) { c.trail.push([player.x, player.y]); if (c.trail.length > 600) c.trail.shift(); } }      // the chef's footsteps
+  if (c.where === 'world') {
+    if (nearShop()) {      // at home: pad about the grass by the wall and sit a lot; coming back from elsewhere it goes round the shop's corner, not through it
+      c.trail = [];
+      const inHome = c.x >= PET_HOME.x0 - .05 && c.x <= PET_HOME.x1 + .05 && c.y >= PET_HOME.y0 - .05 && c.y <= PET_HOME.y1 + .05;
+      if (c.sit > 0 && inHome) { c.sit -= dt; return; }
+      c.sit = 0; let tx = c.tx, ty = c.ty;
+      if (c.x < -3.3 && c.y > 2.9) { tx = -2.95; ty = 3.25; } else if (c.x < -3.3 && c.y < 1.45) { tx = -2.95; ty = 1.2; }
+      if (petStep('x', 'y', tx, ty, PET_SLOW, dt) && tx === c.tx && ty === c.ty) { if (Math.random() < .75) c.sit = rnd(4, 10); c.tx = rnd(PET_HOME.x0, PET_HOME.x1); c.ty = rnd(PET_HOME.y0, PET_HOME.y1); }
+      return;
     }
+    const R = petRooms()[mode];
+    if (R) { const dx = c.x - R.door[0] - .5, dy = c.y - R.door[1] - .5; if (Math.hypot(dx, dy) < .45) { Object.assign(c, { where: mode, trail: [], sit: 0, dash: null, cd: rnd(15, 35) }); [c.rx, c.ry] = R.in; [c.rtx, c.rty] = R.in; return; } }      // reached the door of the room the chef is in: in it goes
+    if (mode === 'world' || R) petFollow(dt); else c.sit = Math.max(c.sit, .3);
     return;
   }
-  if (live.length && (m.cd -= dt) <= 0) { m.dash = pick(live); return; }
-  if (m.sit > 0) { m.sit -= dt; return; }
-  if (petStep('cx', 'cy', m.ctx, m.cty, c.fight ? 3.2 : 2.4, dt)) { if (Math.random() < (c.fight ? .15 : .4)) m.sit = rnd(1, 3); m.ctx = rnd(CX0 + .3, CX1 - .3); m.cty = rnd(CY0 + .2, CY1 - .2); }
+  // inside a room
+  const R = petRooms()[c.where];
+  if (mode !== c.where) {      // the chef has gone out: wander over to the way out, then out after him
+    c.sit = 0; c.dash = null;
+    if (petStep('rx', 'ry', R.out[0], R.out[1], PET_SLOW, dt)) Object.assign(c, { where: 'world', x: R.door[0] + .5, y: R.door[1] + .5, sit: .3 });
+    return;
+  }
+  if (c.where === 'church' && petPounce(dt)) return;
+  if (c.sit > 0) { c.sit -= dt; return; }
+  if (petStep('rx', 'ry', c.rtx, c.rty, PET_SLOW, dt)) {      // mostly sitting; now and then a slow little walk, never far from the chef
+    if (Math.random() < .7) c.sit = rnd(3, 8);
+    const [hx, hy] = R.chef(); for (let k = 0; k < 12; k++) { const x = hx + rnd(-1.6, 1.6), y = hy + rnd(-1.6, 1.6); if (R.ok(x, y)) { c.rtx = x; c.rty = y; break; } }
+  }
+}
+function petMeow() { pet.meowT = 1.6; sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); }
+function petPounce(dt) {      // in a church fight, about once a minute: amble over to a foe, then one quick leap. It does no harm, only dazes the foe for a second. Nothing ever aims at the cat
+  const c = church, m = pet;
+  const live = c.fight && c.freeze <= 0 && !c.story ? c.foes.filter(e => e.hp > 0 && !(e.app > 0) && !e.inv && e.kind !== 'adv' && e.wave === c.wave) : [];
+  if (!m.dash) { if (live.length && (m.cd -= dt) <= 0) { m.dash = live.reduce((a, b) => Math.hypot(a.x - m.rx, a.y - m.ry) < Math.hypot(b.x - m.rx, b.y - m.ry) ? a : b); m.dashT = 0; m.sit = 0; } else return false; }
+  const e = m.dash; m.dashT += dt;
+  if (!live.includes(e) || m.dashT > 14) { m.dash = null; m.cd = rnd(20, 30); return false; }      // gone, or it never got near: give up for now
+  const d = Math.hypot(e.x - m.rx, e.y - m.ry);
+  if (petStep('rx', 'ry', e.x, e.y, d < 1.1 ? 6 : PET_SLOW * 1.6, dt) || d < .5) {
+    e.stun = Math.max(e.stun || 0, 1); e.wind = 0; e.dash = 0; e.combo = 0;
+    c.fx.push({ k: 'poof', x: e.x, y: e.y, t: 0, T: .4, c: [70, 60, 96] }); noise(.12, .22, 3200, 900); petMeow();
+    m.dash = null; m.cd = rnd(50, 70); m.sit = rnd(2, 4); m.rtx = m.rx; m.rty = m.ry;
+  }
+  return true;
 }
 function updateWorld(dt) {
   if (walk(player, dt, 3.4 * speedK(), true)) chime(pick([62, 66, 69, 74]) + 12, 0, 0.035, 0.5);
@@ -1421,6 +1441,7 @@ function drawTowerRoom(t) {
     poly([[top[0] - s * .16, top[1] + s * .1], [top[0] + s * .16, top[1] + s * .1], [top[0] + s * .05 * Math.sin(t * 9), top[1] - s * .62 * fl]], [255, 150, 70]); poly([[top[0] - s * .09, top[1] + s * .1], [top[0] + s * .09, top[1] + s * .1], [top[0] - s * .03 * Math.sin(t * 11), top[1] - s * .36 * fl]], [255, 230, 150]); } });
   objs.push({ k: TMAN[0] + TMAN[1], d: () => { const q = P(TMAN[0], TMAN[1]); fig(q[0], q[1], K, { kind: 'teller', body: mix([132, 100, 172], [255, 190, 120], .16), hat: [70, 52, 100] }); tw.HIT.man = [q[0], q[1] - K * .7]; tw.manAt = q;
     if (!tw.msay && !tw.seen && !tw.pend) { const y = q[1] - K * 1.95 - Math.abs(Math.sin(t * 3)) * s * .1, r = s * .09; glow(q[0], y, r * 4, [255, 236, 170], .7); poly([[q[0], y - r * 1.3], [q[0] + r, y], [q[0], y + r * 1.3], [q[0] - r, y]], [255, 236, 170]); } } });
+  if (pet.where === 'tower') objs.push({ k: pet.rx + pet.ry + .02, d: () => { const q = P(pet.rx, pet.ry), lit = clamp(1 - Math.hypot(pet.rx - TTORCH[0], pet.ry - TTORCH[1]) / 4.2); glow(q[0], q[1] - s * .2, s * .5, [255, 214, 150], .25 * lit); pet.at = catFigure(q, s * .5, pet, CAT_BLACK); } });      // the black cat, in the torchlight
   objs.push({ k: tw.x + tw.y + .01, d: () => { const q = P(tw.x, tw.y), hop = tw.moving ? Math.abs(Math.sin(tw.hopT * 11)) * s * .08 : 0, lit = clamp(1 - Math.hypot(tw.x - TTORCH[0], tw.y - TTORCH[1]) / 4.2), c = col => mix(tn(col), col, .35 + .5 * lit);
     fig(q[0], q[1] - hop, K, { kind: 'chef', apron: c([220, 80, 80]), body: c(WHITE), head: c(SKIN), lean: tw.moving ? clamp(tw.face || 0, -1, 1) * .05 : 0 }); tw.at = q; } });
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
@@ -1525,7 +1546,10 @@ function drawLib(t) {
     lib.lit = lerp(lib.lit || 0, inX ? clamp(edge / .3 + .5) : 0, .18); }
   const lit = c => mix(tn(c), mix(c, lightC, .14), lib.lit);
   if (lib.lit > .02) glow(op[0], op[1] - K * .6, K * 1.1, lightC, .3 * lib.lit);
+  const libCat = () => { if (pet.where === 'lib') pet.at = catFigure(P(pet.rx, pet.ry), s * .5, pet, CAT_BLACK); }, catBehind = pet.rx + pet.ry <= lib.x + lib.y;      // the black cat, drawn behind or in front of the chef as it stands
+  if (catBehind) libCat();
   fig(op[0], op[1] - hop, K, { kind: 'chef', apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) });
+  if (!catBehind) libCat();
   if (lib.sayT > 0) sayBubble(op[0], op[1] - K * 1.5, lib.say, clamp(s * .3, 12.5, 15), clamp(lib.sayT * 2), Math.min(W * .62, 250));
   TK = 0;
 }
@@ -1742,7 +1766,7 @@ function enterChurch() {
   const c = church, p = c.p;
   Object.assign(c, { freeze: 0, inv: 0, bonus: false, wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
   Object.assign(p, { x: CX1 - 1.2, y: CW / 2, exit: false, second: null, pend: null, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y; c.exitOpen = true;      // the steps out are there when you come in
-  churchBanner(S().lightTorch, 5); bell(196, .12); petEnterChurch();
+  churchBanner(S().lightTorch, 5); bell(196, .12);
 }
 function churchIgnite() {      // the torch is lit: the fight is on. Round 1 opens with the small foes; later rounds go straight to the bosses
   const c = church; if (c.fight || c.done || c.story) return; c.storyDone = false; c.fight = true; c.torchOn = true; c.bannerT = 0; c.p.exit = false; c.exitOpen = false; bag.open = false;      // lighting the torch takes the steps away; they come back only once the chest is opened and its visitor thanked
@@ -1754,7 +1778,7 @@ function churchRest() {      // thanks have been said: the good soul and the che
 }
 function leaveChurch() {      // back outside, at the church door; any prophecy is spent
   save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'block'; $('bback').style.display = 'none';
-  player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); petLeaveChurch();
+  player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
 function churchHurt(src) {
   const c = church, p = c.p, dmg = 1; if (c.hurt > 0 || c.down > 0 || !c.fight || c.inv > 0) return;      // nothing lands while the bottle's five seconds last
@@ -2275,7 +2299,7 @@ function drawChurch(t, dt) {
     if (open) { const g = k * (.17 + .03 * pulse), gy = y - k * (top + (e.max > 2 ? .28 : .03)); glow(x, gy, g * 2.4, Y, .8); poly([[x, gy - g * 1.6], [x + g * .4, gy - g * .4], [x + g * 1.6, gy], [x + g * .4, gy + g * .4], [x, gy + g * 1.6], [x - g * .4, gy + g * .4], [x - g * 1.6, gy], [x - g * .4, gy - g * .4]], [255, 240, 140]); }
   } }); }
   if (storyHook) storyHook(v, objs, K, t, 'church');      // the story's people, when the church is the stage (and the chef is not there)
-  if (!storyHook && pet.where === 'church') objs.push({ k: pet.cx + pet.cy + .02, d: () => { const q = P(pet.cx, pet.cy); glow(q[0], q[1] - s * .2, s * .55, [190, 180, 255], .22); pet.at = catFigure(q, s * .5, pet, CAT_BLACK); } });      // the black cat, a faint light about it so it shows on the dark floor
+  if (!storyHook && pet.where === 'church') objs.push({ k: pet.rx + pet.ry + .02, d: () => { const q = P(pet.rx, pet.ry); glow(q[0], q[1] - s * .2, s * .55, [190, 180, 255], .22); pet.at = catFigure(q, s * .5, pet, CAT_BLACK); } });      // the black cat, a faint light about it so it shows on the dark floor
   if (!storyHook) objs.push({ k: p.x + p.y + .01, d: () => {
     const q = P(p.x, p.y), down = c.down > 0, hop = p.moving ? Math.abs(Math.sin((p.hopT || 0) * 11)) * s * .09 : 0, hurt = c.hurt > 0 && !down, tc = col => hurt ? mix(col, [236, 60, 80], .5) : col, y = q[1] - hop, sl = sleepy();
     if (down) { drawFallen(q[0], q[1], K, 1 - c.down / 2.2, p.fallDir || 1, t); return; }
@@ -2355,9 +2379,9 @@ function frame(now) {
   else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); if (tw.view.t >= TVIEW + 1.8) tapHint('tapGo', tw.view.t - TVIEW - 1.8); } else drawTowerRoom(T); }      // the view from the top: after the clock's second stroke, "tap anywhere to continue"
   else if (mode === 'lib') { updateLib(dt); drawLib(T, dt); }
   else if (mode === 'bar') { updateBar(dt); drawBar(T, dt); }
-  else if (mode === 'church') { updateChurch(dt); petChurch(dt); drawChurch(T, dt); }
+  else if (mode === 'church') { updateChurch(dt); drawChurch(T, dt); }
   else { if (mode === 'world') updateWorld(dt); drawWorld(T, dt); }
-  if (mode !== 'church') updatePet(dt);
+  updatePet(dt);
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5) || !!window.__3bLang, lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
   { const can = mode === 'church' && !church.fight && !church.story && !church.chapter && church.down <= 0, set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };
