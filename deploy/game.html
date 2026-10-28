@@ -605,6 +605,30 @@ function barGo(cell, pending) { const p = (function () { const from = cellOf(bar
 function barArrive() { const p = bar.pending; bar.pending = null;
   if (p === 'exit') return leaveBar();
   if (p && p.cup) { p.cup.full = false; chime(72, 0, .08); chime(67, .15, .06); } }      // drunk up: an empty cup is left on the counter
+// a cat, drawn the same way everywhere: q the point on the ground, k its size, c its state (face, t, sit), pal its colours.
+// Returns where its head is, for speech bubbles and taps.
+const CAT_WHITE = { col: [248, 246, 242], sh: [224, 220, 226], pink: [244, 170, 180], eye: [44, 34, 44] };
+const CAT_BLACK = { col: [46, 40, 58], sh: [26, 22, 34], pink: [214, 128, 150], eye: [238, 208, 92], pupil: [26, 20, 30] };
+function catFigure(q, k, c, pal) {
+  const f = c.face || 1, sit = false, still = c.sit > 0, { col, sh, pink } = pal;
+  const tail = (pts, w) => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.quadraticCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1]); ctx.quadraticCurveTo(pts[3][0], pts[3][1], pts[4][0], pts[4][1]); ctx.strokeStyle = css(sh); ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke(); ctx.strokeStyle = css(col); ctx.lineWidth = w * .7; ctx.stroke(); };
+      ell(q[0], q[1], k * .42, k * .12, [20, 12, 40], .22);
+      let hx, hy;
+      if (sit) { const sw = Math.sin(c.t * 1.6) * k * .05;      // sitting up: a soft pear of a body, the tail curled round the paws
+        tail([[q[0] - f * k * .22, q[1] - k * .08], [q[0] - f * k * .5, q[1] - k * .02], [q[0] - f * k * .3, q[1] + k * .06 + sw * .3], [q[0] + f * k * .05, q[1] + k * .1], [q[0] + f * k * .22, q[1] + k * .02 + sw * .2]], Math.max(3, k * .13));
+        ell(q[0], q[1] - k * .3, k * .3, k * .32, col); ell(q[0] + k * .06, q[1] - k * .26, k * .14, k * .24, sh, .35); for (const dx of [-.1, .1]) ell(q[0] + f * k * .1 + dx * k, q[1] - k * .03, k * .08, k * .05, col);      // body and front paws
+        hx = q[0] + f * k * .05; hy = q[1] - k * .76; }
+      else { const ph = still ? 0 : c.t * 9, bob = Math.abs(Math.sin(ph)) * k * .03, by = q[1] - k * .3 - bob;      // walking: little legs stepping toward where it goes, tail up and swaying
+        tail([[q[0] - f * k * .3, by - k * .02], [q[0] - f * k * .55, by - k * .05], [q[0] - f * k * .52, by - k * .3], [q[0] - f * k * .5, by - k * .55 + Math.sin(c.t * 4) * k * .05], [q[0] - f * k * (.36 + .08 * Math.sin(c.t * 4)), by - k * .6]], Math.max(3, k * .13));
+        const legs = [[-.22, 0], [-.1, Math.PI], [.14, Math.PI], [.26, 0]]; for (const [lx, o] of legs) { const sw = still ? 0 : Math.sin(ph + o) * k * .08; line([[q[0] + f * lx * k, by + k * .1], [q[0] + f * lx * k + f * sw, q[1] - k * .02]], o ? sh : col, Math.max(2.5, k * .11)); }      // each foot swings forward, then back
+        ell(q[0], by, k * .38, k * .22, col); ell(q[0] - f * k * .04, by + k * .05, k * .3, k * .1, sh, .35);
+        hx = q[0] + f * k * .34; hy = by - k * .2; }
+      for (const sg of [-1, 1]) { poly([[hx + sg * k * .08, hy - k * .17], [hx + sg * k * .23, hy - k * .08], [hx + sg * k * .2, hy - k * .36]], col); poly([[hx + sg * k * .11, hy - k * .17], [hx + sg * k * .2, hy - k * .12], [hx + sg * k * .19, hy - k * .28]], pink); }      // ears, pink inside
+      circ(hx, hy, k * .27, col);      // a big round head
+      for (const sg of [-1, 1]) { const ex = hx + sg * k * .1 + f * k * .03; circ(ex, hy - k * .02, k * (pal.pupil ? .06 : .045), pal.eye); if (pal.pupil) ell(ex, hy - k * .02, k * .018, k * .05, pal.pupil); circ(ex + k * .015, hy - k * .035, k * .015, [255, 255, 255]); ell(hx + sg * k * .17 + f * k * .03, hy + k * .07, k * .05, k * .03, pink, .55); }      // eyes with a glint (a black cat's are gold, with slit pupils), rosy cheeks      // eyes with a glint, rosy cheeks
+      circ(hx + f * k * .03, hy + k * .05, k * .025, pink);      // a tiny nose
+  return [hx, hy];
+}
 function barCat(dt) {      // the cat: now padding about the floor, now sitting down for a while
   const c = bar.cat; if (!c) return; c.t += dt; if (c.meowT > 0) c.meowT -= dt;
   if (c.sit > 0) { c.sit -= dt; return; }
@@ -683,23 +707,8 @@ function drawBar(t) {
       const pts = []; for (let i = 0; i <= 16; i++) { const a = Math.PI * (1.05 + .9 * i / 16), r = hr * (i % 2 ? 1.25 : 1.75); pts.push([hx + Math.cos(a) * r, hy - hr * .15 + Math.sin(a) * r]); } poly(pts, hc); }      // light-blue hair blown wild by the sea wind, even on both sides
     BARHIT.who = [q[0], q[1] - K * .8, K * .7]; bar.whoAtP = q; } });
   // the cat
-  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55, f = c.face || 1, sit = false, still = c.sit > 0, col = [248, 246, 242], sh = [224, 220, 226], pink = [244, 170, 180];      // a round, soft white cat, always on all four feet: when it pauses it simply stands still
-      const tail = (pts, w) => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.quadraticCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1]); ctx.quadraticCurveTo(pts[3][0], pts[3][1], pts[4][0], pts[4][1]); ctx.strokeStyle = css(sh); ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke(); ctx.strokeStyle = css(col); ctx.lineWidth = w * .7; ctx.stroke(); };
-      ell(q[0], q[1], k * .42, k * .12, [20, 12, 40], .22);
-      let hx, hy;
-      if (sit) { const sw = Math.sin(c.t * 1.6) * k * .05;      // sitting up: a soft pear of a body, the tail curled round the paws
-        tail([[q[0] - f * k * .22, q[1] - k * .08], [q[0] - f * k * .5, q[1] - k * .02], [q[0] - f * k * .3, q[1] + k * .06 + sw * .3], [q[0] + f * k * .05, q[1] + k * .1], [q[0] + f * k * .22, q[1] + k * .02 + sw * .2]], Math.max(3, k * .13));
-        ell(q[0], q[1] - k * .3, k * .3, k * .32, col); ell(q[0] + k * .06, q[1] - k * .26, k * .14, k * .24, sh, .35); for (const dx of [-.1, .1]) ell(q[0] + f * k * .1 + dx * k, q[1] - k * .03, k * .08, k * .05, col);      // body and front paws
-        hx = q[0] + f * k * .05; hy = q[1] - k * .76; }
-      else { const ph = still ? 0 : c.t * 9, bob = Math.abs(Math.sin(ph)) * k * .03, by = q[1] - k * .3 - bob;      // walking: little legs stepping toward where it goes, tail up and swaying
-        tail([[q[0] - f * k * .3, by - k * .02], [q[0] - f * k * .55, by - k * .05], [q[0] - f * k * .52, by - k * .3], [q[0] - f * k * .5, by - k * .55 + Math.sin(c.t * 4) * k * .05], [q[0] - f * k * (.36 + .08 * Math.sin(c.t * 4)), by - k * .6]], Math.max(3, k * .13));
-        const legs = [[-.22, 0], [-.1, Math.PI], [.14, Math.PI], [.26, 0]]; for (const [lx, o] of legs) { const sw = still ? 0 : Math.sin(ph + o) * k * .08; line([[q[0] + f * lx * k, by + k * .1], [q[0] + f * lx * k + f * sw, q[1] - k * .02]], o ? sh : col, Math.max(2.5, k * .11)); }      // each foot swings forward, then back
-        ell(q[0], by, k * .38, k * .22, col); ell(q[0] - f * k * .04, by + k * .05, k * .3, k * .1, sh, .35);
-        hx = q[0] + f * k * .34; hy = by - k * .2; }
-      for (const sg of [-1, 1]) { poly([[hx + sg * k * .08, hy - k * .17], [hx + sg * k * .23, hy - k * .08], [hx + sg * k * .2, hy - k * .36]], col); poly([[hx + sg * k * .11, hy - k * .17], [hx + sg * k * .2, hy - k * .12], [hx + sg * k * .19, hy - k * .28]], pink); }      // ears, pink inside
-      circ(hx, hy, k * .27, col);      // a big round head
-      for (const sg of [-1, 1]) { circ(hx + sg * k * .1 + f * k * .03, hy - k * .02, k * .045, [44, 34, 44]); circ(hx + sg * k * .1 + f * k * .03 + k * .015, hy - k * .035, k * .015, [255, 255, 255]); ell(hx + sg * k * .17 + f * k * .03, hy + k * .07, k * .05, k * .03, pink, .55); }      // eyes with a glint, rosy cheeks
-      circ(hx + f * k * .03, hy + k * .05, k * .025, pink);      // a tiny nose
+  { const c = bar.cat; if (c) objs.push({ k: c.x + c.y, d: () => { const q = P(c.x, c.y), k = s * .55;      // a round, soft white cat, always on all four feet: when it pauses it simply stands still
+      const [hx, hy] = catFigure(q, k, c, CAT_WHITE);
       BARHIT.cat = [q[0], q[1] - k * .4, s * .45]; c.at = [hx, hy]; } }); }
   { const per = Math.floor(G.t / HALF), up = per % 2 === 0 && bar.taken !== per, jt = jig('wobTable', 0); { const tq = P(.5, .5, .5); BARHIT.table = [tq[0], tq[1], s * .5]; }      // a little round table by the door, bare: a tap just rocks it (the iced coffee to take away stands at the left end of the counter, below)
     objs.push({ k: 1.05, d: () => { v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46 + jt, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5 + jt, .5, .66, .36, .06, [176, 124, 90]);
@@ -763,12 +772,14 @@ function drawWorld(t, dt) {
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
   const K = s * 0.72;
   for (const n of npcs) objs.push({ k: n.x + n.y, d: () => { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); fig(p[0], p[1] - Math.abs(Math.sin(n.hop || 0)) * s * .08, K, n.look); } });
+  if (pet.where === 'world' && !storyHook) objs.push({ k: pet.x + pet.y + .02, d: () => { const q = v.P(wx(pet.x, pet.y), pet.y, wz(pet.x, pet.y)); pet.at = catFigure(q, s * .42, pet, CAT_BLACK); } });      // the black cat
   if (storyHook) storyHook(v, objs, K, t, 'town');      // the story's people, when the town is the stage
   if (!hideChef && !storyHook) objs.push({ k: player.x + player.y + 0.01, d: () => { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)), hop = player.path.length ? Math.abs(Math.sin(t * 11)) * s * .1 : 0; glow(p[0], p[1] - K * .6, K * 1.3, [255, 240, 200], .35); fig(p[0], p[1] - hop, K, { kind: 'chef', apron: [220, 80, 80] }); } });
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   if (shopSparkle && mode === 'world' && !storyHook) { const q = v.P(-4.17, 2.15, 3.0), yy = q[1] - s * .45 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(q[0], yy, r * 4, [255, 236, 170], .7); poly([[q[0], yy - r * 1.3], [q[0] + r, yy], [q[0], yy + r * 1.3], [q[0] - r, yy]], [255, 236, 170]); }      // over the ramen shop's spire, every time the game opens, until you first go in
   if (storyAfter) storyAfter(v, K, t, 'town');
   for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
+  if (pet.where === 'world' && pet.meowT > 0 && pet.at && !storyHook) sayBubble(pet.at[0], pet.at[1] - K * .35, S().meow, clamp(W * .036, 12, 15), clamp(pet.meowT * 2), Math.min(W * .62, 250));
   if (mode === 'title') {
     // the title, in the Monument Valley manner: thin, widely spaced lettering beside the clock face
     const a = v.P(1.5, -1.5, 7.5), chars = [...S().title], en = LANG === 'en', fs = Math.max(en ? 9 : 11, Math.min(clamp(s * (en ? .7 : .86), en ? 10 : 13, 26), (W - a[0]) / (en ? 3.85 + (chars.length - 1) * .74 : 11.6))), x0 = a[0] + fs * 1.15, gap = Math.min(fs * (en ? .92 : 1.9), (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
@@ -787,6 +798,57 @@ function drawWorld(t, dt) {
 let worldHint = 6, nearDoor = null, zoomHintT0 = null;      // zoomHintT0: when the zoomed-out view's hint first showed
 const DOORS = { stall: DOOR, tower: TDOOR, lib: LDOOR, church: CDOOR, bar: BDOOR }, goIn = w => w === 'stall' ? enterStall() : w === 'tower' ? enterTower() : w === 'church' ? enterChurch() : w === 'bar' ? enterBar() : enterLib();
 function goDoor(which) { const d = DOORS[which], p = bfs(cellOf(player), d); if (!p) return; player.path = p.slice(1); player.enter = which; if (!player.path.length) { player.enter = false; goIn(which); } }
+// ------------------------------------------------------------ the black cat: lives on the grass by the ramen shop's right-hand wall, and tags along when the chef wanders off
+const PET_HOME = { x0: -3.3, x1: -2.65, y0: 1.55, y1: 2.8 };      // the strip of grass outside the shop's right wall
+const pet = { x: -2.95, y: 2.2, tx: -2.95, ty: 2.2, t: 0, face: -1, sit: 3, meowT: 0, at: null, where: 'world', trail: [], cx: 0, cy: 0, ctx: 0, cty: 0, cd: 0, dash: null };
+const nearShop = () => mode === 'stall' || mode === 'title' || Math.hypot(player.x + 4.17, player.y - 2.15) < 2.6;      // inside the shop, or close by it outside
+function petStep(xk, yk, tx, ty, sp, dt) {      // move the cat a step toward a point (xk/yk name the coordinates it moves in: town or church); true once there
+  const c = pet, dx = tx - c[xk], dy = ty - c[yk], d = Math.hypot(dx, dy); if (d < .04) return true;
+  const st = Math.min(d, sp * dt); c[xk] += dx / d * st; c[yk] += dy / d * st; c.face = Math.sign(dx - dy) || c.face; return d - st < .04;
+}
+function updatePet(dt) {
+  const c = pet; c.t += dt; if (c.meowT > 0) c.meowT -= dt;
+  if (c.where !== 'world') return;      // inside the church it is moved by petChurch
+  if (mode === 'world') { const L = c.trail[c.trail.length - 1]; if (!L || Math.hypot(L[0] - player.x, L[1] - player.y) > .25) { c.trail.push([player.x, player.y]); if (c.trail.length > 400) c.trail.shift(); } }      // the chef's footsteps, for following
+  if (mode === 'world' && !nearShop()) {      // the chef has wandered off: follow along the way he went, a step or so behind
+    const dp = Math.hypot(player.x - c.x, player.y - c.y);
+    while (c.trail.length > 1 && Math.hypot(c.trail[0][0] - c.x, c.trail[0][1] - c.y) < .15) c.trail.shift();
+    if (dp < .9 || !c.trail.length) { c.sit = .3; return; }
+    c.sit = 0; petStep('x', 'y', c.trail[0][0], c.trail[0][1], dp > 3 ? 5.2 : 3.6, dt); return;
+  }
+  if (mode !== 'world' && mode !== 'stall' && mode !== 'title') { c.sit = Math.max(c.sit, .3); return; }      // the chef is in the coffee house, the library or the tower: wait by the door
+  // at home: pad about the grass by the wall, often sitting down; coming back from elsewhere it goes round the shop's corner, not through it
+  c.trail = [];
+  const inHome = c.x >= PET_HOME.x0 - .05 && c.x <= PET_HOME.x1 + .05 && c.y >= PET_HOME.y0 - .05 && c.y <= PET_HOME.y1 + .05;
+  if (c.sit > 0 && inHome) { c.sit -= dt; return; }
+  c.sit = 0;
+  let tx = c.tx, ty = c.ty;
+  if (c.x < -3.3 && c.y > 2.9) { tx = -2.95; ty = 3.25; } else if (c.x < -3.3 && c.y < 1.45) { tx = -2.95; ty = 1.2; }      // round the front or back corner first
+  if (petStep('x', 'y', tx, ty, inHome ? 1.1 : 3.4, dt) && tx === c.tx && ty === c.ty) { if (Math.random() < .55) c.sit = rnd(3, 8); c.tx = rnd(PET_HOME.x0, PET_HOME.x1); c.ty = rnd(PET_HOME.y0, PET_HOME.y1); }
+}
+function petMeow() { pet.meowT = 1.6; sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); }
+function petEnterChurch() {      // a cat that was following comes in too
+  if (pet.where !== 'world' || nearShop() || Math.hypot(pet.x - player.x, pet.y - player.y) > 4) return;
+  const p = church.p; Object.assign(pet, { where: 'church', cx: p.x - .9, cy: p.y + .5, sit: 0, dash: null, cd: rnd(15, 35) }); pet.ctx = pet.cx; pet.cty = pet.cy;
+}
+function petLeaveChurch() { if (pet.where !== 'church') return; Object.assign(pet, { where: 'world', x: player.x + .25, y: player.y + .25, trail: [], sit: .5, dash: null }); }
+function petChurch(dt) {      // in the church: it runs about; in a fight, about once a minute it pounces on a foe, which does no harm but dazes it for a second. Nothing ever aims at the cat
+  const c = church, m = pet; if (m.where !== 'church' || c.story) return;
+  const live = c.fight && c.freeze <= 0 ? c.foes.filter(e => e.hp > 0 && !(e.app > 0) && !e.inv && e.kind !== 'adv' && e.wave === c.wave) : [];
+  if (m.dash) {
+    const e = m.dash; if (!live.includes(e)) { m.dash = null; return; }
+    m.sit = 0;
+    if (petStep('cx', 'cy', e.x, e.y, 6.5, dt) || Math.hypot(e.x - m.cx, e.y - m.cy) < .55) {
+      e.stun = Math.max(e.stun || 0, 1); e.wind = 0; e.dash = 0; e.combo = 0;
+      c.fx.push({ k: 'poof', x: e.x, y: e.y, t: 0, T: .4, c: [70, 60, 96] }); noise(.12, .22, 3200, 900); petMeow();
+      m.dash = null; m.cd = rnd(50, 70); m.ctx = clamp(m.cx + rnd(-2, 2), CX0 + .3, CX1 - .3); m.cty = clamp(m.cy + rnd(-2, 2), CY0 + .2, CY1 - .2);
+    }
+    return;
+  }
+  if (live.length && (m.cd -= dt) <= 0) { m.dash = pick(live); return; }
+  if (m.sit > 0) { m.sit -= dt; return; }
+  if (petStep('cx', 'cy', m.ctx, m.cty, c.fight ? 3.2 : 2.4, dt)) { if (Math.random() < (c.fight ? .15 : .4)) m.sit = rnd(1, 3); m.ctx = rnd(CX0 + .3, CX1 - .3); m.cty = rnd(CY0 + .2, CY1 - .2); }
+}
 function updateWorld(dt) {
   if (walk(player, dt, 3.4 * speedK(), true)) chime(pick([62, 66, 69, 74]) + 12, 0, 0.035, 0.5);
   if (player.blocked) {   // someone is standing in the way: go around, or wait at a door
@@ -808,6 +870,7 @@ function updateWorld(dt) {
 }
 function worldTap(sx, sy) {
   const v = wv, hp = v.P(-4.17, 2.15, 1.1), tp = v.P(0, 0, 6), K = v.s * .72;
+  if (pet.where === 'world' && pet.at && Math.hypot(sx - pet.at[0], sy - pet.at[1] - K * .15) < K * .5) { petMeow(); if (nearShop()) pet.sit = Math.max(pet.sit, 2.5); return; }      // stroking the black cat
   for (const n of npcs) { const p = v.P(n.x, n.y); if (Math.abs(sx - p[0]) < K * .5 && sy > p[1] - K * 1.7 && sy < p[1] + K * .25) { n.say = pick(S().hello[n.look.kind] || S().hello.ida); n.sayT = 3.4; n.path = []; n.wait = 3.6; chime(pick([76, 79, 81, 83]), 0, .12, .9); chime(pick([83, 86, 88]), .1, .09, .9); return; } }
   if (Math.abs(sx - hp[0]) < v.s * 1.5 && Math.abs(sy - hp[1]) < v.s * 1.7) { goDoor('stall'); chime(74, 0, .12); return; }
   { const lp = v.P(2.85, -3.75, 1.3); if (Math.abs(sx - lp[0]) < v.s * 1.2 && Math.abs(sy - lp[1]) < v.s * 1.9) { goDoor('lib'); chime(69, 0, .12); return; } }
@@ -1678,7 +1741,7 @@ function enterChurch() {
   const c = church, p = c.p;
   Object.assign(c, { freeze: 0, inv: 0, bonus: false, wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
   Object.assign(p, { x: CX1 - 1.2, y: CW / 2, exit: false, second: null, pend: null, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y; c.exitOpen = true;      // the steps out are there when you come in
-  churchBanner(S().lightTorch, 5); bell(196, .12);
+  churchBanner(S().lightTorch, 5); bell(196, .12); petEnterChurch();
 }
 function churchIgnite() {      // the torch is lit: the fight is on. Round 1 opens with the small foes; later rounds go straight to the bosses
   const c = church; if (c.fight || c.done || c.story) return; c.storyDone = false; c.fight = true; c.torchOn = true; c.bannerT = 0; c.p.exit = false; c.exitOpen = false; bag.open = false;      // lighting the torch takes the steps away; they come back only once the chest is opened and its visitor thanked
@@ -1690,7 +1753,7 @@ function churchRest() {      // thanks have been said: the good soul and the che
 }
 function leaveChurch() {      // back outside, at the church door; any prophecy is spent
   save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'block'; $('bback').style.display = 'none';
-  player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
+  player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); petLeaveChurch();
 }
 function churchHurt(src) {
   const c = church, p = c.p, dmg = 1; if (c.hurt > 0 || c.down > 0 || !c.fight || c.inv > 0) return;      // nothing lands while the bottle's five seconds last
@@ -2211,6 +2274,7 @@ function drawChurch(t, dt) {
     if (open) { const g = k * (.17 + .03 * pulse), gy = y - k * (top + (e.max > 2 ? .28 : .03)); glow(x, gy, g * 2.4, Y, .8); poly([[x, gy - g * 1.6], [x + g * .4, gy - g * .4], [x + g * 1.6, gy], [x + g * .4, gy + g * .4], [x, gy + g * 1.6], [x - g * .4, gy + g * .4], [x - g * 1.6, gy], [x - g * .4, gy - g * .4]], [255, 240, 140]); }
   } }); }
   if (storyHook) storyHook(v, objs, K, t, 'church');      // the story's people, when the church is the stage (and the chef is not there)
+  if (!storyHook && pet.where === 'church') objs.push({ k: pet.cx + pet.cy + .02, d: () => { const q = P(pet.cx, pet.cy); glow(q[0], q[1] - s * .2, s * .55, [190, 180, 255], .22); pet.at = catFigure(q, s * .5, pet, CAT_BLACK); } });      // the black cat, a faint light about it so it shows on the dark floor
   if (!storyHook) objs.push({ k: p.x + p.y + .01, d: () => {
     const q = P(p.x, p.y), down = c.down > 0, hop = p.moving ? Math.abs(Math.sin((p.hopT || 0) * 11)) * s * .09 : 0, hurt = c.hurt > 0 && !down, tc = col => hurt ? mix(col, [236, 60, 80], .5) : col, y = q[1] - hop, sl = sleepy();
     if (down) { drawFallen(q[0], q[1], K, 1 - c.down / 2.2, p.fallDir || 1, t); return; }
@@ -2257,6 +2321,7 @@ function drawChurch(t, dt) {
   if (c.fly && c.fly.n.at) { const u = ease(c.fly.t / 1.1), a = c.fly.n.at, b = P(p.x, p.y); drawItem(c.fly.id, lerp(a[0], b[0], u), lerp(a[1] - K * 1.2, b[1] - K * 1.3, u) - Math.sin(Math.PI * u) * s * 1.2, s * .3); }
   for (const n of c.npcs) if (n.mark && n.a >= 1 && n.at && !(c.say && c.say.n === n)) { const a = n.at, y = a[1] - K * 1.75 - Math.abs(Math.sin(t * 3)) * s * .12, r = s * .11; glow(a[0], y, r * 4, [255, 236, 170], .7); poly([[a[0], y - r * 1.3], [a[0] + r, y], [a[0], y + r * 1.3], [a[0] - r, y]], [255, 236, 170]); }      // a small light over someone who has something for you
   if (c.say && c.say.n.at) { const a = c.say.n.at; sayBubble(a[0], a[1] - K * 1.5, c.say.text, clamp(s * .34, 12.5, 15), clamp(c.say.t * 3), Math.min(W * .74, 290)); }
+  if (pet.where === 'church' && pet.meowT > 0 && pet.at && !storyHook) sayBubble(pet.at[0], pet.at[1] - s * .25, S().meow, clamp(s * .34, 12.5, 15), clamp(pet.meowT * 2), Math.min(W * .62, 250));      // the black cat's meow after a pounce
   // hearts, and the chef's own remarks
   if (c.freeze > 0) { ctx.fillStyle = css([150, 180, 255], .1 + .04 * Math.sin(performance.now() / 200)); ctx.fillRect(0, 0, W, H); }      // time stands still: a cold hush over everything
   if (c.fight) drawHud(c.hp, c.ringUsed, c.bonus ? 7 : 6);      // only while there is a fight on
@@ -2289,8 +2354,9 @@ function frame(now) {
   else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); if (tw.view.t >= TVIEW + 1.8) tapHint('tapGo', tw.view.t - TVIEW - 1.8); } else drawTowerRoom(T); }      // the view from the top: after the clock's second stroke, "tap anywhere to continue"
   else if (mode === 'lib') { updateLib(dt); drawLib(T, dt); }
   else if (mode === 'bar') { updateBar(dt); drawBar(T, dt); }
-  else if (mode === 'church') { updateChurch(dt); drawChurch(T, dt); }
+  else if (mode === 'church') { updateChurch(dt); petChurch(dt); drawChurch(T, dt); }
   else { if (mode === 'world') updateWorld(dt); drawWorld(T, dt); }
+  if (mode !== 'church') updatePet(dt);
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5), lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
   { const can = mode === 'church' && !church.fight && !church.story && !church.chapter && church.down <= 0, set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };
