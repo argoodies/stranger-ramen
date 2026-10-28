@@ -754,13 +754,13 @@ function drawWorld(t, dt) {
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(wx(c[0] + .5, c[1] + .5), c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
-  objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
-  objs.push({ k: 0, d: () => drawTower(v, t) });
+  objs.push({ k: -0.9, occ: [2.2, -4.4, 0, 1.3, 1.3, 3.2], d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
+  objs.push({ k: 0, occ: [-1.5, -1.5, 0, 3, 3, 8.2], d: () => drawTower(v, t) });
   objs.push({ k: 9.6 + CDX + CDY, d: () => drawChapel(v, t) });      // sorted where the church now stands, so whoever is in front of it is drawn over it
   objs.push({ k: 12.4, d: () => drawBarHouse(v, t) });
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
-  objs.push({ k: -2.0, d: () => drawHouse(v, t) });
-  for (const [i, j] of TREES) objs.push({ k: i + j + 1, d: () => tree(v, i, j) });
+  objs.push({ k: -2.0, occ: [-4.92, 1.4, 0, 1.5, 1.5, 3.4], d: () => drawHouse(v, t) });
+  for (const [i, j] of TREES) objs.push({ k: i + j + 1, occ: [i + .05, j + .05, 0, .9, .9, 2.2], d: () => tree(v, i, j) });
   objs.push({ k: 8.8 + .3 + .5, d: () => { const x = 8.28, y = .3, z = CDZ; v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
     for (const [dz, w, h, c] of [[.18, .3, .34, [70, 150, 130]], [.38, .23, .3, [90, 170, 146]], [.56, .15, .26, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z + dz, w, h, c); } });
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
@@ -768,7 +768,12 @@ function drawWorld(t, dt) {
   for (const n of npcs) objs.push({ k: n.x + n.y, d: () => { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); fig(p[0], p[1] - Math.abs(Math.sin(n.hop || 0)) * s * .08, K, n.look); } });
   if (storyHook) storyHook(v, objs, K, t, 'town');      // the story's people, when the town is the stage
   if (!hideChef && !storyHook) objs.push({ k: player.x + player.y + 0.01, d: () => { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)), hop = player.path.length ? Math.abs(Math.sin(t * 11)) * s * .1 : 0; glow(p[0], p[1] - K * .6, K * 1.3, [255, 240, 200], .35); buffRings(p[0], p[1], s, t); fig(p[0], p[1] - hop, K, { kind: 'chef', apron: [220, 80, 80] }); } });
-  objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
+  { const pk = player.x + player.y, pp = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)), pr = [pp[0] - K * .45, pp[1] - K * 1.6, pp[0] + K * .45, pp[1] + K * .1];      // the chef's figure on screen
+    const hides = o => { if (!o.occ || hideChef || storyHook || o.k <= pk) return false; const [x, y, z, w, d, h] = o.occ; let l = 1e9, tp = 1e9, r = -1e9, bt = -1e9;      // drawn after him, and its box covers him on screen
+      for (const cx of [x, x + w]) for (const cy of [y, y + d]) for (const cz of [z, z + h]) { const q = v.P(cx, cy, cz); l = Math.min(l, q[0]); r = Math.max(r, q[0]); tp = Math.min(tp, q[1]); bt = Math.max(bt, q[1]); }
+      return l < pr[2] && r > pr[0] && tp < pr[3] && bt > pr[1]; };
+    let run = []; const flush = () => { if (run.length) { const r = run; run = []; seeThrough(.42, () => r.forEach(o => o.d())); } };      // buildings and trees in front of the chef go see-through; several in a row fade together as one layer, so where they overlap the fade doesn't stack
+    objs.sort((a, b) => a.k - b.k).forEach(o => { if (hides(o)) run.push(o); else { flush(); o.d(); } }); flush(); }
   if (shopSparkle && mode === 'world' && !storyHook) { const q = v.P(-4.17, 2.15, 3.0), yy = q[1] - s * .45 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(q[0], yy, r * 4, [255, 236, 170], .7); poly([[q[0], yy - r * 1.3], [q[0] + r, yy], [q[0], yy + r * 1.3], [q[0] - r, yy]], [255, 236, 170]); }      // over the ramen shop's spire, every time the game opens, until you first go in
   if (storyAfter) storyAfter(v, K, t, 'town');
   for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
@@ -1831,6 +1836,14 @@ function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the ai
   if (sc.lock) { const c0 = P(7.5, .5, 1.6); for (let k = 0; k < 5; k++) { const w = clamp(u * 1.4 - k * .05), g = k * 2.39 + (k % 3) * .2, d = K * 1.2 + Math.max(W, H) * .9 * w * w * (.7 + (k % 4) * .15); if (w <= 0) continue; storyBird(c0[0] + Math.cos(g) * d, c0[1] - K * .8 - H * .25 * w + Math.sin(g) * d * .5, K * (.24 + .06 * (k % 3)), t * 16 + k); } }      // the church is sealed: the flock about it flies off in every direction and away out of sight
   sc.lines.forEach(([who, a, b0], j) => { const b = b0 >= .9 ? 9 : b0; if (u < a || u > b) return;      // a closing line stays up through the hold
  const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
+}
+let seeCv = null;
+function seeThrough(a, fn) {      // draw fn on a canvas of its own, fully opaque, then lay that down at alpha a: the thing fades as one, its own faces never show through each other
+  const real = ctx, oc = seeCv || (seeCv = document.createElement('canvas'));
+  if (oc.width !== cv.width || oc.height !== cv.height) { oc.width = cv.width; oc.height = cv.height; }
+  const g = oc.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, oc.width, oc.height); g.setTransform(DPR, 0, 0, DPR, 0, 0); g.globalAlpha = 1;
+  ctx = g; try { fn(); } finally { ctx = real; }
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = a; ctx.drawImage(oc, 0, 0); ctx.restore();
 }
 let pairCv = null;      // scratch canvas: the two of them, faded in whole at the start of the story
 function oldPaper(c, k = 1) {      // the story is a memory, toned evenly over the whole picture; c: how cold it has grown, 0 warm gold (all is well) … 1 cold cyan-grey (from the execution on). A saturation blend takes colour out, a 'color' blend tints what is left, a faint haze over it; every value eases between the two moods
