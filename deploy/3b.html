@@ -857,7 +857,7 @@ const same = (b, w) => b.chili === w.chili && b.cilantro === w.cilantro && b.bee
 function waiting() { return stall.seats.map((c, i) => c && c.state === 'wait' ? i : -1).filter(i => i >= 0).sort((a, b) => stall.seats[b].wait - stall.seats[a].wait); }
 // Everything in the shop is "pick it up, then put it down": stall.hold is what is in your hand
 // (null | 'noodle' | 'soup' | 'chili' | 'cilantro' | 'beef' | 'bowl').
-const ING = ['soup', 'chili', 'cilantro', 'beef'], MORE = ['chili', 'cilantro'];
+const ING = ['soup', 'chili', 'cilantro', 'beef'], MORE = ['chili', 'cilantro', 'beef'];      // MORE: picked up once, then sprinkled into the bowl as many times as you like
 function setHold(h) { stall.hold = h; stall.strainer = h === 'noodle'; }
 function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
@@ -873,7 +873,7 @@ function grab(k) {
   if (s.hold) return false;
   if (k === 'noodle') { if (s.pot !== 'done') return false; s.pot = 'empty'; goTo('scoop'); chime(NOTE.scoop, 0, .2, 1.4); }
   else if (k === 'bowl') { if (!b.noodle) return false; goTo('bowl'); chime(NOTE.bowl, 0, .16, 1); }
-  else if (ING.includes(k)) { if (!b.noodle || (b[k] && !MORE.includes(k))) return false; goTo(k); chime(NOTE[k] - 12, 0, .14, .9); }      // chili and cilantro can be added again and again
+  else if (ING.includes(k)) { if (!b.noodle || (b[k] && !MORE.includes(k))) return false; goTo(k); chime(NOTE[k] - 12, 0, .14, .9); }      // beef, chili and cilantro can be added again and again
   else return false;
   setHold(k); return true;
 }
@@ -883,12 +883,14 @@ function intoBowl() {
   if (!h || h === 'bowl') return false;
   let again = false;
   if (h === 'noodle') { if (b.noodle) return false; b.noodle = true; } else { if (!b.noodle || (b[h] && !MORE.includes(h))) return false; again = b[h]; b[h] = true; }
-  if (!again) s.bowlAnim[h] = 0;      /* a second helping feels the same to do, but the bowl looks no different */
-  goTo('put'); chime(NOTE[h === 'noodle' ? 'put' : h], 0, .2, 1.4);
-  if (h === 'chili') { b.chiliN = (b.chiliN || 0) + 1; if (b.chiliN >= 3) unlockBadge('spicy'); }
+  s.bowlAnim[h] = 0;
+  goTo('put'); chime(NOTE[h === 'noodle' ? 'put' : h] + (MORE.includes(h) ? Math.min(2, b[h + 'N'] || 0) * 2 : 0), 0, .2, 1.4);      // each further sprinkle a little higher
+  if (MORE.includes(h)) b[h + 'N'] = (b[h + 'N'] || 0) + 1;      // how many times it went in: 1, 2, 3 and more each look different in the bowl
+  if (h === 'chili' && b.chiliN >= 3) unlockBadge('spicy');
   if (b.chili && b.cilantro && b.beef) unlockBadge('full');
   if (HIT.own && HIT.bowl) s.fly.push({ a: [HIT.own[0], HIT.own[1]], b: [HIT.bowl[0], HIT.bowl[1]], t: 0, c: FLYC[h] });
-  setHold(null); return true;
+  if (!MORE.includes(h)) setHold(null);      // beef, chili and cilantro stay in your hand for another sprinkle; tap their jar to put them back
+  return true;
 }
 // carry the bowl in your hands to a customer
 function serve(i) {
@@ -910,7 +912,7 @@ function act(a, seat) {
     s.pot = 'cooking'; s.potT = 0; goTo('boil'); chime(NOTE.boil, 0, .2, 1.4); return true; }
   if (a === 'scoop') return grab('noodle');
   if (a === 'put') return s.hold === 'noodle' && intoBowl();
-  if (ING.includes(a)) return grab(a) && intoBowl();
+  if (ING.includes(a)) { const ok = grab(a) && intoBowl(); if (ok && MORE.includes(a)) setHold(null); return ok; }
   if (a === 'serve') { const w = waiting(); let i = seat; if (i == null) { const m = w.find(k => same(s.bowl, s.seats[k].want)); i = m != null ? m : w[0]; } if (i == null || !s.bowl.noodle) return false; if (!s.hold && !grab('bowl')) return false; const ok = serve(i); if (!ok && s.hold === 'bowl') setHold(null); return ok; }
   return false;
 }
@@ -920,6 +922,7 @@ function hintKey() {
   // your own bowl: no rings while making it (only the yellow disc on the bar); the one hint is the ring on the bowl waiting to be eaten
   if (self || s.myBowl) return s.myBowl && s.eatT <= 0 && !h ? 'bar' : null;
   if (h === 'bowl') { if (!b.soup) return 'bin'; if (self) return 'bar'; const m = w.find(k => same(b, s.seats[k].want)); return w.length ? 'spot' + (m != null ? m : w[0]) : null; }
+  if (h && MORE.includes(h) && b[h]) { const want = w.length ? s.seats[w[0]].want : null; if (want) for (const k of ['chili', 'cilantro', 'beef']) if (want[k] && !b[k]) return k; return h; }      // already sprinkled: the next topping the order needs, else its own jar to put it back
   if (h) return 'bowl';
   if (s.myBowl) return s.eatT > 0 ? null : 'bar';
   if (s.done) return null;
@@ -973,7 +976,7 @@ function stallTap(x, y) {
   const s = stall, h = s.hold; let ok = false;
   if (best === 'exit') { if (h) { ok = false; } else { s.owner.tx = SHOP_DOOR[0]; s.owner.ty = SHOP_DOOR[1]; s.pend = null; s.leaving = true; chime(69, 0, .1, .8); return; } }
   else if (best === 'pot') ok = h === 'noodle' ? false : s.pot === 'empty' ? act('boil') : grab('noodle');
-  else if (ING.includes(best)) { if (h === best) { setHold(null); chime(57, 0, .1, .6); ok = true; } else ok = grab(best); }
+  else if (ING.includes(best)) { if (h === best) { setHold(null); chime(57, 0, .1, .6); ok = true; } else { if (MORE.includes(h)) setHold(null); ok = grab(best); } }      // holding another topping: it goes back and this one is taken up
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
   else if (best === 'bin') { if (h) { goDo('dump', 3.8, 3.05); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 4.45, .95); if (!s.myBowl) chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }      // going to eat your own bowl: no tap chime, only the eating notes
@@ -1256,6 +1259,7 @@ function boardUp() {
 }
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]); ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, b.soup ? [226, 160, 84] : [248, 246, 240]);
+  if (b.soup && (b.chiliN || 0) >= 3) ell(x, y, r * .78, r * .45, [214, 72, 40], .45);      // three sprinkles of chili or more: red oil spreads over the soup
   if (b.noodle) {      // the noodles, Monument Valley flat: a pale oval lit from above in two flat tones, coiled by three smooth concentric arcs
     const nx = r * .5, ny = r * .28;
     ell(x, y, nx, ny, [236, 194, 118]);
@@ -1263,9 +1267,11 @@ function bowlTopMini(x, y, r, b) {
     ctx.lineCap = 'round'; ctx.lineWidth = Math.max(1, r * .065); ctx.strokeStyle = css([255, 242, 200]);
     [[.76, 3.3, 6.1], [.52, 2.9, 5.6], [.28, 3.6, 6.5]].forEach(([k, a0, a1]) => { ctx.beginPath(); ctx.ellipse(x, y, nx * k, ny * k, 0, a0, a1); ctx.stroke(); });
   }
-  if (b.beef) ell(x - r * .2, y - r * .08, r * .22, r * .1, [150, 86, 62]);
-  if (b.chili) ell(x + r * .22, y - r * .1, r * .14, r * .07, [220, 40, 40]);
-  if (b.cilantro) ell(x + r * .12, y + r * .14, r * .16, r * .07, [70, 160, 90]);
+  const n = k => Math.min(3, b[k + 'N'] || (b[k] ? 1 : 0));      // 1, 2, 3 or more sprinkles: each looks different
+  const nb = n('beef'), nc = n('chili'), ng = n('cilantro');
+  if (nb) for (const [dx, dy] of [[[-.2, -.08]], [[-.25, -.1], [-.07, -.17]], [[-.27, -.05], [-.1, -.17], [-.2, .07]]][nb - 1]) { ell(x + dx * r, y + dy * r, r * .19, r * .085, [150, 86, 62]); ell(x + dx * r, y + dy * r - r * .02, r * .13, r * .035, [186, 120, 92]); }      // slices of beef, a lighter streak on each
+  if (nc) for (const [dx, dy] of [[[.22, -.1]], [[.2, -.13], [.3, -.03]], [[.18, -.15], [.31, -.05], [.12, .02]]][nc - 1]) ell(x + dx * r, y + dy * r, r * .085, r * .05, [220, 40, 40]);      // flecks of chili
+  if (ng) for (const [dx, dy] of [[[.12, .14]], [[.06, .15], [.2, .1]], [[.03, .16], [.17, .12], [-.06, .1], [.26, .02]]][ng - 1]) ell(x + dx * r, y + dy * r, r * .11, r * .05, [70, 160, 90]);      // leaves of cilantro
 }
 
 // round character token, as in the video: cream disc + flat icon (blue = good, red = evil)
