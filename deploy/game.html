@@ -986,6 +986,7 @@ function stallTap(x, y) {
   let best = null, bd = 1e9;
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
   if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
+    if (stall.hold && stall.hold !== 'bowl') { if (stall.hold === 'noodle') stall.pot = 'done'; setHold(null); chime(57, 0, .1, .6); return; }      // holding noodles, the soup ladle or a topping: a tap on bare floor puts it back (the noodles back in the pot)
     const s = stall, v = s.V; if (!v) return; const [fx, fy] = v.inv(x, y); if (fx < -.4 || fy < -.4 || fx > 5.4 || fy > 4.7) return; if (fx < 1.3 && fy < 1.05) return;      // the sliver of floor behind the stove is too small to stand on: a tap there does nothing
     const g = shopBlocked(fx, fy) ? sgNearest([fx, fy]) : null, o = s.owner; o.tx = g ? g[0] * SG : fx; o.ty = g ? g[1] * SG : fy; s.mark = [o.tx, o.ty]; s.pend = null; s.leaving = false; chime(69, 0, .08, .8); return; }
   const s = stall, h = s.hold; let ok = false;
