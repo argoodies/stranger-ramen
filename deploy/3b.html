@@ -756,12 +756,11 @@ function drawWorld(t, dt) {
   // objects
   const objs = [];
   objs.push({ k: -0.9, occ: [2.2, -4.4, 0, 1.3, 1.3, 3.2], d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
-  objs.push({ k: 0, occ: [-1.5, -1.5, 0, 3, 3, 8.2], d: () => drawTower(v, t) });
+  objs.push({ k: 0, occ: [-1.5, -1.5, 0, 4.2, 3, 8.2], d: () => { drawTower(v, t); for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });      // the clock tower with its steps: they fade together
   objs.push({ k: 9.6 + CDX + CDY, d: () => drawChapel(v, t) });      // sorted where the church now stands, so whoever is in front of it is drawn over it
-  objs.push({ k: 12.4, d: () => drawBarHouse(v, t) });
-  objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
+  objs.push({ k: 12.4, occ: [6, 2.85, 0, 1.3, 1.3, 2.4], d: () => drawBarHouse(v, t) });
   objs.push({ k: -2.0, occ: [-4.92, 1.4, 0, 1.5, 1.5, 3.4], d: () => drawHouse(v, t) });
-  for (const [i, j] of TREES) objs.push({ k: i + j + 1, occ: [i + .05, j + .05, 0, .9, .9, 2.2], d: () => tree(v, i, j) });
+  for (const [i, j] of TREES) objs.push({ k: i + j + 1, occ: [i + .05, j + .05, 0, .9, .9, 2.2], only: [i - 1, j - 1], d: () => tree(v, i, j) });      // a tree fades only for the one cell right behind it
   objs.push({ k: 8.8 + .3 + .5, d: () => { const x = 8.28, y = .3, z = CDZ; v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
     for (const [dz, w, h, c] of [[.18, .3, .34, [70, 150, 130]], [.38, .23, .3, [90, 170, 146]], [.56, .15, .26, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z + dz, w, h, c); } });
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
@@ -770,10 +769,10 @@ function drawWorld(t, dt) {
   if (storyHook) storyHook(v, objs, K, t, 'town');      // the story's people, when the town is the stage
   if (!hideChef && !storyHook) objs.push({ k: player.x + player.y + 0.01, d: () => { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)), hop = player.path.length ? Math.abs(Math.sin(t * 11)) * s * .1 : 0; glow(p[0], p[1] - K * .6, K * 1.3, [255, 240, 200], .35); buffRings(p[0], p[1], s, t); fig(p[0], p[1] - hop, K, { kind: 'chef', apron: [220, 80, 80] }); } });
   { const pk = player.x + player.y, pp = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)), pr = [pp[0] - K * .45, pp[1] - K * 1.6, pp[0] + K * .45, pp[1] + K * .1];      // the chef's figure on screen
-    const hides = o => { if (!o.occ || hideChef || storyHook || o.k <= pk) return false; const [x, y, z, w, d, h] = o.occ; let l = 1e9, tp = 1e9, r = -1e9, bt = -1e9;      // drawn after him, and its box covers him on screen
+    const hides = o => { if (!o.occ || hideChef || storyHook || o.k <= pk) return false; if (o.only && (Math.floor(player.x) !== o.only[0] || Math.floor(player.y) !== o.only[1])) return false; const [x, y, z, w, d, h] = o.occ; let l = 1e9, tp = 1e9, r = -1e9, bt = -1e9;      // drawn after him, and its box covers him on screen
       for (const cx of [x, x + w]) for (const cy of [y, y + d]) for (const cz of [z, z + h]) { const q = v.P(cx, cy, cz); l = Math.min(l, q[0]); r = Math.max(r, q[0]); tp = Math.min(tp, q[1]); bt = Math.max(bt, q[1]); }
       return l < pr[2] && r > pr[0] && tp < pr[3] && bt > pr[1]; };
-    const ease = 1 - Math.exp(-(dt || .016) * 7);      // each thing eases in and out of see-through over about half a second
+    const ease = 1 - Math.exp(-(dt || .016) * 3);      // each thing eases in and out of see-through over a second or so
     for (const o of objs) if (o.occ) { const key = o.occ.join(','), cur = seeA.get(key) ?? 1, nxt = cur + ((hides(o) ? .42 : 1) - cur) * ease; o.a = Math.abs(nxt - 1) < .003 ? 1 : nxt; seeA.set(key, o.a); }
     let run = []; const flush = () => { if (run.length) { const r = run; run = []; seeThrough(Math.min(...r.map(o => o.a)), () => r.forEach(o => o.d())); } };      // several fading in a row are faded together as one layer, so where they overlap the fade doesn't stack
     objs.sort((a, b) => a.k - b.k).forEach(o => { if (o.a < 1) run.push(o); else { flush(); o.d(); } }); flush(); }
