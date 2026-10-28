@@ -772,8 +772,10 @@ function drawWorld(t, dt) {
     const hides = o => { if (!o.occ || hideChef || storyHook || o.k <= pk) return false; const [x, y, z, w, d, h] = o.occ; let l = 1e9, tp = 1e9, r = -1e9, bt = -1e9;      // drawn after him, and its box covers him on screen
       for (const cx of [x, x + w]) for (const cy of [y, y + d]) for (const cz of [z, z + h]) { const q = v.P(cx, cy, cz); l = Math.min(l, q[0]); r = Math.max(r, q[0]); tp = Math.min(tp, q[1]); bt = Math.max(bt, q[1]); }
       return l < pr[2] && r > pr[0] && tp < pr[3] && bt > pr[1]; };
-    let run = []; const flush = () => { if (run.length) { const r = run; run = []; seeThrough(.42, () => r.forEach(o => o.d())); } };      // buildings and trees in front of the chef go see-through; several in a row fade together as one layer, so where they overlap the fade doesn't stack
-    objs.sort((a, b) => a.k - b.k).forEach(o => { if (hides(o)) run.push(o); else { flush(); o.d(); } }); flush(); }
+    const ease = 1 - Math.exp(-(dt || .016) * 7);      // each thing eases in and out of see-through over about half a second
+    for (const o of objs) if (o.occ) { const key = o.occ.join(','), cur = seeA.get(key) ?? 1, nxt = cur + ((hides(o) ? .42 : 1) - cur) * ease; o.a = Math.abs(nxt - 1) < .003 ? 1 : nxt; seeA.set(key, o.a); }
+    let run = []; const flush = () => { if (run.length) { const r = run; run = []; seeThrough(Math.min(...r.map(o => o.a)), () => r.forEach(o => o.d())); } };      // several fading in a row are faded together as one layer, so where they overlap the fade doesn't stack
+    objs.sort((a, b) => a.k - b.k).forEach(o => { if (o.a < 1) run.push(o); else { flush(); o.d(); } }); flush(); }
   if (shopSparkle && mode === 'world' && !storyHook) { const q = v.P(-4.17, 2.15, 3.0), yy = q[1] - s * .45 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(q[0], yy, r * 4, [255, 236, 170], .7); poly([[q[0], yy - r * 1.3], [q[0] + r, yy], [q[0], yy + r * 1.3], [q[0] - r, yy]], [255, 236, 170]); }      // over the ramen shop's spire, every time the game opens, until you first go in
   if (storyAfter) storyAfter(v, K, t, 'town');
   for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
@@ -1837,7 +1839,7 @@ function storyEffects(sc, u, t, v, K, at, cast) {      // what happens in the ai
   sc.lines.forEach(([who, a, b0], j) => { const b = b0 >= .9 ? 9 : b0; if (u < a || u > b) return;      // a closing line stays up through the hold
  const sp = find(who), txt = L[STORY.indexOf(sc)][j]; if (sp && txt) sayBubble(sp.q[0], sp.q[1] - K * (sp.lying ? .9 : sp.kneel ? 1.45 : 1.75), txt, fs, clamp(Math.min((u - a) * 14, (b - u) * 14)), W * .62); });
 }
-let seeCv = null;
+let seeCv = null; const seeA = new Map();      // how see-through each building or tree is right now, by its box
 function seeThrough(a, fn) {      // draw fn on a canvas of its own, fully opaque, then lay that down at alpha a: the thing fades as one, its own faces never show through each other
   const real = ctx, oc = seeCv || (seeCv = document.createElement('canvas'));
   if (oc.width !== cv.width || oc.height !== cv.height) { oc.width = cv.width; oc.height = cv.height; }
