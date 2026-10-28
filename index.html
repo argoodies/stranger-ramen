@@ -830,6 +830,11 @@ function worldTap(sx, sy) {
   let [x, y] = v.inv(sx, sy); x = wxi(x, y); for (const z of [CDZ, -1.6, -1.2, -.8, -.4]) { let [lx, ly] = v.inv(sx, sy + z * v.s); lx = wxi(lx, ly); if (Math.abs(wz(lx, ly) - z) < .01 && walkable(Math.floor(lx), Math.floor(ly))) { x = lx; y = ly; break; } }      // a tap on the lower ground by the church is read at that ground's height
   let to = [Math.floor(x), Math.floor(y)];
   for (const k of ['stall', 'lib', 'church', 'bar', 'tower']) { const d = DOORS[k]; if (to[0] === d[0] && to[1] === d[1]) { goDoor(k); chime(67, 0, .12); return; } }      // the cell in front of a door: in you go (the coffee house's door is round the back, so this is the only way in there)
+  { const [gx, gy] = v.inv(sx, sy), c = [Math.floor(gx), Math.floor(gy)], on = cells => cells.some(q => q[0] === c[0] && q[1] === c[1]);      // the ground a building stands on: tapping one of its own cells goes in too
+    const FOOT = { stall: [[-5, 1], [-4, 1], [-5, 2], [-4, 2]], lib: [[2, -5], [3, -5], [2, -4], [3, -4]], church: [[7, -2], [8, -2], [7, -1], [8, -1], [8, 0]], bar: [[6, 3]], tower: [[2, -1], [2, 0]] };
+    for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) FOOT.tower.push([i, j]);
+    for (const k in FOOT) if (on(FOOT[k])) { goDoor(k); chime(67, 0, .12); return; }
+    { let [lx, ly] = v.inv(sx, sy + CDZ * v.s); lx = wxi(lx, ly); const cc = [Math.floor(lx), Math.floor(ly)]; if (FOOT.church.some(q => q[0] === cc[0] && q[1] === cc[1])) { goDoor('church'); chime(67, 0, .12); return; } } }      // the church's own ground lies lower: read the tap at its height
   if (!walkable(to[0], to[1])) to = nearestWalkable(x, y);
   const p = bfs(cellOf(player), to); if (p) { player.path = p.slice(1); player.enter = false; chime(69, 0, .08, .8); }
 }
