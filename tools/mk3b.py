@@ -106,7 +106,7 @@ boot = """<script>
   const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter']) { const el = $(id); if (el) el.style.display = 'none'; }
     mode = 'tower'; tw.view = null; fade = 0; BG.dark = 0; BG.isNight = false;
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));z-index:20';      // the language button in the bottom-right corner, its menu opening upward
-    box.appendChild($('lang')); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; box.appendChild(m); document.body.appendChild(box); };
+    box.appendChild($('lang')); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; m.style.left = 'auto'; m.style.right = '0'; box.appendChild(m); document.body.appendChild(box); };
   window.__3bQuietMs = performance.now() + (APPEAR_END + .1) * 1000;      // no melody notes from the music until the opening is over
   if (!location.hash) go();      // at once, before the first frame: straight onto the table in the air, no fade, no title, no town
   requestAnimationFrame(frame);      // only now do the frames begin
