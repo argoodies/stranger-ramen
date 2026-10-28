@@ -14,6 +14,8 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .pill{background:rgba(30,24,60,.62);color:#f4ecdc;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 14px;font:300 15px var(--serif);letter-spacing:.12em;backdrop-filter:blur(4px)}
 button.pill{cursor:pointer}
 button.pill:active{transform:scale(.96)}
+#bspeed,#bfreeze{box-shadow:0 0 0 2px rgba(255,236,170,.35),0 0 14px 4px rgba(255,226,150,.55);animation:halo 2.4s ease-in-out infinite}
+@keyframes halo{50%{box-shadow:0 0 0 3px rgba(255,236,170,.55),0 0 22px 8px rgba(255,226,150,.8)}}
 button.pill.hint{animation:pillpulse 1.2s ease-in-out infinite;border-color:rgba(255,236,170,.9)}
 @keyframes pillpulse{50%{box-shadow:0 0 0 5px rgba(255,236,170,.55)}}
 #coins{letter-spacing:.06em}
@@ -147,7 +149,7 @@ const STR = {
     churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–6）', devOn: '进入开发者模式。', devOff: '离开开发者模式。', devTitle: '开发者', devJump: '跳关', devItems: '获得物品', devTime: '调整时间', devBuff: '开关预言', devCut: '过场动画', cutTower: '塔顶的风景', cutStory: '迷乱的漩涡', tapGo: '点击任意处继续', tapStart: '点击任意处开始', chapterDone: '已完成', chapterNo: '第一章', on: '开', off: '关', drySay: '怎么是拌面？',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '饰品', '饮品'], bagHint: '拖动来装备、卸下、挪动；点一下查看。', ringSave: '戒指把这一下弹回去了！',
-    realBoss: '这是真正的Boss！', takeCoffee: '可以带走。', story: [['看，流星！', '快许个愿吧。'], ['老样子，两杯拿铁？', '嗯，和你一样就好。'], ['要最好看的那一朵。', '谢谢你。'], ['鸟儿又来找你了。', '它们是来看你的。'], ['我要去教堂唱诗了。', '我会等你。'], [], ['就是她！她是恶魔伪装的！', '什么？！', '我不是！'], ['我要今天就处决掉你。'], ['不好了！出事了！', '什么？！'], ['住手！'], ['啊——！', '这……这是漩涡的力量……'], [], ['糟糕，门打不开了！'], ['不要走……'], []], useSay: { coffee: '又有力气了！' }, gotProphecy: '得到一个预言。', buffNames: { speed: '速度预言', freeze: '冰冻预言' }, buffSay: { speed: '战斗中跑得更快。', freeze: '弹刀让敌人冻慢五秒。' }, items: { coffee: ['咖啡', '战斗中恢复一半生命。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
+    realBoss: '这是真正的Boss！', takeCoffee: '可以带走。', story: [['看，流星！', '快许个愿吧。'], ['老样子，两杯拿铁？', '嗯，和你一样就好。'], ['要最好看的那一朵。', '谢谢你。'], ['鸟儿又来找你了。', '它们是来看你的。'], ['我要去教堂唱诗了。', '我会等你。'], [], ['就是她！她是恶魔伪装的！', '什么？！', '我不是！'], ['我要今天就处决掉你。'], ['不好了！出事了！', '什么？！'], ['住手！'], ['啊——！', '这……这是漩涡的力量……'], [], ['糟糕，门打不开了！'], ['不要走……'], []], useSay: { coffee: '又有力气了！' }, gotProphecy: '得到一个预言。', buffNames: { speed: '速度预言', freeze: '冰冻预言' }, buffSay: { speed: '走路跑步都更快了。', freeze: '弹刀让敌人冻慢五秒。' }, items: { coffee: ['咖啡', '战斗中恢复一半生命。'], twin: ['教父双刀', '每次出手砍两下，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时，闪电随机劈中一个敌人，伤害十点。'], flower: ['鲜花', '什么用都没有。'], sleep: ['驱魔刀', '弹刀三倍伤害，三成机会让恶魔沉睡三秒。'], guard: ['守护十字架', '三成机会挡下恶魔的一击。'], knife: ['菜刀', '弹刀造成十倍伤害。'], ring: ['贞洁之戒', '倒下前触发一次伤害弹回。'] },
     badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'], ring: ['贞洁之戒', '从教堂里救出了贞洁者。'] },
     welcome: '欢迎来玩三人染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
@@ -177,7 +179,7 @@ const STR = {
     churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–6）', devOn: '進入開發者模式。', devOff: '離開開發者模式。', devTitle: '開發者', devJump: '跳關', devItems: '獲得物品', devTime: '調整時間', devBuff: '開關預言', devCut: '過場動畫', cutTower: '塔頂的風景', cutStory: '迷亂的漩渦', tapGo: '點擊任意處繼續', tapStart: '點擊任意處開始', chapterDone: '已完成', chapterNo: '第一章', on: '開', off: '關', drySay: '怎麼是拌麵？',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
     bagTitle: '背包', bagWorn: '身上', bagSlots: ['武器', '飾品', '飲品'], bagHint: '拖動來裝備、卸下、挪動；點一下查看。', ringSave: '戒指把這一下彈回去了！',
-    realBoss: '這是真正的Boss！', takeCoffee: '可以帶走。', story: [['看，流星！', '快許個願吧。'], ['老樣子，兩杯拿鐵？', '嗯，和你一樣就好。'], ['要最好看的那一朵。', '謝謝你。'], ['鳥兒又來找你了。', '牠們是來看你的。'], ['我要去教堂唱詩了。', '我會等你。'], [], ['就是她！她是惡魔偽裝的！', '什麼？！', '我不是！'], ['我要今天就處決掉你。'], ['不好了！出事了！', '什麼？！'], ['住手！'], ['啊——！', '這……這是漩渦的力量……'], [], ['糟糕，門打不開了！'], ['不要走……'], []], useSay: { coffee: '又有力氣了！' }, gotProphecy: '得到一個預言。', buffNames: { speed: '速度預言', freeze: '冰凍預言' }, buffSay: { speed: '戰鬥中跑得更快。', freeze: '彈刀讓敵人凍慢五秒。' }, items: { coffee: ['咖啡', '戰鬥中恢復一半生命。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
+    realBoss: '這是真正的Boss！', takeCoffee: '可以帶走。', story: [['看，流星！', '快許個願吧。'], ['老樣子，兩杯拿鐵？', '嗯，和你一樣就好。'], ['要最好看的那一朵。', '謝謝你。'], ['鳥兒又來找你了。', '牠們是來看你的。'], ['我要去教堂唱詩了。', '我會等你。'], [], ['就是她！她是惡魔偽裝的！', '什麼？！', '我不是！'], ['我要今天就處決掉你。'], ['不好了！出事了！', '什麼？！'], ['住手！'], ['啊——！', '這……這是漩渦的力量……'], [], ['糟糕，門打不開了！'], ['不要走……'], []], useSay: { coffee: '又有力氣了！' }, gotProphecy: '得到一個預言。', buffNames: { speed: '速度預言', freeze: '冰凍預言' }, buffSay: { speed: '走路跑步都更快了。', freeze: '彈刀讓敵人凍慢五秒。' }, items: { coffee: ['咖啡', '戰鬥中恢復一半生命。'], twin: ['教父雙刀', '每次出手砍兩下，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時，閃電隨機劈中一個敵人，傷害十點。'], flower: ['鮮花', '什麼用都沒有。'], sleep: ['驅魔刀', '彈刀三倍傷害，三成機會讓惡魔沉睡三秒。'], guard: ['守護十字架', '三成機會擋下惡魔的一擊。'], knife: ['菜刀', '彈刀造成十倍傷害。'], ring: ['貞潔之戒', '倒下前觸發一次傷害彈回。'] },
     badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'], ring: ['貞潔之戒', '從教堂裡救出了貞潔者。'] },
     welcome: '歡迎來玩三人染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
@@ -207,7 +209,7 @@ const STR = {
     churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–6)', devOn: 'Developer mode on.', devOff: 'Developer mode off.', devTitle: 'Developer', devJump: 'Jump to round', devItems: 'Get an item', devTime: 'Set the time', devBuff: 'Prophecies', devCut: 'Cutscenes', cutTower: 'The View from the Top', cutStory: 'The Bewildered Whirlwind', tapGo: 'Tap anywhere to continue', tapStart: 'Tap anywhere to start', chapterDone: 'Completed', chapterNo: 'Chapter One', on: 'On', off: 'Off', drySay: 'Dry noodles? Where is the soup?',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
     bagTitle: 'Backpack', bagWorn: 'Equipped', bagSlots: ['Weapon', 'Charm', 'Drink'], bagHint: 'Drag to equip, take off or move. Tap to look.', ringSave: 'The ring threw that one back!',
-    realBoss: 'This is the real boss!', takeCoffee: 'To take away.', story: [['Look, a shooting star!', 'Quick, make a wish.'], ['The usual? Two lattes?', 'Mm. Same as you.'], ['The prettiest one you have.', 'Thank you.'], ['The birds have come to find you again.', 'They came to see you.'], ['I am going to sing in the church.', 'I will wait for you.'], [], ['It is her! She is a demon in disguise!', 'What?!', 'I am not!'], ['I will execute you this very day.'], ['Quick! Something has happened!', 'What?!'], ['Stop!'], ['Aaah!', 'Th-this is the whirlwind\'s power...'], [], ['Oh no, the doors will not open!'], ['Do not go...'], []], useSay: { coffee: 'Back on my feet!' }, gotProphecy: 'A prophecy for me.', buffNames: { speed: 'Prophecy of Speed', freeze: 'Prophecy of Frost' }, buffSay: { speed: 'I run faster in a fight.', freeze: 'A parry slows a foe for five seconds.' }, items: { coffee: ['Iced Coffee', 'Restores half your hearts in a fight.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
+    realBoss: 'This is the real boss!', takeCoffee: 'To take away.', story: [['Look, a shooting star!', 'Quick, make a wish.'], ['The usual? Two lattes?', 'Mm. Same as you.'], ['The prettiest one you have.', 'Thank you.'], ['The birds have come to find you again.', 'They came to see you.'], ['I am going to sing in the church.', 'I will wait for you.'], [], ['It is her! She is a demon in disguise!', 'What?!', 'I am not!'], ['I will execute you this very day.'], ['Quick! Something has happened!', 'What?!'], ['Stop!'], ['Aaah!', 'Th-this is the whirlwind\'s power...'], [], ['Oh no, the doors will not open!'], ['Do not go...'], []], useSay: { coffee: 'Back on my feet!' }, gotProphecy: 'A prophecy for me.', buffNames: { speed: 'Prophecy of Speed', freeze: 'Prophecy of Frost' }, buffSay: { speed: 'I walk and run faster.', freeze: 'A parry slows a foe for five seconds.' }, items: { coffee: ['Iced Coffee', 'Restores half your hearts in a fight.'], twin: ["Godfather's Twin Blades", 'Two cuts each attack; a parry cuts three times as deep.'], doom: ['Doomsday Necklace', 'On a parry, lightning strikes a random foe for ten.'], flower: ['Flower', 'It does nothing at all.'], sleep: ["Exorcist's Knife", 'A parry cuts three times as deep and may put a demon to sleep for three seconds.'], guard: ['Guardian Cross', "Three times in ten, a demon's blow is blocked."], knife: ['Kitchen Knife', 'A parry cuts ten times as deep.'], ring: ['Ring of Chastity', 'Once, the blow that would fell you is thrown back.'] },
     badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'], ring: ['Ring of Chastity', 'Rescued the Virgin from the church.'] },
     welcome: 'Welcome to the three-player game.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
@@ -616,10 +618,10 @@ function barCat(dt) {      // the cat: now padding about the floor, now sitting 
   if (d < .05) { if (Math.random() < .5) c.sit = rnd(3, 7); c.tx = rnd(.3, 2.6); c.ty = rnd(.4, 3.6); if (Math.abs(c.tx - 2.5) < .5 && Math.abs(c.ty - bar.whoAt - .5) < .6) c.tx = 1; if (c.tx < 1.2 && c.ty < 1.2) c.ty = rnd(1.5, 3.6); return; }
   const st = Math.min(d, .55 * dt); c.x += dx / d * st; c.y += dy / d * st; c.face = Math.sign(dx - dy) || c.face; c.depth = Math.sign(dx + dy); }      // face: which way it heads across the screen
 function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 2.8); c.y = clamp(c.y, .2, 3.8); if (c.x < 1.1 && c.y < 1.1) c.y = 1.1; if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
-function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT', 'mySayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); }
+function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3 * buffK())) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT', 'mySayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); }
 function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
  whoSayT: 0, keepSayT: 0, mySayT: 0, cat: { x: .5, y: 3.5, tx: .5, ty: 3.5, sit: 4, t: 0, face: 1, meowT: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }
-function leaveBar() { mode = 'world'; $('zoom').style.display = 'block'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
+function leaveBar() { mode = 'world'; $('zoom').style.display = 'none'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
 function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
   if (hit('exit')) return barGo([0, 1], 'exit');
@@ -773,6 +775,7 @@ function drawWorld(t, dt) {
   if (shopSparkle && mode === 'world' && !storyHook) { const q = v.P(-4.17, 2.15, 3.0), yy = q[1] - s * .45 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(q[0], yy, r * 4, [255, 236, 170], .7); poly([[q[0], yy - r * 1.3], [q[0] + r, yy], [q[0], yy + r * 1.3], [q[0] - r, yy]], [255, 236, 170]); }      // over the ramen shop's spire, every time the game opens, until you first go in
   if (storyAfter) storyAfter(v, K, t, 'town');
   for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
+  if (player.sayT > 0 && mode === 'world' && !storyHook) { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)); sayBubble(p[0], p[1] - K * 1.75, player.say, clamp(W * .036, 12, 15), clamp(player.sayT * 2), Math.min(W * .62, 250)); }      // the chef's own words in the town (what a prophecy does)
   if (mode === 'title') {
     // the title, in the Monument Valley manner: thin, widely spaced lettering beside the clock face
     const a = v.P(1.5, -1.5, 7.5), chars = [...S().title], en = LANG === 'en', fs = Math.max(en ? 9 : 11, Math.min(clamp(s * (en ? .7 : .86), en ? 10 : 13, 26), (W - a[0]) / (en ? 3.85 + (chars.length - 1) * .74 : 11.6))), x0 = a[0] + fs * 1.15, gap = Math.min(fs * (en ? .92 : 1.9), (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
@@ -792,7 +795,8 @@ let worldHint = 6, nearDoor = null, zoomHintT0 = null;      // zoomHintT0: when 
 const DOORS = { stall: DOOR, tower: TDOOR, lib: LDOOR, church: CDOOR, bar: BDOOR }, goIn = w => w === 'stall' ? enterStall() : w === 'tower' ? enterTower() : w === 'church' ? enterChurch() : w === 'bar' ? enterBar() : enterLib();
 function goDoor(which) { const d = DOORS[which], p = bfs(cellOf(player), d); if (!p) return; player.path = p.slice(1); player.enter = which; if (!player.path.length) { player.enter = false; goIn(which); } }
 function updateWorld(dt) {
-  if (walk(player, dt, 3.4 * speedK(), true)) chime(pick([62, 66, 69, 74]) + 12, 0, 0.035, 0.5);
+  if (player.sayT > 0) player.sayT -= dt;
+  if (walk(player, dt, 3.4 * speedK() * buffK(), true)) chime(pick([62, 66, 69, 74]) + 12, 0, 0.035, 0.5);
   if (player.blocked) {   // someone is standing in the way: go around, or wait at a door
     player.blockT = (player.blockT || 0) + dt;
     if (player.blockT > .25) { player.blockT = 0; const dest = player.path[player.path.length - 1], avoid = new Set(npcs.map(n => key(Math.floor(n.x), Math.floor(n.y)))); const p = avoid.has(key(dest[0], dest[1])) ? null : bfs(cellOf(player), dest, avoid); if (p) player.path = p.slice(1); else if (!player.enter) player.path = []; }
@@ -1019,7 +1023,7 @@ function enterStall() {
 }
 function leaveStall() {
   $('leave').classList.remove('hint');
-  mode = 'world'; $('leave').style.display = 'none'; $('zoom').style.display = 'block';
+  mode = 'world'; $('leave').style.display = 'none'; $('zoom').style.display = 'none';
   stall.seats = [null, null, null]; stall.pot = 'empty'; setHold(null); stall.bowl = emptyBowl(); stall.bowlAnim = {}; stall.ownSayT = 0;
   player.x = DOOR[0] + .5; player.y = DOOR[1] + .5; player.path = []; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
@@ -1030,7 +1034,7 @@ function updateStall(dt) {
   for (const k in s.bowlAnim) s.bowlAnim[k] = Math.min(1, s.bowlAnim[k] + dt * 3);
   { const o = s.owner;      // walk to the target around the furniture
     if (o.ptx !== o.tx || o.pty !== o.ty) { o.path = shopPath([o.x, o.y], [o.tx, o.ty]); o.ptx = o.tx; o.pty = o.ty; }
-    let step = 5.2 * dt;
+    let step = 5.2 * buffK() * dt;
     while (o.path && o.path.length && step > 0) { const [px, py] = o.path[0], d = Math.hypot(px - o.x, py - o.y); if (d <= step) { o.x = px; o.y = py; o.path.shift(); step -= d; } else { o.x += (px - o.x) / d * step; o.y += (py - o.y) / d * step; step = 0; } }
     if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; }
     if (s.pend && !(o.path && o.path.length)) { const p = s.pend; s.pend = null; if (p === 'oracle') { if (s.oracle) { save.buffs[s.oracle] = true; saveNow(); s.oracle = false; s.ownSay = S().gotProphecy; s.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } else if (p === 'dump') dump(); else if (p === 'bar') barTap(); else if (p.startsWith('serve')) serve(+p[5]); else if (p === 'board' && !s.hold) { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); } } }
@@ -1325,7 +1329,7 @@ function enterTower() {
   Object.assign(tw, { x: TN - 1.1, y: TN - .9, moving: false, pend: null, msay: null, view: null, seen: false, say: null }); tw.tx = tw.x; tw.ty = tw.y;
 }
 function leaveTower() {
-  hideChef = false; tw.view = null; mode = 'world'; $('leave').style.display = 'none'; $('zoom').style.display = 'block'; zoomTarget = 0; zoomOut = 0;
+  hideChef = false; tw.view = null; mode = 'world'; $('leave').style.display = 'none'; $('zoom').style.display = 'none'; zoomTarget = 0; zoomOut = 0;
   player.x = TDOOR[0] + .5; player.y = TDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
 function hushAll() { for (const n of npcs) n.sayT = 0; bar.keepSayT = bar.mySayT = bar.whoSayT = 0; if (bar.cat) bar.cat.meowT = 0; lib.sayT = 0; tw.say = tw.msay = null; church.say = null; church.bannerT = 0; }      // a cutscene starts: whatever anyone was saying before it is cut off, so no old bubble hangs over it
@@ -1343,7 +1347,7 @@ function updateTower(dt) {
   if (tw.say && (tw.say.t -= dt) <= 0) tw.say = null;
   if (tw.msay && (tw.msay.t -= dt) <= 0) { const go = tw.msay.go; tw.msay = null; if (go) return towerShow(); }
   const dx = tw.tx - tw.x, dy = tw.ty - tw.y, d = Math.hypot(dx, dy); tw.moving = d > .03;
-  if (tw.moving) { const st = Math.min(d, 3 * dt); tw.x += dx / d * st; tw.y += dy / d * st; tw.face = dx - dy; tw.hopT += dt; if ((tw.stepT = (tw.stepT || 0) + dt) > .3) { tw.stepT = 0; chime(pick([62, 65, 69]) + 12, 0, .03, .5); } }
+  if (tw.moving) { const st = Math.min(d, 3 * buffK() * dt); tw.x += dx / d * st; tw.y += dy / d * st; tw.face = dx - dy; tw.hopT += dt; if ((tw.stepT = (tw.stepT || 0) + dt) > .3) { tw.stepT = 0; chime(pick([62, 65, 69]) + 12, 0, .03, .5); } }
   tw.x = clamp(tw.x, .4, TN - .4); tw.y = clamp(tw.y, .4, TN - .4);
   for (const [x, y] of [TTORCH, TMAN]) { const ex = tw.x - x, ey = tw.y - y, e = Math.hypot(ex, ey); if (e < .5) { const q = Math.atan2(ey, ex) + .06; tw.x = x + Math.cos(q) * .5; tw.y = y + Math.sin(q) * .5; } }      // nobody walks through the torch or its keeper
   if (!tw.moving && tw.pend) { const pd = tw.pend; tw.pend = null;
@@ -1411,9 +1415,9 @@ function lbfs(from, to) {
 }
 function libGo(cell, pending) { const p = lbfs(cellOf(lib), cell); if (!p) return; lib.path = p.slice(1); lib.pending = pending; chime(69, 0, .07, .8); if (!lib.path.length) libArrive(); }
 function libArrive() { const p = lib.pending; lib.pending = null; if (p === 'exit') leaveLib(); else if (p === 'shelf') { lib.say = S().libAway; lib.sayT = 3.2; chime(57, 0, .12, 1.2); chime(60, .12, .1, 1.2); } }
-function updateLib(dt) { const had = lib.path.length; if (walk(lib, dt, 3)) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !lib.path.length && lib.pending) libArrive(); if (lib.sayT > 0) lib.sayT -= dt; }
+function updateLib(dt) { const had = lib.path.length; if (walk(lib, dt, 3 * buffK())) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !lib.path.length && lib.pending) libArrive(); if (lib.sayT > 0) lib.sayT -= dt; }
 function enterLib() { mode = 'lib'; $('zoom').style.display = 'none'; fade = 1; Object.assign(lib, { x: 1.4, y: 3.5, path: [], say: '', sayT: 0, pending: null }); chime(62, 0, .12); chime(69, .14, .1); }
-function leaveLib() { mode = 'world'; $('zoom').style.display = 'block'; player.x = LDOOR[0] + .5; player.y = LDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
+function leaveLib() { mode = 'world'; $('zoom').style.display = 'none'; player.x = LDOOR[0] + .5; player.y = LDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
 function libTap(x, y) {
   const e = LHIT.exit; if (e && Math.hypot(x - e[0], y - e[1]) < e[2]) { libGo([1, 3], 'exit'); return; }
   const sh = LHIT.shelf; if (sh && x > sh[0] && x < sh[2] && y > sh[1] && y < sh[3]) { const [gx] = lv.inv(x, y + lv.s * 1.2); libGo([clamp(Math.floor(gx), 0, 3), 1], 'shelf'); return; }
@@ -1571,7 +1575,8 @@ const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', g
 save.cards = save.cards || {}; if (save.cards.stop || save.stop) save.cards.csail = (save.cards.csail || 0) + (save.cards.stop || 1);      // cards and drinks stack: save.cards[id] is how many you hold, the one on its plinth included (an old Time Stop card becomes a Sailor card; the playing cards are gone)
 for (const id of Object.keys(save.cards)) if (!ITEMS[id]) delete save.cards[id]; if (save.equip.drink && !ITEMS[save.equip.drink]) save.equip.drink = null;
 save.buffs = save.buffs || {}; delete save.equip.card;      // the cards are gone: what a fortune teller leaves now is a prophecy (save.buffs)
-const buffOn = k => !!save.buffs[k], STACK = id => ITEMS[id] === 'drink', cardN = id => save.cards[id] || 0, rest = id => (STACK(id) ? cardN(id) : 1) - (save.equip[ITEMS[id]] === id ? 1 : 0);      // rest: how many of it lie loose in the backpack
+const buffOn = k => !!save.buffs[k], buffK = () => buffOn('speed') ? 1.5 : 1,      // buffK: the Prophecy of Speed quickens the chef's step everywhere, not only in a fight
+      STACK = id => ITEMS[id] === 'drink', cardN = id => save.cards[id] || 0, rest = id => (STACK(id) ? cardN(id) : 1) - (save.equip[ITEMS[id]] === id ? 1 : 0);      // rest: how many of it lie loose in the backpack
 const have = id => id === 'knife' || (STACK(id) ? cardN(id) > 0 : !!save[id]) || (id === 'ring' && !!save.badges.ring), owned = () => Object.keys(ITEMS).filter(have), wearing = id => save.equip[ITEMS[id]] === id && have(id);
 const armed = () => ITEMS[save.equip.weapon] === 'weapon' && have(save.equip.weapon), sleepy = () => wearing('sleep'), ringOn = () => wearing('ring'), guardOn = () => wearing('guard');
 function drawItem(id, x, y, r) {
@@ -1691,6 +1696,9 @@ function churchSpawn(tier = 1, bosses = false) {      // the foes of a round: se
 }
 const shielded = e => e.shieldT > 0 && e.hp > 0;      // the Advocate's shield: for three seconds after it is thrown, nothing gets through
 const churchXmin = () => CX0, churchXmax = () => CX1;
+function toastSay(txt) {      // outside the church: the chef says it too, in his own bubble wherever he is
+  if (mode === 'stall') { stall.ownSay = txt; stall.ownSayT = 3; } else if (mode === 'bar') { bar.mySay = txt; bar.mySayT = 3; } else if (mode === 'lib') { lib.say = txt; lib.sayT = 3; } else if (mode === 'tower') tw.say = { text: txt, t: 3 }; else if (mode === 'world') { player.say = txt; player.sayT = 3; }
+}
 function churchBanner(txt, sec = 3) { church.banner = txt; church.bannerT = sec; }      // news is not posted on the screen: the chef says it, in a bubble
 function enterChurch() {
   mode = 'church'; $('zoom').style.display = 'none'; $('bag').style.display = 'none'; $('bback').style.display = 'none'; fade = 1; bag.open = false;      // no button leads out: you walk down the steps at the door, any time there is no fight on
@@ -1708,7 +1716,7 @@ function churchRest() {      // thanks have been said: the good soul and the che
   Object.assign(c, { freeze: 0, bonus: false, npcs: [], chest: null, fly: null, say: null, done: false, torchOn: false, hp: 6, ringUsed: false, stains: [], tier: Math.min(TIERS, c.tier + 1) }); churchBanner(S().lightTorch, 5); noise(.4, .25, 900, 200);
 }
 function leaveChurch() {      // back outside, at the church door; any prophecy is spent
-  save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'block'; $('bback').style.display = 'none';
+  save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'none'; $('bback').style.display = 'none';
   player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
 function churchHurt(src) {
@@ -1953,7 +1961,7 @@ function updateChurch(dt) {
     if (p.arrived && !p.target && !p.exit) { p.tx = p.x; p.ty = p.y; }      // once there, the chef stays wherever he is pushed or pulled: he never walks back to the spot
     const e = p.target, gx = e ? e.x : p.tx, gy = e ? e.y : p.ty, dx = gx - p.x, dy = gy - p.y, d = Math.hypot(dx, dy), reach = e ? .78 : .02;
     p.vx = p.vy = 0; p.moving = d > reach; if (!e && !p.exit && d < .2) p.arrived = true;      // close enough counts as there, even with a whirlwind tugging at you
-    if (p.moving) { const sp = p.exit ? 7 : 3.9 * (c.fight && buffOn('speed') ? 1.5 : 1), st = Math.min(d - reach, sp * dt); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += dx / d * st; p.y += dy / d * st; p.face = dy - dx; p.hopT = (p.hopT || 0) + dt; }
+    if (p.moving) { const sp = p.exit ? 7 : 3.9 * buffK(), st = Math.min(d - reach, sp * dt); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += dx / d * st; p.y += dy / d * st; p.face = dy - dx; p.hopT = (p.hopT || 0) + dt; }
     p.x = clamp(p.x, churchXmin(), churchXmax()); p.y = clamp(p.y, CY0, CY1); churchBump(p);
     for (const f of c.foes) { if (f.hp <= 0 || f.app > 0 || f.spin > 0 || f.inv) continue; const dx = p.x - f.x, dy = p.y - f.y, dd = Math.hypot(dx, dy), R = .62; if (dd < R) { const k = dd > .001 ? R / dd : 0; p.x = f.x + (k ? dx * k : R); p.y = f.y + (k ? dy * k : 0); } }      // the chef cannot walk through a foe: he is pushed back out round it
     p.x = clamp(p.x, churchXmin(), churchXmax()); p.y = clamp(p.y, CY0, CY1);
@@ -2310,12 +2318,13 @@ function frame(now) {
   else if (mode === 'bar') { updateBar(dt); drawBar(T, dt); }
   else if (mode === 'church') { updateChurch(dt); drawChurch(T, dt); }
   else { if (mode === 'world') updateWorld(dt); drawWorld(T, dt); }
+  if (bag.open && ['stall', 'bar', 'lib', 'tower'].includes(mode)) drawBag(T);      // the backpack over the shop, the coffee house, the library or the tower room
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5) || !!window.__3bLang, lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
-  { const can = mode === 'church' && !church.fight && !church.story && !church.chapter && church.down <= 0, set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };
+  { const can = ['world', 'stall', 'bar', 'lib', 'tower', 'church'].includes(mode) && !tw.view && !(mode === 'stall' && stall.board) && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)), set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };      // the backpack and the prophecies are at hand everywhere except in a fight (and the tower's view, the story)
     if (!can) bag.open = false; set('bag', can && !bag.open, 'block'); for (const k of BUFFS) set(k === 'speed' ? 'bspeed' : 'bfreeze', can && !bag.open && buffOn(k), 'block');      // each prophecy as a white mark beside the backpack button      // the backpack is at hand inside the church whenever there is no fight on
     set('gear', mode === 'church' && !!save.dev && !church.fight && !church.story && !church.chapter && !bag.open && church.down <= 0, 'block');      // developer mode: a gear for choosing the round
-    set('bclose', bag.open, 'block'); if (mode === 'world') set('zoom', !bag.open, 'block'); }      // with the backpack open the only button is a cross, and all it does is close the backpack
+    set('bclose', bag.open, 'block'); }      // with the backpack open the only button is a cross, and all it does is close the backpack
   musicTick();
   requestAnimationFrame(frame);
 }
@@ -2325,15 +2334,15 @@ setTimeout(() => { try { initAudio(); if (AC && AC.state !== 'running') AC.resum
 function start() {
   if (mode !== 'title' || titleT0 == null || titleT0 < TITLE_UP) return;      // no starting before the title is up and the hint shows
   initAudio(); if (AC && AC.state === 'suspended') AC.resume();
-  mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'block'; bell(146.8, .18);
+  mode = 'world'; zoomTarget = 0; $('title').style.display = 'none'; $('zoom').style.display = 'none'; bell(146.8, .18);
 }
 $('gear').addEventListener('click', () => { if (!church.fight) devMenu(); });
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
-cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'bar') { cafeTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } if (zoomTarget > 0.5) { zoomTarget = 0; $('zoom').innerHTML = ZOOM_ICO[0]; return; } worldTap(e.clientX, e.clientY); } });
+cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (bag.open && mode !== 'title') { bagTap(e.clientX, e.clientY); return; } if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'bar') { cafeTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
 $('bag').addEventListener('click', () => { bag.open = !bag.open; bag.sel = null; chime(bag.open ? 74 : 62, 0, .12, .8); });
-for (const k of ['speed', 'freeze']) $(k === 'speed' ? 'bspeed' : 'bfreeze').addEventListener('click', () => { if (mode === 'church') { churchBanner(S().buffSay[k], 3); chime(81, 0, .08, .7); } });      // a tap says what the prophecy does
+for (const k of ['speed', 'freeze']) $(k === 'speed' ? 'bspeed' : 'bfreeze').addEventListener('click', () => { if (mode === 'church') churchBanner(S().buffSay[k], 3); else toastSay(S().buffSay[k]); chime(81, 0, .08, .7); });      // a tap says what the prophecy does
 $('bclose').addEventListener('click', () => { bag.open = false; bag.drag = null; chime(62, 0, .1, .8); });
 $('bback').addEventListener('click', () => { if (stall.board) closeBoard(); });
 cv.addEventListener('pointermove', e => { if (mode === 'stall' && stall.board) boardMove(e.clientX, e.clientY); else if (bag.open) bagMove(e.clientX, e.clientY); });
@@ -2356,7 +2365,7 @@ resize(); refreshUI();
 // debug entry points for automated checks: #world, #stall, #test
 { const m = /[?&]lang=(hans|hant|en|auto)/.exec(location.search); if (m) setLang(m[1]); }
 if (location.hash) {
-  $('title').style.display = 'none'; mode = 'world'; zoomOut = zoomTarget = 0; $('zoom').style.display = 'block';
+  $('title').style.display = 'none'; mode = 'world'; zoomOut = zoomTarget = 0; $('zoom').style.display = 'none';
   if (location.hash === '#audio') setTimeout(async () => { const log = []; restartGame = () => {}; try { initAudio(); log.push('ctx=' + !!AC + ' state=' + (AC && AC.state)); if (AC) { await AC.resume(); musicTick(); const b0 = barIdx; await AC.suspend(); log.push('suspended=' + AC.state); document.dispatchEvent(new Event('visibilitychange')); await new Promise(r => setTimeout(r, 300)); log.push('afterReturn=' + AC.state); nextBar = AC.currentTime - 30; musicTick(); log.push('barsScheduledAfterGap=' + (barIdx - b0) + ' nextBarAhead=' + (nextBar > AC.currentTime)); const old = AC; await AC.close(); window.dispatchEvent(new Event('pointerdown')); log.push('afterClosed newCtx=' + (AC && AC !== old) + ' state=' + (AC && AC.state)); } } catch (e) { log.push('ERR ' + e.message); } document.title = log.join(' ; '); }, 300);
   if (location.hash === '#hush') setTimeout(async () => { const log = [], wait = ms => new Promise(r => setTimeout(r, ms)); restartGame = () => { log.push('RESTART'); }; mode = 'world'; initAudio(); await AC.resume(); enterStall(); stall.pot = 'cooking'; for (let k = 0; k < 40; k++) updateStall(.05); log.push('boilInShop=' + boilGain.gain.value.toFixed(3)); leaveStall(); musicTick(); log.push('boilOutside=' + boilGain.gain.value);
     hushAudio(); await wait(300); log.push('afterHush gain=' + master.gain.value.toFixed(3) + ' state=' + AC.state); wakeAudio(false); await wait(600); log.push('afterWake gain=' + master.gain.value.toFixed(2) + ' state=' + AC.state);
