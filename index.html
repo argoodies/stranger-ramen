@@ -1581,8 +1581,17 @@ function thinText(str, x, y, px, c = [255, 255, 255], a = 1, wide = 1) {
   ctx.font = `200 ${px}px ${THINF}`; const chars = [...str], gap = px * (LANG === 'en' ? .14 : .5) * wide, ws = chars.map(ch => ctx.measureText(ch).width); let cx = x - (ws.reduce((p, w) => p + w, 0) + gap * (chars.length - 1)) / 2;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = css(c, a); chars.forEach((ch, k) => { ctx.fillText(ch, cx, y); cx += ws[k] + gap; });
 }
-function mvBack(t, title) {
-  TK = 0; const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css([40, 44, 92], .96)); g.addColorStop(.55, css([124, 98, 144], .96)); g.addColorStop(1, css([232, 156, 138], .96)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+let frostCv = [null, null], frostT = -1;
+function frost(t) {      // frosted glass: whatever is already on the screen, shrunk twice and spread back (blurred where the browser can), so the scene shows through soft and faint
+  const a = frostCv[0] || (frostCv[0] = document.createElement('canvas')), b = frostCv[1] || (frostCv[1] = document.createElement('canvas')), w1 = Math.max(1, Math.round(cv.width / 6)), h1 = Math.max(1, Math.round(cv.height / 6)), w2 = Math.max(1, w1 >> 2), h2 = Math.max(1, h1 >> 2);
+  let fresh = Math.abs(t - frostT) > .2; if (a.width !== w1 || a.height !== h1) { a.width = w1; a.height = h1; fresh = true; } if (b.width !== w2 || b.height !== h2) { b.width = w2; b.height = h2; }
+  if (fresh) { frostT = t; const ga = a.getContext('2d'), gb = b.getContext('2d'); ga.imageSmoothingQuality = gb.imageSmoothingQuality = 'high';
+  ga.drawImage(cv, 0, 0, w1, h1); gb.drawImage(a, 0, 0, w2, h2); ga.clearRect(0, 0, w1, h1); if ('filter' in ga) ga.filter = 'blur(1.5px)'; ga.drawImage(b, -2, -2, w1 + 4, h1 + 4); ga.filter = 'none'; }      // the blur is done small, where it is cheap, and only five times a second: under frosted glass nobody sees the difference
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingQuality = 'low'; ctx.drawImage(a, 0, 0, cv.width, cv.height); ctx.restore();
+}
+function mvBack(t, title, glass) {
+  TK = 0; const g = ctx.createLinearGradient(0, 0, 0, H), o = glass ? .5 : .96; if (glass) frost(t); g.addColorStop(0, css([40, 44, 92], o)); g.addColorStop(.55, css([124, 98, 144], o)); g.addColorStop(1, css([232, 156, 138], o)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  if (glass) { ctx.fillStyle = css([255, 255, 255], .07); ctx.fillRect(0, 0, W, H); }      // a milky sheen over the tint
   const y = Math.max(104, H * .15); thinText(title, W / 2, y, 24, [255, 255, 255], .96, 1.5);
   line([[W / 2 - 54, y + 30], [W / 2 - 9, y + 30]], [255, 255, 255], 1, .5); line([[W / 2 + 9, y + 30], [W / 2 + 54, y + 30]], [255, 255, 255], 1, .5); poly([[W / 2 - 4, y + 30], [W / 2, y + 26], [W / 2 + 4, y + 30], [W / 2, y + 34]], [255, 255, 255], .8);
   return y;
@@ -1622,25 +1631,34 @@ function bagSlabs() {
   for (const id of loose) if (P0[id] == null) { const k = out.indexOf(null); if (k < 0) break; out[k] = id; P0[id] = k; }
   return out;
 }
-function drawBag(t) {      // what you wear stands on two plinths; what you carry lies on the slabs below. Things are moved by dragging; a tap only shows what a thing is.
-  const L = S(), y0 = mvBack(t, L.bagTitle), s = clamp(Math.min(W * .1, (H - 150) / 14), 24, 42), cell = 62, hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
-  const stand = (cx, cy, id, h, place, sc = 1) => { const v = new View(cx, cy, s * sc), sel = id && bag.sel === id, held = dg && dg.id === id, over = dg && dg.over === place;
-    spots.push([cx, cy - s * .45, place]);
-    if (sel || over) glow(cx, cy + s * .2, s * 2, [255, 236, 170], over ? .9 : .75);
-    if ((id && !held) || over) v.box(-.5, -.5, -h, 1, 1, h, sel || over ? mix(PAL.stone, [255, 255, 255], .25) : PAL.stone); else v.box(-.5, -.5, -h, 1, 1, h, [255, 255, 255], .16);
-    if (id) hits.push([cx - cell / 2, cy - s * .45 - cell / 2, id, place]);
-    if (id && !held) { const by = cy - s * sc * .72 - Math.sin(t * 2 + cx * .05) * 3; ell(cx, cy, s * .34, s * .17, [60, 40, 90], .25); glow(cx, by, s * sc * 1.1, [255, 240, 200], .45); drawItem(id, cx, by, s * sc * .44);
-      const n = typeof place === 'number' ? rest(id) : 0; if (n > 1) { const bx = cx + s * .42, byy = by + s * .3; circ(bx, byy, 8, [255, 236, 190]); ctx.font = `400 11px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([60, 40, 90]); ctx.fillText(String(n), bx, byy + .5); } } };      // a stack of cards shows how many lie there
+function glassWell(cx, cy, w, h, lit, empty) {      // a hollow pressed into the frosted glass: darker within, a shadow under its top lip, a bright rim along its lower edge
+  const x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * .26;
+  rrect(x, y, w, h, r); ctx.fillStyle = css(lit ? [255, 240, 200] : [20, 16, 50], lit ? .2 : .16); ctx.fill();
+  ctx.save(); rrect(x, y, w, h, r); ctx.clip(); const g = ctx.createLinearGradient(0, y, 0, y + h * .45); g.addColorStop(0, css([12, 8, 40], .3)); g.addColorStop(1, css([12, 8, 40], 0)); ctx.fillStyle = g; ctx.fillRect(x, y, w, h * .45);
+  const q = ctx.createLinearGradient(0, y + h * .6, 0, y + h); q.addColorStop(0, css([255, 255, 255], 0)); q.addColorStop(1, css([255, 255, 255], .12)); ctx.fillStyle = q; ctx.fillRect(x, y + h * .6, w, h * .4); ctx.restore();
+  rrect(x + .5, y + .5, w - 1, h - 1, r); const e = ctx.createLinearGradient(0, y, 0, y + h); e.addColorStop(0, css([20, 14, 50], .32)); e.addColorStop(.5, css([255, 255, 255], .12)); e.addColorStop(1, css([255, 255, 255], lit ? .9 : .55)); ctx.strokeStyle = e; ctx.lineWidth = 1; ctx.stroke();
+  if (empty) { rrect(x + w * .3, cy - .5, w * .4, 1, .5); ctx.fillStyle = css([255, 255, 255], .12); ctx.fill(); }
+}
+function drawBag(t) {      // what you wear sits in three glass hollows; what you carry lies in the twelve below. Things are moved by dragging; a tap only shows what a thing is. Things are moved by dragging; a tap only shows what a thing is.
+  const L = S(), y0 = mvBack(t, L.bagTitle, true), s = clamp(Math.min(W * .1, (H - 150) / 14), 24, 42), cell = 62, hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null, gx = Math.min(s * 1.95, (W - 40) / 4);
+  const stand = (cx, cy, id, h, place, sc = 1) => { const sel = id && bag.sel === id, held = dg && dg.id === id, over = dg && dg.over === place;
+    const wy = cy - s * .45, ww = h > .3 ? s * 1.6 * sc : Math.min(s * 1.3, gx * .84), wh = h > .3 ? s * 1.6 * sc : s * 1.24;
+    spots.push([cx, wy, place]);
+    if (sel || over) glow(cx, wy, ww * .95, [255, 236, 170], over ? .7 : .5);
+    glassWell(cx, wy, ww, wh, sel || over, !id || held);
+    if (id) hits.push([cx - cell / 2, wy - cell / 2, id, place]);
+    if (id && !held) { const by = wy - Math.sin(t * 2 + cx * .05) * 1.5; glow(cx, by, s * sc * .8, [255, 240, 200], .3); drawItem(id, cx, by, s * sc * .4);
+      const n = typeof place === 'number' ? rest(id) : 0; if (n > 1) { const bx = cx + ww / 2 - 7, byy = wy + wh / 2 - 7; circ(bx, byy, 8, [255, 236, 190]); ctx.font = `400 11px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([60, 40, 90]); ctx.fillText(String(n), bx, byy + .5); } } };      // a stack of cards shows how many lie there
   thinText(L.bagWorn, W / 2, y0 + 64, 12.5, [255, 255, 255], .7);
   const yA = y0 + 64 + s * 2.3;
-  ['weapon', 'acc', 'drink'].forEach((k, n) => { const big = n < 2, gap = Math.min(s * 2.3, (W - 60) / 3), cx = W / 2 + (n - 1) * gap, id = has.includes(save.equip[k]) ? save.equip[k] : null; stand(cx, yA + (big ? 0 : s * .2), id, big ? .9 : .5, k, big ? 1 : .72); thinText(L.bagSlots[n], cx, yA + s * 1.4 + 20, 12.5, [255, 255, 255], .8); });      // weapon and charm on tall plinths; the drink on a small one
+  ['weapon', 'acc', 'drink'].forEach((k, n) => { const big = n < 2, gap = Math.min(s * 2.3, (W - 60) / 3), cx = W / 2 + (n - 1) * gap, id = has.includes(save.equip[k]) ? save.equip[k] : null; stand(cx, yA + s * .75 + (big ? 0 : s * .2), id, big ? .9 : .5, k, big ? 1 : .72); thinText(L.bagSlots[n], cx, yA + s * 1.4 + 20, 12.5, [255, 255, 255], .8); });      // weapon and charm on tall plinths; the drink on a small one
   const yL = yA + s * 1.4 + 50; line([[W / 2 - 70, yL], [W / 2 + 70, yL]], [255, 255, 255], 1, .35);
-  const yB = yL + s * 1.5, gx = Math.min(s * 1.95, (W - 40) / 4), slabs = bagSlabs();
+  const yB = yL + s * 1.5, slabs = bagSlabs();
   for (let n = 0; n < 12; n++) stand(W / 2 + (n % 4 - 1.5) * gx, yB + (n >> 2) * s * 1.45, slabs[n], .14, n);
   const yD = yB + 2 * s * 1.45 + s * .64 + 40;
   if (bag.sel) { thinText(L.items[bag.sel][0], W / 2, yD, 17, [255, 236, 190]); ctx.font = `300 13px ${THINF}`; wrapText(L.items[bag.sel][1], Math.min(W - 64, 300)).forEach((l, k) => { ctx.font = `300 13px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([255, 255, 255], .85); ctx.fillText(l, W / 2, yD + 30 + k * 21); }); }
   else thinText(L.bagHint, W / 2, yD + 6, 12.5, [255, 255, 255], .7, .5);
-  if (dg) { ell(dg.x, dg.y + s * .5, s * .34, s * .14, [30, 20, 60], .3); glow(dg.x, dg.y - s * .2, s * 1.3, [255, 240, 200], .6); drawItem(dg.id, dg.x, dg.y - s * .2, s * .5); }      // the thing in your hand follows the finger
+  if (dg) { glow(dg.x, dg.y - s * .2, s * 1.1, [255, 240, 200], .5); drawItem(dg.id, dg.x, dg.y - s * .2, s * .5); }      // the thing in your hand follows the finger
   bag.box = [W / 2 - 175, y0 - 34, W / 2 + 175, yD + 96];
 }
 function bagTap(x, y) {      // finger down: pick a thing up, or (off the panel) close the backpack
