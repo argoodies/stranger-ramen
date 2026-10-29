@@ -786,7 +786,7 @@ function drawWorld(t, dt) {
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
     if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
     const tt = titleT0 == null ? -1 : titleT0;
-    { const u = ease(clamp((tt - .35) / 1.2)), im = LOGO[LANG] || LOGO.hans, lx = a[0] + fs * .9, lw = Math.min(W - lx - Math.max(14, W * .04), fs * 13), ok = im.complete && im.naturalWidth, lh = ok ? lw * im.naturalHeight / im.naturalWidth : fs;      // the logo, to the right of the clock face, as wide as the room there allows
+    { const u = ease(clamp((tt - .35) / 1.2)), im = LOGO[LANG] || LOGO.hans, lx = a[0] + fs * .45, lw = Math.min(W - lx - Math.max(14, W * .04), fs * 13), ok = im.complete && im.naturalWidth, lh = ok ? lw * im.naturalHeight / im.naturalWidth : fs;      // the logo, to the right of the clock face, as wide as the room there allows
       titleBox = { cx: lx + lw / 2, hw: lw / 2, y, fs: lh, u }; if (u > 0 && ok) { ctx.globalAlpha = .96 * u; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; ctx.drawImage(im, lx, y - lh / 2, lw, lh); ctx.globalAlpha = 1; } } ctx.restore();
     if (tt >= TITLE_UP) tapHint('tapStart', tt - TITLE_UP);      // as soon as the title is up: "tap anywhere to start"      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
