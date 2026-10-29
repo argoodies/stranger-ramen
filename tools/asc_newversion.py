@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- Chili and cilantro can be sprinkled again and again, and customers say how much they want: none, a little, as usual or a lot\n- Beef can be added more than once too, and the bowl shows how much went in\n- An unhappy customer says what is wrong\n- Holding noodles, the ladle or a topping, tap the floor to put it back\n- The backpack and prophecies can be opened in every scene, and the Prophecy of Speed works everywhere",
-       'zh-Hant': "· 辣椒和香菜可以連續撒，客人點單會說要多少：不要、來一點、正常、多來點\n· 加牛肉也能連續撒，碗裡會看出放了幾次\n· 客人不滿意時會直接說哪裡不對\n· 拿起麵、湯勺或配料後，點空地就能放回去\n· 背包和預言在各個場景都能打開，速度預言在全遊戲都有效",
-       'zh-Hans': "· 辣椒和香菜可以连续撒，客人点单会说要多少：不要、来一点、正常、多来点\n· 加牛肉也能连续撒，碗里会看出放了几次\n· 客人不满意时会直接说哪里不对\n· 拿起面、汤勺或配料后，点空地就能放回去\n· 背包和预言在各个场景都能打开，速度预言在全游戏都有效"}
+NEW = {'en-US': "- A new title on the start screen, its strokes gently drifting\n- The language button is now a 文A icon at the top left\n- A new backpack icon; inside, things rest in clear glass hollows\n- In town, tap a building's door, the cell before it or the building itself to go in",
+       'zh-Hant': "· 開始頁換上新的標題字，筆畫會輕輕浮動\n· 語言按鈕改成「文A」圖示，放在左上角\n· 背包換了新圖示，打開後物品放在透明的玻璃凹槽裡\n· 小鎮裡點建築的門、門前的格子或建築本身才會進去",
+       'zh-Hans': "· 开始页换上新的标题字，笔画会轻轻浮动\n· 语言按钮改成「文A」图示，放在左上角\n· 背包换了新图示，打开后物品放在透明的玻璃凹槽里\n· 小镇里点建筑的门、门前的格子或建筑本身才会进去"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
