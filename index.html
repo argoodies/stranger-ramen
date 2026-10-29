@@ -574,7 +574,7 @@ function logoWaver(im, x, y, w, h, t) {      // every stroke of the logo floats 
   const g = oc.getContext('2d'), src = logoThin(im), parts = logoParts(im), k = w / src.width, A = h * .05;      // A: how far a stroke wanders
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cw, ch); const sized = parts && logoSized(im, k * DPR);
   if (!sized) { g.setTransform(DPR, 0, 0, DPR, pad * DPR, pad * DPR); g.drawImage(im._small && im._small.width === Math.round(w * DPR) ? im._small : (im._small = shrinkTo(src, Math.round(w * DPR), Math.round(h * DPR))), 0, 0, w, h); }
-  else for (const q of sized) { const s = t * q.v, cx = ((q.x + q.w / 2) * k + Math.sin(s * .9 + q.a) * A * .7 + pad) * DPR, cy = ((q.y + q.h / 2) * k + Math.sin(s * 1.1 + q.b) * A + pad) * DPR;      // in device pixels: each stroke is drawn one to one, only moved
+  else for (const q of sized) { const s = t * q.v * .5, cx = ((q.x + q.w / 2) * k + Math.sin(s * .9 + q.a) * A * .7 + pad) * DPR, cy = ((q.y + q.h / 2) * k + Math.sin(s * 1.1 + q.b) * A + pad) * DPR;      // in device pixels: each stroke is drawn one to one, only moved
     g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(q.c, Math.round(cx - q.c.width / 2), Math.round(cy - q.c.height / 2)); }      // whole pixels, no turning, no smoothing: nothing to blur it
   const m = ctx.getTransform(), q = m.transformPoint(new DOMPoint(x - pad, y - pad));      // pasted on whole device pixels, unscaled, so the crisp strokes stay crisp
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false; ctx.drawImage(oc, Math.round(q.x), Math.round(q.y)); ctx.restore();
