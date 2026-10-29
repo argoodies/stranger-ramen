@@ -564,18 +564,21 @@ function shrinkTo(src, tw, th) {      // a canvas made smaller in halves (each s
 }
 function logoSized(im, sc) {      // the strokes ready-made at the size they are shown (sc: device pixels per SVG pixel), each with a pixel of clear border so it turns cleanly; remade only when the size changes
   const parts = logoParts(im); if (!parts) return null; if (im._sized && Math.abs(im._sized.sc - sc) < sc * .01) return im._sized.list;
-  const list = parts.map(q => { const tw = Math.max(1, Math.round(q.w * sc)), th = Math.max(1, Math.round(q.h * sc)), c = document.createElement('canvas'); c.width = tw + 2; c.height = th + 2; c.getContext('2d').drawImage(shrinkTo(q.c, tw, th), 1, 1); return { ...q, c }; });
+  const list = parts.map(q => { const tw = Math.max(1, Math.round(q.w * sc)), th = Math.max(1, Math.round(q.h * sc)), c = document.createElement('canvas'); c.width = tw + 2; c.height = th + 2; const g = c.getContext('2d'); g.drawImage(shrinkTo(q.c, tw, th), 1, 1);
+    try { const D = g.getImageData(0, 0, c.width, c.height), d = D.data; for (let i = 3; i < d.length; i += 4) d[i] = d[i] < 128 ? 0 : 255; g.putImageData(D, 0, 0); } catch (e) {}      // hard edges: every pixel either stroke or not, so the title stays crisp
+    return { ...q, c }; });
   im._sized = { sc, list }; return list;
 }
-function logoWaver(im, x, y, w, h, t) {      // every stroke of the logo floats on its own, a hair this way and that and turning very slightly, like the pieces of a Monument Valley title; the letters keep their shape
+function logoWaver(im, x, y, w, h, t) {      // every stroke of the logo floats on its own, a hair this way and that, like the pieces of a Monument Valley title; the letters keep their shape
   const pad = h * .12, oc = logoCv || (logoCv = document.createElement('canvas')), cw = Math.ceil((w + pad * 2) * DPR), ch = Math.ceil((h + pad * 2) * DPR);
   if (oc.width !== cw || oc.height !== ch) { oc.width = cw; oc.height = ch; }
   const g = oc.getContext('2d'), src = logoThin(im), parts = logoParts(im), k = w / src.width, A = h * .05;      // A: how far a stroke wanders
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cw, ch); const sized = parts && logoSized(im, k * DPR);
   if (!sized) { g.setTransform(DPR, 0, 0, DPR, pad * DPR, pad * DPR); g.drawImage(im._small && im._small.width === Math.round(w * DPR) ? im._small : (im._small = shrinkTo(src, Math.round(w * DPR), Math.round(h * DPR))), 0, 0, w, h); }
-  else for (const q of sized) { const s = t * q.v, cx = ((q.x + q.w / 2) * k + Math.sin(s * .9 + q.a) * A * .7 + pad) * DPR, cy = ((q.y + q.h / 2) * k + Math.sin(s * 1.1 + q.b) * A + pad) * DPR;      // in device pixels: each stroke is drawn one to one, only moved and turned
-    g.setTransform(1, 0, 0, 1, cx, cy); g.rotate(Math.sin(s * .7 + q.a + q.b) * .035); g.drawImage(q.c, -q.c.width / 2, -q.c.height / 2); }
-  ctx.drawImage(oc, 0, 0, cw, ch, x - pad, y - pad, w + pad * 2, h + pad * 2);
+  else for (const q of sized) { const s = t * q.v, cx = ((q.x + q.w / 2) * k + Math.sin(s * .9 + q.a) * A * .7 + pad) * DPR, cy = ((q.y + q.h / 2) * k + Math.sin(s * 1.1 + q.b) * A + pad) * DPR;      // in device pixels: each stroke is drawn one to one, only moved
+    g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(q.c, Math.round(cx - q.c.width / 2), Math.round(cy - q.c.height / 2)); }      // whole pixels, no turning, no smoothing: nothing to blur it
+  const m = ctx.getTransform(), q = m.transformPoint(new DOMPoint(x - pad, y - pad));      // pasted on whole device pixels, unscaled, so the crisp strokes stay crisp
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false; ctx.drawImage(oc, Math.round(q.x), Math.round(q.y)); ctx.restore();
 }
 let titleBox = null;      // where the title's letters sit (and how far they have faded in), so the stars behind them can go dim
 function drawSky(top, mid, bot, t, starA = 1) {
