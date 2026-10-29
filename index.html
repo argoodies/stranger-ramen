@@ -37,7 +37,7 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
 #title .go{position:absolute;bottom:calc(9vh + env(safe-area-inset-bottom));padding:12px 30px;font-size:18px;letter-spacing:.3em;animation:breath 2s ease-in-out infinite}
 @keyframes breath{50%{opacity:.55}}
 #leave,#enter{display:none!important}
-#langMenu{display:none;position:absolute;right:0;bottom:46px;z-index:5;flex-direction:column;gap:6px;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
+#langMenu{display:none;position:absolute;left:0;top:46px;z-index:5;flex-direction:column;gap:6px;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
 #langMenu.open{display:flex}
 #langMenu button{appearance:none;border:0;border-radius:11px;padding:9px 18px;font:300 15px var(--serif);letter-spacing:.08em;color:#f4ecdc;background:transparent;white-space:nowrap;text-align:left;cursor:pointer}
 #langMenu button.on{background:rgba(255,236,170,.2);color:#ffe9b0}
@@ -46,12 +46,10 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="langBox" style="position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:20">      <!-- the language button sits at the bottom right; its menu opens upward -->
-  <button class="pill" id="lang" style="display:none;padding:8px 11px;line-height:0" aria-label="Language"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.2v2.3M2.6 5.6h9.8M10.4 5.6C9.3 9.6 6.9 12.2 3.2 13.8M5.6 7.6c1.5 2.7 3.7 4.8 6.6 6.1"/><path d="M13.2 21.6l4.3-10.4 4.3 10.4M14.8 17.9h5.4"/></svg></button>      <!-- 文A: the language button -->
-  <div id="langMenu"><button data-l="hans">简体中文</button><button data-l="hant">繁體中文</button><button data-l="en">English</button><button data-l="auto">跟随系统</button></div>
-</div>
 <div id="top">
   <div style="display:flex;gap:8px;position:relative">
+    <button class="pill" id="lang" style="display:none;padding:8px 11px;line-height:0" aria-label="Language"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.2v2.3M2.6 5.6h9.8M10.4 5.6C9.3 9.6 6.9 12.2 3.2 13.8M5.6 7.6c1.5 2.7 3.7 4.8 6.6 6.1"/><path d="M13.2 21.6l4.3-10.4 4.3 10.4M14.8 17.9h5.4"/></svg></button>      <!-- 文A: the language button -->
+    <div id="langMenu"><button data-l="hans">简体中文</button><button data-l="hant">繁體中文</button><button data-l="en">English</button><button data-l="auto">跟随系统</button></div>
     <button class="pill" id="leave" style="display:none">← 离开</button>
     <button class="pill" id="bback" style="display:none;padding:8px 11px;line-height:0" aria-label="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l-8 8 8 8"/></svg></button>
     <button class="pill" id="bclose" style="display:none;padding:8px 11px;line-height:0" aria-label="close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
