@@ -16,9 +16,9 @@ OUT = '/dev/shm/botc/shots4'
 LOC = {'hans': 'zh-Hans', 'hant': 'zh-Hant', 'en': 'en-US'}
 COMMON = "window.requestAnimationFrame = (f) => setTimeout(() => f(performance.now()), 16); window.__noGeese = true;"
 SCENES_ALL = {
- 1: """setTimeout(() => { enterStall(); fade = 0; const want = { chili: true, cilantro: true, beef: true };
+ 1: """setTimeout(() => { enterStall(); fade = 0; const want = { chili: 2, cilantro: 2, beef: true };
       stall.seats = [null, { look: { kind: 'ft', hat: [70, 100, 220], name: '占卜师' }, want, text: orderText(want), state: 'wait', t: 9, wait: 0, say: '', dish: null }, null]; stall.spawn = 999;
-      stall.bowl = Object.assign(emptyBowl(), { noodle: true, soup: true, chili: true, cilantro: true, beef: true }); stall.bowlAnim = {};
+      stall.carry = Object.assign(emptyBowl(), { noodle: true, soup: true, chili: true, cilantro: true, beef: true, chiliN: 2, cilantroN: 2 }); stall.slots = [Object.assign(emptyBowl(), { noodle: true, soup: true, chili: true, chiliN: 1 }), null, Object.assign(emptyBowl(), { noodle: true })]; stall.cur = 1; stall.bowlAnim = {};
       Object.assign(stall.owner, { x: 2.44, y: 1.25, tx: 2.44, ty: 1.25, ptx: null, path: null }); setHold('bowl'); stall.pot = 'cooking'; stall.potT = .9; cookT = () => 99; }, 300);""",
  2: """setTimeout(() => { G.n = 1; G.t = HALF + 20; enterBar(); fade = 0; Object.assign(bar, { who: 'sailor', x: 2.5, y: 3.5, path: [] }); Object.assign(bar.cat, { x: .55, y: 2.3, tx: .55, ty: 2.3, sit: 999, face: 1 });
       setTimeout(() => { const k = BARHIT.keeper; if (k) cafeTap(k[0], k[1]); }, 300);
