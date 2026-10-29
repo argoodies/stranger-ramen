@@ -1582,17 +1582,9 @@ function thinText(str, x, y, px, c = [255, 255, 255], a = 1, wide = 1) {
   ctx.font = `200 ${px}px ${THINF}`; const chars = [...str], gap = px * (LANG === 'en' ? .14 : .5) * wide, ws = chars.map(ch => ctx.measureText(ch).width); let cx = x - (ws.reduce((p, w) => p + w, 0) + gap * (chars.length - 1)) / 2;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = css(c, a); chars.forEach((ch, k) => { ctx.fillText(ch, cx, y); cx += ws[k] + gap; });
 }
-let frostCv = [null, null], frostT = -1;
-function frost(t) {      // frosted glass: whatever is already on the screen, shrunk twice and spread back (blurred where the browser can), so the scene shows through soft and faint
-  const a = frostCv[0] || (frostCv[0] = document.createElement('canvas')), b = frostCv[1] || (frostCv[1] = document.createElement('canvas')), w1 = Math.max(1, Math.round(cv.width / 6)), h1 = Math.max(1, Math.round(cv.height / 6)), w2 = Math.max(1, w1 >> 2), h2 = Math.max(1, h1 >> 2);
-  let fresh = Math.abs(t - frostT) > .2; if (a.width !== w1 || a.height !== h1) { a.width = w1; a.height = h1; fresh = true; } if (b.width !== w2 || b.height !== h2) { b.width = w2; b.height = h2; }
-  if (fresh) { frostT = t; const ga = a.getContext('2d'), gb = b.getContext('2d'); ga.imageSmoothingQuality = gb.imageSmoothingQuality = 'high';
-  ga.drawImage(cv, 0, 0, w1, h1); gb.drawImage(a, 0, 0, w2, h2); ga.clearRect(0, 0, w1, h1); if ('filter' in ga) ga.filter = 'blur(1.5px)'; ga.drawImage(b, -2, -2, w1 + 4, h1 + 4); ga.filter = 'none'; }      // the blur is done small, where it is cheap, and only five times a second: under frosted glass nobody sees the difference
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingQuality = 'low'; ctx.drawImage(a, 0, 0, cv.width, cv.height); ctx.restore();
-}
 function mvBack(t, title, glass) {
-  TK = 0; const g = ctx.createLinearGradient(0, 0, 0, H), o = glass ? .5 : .96; if (glass) frost(t); g.addColorStop(0, css([40, 44, 92], o)); g.addColorStop(.55, css([124, 98, 144], o)); g.addColorStop(1, css([232, 156, 138], o)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  if (glass) { ctx.fillStyle = css([255, 255, 255], .07); ctx.fillRect(0, 0, W, H); }      // a milky sheen over the tint
+  TK = 0; const g = ctx.createLinearGradient(0, 0, 0, H), o = glass ? .86 : .96; g.addColorStop(0, css([40, 44, 92], o)); g.addColorStop(.55, css([124, 98, 144], o)); g.addColorStop(1, css([232, 156, 138], o)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  if (glass) { ctx.fillStyle = css([255, 255, 255], .08); ctx.fillRect(0, 0, W, H); }      // no real blur: a milky, see-through tint is enough to read as glass
   const y = Math.max(104, H * .15); thinText(title, W / 2, y, 24, [255, 255, 255], .96, 1.5);
   line([[W / 2 - 54, y + 30], [W / 2 - 9, y + 30]], [255, 255, 255], 1, .5); line([[W / 2 + 9, y + 30], [W / 2 + 54, y + 30]], [255, 255, 255], 1, .5); poly([[W / 2 - 4, y + 30], [W / 2, y + 26], [W / 2 + 4, y + 30], [W / 2, y + 34]], [255, 255, 255], .8);
   return y;
