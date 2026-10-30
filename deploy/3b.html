@@ -575,8 +575,9 @@ function logoWaver(im, x, y, w, h, tt) {      // the logo drawn crisp: its strok
   const g = oc.getContext('2d'), src = logoThin(im), parts = logoParts(im), k = w / src.width;
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cw, ch); const sized = parts && logoSized(im, k * DPR);
   if (!sized) { g.setTransform(DPR, 0, 0, DPR, pad * DPR, pad * DPR); g.drawImage(im._small && im._small.width === Math.round(w * DPR) ? im._small : (im._small = shrinkTo(src, Math.round(w * DPR), Math.round(h * DPR))), 0, 0, w, h); }
-  else { const j = Math.floor((tt - 2) / 5), ph = tt - 2 - j * 5, r = Math.sin(j * 78.233) * 43758.5453, pick = tt > 2 && ph < 3.6 ? Math.floor((r - Math.floor(r)) * sized.length) : -1;      // now and then: every five seconds one stroke, picked at random, drifts a hair out and slowly back (3.6 s), never two at once
-  for (const [n, q] of sized.entries()) { const e = n === pick ? Math.sin(Math.PI * ph / 3.6) ** 2 : 0, far = h * .07 * e;
+  else { const B = 1.5, D = 3.6, J = Math.floor((tt - 2) / B), go = new Map();      // every second and a half a stroke, picked at random, starts to drift a hair out and slowly back (3.6 s), so two or three are on the move at any time
+  for (let j = J - 2; j <= J; j++) { const ph = tt - 2 - j * B; if (j < 0 || ph < 0 || ph >= D) continue; const r = Math.sin(j * 78.233) * 43758.5453, n = Math.floor((r - Math.floor(r)) * sized.length); go.set(n, Math.max(go.get(n) || 0, Math.sin(Math.PI * ph / D) ** 2)); }
+  for (const [n, q] of sized.entries()) { const e = go.get(n) || 0, far = h * .07 * e;
     const cx = ((q.x + q.w / 2) * k + Math.cos(q.a) * far + pad) * DPR, cy = ((q.y + q.h / 2) * k + Math.sin(q.a) * far + pad) * DPR;
     g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(q.c, Math.round(cx - q.c.width / 2), Math.round(cy - q.c.height / 2)); } }      // each stroke in its place, on whole pixels, no smoothing: nothing to blur it
   const m = ctx.getTransform(), q = m.transformPoint(new DOMPoint(x - pad, y - pad));      // pasted on whole device pixels, unscaled, so the crisp strokes stay crisp
