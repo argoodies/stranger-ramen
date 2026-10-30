@@ -568,16 +568,14 @@ function logoSized(im, sc) {      // the strokes ready-made at the size they are
     return { ...q, c }; });
   im._sized = { sc, list }; return list;
 }
-function logoWaver(im, x, y, w, h, tt) {      // tt: seconds since the title began. The strokes of the logo start scattered, each off in its own direction, and glide home into the letters, one after another; then they stay still
-  const pad = h * .8, oc = logoCv || (logoCv = document.createElement('canvas')), cw = Math.ceil((w + pad * 2) * DPR), ch = Math.ceil((h + pad * 2) * DPR);
+function logoWaver(im, x, y, w, h) {      // the logo drawn crisp: its strokes ready-made at the size shown and laid on whole device pixels (it simply fades in with the title)
+  const pad = h * .12, oc = logoCv || (logoCv = document.createElement('canvas')), cw = Math.ceil((w + pad * 2) * DPR), ch = Math.ceil((h + pad * 2) * DPR);
   if (oc.width !== cw || oc.height !== ch) { oc.width = cw; oc.height = ch; }
   const g = oc.getContext('2d'), src = logoThin(im), parts = logoParts(im), k = w / src.width;
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cw, ch); const sized = parts && logoSized(im, k * DPR);
   if (!sized) { g.setTransform(DPR, 0, 0, DPR, pad * DPR, pad * DPR); g.drawImage(im._small && im._small.width === Math.round(w * DPR) ? im._small : (im._small = shrinkTo(src, Math.round(w * DPR), Math.round(h * DPR))), 0, 0, w, h); }
-  else for (const q of sized) { const f = q.b / TAU, p = clamp((tt - .15 - f * .6) / 1.7), e = 1 - (1 - p) ** 3, far = h * (.25 + .45 * f) * (1 - e);      // f: this stroke's own number, for its delay and how far out it starts
-    const cx = ((q.x + q.w / 2) * k + Math.cos(q.a) * far + pad) * DPR, cy = ((q.y + q.h / 2) * k + Math.sin(q.a) * far * .8 + pad) * DPR;
-    g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.globalAlpha = .35 + .65 * e; g.drawImage(q.c, Math.round(cx - q.c.width / 2), Math.round(cy - q.c.height / 2)); }      // whole pixels, no turning, no smoothing: nothing to blur it
-  g.globalAlpha = 1;
+  else for (const q of sized) { const cx = ((q.x + q.w / 2) * k + pad) * DPR, cy = ((q.y + q.h / 2) * k + pad) * DPR;
+    g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(q.c, Math.round(cx - q.c.width / 2), Math.round(cy - q.c.height / 2)); }      // each stroke in its place, on whole pixels, no smoothing: nothing to blur it
   const m = ctx.getTransform(), q = m.transformPoint(new DOMPoint(x - pad, y - pad));      // pasted on whole device pixels, unscaled, so the crisp strokes stay crisp
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false; ctx.drawImage(oc, Math.round(q.x), Math.round(q.y)); ctx.restore();
 }
@@ -834,7 +832,7 @@ function drawWorld(t, dt) {
     if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
     const tt = titleT0 == null ? -1 : titleT0;
     { const u = ease(clamp((tt - .35) / 1.2)), im = LOGO[LANG] || LOGO.hans, lx = a[0] + fs * .45, lw = Math.min(W - lx - Math.max(14, W * .04), fs * 13), ok = im.complete && im.naturalWidth, lh = ok ? lw * im.naturalHeight / im.naturalWidth : fs;      // the logo, to the right of the clock face, as wide as the room there allows
-      titleBox = { cx: lx + lw / 2, hw: lw / 2, y, fs: lh, u }; if (u > 0 && ok) { ctx.globalAlpha = .96 * u; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; logoWaver(im, lx, y - lh / 2, lw, lh, tt); ctx.globalAlpha = 1; } } ctx.restore();
+      titleBox = { cx: lx + lw / 2, hw: lw / 2, y, fs: lh, u }; if (u > 0 && ok) { ctx.globalAlpha = .96 * u; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; logoWaver(im, lx, y - lh / 2, lw, lh); ctx.globalAlpha = 1; } } ctx.restore();
     // no "tap anywhere to start" hint: any tap starts at once      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
   if (mode === 'world' && zoomTarget > .5 && !bag.open) { if (zoomHintT0 == null) zoomHintT0 = t; tapHint('tapGo', t - zoomHintT0); } else zoomHintT0 = null;      // the zoomed-out view of the town: a tap anywhere goes back in
