@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- A new title on the start screen, its strokes gently drifting\n- The language button is now a 文A icon at the top left\n- A new backpack icon; inside, things rest in clear glass hollows\n- In town, tap a building's door, the cell before it or the building itself to go in",
-       'zh-Hant': "· 開始頁換上新的標題字，筆畫會輕輕浮動\n· 語言按鈕改成「文A」圖示，放在左上角\n· 背包換了新圖示，打開後物品放在透明的玻璃凹槽裡\n· 小鎮裡點建築的門、門前的格子或建築本身才會進去",
-       'zh-Hans': "· 开始页换上新的标题字，笔画会轻轻浮动\n· 语言按钮改成「文A」图示，放在左上角\n· 背包换了新图示，打开后物品放在透明的玻璃凹槽里\n· 小镇里点建筑的门、门前的格子或建筑本身才会进去"}
+NEW = {'en-US': "- A new opening screen: the title stands centred above the clock tower\n- Now and then a letter of the title steams like a hot bowl of noodles\n- Tap once to start, no waiting\n- A tidier backpack, with hollows all one size",
+       'zh-Hant': "· 全新開始畫面：標題置中，立在鐘樓上方\n· 標題的字偶爾會像熱湯一樣冒氣\n· 點一下馬上開始，不用等待\n· 背包重新整理，凹槽大小一致",
+       'zh-Hans': "· 全新开始画面：标题居中，立在钟楼上方\n· 标题的字偶尔会像热汤一样冒气\n· 点一下马上开始，不用等待\n· 背包重新整理，凹槽大小一致"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
