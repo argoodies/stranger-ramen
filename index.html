@@ -525,7 +525,7 @@ function walk(p, dt, speed, solid) {
 let titleT0 = null;
 const titleAgain = () => { if (mode === 'title') titleT0 = null; };      // a phone keeps the tab alive: coming back to it, or to a page restored from the back-forward cache, plays the title's fade again
 addEventListener('pageshow', e => { if (e.persisted) titleAgain(); }); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') titleAgain(); });
-let wv = new View(0, 0, 40), zoomOut = 1, zoomTarget = 1, camX = 0, camY = 0;
+let wv = new View(0, 0, 40), zoomOut = 1, zoomTarget = 1, camX = 0, camY = 0, titleK = 1;      // titleK: how much of the title's framing is in the camera (1 on the title, easing to 0 in the game)
 let starCache = null;
 let moonAt = null;      // set while the town sky is drawn, so the stars keep clear of the moon
 const LOGO = {};      // the title lettering, drawn as SVG (assets/logo/title-*.svg, inlined so the apps' single bundled page carries it)
@@ -791,10 +791,14 @@ function drawWorld(t, dt) {
   if (!storyRain) for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], G.n), 2, lerp(.95, .7, G.n)); }
   if (hideChef && tw.view) drawTowerView(t, false);      // what happens in the sky, behind everything that stands on the ground
   zoomOut = lerp(zoomOut, zoomTarget, 1 - Math.pow(0.02, dt));
-  const sNear = clamp(Math.min(W, H) / 10.5, 28, 60), sFar = Math.min(W / 21, H / 26), s = hideChef ? Math.min(W * .036, H * .03) : lerp(sNear, sFar, zoomOut);
+  let sNear = clamp(Math.min(W, H) / 10.5, 28, 60), sFar = Math.min(W / 21, H / 26), s = hideChef ? Math.min(W * .036, H * .03) : lerp(sNear, sFar, zoomOut);
   const fx = lerp(player.x, 1.5, zoomOut), fy = lerp(player.y, -1.5, zoomOut);
   camX = lerp(camX, fx, 1 - Math.pow(0.01, dt)); camY = lerp(camY, fy, 1 - Math.pow(0.01, dt));
   const v = wv; v.s = s; v.cx = W / 2 - (camX - camY) * s * C30; v.cy = H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut) + storyPan;      // storyPan: the story's camera, looking up into the sky
+  titleK = lerp(titleK, mode === 'title' ? 1 : 0, 1 - Math.pow(0.02, dt));
+  if (titleK > .001 && !hideChef) {      // the title's own framing, eased away as the game starts: the whole island (it spans about -8.7 s to 9.2 s across and -17.2 s to 6.8 s up and down from its centre) sits in the middle of the screen; on a narrow phone it keeps to the left edge so the title has room beside the clock
+    const sT = Math.min(W / 21.5, H / 28), s2 = lerp(s, sT, titleK), oX = W < 640 ? Math.min(W / 2 - .27 * s2, 8 + 8.66 * s2) : W / 2 - .27 * s2, oY = H * .5 + 5.2 * s2;
+    v.s = s = s2; v.cx = lerp(W / 2 - (camX - camY) * s * C30, oX - (camX - camY - 3) * s * C30, titleK); v.cy = lerp(H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut), oY - (camX + camY) * s * .5, titleK) + storyPan; }
   if (hideChef) { v.cx = W / 2 - .9 * s; v.cy = H * .7; }      // the view from the top of the tower: the whole town small and low in the frame, most of the picture sky
   // ground
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
