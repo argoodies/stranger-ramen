@@ -811,8 +811,8 @@ function drawWorld(t, dt) {
   camX = lerp(camX, fx, 1 - Math.pow(0.01, dt)); camY = lerp(camY, fy, 1 - Math.pow(0.01, dt));
   const v = wv; v.s = s; v.cx = W / 2 - (camX - camY) * s * C30; v.cy = H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut) + storyPan;      // storyPan: the story's camera, looking up into the sky
   titleK = lerp(titleK, mode === 'title' ? 1 : 0, 1 - Math.pow(0.02, dt));
-  if (titleK > .001 && !hideChef) {      // the title's own framing, eased away as the game starts: the whole island (it spans about -8.7 s to 9.2 s across and -17.2 s to 6.8 s up and down from its centre) sits in the middle of the screen; on a narrow phone it keeps to the left edge so the title has room beside the clock
-    const sT = Math.min(W / 21.5, H / 28), s2 = lerp(s, sT, titleK), oX = W < 640 ? Math.min(W / 2 - .27 * s2, 8 + 8.66 * s2) : W / 2 - .27 * s2, oY = H * .5 + 5.2 * s2;
+  if (titleK > .001 && !hideChef) {      // the title's own framing, eased away as the game starts (the island spans about -8.7 s to 9.2 s across and -17.2 s to 6.8 s up and down from its centre)
+    const sT = Math.min(W / 20.5, H * .6 / 24), s2 = lerp(s, sT, titleK), oX = W / 2 - .27 * s2, oY = H * .67 + 5.2 * s2;      // the title is high in the sky (see the title's drawing), so the island stands low and centred under it
     v.s = s = s2; v.cx = lerp(W / 2 - (camX - camY) * s * C30, oX - (camX - camY - 3) * s * C30, titleK); v.cy = lerp(H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut), oY - (camX + camY) * s * .5, titleK) + storyPan; }
   if (hideChef) { v.cx = W / 2 - .9 * s; v.cy = H * .7; }      // the view from the top of the tower: the whole town small and low in the frame, most of the picture sky
   // ground
@@ -845,14 +845,15 @@ function drawWorld(t, dt) {
   for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
   if (player.sayT > 0 && mode === 'world' && !storyHook) { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)); sayBubble(p[0], p[1] - K * 1.75, player.say, clamp(W * .036, 12, 15), clamp(player.sayT * 2), Math.min(W * .62, 250)); }      // the chef's own words in the town (what a prophecy does)
   if (mode === 'title') {
-    // the title, in the Monument Valley manner: thin, widely spaced lettering beside the clock face
-    const a = v.P(1.5, -1.5, 7.5), chars = [...S().title], en = LANG === 'en', fs = Math.max(en ? 9 : 11, Math.min(clamp(s * (en ? .7 : .86), en ? 10 : 13, 26), (W - a[0]) / (en ? 3.85 + (chars.length - 1) * .74 : 11.6))), x0 = a[0] + fs * 1.15, gap = Math.min(fs * (en ? .92 : 1.9), (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
+    // the title, in the Monument Valley manner: thin lettering, centred high in the night sky above the island
+    let a = v.P(1.5, -1.5, 7.5), chars = [...S().title], en = LANG === 'en', fs = Math.max(en ? 9 : 11, Math.min(clamp(s * (en ? .7 : .86), en ? 10 : 13, 26), (W - a[0]) / (en ? 3.85 + (chars.length - 1) * .74 : 11.6))), x0 = a[0] + fs * 1.15, gap = Math.min(fs * (en ? .92 : 1.9), (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
     ctx.font = `200 ${fs}px "PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.96)';
     ctx.save(); ctx.shadowColor = 'rgba(8,6,28,.5)'; ctx.shadowBlur = fs * .55 * DPR; ctx.shadowOffsetY = fs * .08 * DPR;
     if (document.fonts.status === 'loaded' && document.visibilityState === 'visible') titleT0 = (titleT0 || 0) + Math.min(dt, 1 / 30);      // the letters wait for the font, so they never jump from one face to another; the clock runs on frames actually painted, so a slow first load or a page opened in the background doesn't play it unseen
     const tt = titleT0 == null ? -1 : titleT0;
-    { const u = ease(clamp((tt - .35) / 1.2)), im = LOGO[LANG] || LOGO.hans, lx = a[0] + fs * .45, lw = Math.min(W - lx - Math.max(14, W * .04), fs * 13), ok = im.complete && im.naturalWidth, lh = ok ? lw * im.naturalHeight / im.naturalWidth : fs;      // the logo, to the right of the clock face, as wide as the room there allows
+    { const u = ease(clamp((tt - .35) / 1.2)), im = LOGO[LANG] || LOGO.hans, ok = im.complete && im.naturalWidth, ar = ok ? im.naturalHeight / im.naturalWidth : .17, lw = Math.min(W * .7, 480, H * .075 / ar), lx = W / 2 - lw / 2, lh = ok ? lw * ar : fs;
+      y = Math.max(H * .2, H * .13 + 26 + lh / 2 + Math.max(34, H * .05));      // centred across, high in the sky but well clear below the moon (its disc is at 13% of the height, radius 26)      // the logo, to the right of the clock face, as wide as the room there allows
       titleBox = { cx: lx + lw / 2, hw: lw / 2, y, fs: lh, u }; if (u > 0 && ok) { ctx.globalAlpha = .96 * u; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; logoWaver(im, lx, y - lh / 2, lw, lh, tt); logoSteam(im, lx, y - lh / 2, lw, lh, tt); ctx.globalAlpha = 1; } } ctx.restore();
     // no "tap anywhere to start" hint: any tap starts at once      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
