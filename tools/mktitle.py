@@ -1,5 +1,5 @@
-"""The title of 星穹十字小镇 in the style of MELO's lettering (assets/logo/title-*-clean.svg): even strokes, 45-degree cut corners and ends, small stencil gaps.
-The English a, e, l, n are MELO's own shapes; the rest is drawn here from strokes. Writes assets/logo/star-<lang>.svg and inlines them. usage: python3 tools/mktitle.py"""
+"""The title of 星穹十字物语 in the style of MELO's lettering (assets/logo/title-*-clean.svg): even strokes, 45-degree cut corners and ends, small stencil gaps.
+物语/語 and the English a, e, l are MELO's own shapes; the rest is drawn here from strokes. Writes assets/logo/star-<lang>.svg and inlines them. usage: python3 tools/mktitle.py"""
 import re, math, os
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 W = 17
@@ -50,17 +50,18 @@ def pick_x(ps, a, b): return [p for p in ps if min(q[0] for q in p) >= a and max
 SLOT = [162, 435, 700, 940, 1194, 1441]      # where MELO's six letters stood
 def chinese(l):
     mine = []
-    for ch, x in zip('星穹十字小' + ('镇' if l == 'hans' else '鎮'), SLOT): mine += shift(GLYPHS[ch](), x, 310)
-    return mine, [], (154, 288, 1526, 266)
+    for ch, x in zip('星穹十字', SLOT): mine += shift(GLYPHS[ch](), x, 310)
+    return mine, pick_x(subs(l), 1190, 1680), (154, 288, 1526, 266)
 def english():
     en = subs('en'); keep = []; x = 150; mine = []; GAP = 26
-    a, l, n = pick_x(en, 323, 441), pick_x(en, 1521, 1543), pick_x(en, 787, 891)
+    a, e, l = pick_x(en, 323, 441), pick_x(en, 1570, 1690), pick_x(en, 1521, 1543)
     def put(ps, x0, x1):
-        nonlocal x; keep.extend(shift(ps, x - x0, -7 if ps is n else 0)); x += x1 - x0 + GAP
-    for ch in 'Starcross Town':
+        nonlocal x; keep.extend(shift(ps, x - x0)); x += x1 - x0 + GAP
+    for ch in 'Starcross Tales':
         if ch == ' ': x += 50; continue
         if ch == 'a': put(a, 323, 441)
-        elif ch == 'n': put(n, 787, 891)
+        elif ch == 'e': put(e, 1570, 1690)
+        elif ch == 'l': put(l, 1521, 1543)
         else: w, f = LAT[ch]; mine += shift(f(), x); x += w + GAP
     return mine, keep, (140, 290, x - 140, 235)
 html = open(f'{ROOT}/index.html').read()

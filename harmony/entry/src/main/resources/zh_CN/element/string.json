@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "星穹十字小镇"
+      "value": "星穹十字物语"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "星穹十字小镇"
+      "value": "星穹十字物语"
     },
     {
       "name": "EntryAbility_label",
-      "value": "星穹十字小镇"
+      "value": "星穹十字物语"
     }
   ]
 }
