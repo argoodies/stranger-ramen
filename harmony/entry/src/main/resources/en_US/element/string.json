@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "Starcross Tales"
+      "value": "Starcross Town"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "Starcross Tales"
+      "value": "Starcross Town"
     },
     {
       "name": "EntryAbility_label",
-      "value": "Starcross Tales"
+      "value": "Starcross Town"
     }
   ]
 }
