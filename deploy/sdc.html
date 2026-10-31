@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>拉面怪奇物语 · 魔窟</title>
+<style>
+html,body{margin:0;height:100%;background:#16122c;overflow:hidden;font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif;font-weight:300;color:#fff;-webkit-user-select:none;user-select:none;touch-action:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.btn{position:fixed;display:none;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;font:inherit;font-size:15px;padding:0;-webkit-tap-highlight-color:transparent;touch-action:none}
+.btn.on{background:rgba(255,255,255,.34)}
+#hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom));padding:9px 18px;border-radius:22px;background:rgba(20,16,44,.72);border:1px solid rgba(255,255,255,.3);font-size:14px;display:none;white-space:nowrap;cursor:pointer}
+#bagBtn{position:fixed;top:calc(12px + env(safe-area-inset-top));left:12px;padding:8px 14px;border-radius:20px;background:rgba(20,16,44,.6);border:1px solid rgba(255,255,255,.3);color:#fff;font:inherit;font-size:13px}
+#panel{position:fixed;inset:0;display:none;background:rgba(36,30,78,.86);overflow:auto;padding:calc(18px + env(safe-area-inset-top)) 16px 26px;box-sizing:border-box;touch-action:pan-y}
+#panel .in{max-width:520px;margin:0 auto}
+#panel h2{font-weight:200;font-size:22px;letter-spacing:.3em;text-align:center;margin:6px 0 4px}
+#panel .sub{text-align:center;font-size:13px;opacity:.8;margin-bottom:12px;line-height:1.7}
+#panel h3{font-weight:300;font-size:13px;opacity:.75;margin:16px 0 8px;letter-spacing:.1em}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.cell{aspect-ratio:1;border-radius:12px;background:rgba(20,16,50,.32);box-shadow:inset 0 2px 5px rgba(10,6,40,.45);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:400;position:relative}
+.cell.sel{border-color:#ffe6a8;background:rgba(255,236,190,.2)}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.act{padding:10px 20px;border-radius:22px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff;font:inherit;font-size:14px}
+.act.main{background:#ffe6a8;color:#3a2c5a;border-color:#ffe6a8;font-weight:400}
+.act:disabled{opacity:.4}
+#detail{min-height:58px;text-align:center;font-size:13.5px;line-height:1.7;margin-top:12px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.slots .cell{aspect-ratio:auto;height:62px;flex-direction:column;font-size:15px}.slots small{font-size:10.5px;opacity:.7;font-weight:300}
+</style></head><body>
+<canvas id="c"></canvas>
+<button id="bagBtn">背包</button>
+<div id="hint"></div>
+<button class="btn" id="bJump" style="width:70px;height:70px;right:18px;bottom:calc(30px + env(safe-area-inset-bottom))">跳</button>
+<button class="btn" id="bShoot" style="width:86px;height:86px;right:98px;bottom:calc(52px + env(safe-area-inset-bottom))">射</button>
+<button class="btn" id="bPotion" style="width:52px;height:52px;right:28px;bottom:calc(112px + env(safe-area-inset-bottom));font-size:13px">药</button>
+<div id="panel"><div class="in" id="pin"></div></div>
+<script>
+'use strict';
+// 拉面怪奇物语 · 魔窟: the same little town, side on. A hunter and his crow; the tavern is home, the clock tower is the way down,
+// and the Demon Cave is a search-fight-extract run: what you carry only counts once you reach a way out.
+const cv = document.getElementById('c'), C = cv.getContext('2d'), $ = id => document.getElementById(id);
+let W = 0, H = 0, DPR = 1, S = 32;
+const TAU = Math.PI * 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, rand = (a, b) => a + Math.random() * (b - a), irand = (a, b) => Math.floor(rand(a, b + 1)), pick = a => a[Math.floor(Math.random() * a.length)];
+const css = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`, mix = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];
+const THIN = '"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif';
+function resize() { W = innerWidth; H = innerHeight; DPR = Math.min(2, devicePixelRatio || 1); cv.width = W * DPR; cv.height = H * DPR; S = clamp(Math.min(W / 13, H / 11), 24, 46); }
+addEventListener('resize', resize); resize();
+const touch = 'ontouchstart' in window;
+
+// ---------- drawing helpers ----------
+function rect(x, y, w, h, c, a = 1) { C.fillStyle = css(c, a); C.fillRect(x, y, w, h); }
+function circ(x, y, r, c, a = 1) { C.beginPath(); C.arc(x, y, Math.max(0, r), 0, TAU); C.fillStyle = css(c, a); C.fill(); }
+function poly(p, c, a = 1) { C.beginPath(); p.forEach((q, i) => i ? C.lineTo(q[0], q[1]) : C.moveTo(q[0], q[1])); C.closePath(); C.fillStyle = css(c, a); C.fill(); }
+function line(p, c, w, a = 1) { C.beginPath(); p.forEach((q, i) => i ? C.lineTo(q[0], q[1]) : C.moveTo(q[0], q[1])); C.strokeStyle = css(c, a); C.lineWidth = w; C.lineCap = 'round'; C.lineJoin = 'round'; C.stroke(); }
+function glow(x, y, r, c, st = 1) { const g = C.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, css(c, .55 * st)); g.addColorStop(1, css(c, 0)); C.fillStyle = g; C.beginPath(); C.arc(x, y, r, 0, TAU); C.fill(); }
+function text(s, x, y, px, c = [255, 255, 255], a = 1, al = 'center', w = 300) { C.font = `${w} ${px}px ${THIN}`; C.textAlign = al; C.textBaseline = 'middle'; C.fillStyle = css(c, a); C.fillText(s, x, y); }
+function arch(x, y, w, h, c) { C.beginPath(); C.moveTo(x - w / 2, y); C.lineTo(x - w / 2, y - h + w / 2); C.arc(x, y - h + w / 2, w / 2, Math.PI, 0); C.lineTo(x + w / 2, y); C.closePath(); C.fillStyle = css(c); C.fill(); }
+
+// ---------- save ----------
+const KEY = 'ramen_sdc_v1';
+const blank = () => ({ gold: 60, stash: [], equip: { bow: null, armor: null, acc: null }, potions: 2, runs: 0, out: 0 });
+let save = blank();
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) save = Object.assign(blank(), s); } catch (e) {}
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
+
+// ---------- items ----------
+const RAR = [{ n: '普通', c: '#d6dbe8', m: 1 }, { n: '优良', c: '#7fe0a8', m: 1.7 }, { n: '稀有', c: '#74b9ff', m: 2.8 }, { n: '史诗', c: '#c493ff', m: 4.6 }, { n: '传说', c: '#ffc866', m: 8 }];
+const KIND = { gem: '宝', bow: '弓', armor: '甲', acc: '饰' };
+const NAMES = { gem: ['碎晶', '紫水晶', '血玉', '月长石', '星辰石'], bow: ['猎弓', '角弓', '夜莺弓', '钟楼弓', '渡鸦之弓'], armor: ['皮甲', '镶钉甲', '夜行斗篷', '鳞甲', '守夜人之甲'], acc: ['旧铃铛', '鹰眼坠', '疾风戒', '渡鸦羽', '月光护符'] };
+function rollRar(depth) { let r = Math.random() * (1 + depth * .6), k = 0; for (const t of [.62, .92, 1.16, 1.34]) if (r > t) k++; return k; }
+function makeItem(depth, kind) {
+  const k = kind || pick(['gem', 'gem', 'bow', 'armor', 'acc']), r = rollRar(depth), m = RAR[r].m, it = { k, r, name: NAMES[k][r] };
+  if (k === 'gem') it.v = Math.round(rand(14, 24) * m);
+  if (k === 'bow') { it.dmg = Math.round(rand(7, 10) * Math.sqrt(m) * 1.1); it.v = Math.round(it.dmg * 2.2 * m); }
+  if (k === 'armor') { it.hp = Math.round(rand(14, 22) * Math.sqrt(m)); it.v = Math.round(it.hp * 1.3 * m); }
+  if (k === 'acc') { it.spd = +(rand(.02, .05) * Math.sqrt(m)).toFixed(3); it.sight = r >= 2 ? 1 : 0; it.v = Math.round(rand(16, 26) * m); }
+  return it;
+}
+const itemStat = it => it.k === 'gem' ? `价值 ${it.v} 金币` : it.k === 'bow' ? `攻击 +${it.dmg}` : it.k === 'armor' ? `生命 +${it.hp}` : `移速 +${Math.round(it.spd * 100)}%${it.sight ? '，视野 +1' : ''}`;
+const stats = () => { const e = save.equip; return { dmg: 12 + (e.bow ? e.bow.dmg : 0), hp: 100 + (e.armor ? e.armor.hp : 0), spd: 5.6 * (1 + (e.acc ? e.acc.spd : 0)), sight: 6.5 + (e.acc ? e.acc.sight : 0) }; };
+
+// ---------- sound ----------
+let AC = null;
+function tone(f, d = .1, type = 'sine', v = .08, slide = 0) { if (!AC) return; const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime; o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0005, t + d); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d); }
+const sfx = { shoot: () => tone(520, .12, 'triangle', .07, -300), hit: () => tone(180, .09, 'square', .05, -80), coin: () => { tone(990, .07, 'sine', .06); setTimeout(() => tone(1320, .1, 'sine', .06), 60); }, chest: () => { tone(330, .12, 'triangle', .08); setTimeout(() => tone(494, .14, 'triangle', .08), 90); setTimeout(() => tone(660, .2, 'triangle', .08), 190); }, hurt: () => tone(120, .18, 'sawtooth', .07, -50), out: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, .24, 'sine', .07), i * 110)) };
+
+// ---------- state ----------
+const P = { x: 8, y: 0, vx: 0, vy: 0, face: 1, ground: true, hp: 100, inv: 0, draw: 0, aim: 0, step: 0, moved: 0, drop: 0 };
+const crow = { x: 5, y: -5, state: 'fly', t: 0, flap: 0, dir: 1, shot: 0 };
+let scene = 'tavern', cam = { x: 0, y: 0 }, time = 0, fade = 1, modal = false, shake = 0;
+let run = null;      // the current trip into the cave
+const floats = [];
+const input = { l: 0, r: 0, up: false, down: false, shoot: false, joy: 0, mx: 0, my: 0, mouse: false, act: false };
+function say(s, x, y, c = [255, 255, 255]) { floats.push({ s, x, y, c, t: 1.4 }); }
+
+// ---------- tavern and town: a flat floor, side on ----------
+const TAV = { w: 15, door: 13.4, bar: 4.6, chest: 8.6, board: 11 };
+const TOWN = { w: 58, tavern: 9, stall: 22, lib: 32, tower: 45 };
+const TREES = [2.6, 15.6, 17.4, 27.4, 38.6, 40.4, 53, 55.4], LAMPS = [14, 27, 39, 51];
+const FOLK = [{ x: 19, c: [226, 106, 96], dir: 1, sp: .5 }, { x: 36, c: [120, 110, 200], dir: -1, sp: .4 }];
+function clockHands(x, y, r) { const d = new Date(), h = (d.getHours() % 12 + d.getMinutes() / 60) / 12 * TAU, m = d.getMinutes() / 60 * TAU; circ(x, y, r, [70, 54, 110]); circ(x, y, r * .86, [240, 232, 216]); line([[x, y], [x + Math.sin(h) * r * .46, y - Math.cos(h) * r * .46]], [60, 40, 90], r * .1); line([[x, y], [x + Math.sin(m) * r * .7, y - Math.cos(m) * r * .7]], [60, 40, 90], r * .07); }
+function house(x, y, w, h, wall, roof, rh) {
+  rect(x - w / 2, y - h, w / 2, h, wall); rect(x, y - h, w / 2, h, mix(wall, [90, 70, 130], .22));
+  poly([[x - w * .58, y - h], [x, y - h - rh], [x, y - h]], roof); poly([[x, y - h], [x, y - h - rh], [x + w * .58, y - h]], mix(roof, [80, 50, 110], .28));
+}
+function tree(x, y, k) { rect(x - k * .07, y - k * .5, k * .14, k * .5, [150, 110, 90]); for (const [z, w, c] of [[.4, .62, [70, 150, 130]], [.82, .5, [90, 170, 146]], [1.2, .36, [120, 190, 160]]]) poly([[x - w * k, y - z * k], [x, y - (z + .72) * k], [x + w * k, y - z * k]], c); }
+function lamp(x, y, k, t) { rect(x - k * .05, y - k * 1.5, k * .1, k * 1.5, [84, 66, 120]); poly([[x - k * .22, y - k * 1.5], [x, y - k * 1.76], [x + k * .22, y - k * 1.5]], [60, 48, 100]); rect(x - k * .14, y - k * 1.5, k * .28, k * .24, [255, 220, 150]); glow(x, y - k * 1.4, k * (2 + .1 * Math.sin(t * 3)), [255, 214, 140], .55); }
+function sky(t) {
+  const g = C.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css([32, 34, 84])); g.addColorStop(.55, css([92, 72, 132])); g.addColorStop(1, css([214, 140, 134])); C.fillStyle = g; C.fillRect(0, 0, W, H);
+  for (let i = 0; i < 70; i++) { const a = Math.sin(i * 12.9898) * 43758.5453, b = Math.sin(i * 78.233) * 12543.123, x = (a - Math.floor(a)) * W, y = (b - Math.floor(b)) * H * .62; circ(x, y, 1 + (i % 3) * .4, [255, 255, 255], .35 + .3 * Math.sin(t * 1.3 + i)); }
+  const mx = W * .8 - cam.x * .02, my = H * .15; glow(mx, my, 150, [252, 244, 220], .5); circ(mx, my, 26, [252, 244, 220]);
+}
+function drawTown(t) {
+  sky(t);
+  const gy = H * .74, wx = x => (x - cam.x) * S + W / 2, k = S;
+  // far hills, then the island's turf and its underside hanging over the sky
+  for (const [o, c, h] of [[.15, [96, 86, 150], 2.4], [.35, [76, 110, 140], 1.5]]) { C.beginPath(); C.moveTo(0, gy); for (let x = 0; x <= W; x += 24) C.lineTo(x, gy - h * k * (.6 + .4 * Math.sin((x + cam.x * S * o) * .006) * Math.sin((x + cam.x * S * o) * .0031 + 2))); C.lineTo(W, gy); C.closePath(); C.fillStyle = css(c, .7); C.fill(); }
+  const x0 = wx(-1), x1 = wx(TOWN.w + 1);
+  rect(x0, gy, x1 - x0, k * .5, [108, 180, 170]); rect(x0, gy + k * .5, x1 - x0, k * .6, [72, 118, 134]); poly([[x0 + k, gy + k * 1.1], [x1 - k, gy + k * 1.1], [x1 - k * 7, gy + k * 2.6], [x0 + k * 7, gy + k * 2.6]], [52, 86, 112]);
+  for (let x = 0; x < TOWN.w; x += 2) rect(wx(x) + 2, gy, k * 2 - 4, k * .14, [150, 206, 190]);
+  for (const x of TREES) tree(wx(x), gy, k * 1.5);
+  // the tavern
+  { const x = wx(TOWN.tavern); house(x, gy, k * 6, k * 3.2, [244, 190, 130], [226, 106, 96], k * 2); rect(x + k * 1.1, gy - k * 6.2, k * .6, k * 1.8, [190, 172, 164]); for (let i = 0; i < 3; i++) { const ph = (t * .3 + i / 3) % 1; circ(x + k * 1.4, gy - k * (6.3 + ph * 1.4), k * (.1 + .16 * ph), [240, 236, 240], .4 * (1 - ph)); } arch(x, gy, k * 1.1, k * 1.9, [255, 214, 140]); arch(x - k * 1.9, gy - k * 1.1, k * .8, k * 1, [255, 214, 140]); arch(x + k * 1.9, gy - k * 1.1, k * .8, k * 1, [255, 214, 140]); glow(x, gy - k * .8, k * 1.8, [255, 214, 140], .4); rect(x - k * 1.5, gy - k * 2.7, k * 3, k * .56, [60, 44, 84]); text('酒馆', x, gy - k * 2.42, k * .34, [255, 236, 190], 1, 'center', 300); }
+  // the noodle stall, the library: closed tonight
+  { const x = wx(TOWN.stall); house(x, gy, k * 3.4, k * 2, [238, 216, 186], [86, 66, 112], k * .5); for (let i = 0; i < 6; i++) rect(x - k * 1.8 + i * k * .6, gy - k * 1.7, k * .6, k * .46, i % 2 ? [255, 255, 255] : [226, 96, 96]); rect(x - k * 1.2, gy - k * 1.1, k * 2.4, k * .9, [255, 214, 140]); }
+  { const x = wx(TOWN.lib); house(x, gy, k * 3, k * 4, [238, 216, 186], [226, 106, 96], k * 1.2); arch(x, gy, k * .9, k * 1.6, [255, 214, 140]); arch(x, gy - k * 2.3, k * .7, k * 1, [80, 66, 120]); }
+  // the clock tower, with its door
+  { const x = wx(TOWN.tower); rect(x - k * 2, gy - k * 1, k * 2, k, [226, 204, 178]); rect(x, gy - k, k * 2, k, [190, 170, 160]); rect(x - k * 1.3, gy - k * 8, k * 1.3, k * 7, [238, 216, 186]); rect(x, gy - k * 8, k * 1.3, k * 7, [196, 176, 166]); rect(x - k * 1.6, gy - k * 10.2, k * 1.6, k * 2.2, [246, 232, 214]); rect(x, gy - k * 10.2, k * 1.6, k * 2.2, [206, 186, 176]); clockHands(x, gy - k * 9.1, k * .84); rect(x - k * 1.9, gy - k * 10.5, k * 3.8, k * .3, [238, 216, 186]); poly([[x - k * 1.7, gy - k * 10.5], [x, gy - k * 13.2], [x, gy - k * 10.5]], [226, 106, 96]); poly([[x, gy - k * 10.5], [x, gy - k * 13.2], [x + k * 1.7, gy - k * 10.5]], [160, 74, 96]); line([[x, gy - k * 13.2], [x, gy - k * 14]], [246, 200, 120], k * .06); circ(x, gy - k * 14, k * .1, [246, 200, 120]); arch(x, gy, k * 1, k * 1.9, [255, 214, 140]); arch(x - k * .6, gy - k * 4.4, k * .4, k * .8, [255, 214, 140]); arch(x + k * .6, gy - k * 5.4, k * .4, k * .8, [255, 214, 140]); glow(x, gy - k * .8, k * 1.6 * (1 + .1 * Math.sin(t * 3)), [190, 150, 255], .5); towerHit = [x - k * 2, gy - k * 14, k * 4, k * 14]; }
+  for (const x of LAMPS) lamp(wx(x), gy, k, t);
+  for (const f of FOLK) person(wx(f.x), gy, k, f.c, f.dir, t * 3 + f.x);
+  return gy;
+}
+let towerHit = null;
+function person(x, y, k, c, dir, ph) { const s = Math.sin(ph) * k * .1; line([[x - k * .08, y - k * .5], [x - k * .1 + s, y]], [60, 48, 90], k * .1); line([[x + k * .08, y - k * .5], [x + k * .1 - s, y]], [60, 48, 90], k * .1); poly([[x - k * .22, y - k * .46], [x + k * .22, y - k * .46], [x + k * .14, y - k * 1.1], [x - k * .14, y - k * 1.1]], c); circ(x, y - k * 1.28, k * .2, [255, 226, 200]); }
+function drawTavern(t) {
+  const k = S, gy = H * .74, wx = x => (x - cam.x) * S + W / 2, x0 = wx(0), x1 = wx(TAV.w), top = gy - k * 6.4;
+  rect(0, 0, W, H, [30, 24, 56]);
+  rect(x0, top, x1 - x0, gy - top, [120, 78, 74]); for (let i = 0; i < TAV.w; i += 2) rect(wx(i), top, k * 1.96, gy - top, [130, 86, 78]);
+  rect(x0, top, x1 - x0, k * .5, [78, 50, 66]); for (let i = 1; i < TAV.w; i += 3.4) rect(wx(i), top, k * .3, gy - top, [92, 58, 66]);
+  rect(x0, gy, x1 - x0, k * .24, [78, 50, 66]); rect(x0, gy + k * .24, x1 - x0, H - gy, [52, 36, 62]);
+  // window with the moon, hanging lamps
+  { const x = wx(2.2); rect(x - k, top + k * 1.4, k * 2, k * 1.8, [40, 44, 96]); circ(x + k * .4, top + k * 1.95, k * .3, [252, 244, 220]); rect(x - k * .04, top + k * 1.4, k * .08, k * 1.8, [78, 50, 66]); rect(x - k, top + k * 2.26, k * 2, k * .08, [78, 50, 66]); }
+  for (const x of [6.6, 10.4]) { line([[wx(x), top + k * .5], [wx(x), top + k * 1.6]], [60, 40, 66], 2); circ(wx(x), top + k * 1.7, k * .17, [255, 226, 160]); glow(wx(x), top + k * 1.7, k * 3, [255, 206, 130], .5); }
+  // the bar and the keeper
+  { const x = wx(TAV.bar); person(x, gy - k * .1, k * 1.05, [90, 120, 170], 1, 0); rect(x - k * 2.4, gy - k * 1.1, k * 4.8, k * 1.1, [92, 56, 56]); rect(x - k * 2.6, gy - k * 1.26, k * 5.2, k * .18, [170, 110, 80]); for (let i = 0; i < 4; i++) { rect(x - k * 2 + i * k * 1.3, gy - k * 2.9, k * .18, k * .5, [[120, 200, 160], [226, 106, 96], [255, 214, 140], [140, 150, 230]][i]); } rect(x - k * 2.4, gy - k * 2.42, k * 4.8, k * .1, [78, 50, 66]); }
+  // the stash, the notice board, the door
+  { const x = wx(TAV.chest); rect(x - k * .8, gy - k * .9, k * 1.6, k * .9, [150, 96, 60]); rect(x - k * .8, gy - k * .9, k * 1.6, k * .24, [190, 128, 80]); rect(x - k * .12, gy - k * .8, k * .24, k * .34, [255, 214, 140]); }
+  { const x = wx(TAV.board); rect(x - k * .9, gy - k * 3.4, k * 1.8, k * 1.4, [92, 60, 56]); rect(x - k * .7, gy - k * 3.2, k * .6, k * .8, [238, 226, 200]); rect(x + k * .05, gy - k * 3.1, k * .6, k * .9, [226, 206, 180]); }
+  { const x = wx(TAV.door); arch(x, gy, k * 1.4, k * 2.6, [60, 44, 84]); arch(x, gy, k * 1.2, k * 2.4, [40, 44, 96]); }
+  return gy;
+}
+
+// ---------- the Demon Cave ----------
+const CW = 180, CH = 84, RX = 7, RY = 3, CELLW = 25, CELLH = 27;      // tiles: 0 air, 1 rock, 2 ledge you can jump up through
+function genCave() {
+  for (let tries = 0; tries < 40; tries++) { const c = tryCave(); if (c) return c; }
+  throw new Error('no cave');
+}
+function tryCave() {
+  const m = new Uint8Array(CW * CH).fill(1), seen = new Uint8Array(CW * CH), at = (x, y) => (x < 0 || y < 0 || x >= CW || y >= CH) ? 1 : m[y * CW + x], set = (x, y, v) => { if (x > 0 && y > 0 && x < CW - 1 && y < CH - 1) m[y * CW + x] = v; };
+  const rooms = [];
+  for (let gy = 0; gy < RY; gy++) for (let gx = 0; gx < RX; gx++) {
+    const w = irand(13, 21), h = irand(7, 17), x = 2 + gx * CELLW + irand(0, CELLW - w - 3), y = 2 + gy * CELLH + irand(0, CELLH - h - 3);
+    const r = { gx, gy, x, y, w, h, floor: y + h, cx: x + (w >> 1) }; rooms.push(r);
+    for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) set(i, j, 0);
+    // ledges, left and right in turn, so the top of any room can be climbed to
+    let side = irand(0, 1); for (let j = y + h - 3; j > y + 1; j -= 3) { const len = Math.ceil(w * .55), a = side ? x + w - len : x; for (let i = a; i < a + len; i++) set(i, j, 2); side = 1 - side; }
+  }
+  const room = (gx, gy) => rooms[gy * RX + gx], link = new Set();
+  const stack = [room(0, RY - 1)], vis = new Set(stack); const nb = r => [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([a, b]) => r.gx + a >= 0 && r.gx + a < RX && r.gy + b >= 0 && r.gy + b < RY ? room(r.gx + a, r.gy + b) : null).filter(Boolean);
+  const join = (a, b) => {
+    if (a.gx > b.gx || a.gy > b.gy) [a, b] = [b, a];
+    if (a.gy === b.gy) { const fl = Math.min(a.floor, b.floor), x0 = a.x + a.w - 2, x1 = b.x + 2; for (let i = x0; i <= x1; i++) { for (let j = fl - 3; j < fl; j++) set(i, j, 0); if (at(i, fl) !== 1 && (i < a.x || i >= a.x + a.w) && (i < b.x || i >= b.x + b.w)) set(i, fl, 1); } }
+    else { const xc = clamp(irand(Math.max(a.x, b.x) + 1, Math.max(Math.max(a.x, b.x) + 1, Math.min(a.x + a.w, b.x + b.w) - 3)), 3, CW - 6); const xm = Math.min(a.x + a.w - 3, Math.max(a.x + 1, Math.min(b.x + b.w - 3, Math.max(b.x + 1, xc)))); for (let j = a.floor - 1; j <= b.y + 2; j++) for (let i = xm; i < xm + 3; i++) set(i, j, 0); for (let j = b.y + 1; j >= a.floor - 1; j -= 3) for (let i = xm - 1; i < xm + 4; i++) if (at(i, j) === 0 || (i >= xm && i < xm + 3)) set(i, j, 2); }
+  };
+  while (stack.length) { const r = stack[stack.length - 1], o = nb(r).filter(n => !vis.has(n)); if (!o.length) { stack.pop(); continue; } const n = pick(o); vis.add(n); join(r, n); stack.push(n); }
+  for (let i = 0; i < 6; i++) { const r = pick(rooms), o = pick(nb(r)); join(r, o); }
+  const start = room(0, RY - 1), standX = r => { for (let k = 0; k < r.w; k++) { const x = r.cx + ((k & 1) ? 1 : -1) * ((k + 1) >> 1); if (at(x, r.floor) === 1 && at(x, r.floor - 1) === 0 && at(x, r.floor - 2) === 0) return x; } return -1; };
+  // what can be reached by walking, falling and jumping
+  const reach = new Uint8Array(CW * CH), q = [], stand = (x, y) => at(x, y) !== 1 && at(x, y - 1) !== 1 && at(x, y + 1) !== 0, sx = standX(start); if (sx < 0) return null;
+  const push = (x, y) => { if (x < 1 || y < 1 || x >= CW - 1 || y >= CH - 1 || reach[y * CW + x] || at(x, y) === 1) return; reach[y * CW + x] = 1; q.push([x, y]); };
+  push(sx, start.floor - 1);
+  while (q.length) { const [x, y] = q.pop(); for (const d of [-1, 1]) { if (at(x + d, y) !== 1) { let j = y; while (at(x + d, j + 1) === 0 && j < CH - 2) j++; if (stand(x + d, j)) push(x + d, j); } }
+    if (at(x, y + 1) === 2) { let j = y + 1; while (at(x, j + 1) === 0 || (at(x, j + 1) === 2 && j === y + 1)) j++; if (stand(x, j)) push(x, j); }
+    for (let h = 1; h <= 3; h++) { if (at(x, y - h) === 1 || at(x, y - h - 1) === 1) break; for (const d of [-2, -1, 0, 1, 2]) if (stand(x + d, y - h) && at(x + d, y - h) !== 1) push(x + d, y - h); } }
+  const reachable = r => { const x = standX(r); return x > 0 && reach[(r.floor - 1) * CW + x]; };
+  const good = rooms.filter(reachable); if (good.length < rooms.length * .9) return null;
+  const dist = r => Math.hypot(r.cx - start.cx, r.floor - start.floor), byFar = [...good].sort((a, b) => dist(b) - dist(a));
+  const portals = [{ x: standX(start) + .5, y: start.floor, name: '入口', t: 0 }];
+  const far = byFar[0], mid = byFar.find(r => Math.hypot(r.cx - far.cx, r.floor - far.floor) > 55 && dist(r) > 35) || byFar[3];
+  portals.push({ x: standX(far) + .5, y: far.floor, name: '深处撤离点', t: 0, armed: true }, { x: standX(mid) + .5, y: mid.floor, name: '撤离点', t: 0, armed: true });
+  const chests = [], mobs = [], maxD = dist(far) || 1;
+  for (const r of good) {
+    if (r === start) continue;
+    const depth = dist(r) / maxD, free = []; for (let i = r.x + 1; i < r.x + r.w - 1; i++) if (at(i, r.floor) === 1 && at(i, r.floor - 1) === 0 && at(i, r.floor - 2) === 0) free.push(i);
+    if (free.length < 3) continue;
+    const nc = Math.random() < .5 + depth * .3 ? (Math.random() < .25 + depth * .25 ? 2 : 1) : 0;
+    for (let i = 0; i < nc; i++) chests.push({ x: pick(free) + .5, y: r.floor, depth, open: false, t: 0, gold: depth > .75 && Math.random() < .4 });
+    const n = irand(0, 2) + Math.round(depth * 2);
+    for (let i = 0; i < n; i++) mobs.push(makeMob(pick(Math.random() < .25 ? ['bat'] : depth > .3 ? ['slime', 'archer', 'slime'] : ['slime']), pick(free) + .5, r.floor, depth));
+    if (depth > .55 && Math.random() < .5) mobs.push(makeMob('golem', pick(free) + .5, r.floor, depth));
+  }
+  return { m, seen, at, rooms, portals, chests, mobs, drops: [], arrows: [], bolts: [], start, sx: standX(start) + .5, sy: start.floor, torches: good.flatMap(r => Math.random() < .7 ? [{ x: r.x + 1.5, y: r.floor - 3 }] : []) };
+}
+const MOB = { slime: { hp: 34, sp: 1.7, dmg: 10, w: .8, h: .7, c: [110, 200, 150] }, bat: { hp: 20, sp: 3.1, dmg: 8, w: .7, h: .5, c: [150, 110, 210], fly: 1 }, archer: { hp: 42, sp: 1.4, dmg: 11, w: .6, h: 1.4, c: [214, 208, 226] }, golem: { hp: 170, sp: 1.1, dmg: 22, w: 1.3, h: 2, c: [120, 110, 150], elite: 1 } };
+function makeMob(k, x, y, depth) { const d = MOB[k], m = 1 + depth * 1.3; return { k, x, y, vx: 0, vy: 0, hp: d.hp * m, max: d.hp * m, dmg: d.dmg * (1 + depth * .7), sp: d.sp, w: d.w, h: d.h, c: d.c, fly: !!d.fly, elite: !!d.elite, dir: Math.random() < .5 ? -1 : 1, alert: 0, cd: rand(.5, 2), flash: 0, depth, ph: Math.random() * 6 }; }
+
+function enterCave() {
+  const s = stats(), c = genCave();
+  run = Object.assign(c, { bag: [], gold: 0, potions: save.potions, time: 0, kills: 0, cap: 12, out: 0, leaving: 0 });
+  scene = 'cave'; fade = 1; P.x = c.sx; P.y = c.sy; P.vx = P.vy = 0; P.hp = s.hp; P.inv = 1; crow.x = P.x - 2; crow.y = P.y - 4; crow.state = 'fly'; cam.x = P.x; cam.y = P.y - 2; save.runs++; persist();
+  say('找到撤离点才算带走', P.x, P.y - 4.2, [255, 236, 190]);
+}
+function leaveCave(ok, title) {
+  const r = run, lost = r.bag.length, vals = r.bag.reduce((a, b) => a + b.v, 0);
+  if (ok) { save.gold += r.gold; save.stash.push(...r.bag); save.out++; save.potions = r.potions; sfx.out(); } else save.potions = Math.max(0, save.potions - (save.potions - r.potions));
+  persist(); run = null; scene = 'tavern'; P.x = TAV.door - 1.4; P.y = 0; P.vx = P.vy = 0; P.hp = stats().hp; crow.state = 'fly'; crow.x = P.x - 2; crow.y = -3; fade = 1; cam.x = P.x;
+  panelResult(ok, title, r, lost, vals);
+}
+
+// tile physics
+function solid(x, y, c, feetFrom, drop) { const t = c.at(Math.floor(x), Math.floor(y)); if (t === 1) return true; if (t === 2 && !drop) return feetFrom <= Math.floor(y) + .02; return false; }
+function moveBox(e, dt, c) {
+  const hw = e.w / 2, sub = Math.ceil(Math.max(Math.abs(e.vx), Math.abs(e.vy)) * dt / .4) || 1, h = dt / sub; e.ground = false;
+  for (let n = 0; n < sub; n++) {
+    let nx = e.x + e.vx * h; const dir = Math.sign(e.vx);
+    if (dir) { const fx = nx + dir * hw; let hit = false; for (let y = e.y - .05; y > e.y - e.h; y -= .45) if (c.at(Math.floor(fx), Math.floor(y)) === 1) hit = true; if (c.at(Math.floor(fx), Math.floor(e.y - e.h + .05)) === 1) hit = true; if (hit) { nx = dir > 0 ? Math.floor(fx) - hw - .001 : Math.ceil(fx) + hw + .001; e.vx = 0; e.bump = true; } }
+    e.x = nx;
+    const ny = e.y + e.vy * h;
+    if (e.vy >= 0) { let land = false; for (const fx of [e.x - hw + .03, e.x + hw - .03]) if (Math.floor(ny) !== Math.floor(e.y - .001) || e.vy === 0 || true) { if (solid(fx, ny, c, e.y, e.drop > 0)) land = true; } if (land) { e.y = Math.floor(ny); e.vy = 0; e.ground = true; } else e.y = ny; }
+    else { let hit = false; for (const fx of [e.x - hw + .03, e.x + hw - .03]) if (c.at(Math.floor(fx), Math.floor(ny - e.h)) === 1) hit = true; if (hit) { e.vy = 0; } else e.y = ny; }
+  }
+}
+function losClear(c, ax, ay, bx, by) { const d = Math.hypot(bx - ax, by - ay), n = Math.ceil(d * 2); for (let i = 1; i < n; i++) { const u = i / n; if (c.at(Math.floor(lerp(ax, bx, u)), Math.floor(lerp(ay, by, u))) === 1) return false; } return true; }
+
+// ---------- the update ----------
+const G = 30, JUMP = 14.4;
+let coyote = 0, jumpBuf = 0;
+function update(dt) {
+  time += dt; if (fade > 0) fade -= dt * 1.6;
+  for (let i = floats.length - 1; i >= 0; i--) { const f = floats[i]; f.t -= dt; f.y -= dt * .7; if (f.t <= 0) floats.splice(i, 1); }
+  if (shake > 0) shake -= dt;
+  if (modal) { updateCrow(dt); return; }
+  const s = stats(), mv = (input.r ? 1 : 0) - (input.l ? 1 : 0) + input.joy, m = clamp(mv, -1, 1);
+  const c = scene === 'cave' ? run : null, slow = P.draw > 0 ? .55 : 1;
+  P.vx = lerp(P.vx, m * s.spd * slow, 1 - Math.pow(.0005, dt));
+  if (Math.abs(m) > .1 && !(P.draw > 0)) P.face = Math.sign(m);
+  P.step += dt * Math.abs(P.vx) * 2.1;
+  P.moved = Math.abs(P.vx) > 1 ? P.moved + dt : 0;
+  if (P.inv > 0) P.inv -= dt;
+  if (!c) {
+    P.x = clamp(P.x + P.vx * dt, .8, scene === 'town' ? TOWN.w - .8 : TAV.w - .8);
+    if (input.upPressed && P.y === 0) P.vy = -11;
+    P.vy += G * dt; P.y = Math.min(0, P.y + P.vy * dt); if (P.y === 0) P.vy = 0; input.upPressed = false;
+    for (const f of FOLK) { f.x += f.dir * f.sp * dt; if (f.x > 42 || f.x < 12) f.dir *= -1; }
+    cam.x = lerp(cam.x, clamp(P.x, Math.min(W / S / 2 - 1, (scene === 'town' ? TOWN.w : TAV.w) / 2), Math.max((scene === 'town' ? TOWN.w : TAV.w) - W / S / 2 + 1, (scene === 'town' ? TOWN.w : TAV.w) / 2)), 1 - Math.pow(.002, dt));
+    updateCrow(dt); updatePrompt(); return;
+  }
+  run.time += dt;
+  if (P.ground) coyote = .1; else coyote -= dt;
+  if (input.upPressed) jumpBuf = .12; else jumpBuf -= dt; input.upPressed = false;
+  if (jumpBuf > 0 && coyote > 0) { P.vy = -JUMP; coyote = 0; jumpBuf = 0; P.ground = false; }
+  if (!input.up && P.vy < -5) P.vy = -5;      // a short tap is a short hop
+  P.drop = input.down ? .15 : P.drop - dt;
+  P.vy = Math.min(22, P.vy + G * dt); P.w = .5; P.h = 1.4;
+  moveBox(P, dt, c);
+  if (P.y > CH - 1) P.y = c.sy;
+  // bow: hold to draw, let go to loose; the aim is the mouse, or on a touch screen the nearest thing in sight
+  const tgt = nearestMob(c, 11);
+  let ax, ay;
+  if (input.mouse) { ax = (input.mx - W / 2) / S + cam.x; ay = (input.my - H / 2) / S + cam.y; }
+  else if (tgt) { ax = tgt.x; ay = tgt.y - tgt.h / 2; } else { ax = P.x + P.face * 6; ay = P.y - 1; }
+  P.aim = Math.atan2(ay - (P.y - 1), ax - P.x); if (P.draw > 0 || input.shoot) P.face = Math.cos(P.aim) >= 0 ? 1 : -1;
+  if (input.shoot) P.draw = Math.min(.7, P.draw + dt + 1e-4);
+  else if (P.draw > 0) { const k = clamp(P.draw / .7, .35, 1), v = 15 + 13 * k; c.arrows.push({ x: P.x, y: P.y - 1, vx: Math.cos(P.aim) * v, vy: Math.sin(P.aim) * v, dmg: s.dmg * (.55 + .75 * k), t: 3, stuck: false }); P.draw = 0; sfx.shoot(); crow.shot = 1; }
+  if (input.potion) { input.potion = false; if (c.potions > 0 && P.hp < s.hp) { c.potions--; P.hp = Math.min(s.hp, P.hp + 50); say('+50', P.x, P.y - 2, [150, 240, 170]); tone(660, .2, 'sine', .07); } }
+  // the fog lifts around the hunter and, a little, around the crow
+  reveal(c, P.x, P.y - 1, s.sight); if (crow.state === 'fly') reveal(c, crow.x, crow.y, 2.6);
+  for (let i = c.arrows.length - 1; i >= 0; i--) { const a = c.arrows[i]; a.t -= dt; if (a.t <= 0) { c.arrows.splice(i, 1); continue; } if (a.stuck) continue;
+    a.vy += 9 * dt; const n = 3; for (let k = 0; k < n && !a.stuck; k++) { a.x += a.vx * dt / n; a.y += a.vy * dt / n; if (c.at(Math.floor(a.x), Math.floor(a.y)) === 1) { a.stuck = true; a.t = 1.2; break; }
+      for (const m of c.mobs) if (a.x > m.x - m.w / 2 - .1 && a.x < m.x + m.w / 2 + .1 && a.y > m.y - m.h - .1 && a.y < m.y + .1) { hurtMob(c, m, a.dmg, Math.sign(a.vx)); c.arrows.splice(i, 1); a.stuck = true; a.gone = true; break; } } }
+  for (let i = c.bolts.length - 1; i >= 0; i--) { const b = c.bolts[i]; b.t -= dt; b.x += b.vx * dt; b.y += b.vy * dt; if (b.t <= 0 || c.at(Math.floor(b.x), Math.floor(b.y)) === 1) { c.bolts.splice(i, 1); continue; } if (Math.abs(b.x - P.x) < .4 && b.y > P.y - 1.5 && b.y < P.y + .1) { hurtP(b.dmg, Math.sign(b.vx)); c.bolts.splice(i, 1); } }
+  for (const m of c.mobs) updateMob(c, m, dt);
+  for (let i = c.drops.length - 1; i >= 0; i--) { const d = c.drops[i]; d.vy = Math.min(14, d.vy + G * .6 * dt); d.w = .3; d.h = .3; d.vx *= Math.pow(.05, dt); moveBox(d, dt, c); d.age += dt; if (d.age > .35 && Math.hypot(d.x - P.x, d.y - (P.y - .6)) < 1.25) { if (take(c, d)) c.drops.splice(i, 1); } }
+  // standing in a way out, for two seconds
+  let at = null; for (const p of c.portals) { const near = Math.abs(p.x - P.x) < 1 && Math.abs(p.y - P.y) < 1.6; if (!near && Math.hypot(p.x - P.x, p.y - P.y) > 4) p.armed = true;      /* the way in only works as a way out once you have walked away from it */ if (near && p.armed) at = p; else p.t = 0; if (Math.hypot(p.x - P.x, p.y - P.y) < s.sight + 3) p.found = true; }
+  c.at_ = at; if (at) { at.t += dt; if (at.t >= 2) { leaveCave(true, at.name); return; } }
+  cam.x = lerp(cam.x, clamp(P.x + P.face * .8, W / S / 2, CW - W / S / 2), 1 - Math.pow(.01, dt)); cam.y = lerp(cam.y, clamp(P.y - 1.4, H / S / 2, CH - H / S / 2), 1 - Math.pow(.01, dt));
+  updateCrow(dt); updatePrompt();
+}
+function nearestMob(c, r) { let b = null, bd = r; for (const m of c.mobs) { const d = Math.hypot(m.x - P.x, m.y - m.h / 2 - (P.y - 1)); if (d < bd && losClear(c, P.x, P.y - 1, m.x, m.y - m.h / 2)) { b = m; bd = d; } } return b; }
+function reveal(c, x, y, r) { for (let j = Math.floor(y - r); j <= y + r; j++) for (let i = Math.floor(x - r); i <= x + r; i++) if (i >= 0 && j >= 0 && i < CW && j < CH && Math.hypot(i + .5 - x, j + .5 - y) < r) c.seen[j * CW + i] = 1; }
+function updateMob(c, m, dt) {
+  m.ph += dt * 4; if (m.flash > 0) m.flash -= dt; if (m.cd > 0) m.cd -= dt;
+  const dx = P.x - m.x, dy = (P.y - .8) - (m.y - m.h / 2), d = Math.hypot(dx, dy), sees = d < 9 && losClear(c, m.x, m.y - m.h / 2, P.x, P.y - 1);
+  if (sees) m.alert = 3; else m.alert -= dt;
+  if (d > 30) return;      // asleep until you come near
+  const hunting = m.alert > 0;
+  if (m.fly) { const a = hunting ? Math.atan2(dy, dx) : Math.sin(m.ph * .3) * 3; m.vx = lerp(m.vx, Math.cos(a) * m.sp, dt * 3); m.vy = lerp(m.vy, Math.sin(a) * m.sp + Math.sin(m.ph) * .5, dt * 3); const nx = m.x + m.vx * dt, ny = m.y + m.vy * dt; if (c.at(Math.floor(nx), Math.floor(ny)) !== 1) m.x = nx; else m.vx *= -1; if (c.at(Math.floor(m.x), Math.floor(ny)) !== 1) m.y = ny; else m.vy *= -1; }
+  else {
+    let want = 0; if (hunting) { want = Math.sign(dx); if (m.k === 'archer') { const hd = Math.abs(dx); want = hd < 4 ? -want : hd > 7 ? want : 0; } m.dir = Math.sign(dx) || m.dir; } else { want = m.dir * .5; }
+    const edge = m.ground && c.at(Math.floor(m.x + m.dir * (m.w / 2 + .2)), Math.floor(m.y + .2)) === 0; if (edge && !hunting) { m.dir *= -1; want = 0; }
+    m.vx = want * m.sp; m.vy = Math.min(20, m.vy + G * dt); m.bump = false; moveBox(m, dt, c); if (m.bump) { if (hunting && m.ground) m.vy = -9; else m.dir *= -1; }
+    if (m.k === 'archer' && hunting && sees && m.cd <= 0) { m.cd = rand(1.6, 2.6); const a = Math.atan2(dy, dx); c.bolts.push({ x: m.x, y: m.y - 1, vx: Math.cos(a) * 8, vy: Math.sin(a) * 8, dmg: m.dmg, t: 3 }); }
+  }
+  if (Math.abs(dx) < m.w / 2 + .3 && P.y > m.y - m.h - .2 && P.y - 1.4 < m.y && m.k !== 'archer') hurtP(m.dmg, Math.sign(dx) || 1);
+}
+function hurtP(n, dir) { if (P.inv > 0) return; P.hp -= n; P.inv = .8; P.vx = dir * 7; P.vy = -6; shake = .25; sfx.hurt(); say('-' + Math.round(n), P.x, P.y - 2, [255, 140, 140]); crow.state = 'fly'; if (P.hp <= 0) leaveCave(false, '倒在了魔窟'); }
+function hurtMob(c, m, n, dir) {
+  m.hp -= n; m.flash = .12; m.alert = 5; if (!m.fly) m.vy = -2; sfx.hit(); say(Math.round(n) + '', m.x, m.y - m.h - .2, [255, 236, 190]);
+  if (m.hp > 0) return;
+  c.mobs.splice(c.mobs.indexOf(m), 1); c.kills++;
+  const coins = (m.elite ? 7 : 2) + Math.round(m.depth * 3); for (let i = 0; i < coins; i++) spawnDrop(c, m.x, m.y - .4, { coin: irand(3, 7) + Math.round(m.depth * 6) });
+  if (Math.random() < (m.elite ? 1 : .26)) spawnDrop(c, m.x, m.y - .4, { item: makeItem(m.depth + (m.elite ? .5 : 0)) });
+  if (Math.random() < .08) spawnDrop(c, m.x, m.y - .4, { potion: 1 });
+}
+function spawnDrop(c, x, y, o) { c.drops.push(Object.assign({ x, y, vx: rand(-3, 3), vy: rand(-7, -4), age: 0 }, o)); }
+function take(c, d) {
+  if (d.coin) { c.gold += d.coin; sfx.coin(); return true; }
+  if (d.potion) { c.potions++; say('药水', d.x, d.y - .6, [150, 240, 170]); tone(800, .1); return true; }
+  if (c.bag.length >= c.cap) { if (!d.warned) { d.warned = 1; say('背包满了', P.x, P.y - 2, [255, 200, 160]); } return false; }
+  c.bag.push(d.item); sfx.coin(); say(d.item.name, d.x, d.y - .7, hexRGB(RAR[d.item.r].c)); return true;
+}
+const hexRGB = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+function updateCrow(dt) {
+  crow.flap += dt * 13; crow.t += dt;
+  const px = P.x, py = P.y, shoulder = [px - P.face * .16, py - 1.5];
+  if (crow.state === 'perch') {
+    crow.x = shoulder[0]; crow.y = shoulder[1]; crow.dir = P.face;
+    if (P.moved > 1.6 || crow.shot || !P.ground && scene === 'cave' && P.vy < -6) { crow.state = 'fly'; crow.t = 0; crow.shot = 0; crow.y -= .3; }
+    return;
+  }
+  crow.shot = 0;
+  if (crow.state === 'land') {      // settling: a slow glide down on to the shoulder
+    const k = 1 - Math.pow(.06, dt); crow.x = lerp(crow.x, shoulder[0], k); crow.y = lerp(crow.y, shoulder[1], k);
+    if (Math.hypot(crow.x - shoulder[0], crow.y - shoulder[1]) < .06) { crow.state = 'perch'; crow.t = 0; }
+    if (P.moved > 1) crow.state = 'fly';
+    return;
+  }
+  // flying: slower than a run, so it falls behind and only catches up when the hunter stops
+  const tx = px - P.face * 1.1 + Math.sin(time * .9) * .5, ty = py - 3 + Math.sin(time * 1.4) * .4, dx = tx - crow.x, dy = ty - crow.y, d = Math.hypot(dx, dy), v = 4.2;
+  if (d > .05) { const st = Math.min(d, v * dt); crow.x += dx / d * st; crow.y += dy / d * st; if (Math.abs(dx) > .1) crow.dir = Math.sign(dx); }
+  if (d > 16) { crow.x = tx - P.face * 8; crow.y = ty - 2; }
+  if (d < .7 && Math.abs(P.vx) < 1 && crow.t > 1.2) { crow.state = 'land'; crow.t = 0; }
+}
+function drawCrow(wx, wy, t) {
+  const x = wx(crow.x), y = wy(crow.y), k = S * .34, d = crow.dir, sit = crow.state === 'perch', col = [30, 26, 48], f = sit ? -.15 : Math.sin(crow.flap) * (crow.state === 'land' ? .35 : .8);
+  if (scene !== 'cave') glow(x, y, k * 1.4, [255, 255, 255], .08);
+  poly([[x - d * k * .9, y], [x + d * k * .1, y - k * .34], [x + d * k * .8, y - k * .12], [x + d * k * .5, y + k * .2], [x - d * k * .4, y + k * .22]], col);
+  poly([[x - d * k * .8, y + k * .02], [x - d * k * 1.45, y + k * .3], [x - d * k * .5, y + k * .2]], col);
+  circ(x + d * k * .72, y - k * .18, k * .24, col); poly([[x + d * k * .9, y - k * .26], [x + d * k * 1.28, y - k * .12], [x + d * k * .9, y - k * .08]], [240, 190, 90]); circ(x + d * k * .78, y - k * .23, k * .05, [255, 240, 170]);
+  poly([[x - d * k * .3, y - k * .1], [x + d * k * .35, y - k * .14], [x - d * k * .15 - d * k * .5 * Math.abs(f), y - k * 1.0 * f]], [52, 46, 78]);
+  if (sit) { line([[x, y + k * .2], [x, y + k * .38]], [240, 190, 90], 1.5); }
+}
+function drawHunter(wx, wy, t, gy) {
+  const x = wx(P.x), y = gy !== undefined ? gy + P.y * S : wy(P.y), k = S, d = P.face, st = Math.sin(P.step) * k * .2, blink = P.inv > 0 && Math.floor(t * 18) % 2;
+  if (blink) C.globalAlpha = .45;
+  line([[x - k * .08, y - k * .66], [x - k * .1 + st, y - k * .05]], [64, 50, 70], k * .15); line([[x + k * .08, y - k * .66], [x + k * .1 - st, y - k * .05]], [84, 66, 80], k * .15);
+  rect(x - k * .22 + st, y - k * .08, k * .3, k * .1, [110, 74, 60]); rect(x - k * .08 - st, y - k * .08, k * .3, k * .1, [130, 90, 70]);
+  // cloak and quiver
+  poly([[x - d * k * .16, y - k * 1.3], [x - d * k * .46, y - k * .54], [x + d * k * .24, y - k * .6], [x + d * k * .2, y - k * 1.3]], [58, 118, 106]);
+  poly([[x - d * k * .16, y - k * 1.3], [x - d * k * .46 - d * Math.abs(P.vx) * k * .03, y - k * .42], [x - d * k * .04, y - k * .6]], [44, 96, 92]);
+  line([[x - d * k * .26, y - k * .72], [x - d * k * .04, y - k * 1.38]], [120, 80, 60], k * .1); for (const o of [0, .06]) line([[x - d * k * (.04 - o), y - k * 1.38], [x - d * k * (.02 - o), y - k * 1.5]], [230, 220, 200], 1.5);
+  circ(x + d * k * .03, y - k * 1.52, k * .19, [255, 226, 196]);
+  poly([[x - d * k * .26, y - k * 1.32], [x - d * k * .2, y - k * 1.76], [x + d * k * .24, y - k * 1.62], [x + d * k * .1, y - k * 1.5], [x - d * k * .06, y - k * 1.3]], [70, 150, 130]);
+  // bow in the leading hand, drawn back with the string
+  const a = scene === 'cave' && (P.draw > 0) ? P.aim : (d > 0 ? .25 : Math.PI - .25), hx = x + Math.cos(a) * k * .42, hy = y - k * 1 + Math.sin(a) * k * .42, pull = P.draw / .7, r = k * .62, n = a + Math.PI / 2;
+  line([[x + d * k * .08, y - k * 1.08], [hx, hy]], [255, 226, 196], k * .09);
+  const ta = [hx + Math.cos(n) * r - Math.cos(a) * k * .1, hy + Math.sin(n) * r - Math.sin(a) * k * .1], tb = [hx - Math.cos(n) * r - Math.cos(a) * k * .1, hy - Math.sin(n) * r - Math.sin(a) * k * .1], nock = [hx - Math.cos(a) * (k * .1 + pull * k * .5), hy - Math.sin(a) * (k * .1 + pull * k * .5)];
+  C.beginPath(); C.moveTo(ta[0], ta[1]); C.quadraticCurveTo(hx + Math.cos(a) * k * .3, hy + Math.sin(a) * k * .3, tb[0], tb[1]); C.strokeStyle = css([150, 104, 70]); C.lineWidth = k * .08; C.lineCap = 'round'; C.stroke();
+  line([ta, nock, tb], [240, 236, 226], 1);
+  if (P.draw > 0) { line([nock, [hx + Math.cos(a) * k * .4, hy + Math.sin(a) * k * .4]], [230, 220, 200], 2); if (pull >= 1) glow(hx, hy, k * .6, [255, 236, 170], .6); }
+  C.globalAlpha = 1;
+}
+function drawMob(wx, wy, m, t) {
+  const x = wx(m.x), y = wy(m.y), k = S, c = m.flash > 0 ? [255, 255, 255] : m.c;
+  if (m.k === 'slime') { const q = 1 + Math.sin(m.ph) * .1; C.beginPath(); C.ellipse(x, y - k * .34 * q, k * .46 / q, k * .36 * q, 0, 0, TAU); C.fillStyle = css(c); C.fill(); circ(x + m.dir * k * .16, y - k * .42, k * .07, [30, 40, 50]); }
+  else if (m.k === 'bat') { const f = Math.sin(m.ph * 3) * k * .3; circ(x, y - k * .25, k * .22, c); poly([[x, y - k * .3], [x - k * .6, y - k * .3 - f], [x - k * .3, y - k * .14]], mix(c, [40, 30, 70], .3)); poly([[x, y - k * .3], [x + k * .6, y - k * .3 - f], [x + k * .3, y - k * .14]], mix(c, [40, 30, 70], .3)); circ(x + k * .08, y - k * .3, k * .04, [255, 90, 90]); circ(x - k * .08, y - k * .3, k * .04, [255, 90, 90]); }
+  else if (m.k === 'archer') { rect(x - k * .15, y - k * 1, k * .3, k * .62, c); line([[x - k * .08, y - k * .4], [x - k * .1, y]], c, k * .09); line([[x + k * .08, y - k * .4], [x + k * .1, y]], c, k * .09); circ(x, y - k * 1.2, k * .2, c); circ(x + m.dir * k * .08, y - k * 1.22, k * .05, [200, 40, 70]); C.beginPath(); C.arc(x + m.dir * k * .3, y - k * .8, k * .4, -1.2, 1.2); C.strokeStyle = css([150, 104, 70]); C.lineWidth = 2; C.stroke(); }
+  else { rect(x - k * .62, y - k * 1.5, k * 1.24, k * 1.1, c); rect(x - k * .62, y - k * 1.5, k * .62, k * 1.1, mix(c, [255, 255, 255], .12)); rect(x - k * .54, y - k * .42, k * .4, k * .42, mix(c, [30, 20, 50], .25)); rect(x + k * .14, y - k * .42, k * .4, k * .42, mix(c, [30, 20, 50], .25)); rect(x - k * .34, y - k * 2, k * .68, k * .52, mix(c, [255, 255, 255], .2)); circ(x + m.dir * k * .14, y - k * 1.76, k * .08, [255, 110, 110]); }
+  if (m.hp < m.max) { const w = k * (m.elite ? 1.4 : .8); rect(x - w / 2, y - m.h * k - k * .22, w, 3, [20, 16, 40], .7); rect(x - w / 2, y - m.h * k - k * .22, w * clamp(m.hp / m.max), 3, [255, 110, 110]); }
+}
+const fogCv = document.createElement('canvas'); let fogImg = null;
+function drawCave(t) {
+  const c = run, sx = W / 2 - cam.x * S, sy = H / 2 - cam.y * S, wx = x => x * S + sx, wy = y => y * S + sy, i0 = Math.max(0, Math.floor(cam.x - W / S / 2) - 1), i1 = Math.min(CW - 1, Math.ceil(cam.x + W / S / 2) + 1), j0 = Math.max(0, Math.floor(cam.y - H / S / 2) - 1), j1 = Math.min(CH - 1, Math.ceil(cam.y + H / S / 2) + 1);
+  const g = C.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css([44, 34, 84])); g.addColorStop(1, css([28, 22, 58])); C.fillStyle = g; C.fillRect(0, 0, W, H);
+  for (let i = 0; i < 9; i++) { const x = ((i * 311 - cam.x * S * .25) % (W + 300) + W + 300) % (W + 300) - 150; poly([[x - 90, H], [x, H * .3 + i * 22], [x + 90, H]], [58, 46, 104], .5); }
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+    const v = c.m[j * CW + i], x = wx(i), y = wy(j);
+    if (v === 1) { const shade = ((i * 7 + j * 13) % 5) * 2; rect(x, y, S + 1, S + 1, [74 + shade, 62 + shade, 112 + shade]); if (c.at(i, j - 1) === 0) { rect(x, y, S + 1, S * .16, [108, 180, 170]); rect(x, y + S * .16, S + 1, S * .08, [72, 118, 134]); } }
+    else if (v === 2) { rect(x, y, S + 1, S * .16, [160, 120, 90]); rect(x, y + S * .16, S + 1, S * .06, [100, 74, 80]); }
+  }
+  for (const b of c.torches) { const x = wx(b.x), y = wy(b.y); if (x < -80 || x > W + 80 || y < -80 || y > H + 80) continue; rect(x - 2, y, 4, S * .5, [120, 84, 70]); glow(x, y, S * 2.4, [255, 170, 100], .5); circ(x, y - 2 + Math.sin(t * 9) * 1, S * .12, [255, 214, 140]); }
+  for (const p of c.portals) { const x = wx(p.x), y = wy(p.y), k = S, q = p.t / 2; glow(x, y - k * 1.2, k * 3, [120, 220, 255], .55 + .2 * Math.sin(t * 3)); arch(x, y, k * 1.7, k * 2.8, [54, 44, 96]); arch(x, y, k * 1.3, k * 2.4, [120, 220, 255]); arch(x, y, k * .8, k * 1.9, [200, 244, 255]); text(p.name, x, y - k * 3.2, k * .34, [220, 244, 255], .9); if (p.t > 0) { rect(x - k, y - k * 3.7, k * 2, 5, [20, 16, 40], .8); rect(x - k, y - k * 3.7, k * 2 * q, 5, [150, 240, 255]); } }
+  for (const b of c.chests) { const x = wx(b.x), y = wy(b.y), k = S, col = b.gold ? [230, 180, 90] : [150, 96, 60]; if (x < -60 || x > W + 60 || y < -60 || y > H + 60) continue; rect(x - k * .55, y - k * .62, k * 1.1, k * .62, b.open ? mix(col, [40, 30, 60], .5) : col); if (b.open) rect(x - k * .55, y - k * .96, k * 1.1, k * .2, mix(col, [255, 255, 255], .15)); else { rect(x - k * .55, y - k * .78, k * 1.1, k * .3, mix(col, [255, 255, 255], .18)); rect(x - k * .1, y - k * .56, k * .2, k * .24, [255, 226, 150]); glow(x, y - k * .5, k * (b.gold ? 1.5 : 1), [255, 214, 140], .5); } if (b.t > 0) { rect(x - k * .6, y - k * 1.2, k * 1.2, 5, [20, 16, 40], .8); rect(x - k * .6, y - k * 1.2, k * 1.2 * clamp(b.t / SEARCH), 5, [255, 236, 170]); } }
+  for (const d of c.drops) { const x = wx(d.x), y = wy(d.y) - Math.abs(Math.sin(t * 4 + d.x)) * 2 - 3; if (d.coin) { circ(x, y, S * .13, [255, 206, 90]); circ(x - 1, y - 1, S * .07, [255, 236, 170]); } else if (d.potion) { rect(x - S * .1, y - S * .2, S * .2, S * .3, [230, 90, 110]); rect(x - S * .05, y - S * .3, S * .1, S * .1, [230, 220, 200]); } else { const cc = hexRGB(RAR[d.item.r].c); glow(x, y, S * .9, cc, .6); text(KIND[d.item.k], x, y, S * .36, cc, 1, 'center', 400); } }
+  for (const m of c.mobs) { if (Math.abs(m.x - cam.x) * S < W && Math.abs(m.y - cam.y) * S < H) drawMob(wx, wy, m, t); }
+  for (const a of c.arrows) { const q = Math.atan2(a.vy, a.vx), l = S * .44, s = a.stuck ? 0 : 0; const x = wx(a.x), y = wy(a.y); line([[x - Math.cos(a.ang = a.stuck ? a.ang : q) * l, y - Math.sin(a.ang) * l], [x, y]], [240, 232, 214], 2); }
+  for (const b of c.bolts) { const x = wx(b.x), y = wy(b.y); glow(x, y, S * .5, [200, 120, 255], .8); circ(x, y, S * .09, [240, 200, 255]); }
+  drawHunter(wx, wy, t); drawCrow(wx, wy, t);
+  // fog: black where nothing has been seen, dim where it has, clear close by
+  const r = stats().sight, px = P.x, py = P.y - 1, fw = i1 - i0 + 3, fh = j1 - j0 + 3;
+  if (fogCv.width !== fw || fogCv.height !== fh) { fogCv.width = fw; fogCv.height = fh; fogImg = null; }
+  const fg = fogCv.getContext('2d'); if (!fogImg) fogImg = fg.createImageData(fw, fh);
+  for (let j = 0; j < fh; j++) for (let i = 0; i < fw; i++) {      // one pixel a tile, then stretched smooth, so the fog has soft edges
+    const ti = i0 - 1 + i, tj = j0 - 1 + j, d = Math.hypot(ti + .5 - px, tj + .5 - py), seen = ti >= 0 && tj >= 0 && ti < CW && tj < CH && c.seen[tj * CW + ti], o = (j * fw + i) * 4;
+    fogImg.data[o] = 14; fogImg.data[o + 1] = 10; fogImg.data[o + 2] = 32; fogImg.data[o + 3] = (seen ? clamp((d - (r - 3)) / 3) * .62 : 1) * 255;
+  }
+  fg.putImageData(fogImg, 0, 0); C.imageSmoothingEnabled = true; C.imageSmoothingQuality = 'high'; C.drawImage(fogCv, wx(i0 - 1) + S / 2, wy(j0 - 1) + S / 2, fw * S, fh * S);
+  drawFloats(wx, wy);
+  // hud
+  const s = stats(), bw = Math.min(W * .4, 200), top = 58;
+  rect(14, top, bw, 9, [20, 16, 40], .7); rect(14, top, bw * clamp(P.hp / s.hp), 9, [240, 100, 110]); text(`生命 ${Math.ceil(P.hp)} / ${s.hp}`, 14, top + 18, 12, [255, 255, 255], .85, 'left');
+  text(`金币 ${c.gold}   背包 ${c.bag.length}/${c.cap}   药水 ${c.potions}`, 14, top + 36, 12.5, [255, 236, 190], .95, 'left');
+  drawMap(c);
+  if (c.at_) text('撤离中，站住别动……', W / 2, H * .22, 15, [200, 244, 255]);
+}
+function drawMap(c) {
+  const k = Math.min(1.1, W * .34 / CW), mw = CW * k, mh = CH * k, x0 = W - mw - 12, y0 = 12 + (parseInt(getComputedStyle(document.body).paddingTop) || 0);
+  rect(x0 - 3, y0 - 3, mw + 6, mh + 6, [14, 10, 32], .62);
+  for (let j = 0; j < CH; j += 2) for (let i = 0; i < CW; i += 2) if (c.seen[j * CW + i] && c.m[j * CW + i] !== 1) rect(x0 + i * k, y0 + j * k, k * 2, k * 2, [150, 170, 200], .7);
+  for (const p of c.portals) if (p.found) circ(x0 + p.x * k, y0 + p.y * k, 3, [120, 230, 255]);
+  circ(x0 + P.x * k, y0 + P.y * k, 2.6, [255, 236, 170]);
+}
+function drawFloats(wx, wy) { for (const f of floats) text(f.s, wx(f.x), wy(f.y), 14, f.c, clamp(f.t * 2), 'center', 400); }
+
+// ---------- doing things ----------
+const SEARCH = 1.1;      // seconds it takes to go through a chest
+let prompt = null;
+function updatePrompt() {
+  let p = null;
+  if (scene === 'tavern') { if (Math.abs(P.x - TAV.door) < 1.4) p = { t: '出门', f: () => { scene = 'town'; P.x = TOWN.tavern; fade = 1; cam.x = P.x; crow.x = P.x - 2; crow.y = -3; } }; else if (Math.abs(P.x - TAV.bar) < 2.8) p = { t: '和老板说话', f: () => panelBar() }; else if (Math.abs(P.x - TAV.chest) < 1.6) p = { t: '打开仓库', f: () => panelBag() }; }
+  else if (scene === 'town') { if (Math.abs(P.x - TOWN.tavern) < 1.2) p = { t: '回酒馆', f: () => { scene = 'tavern'; P.x = TAV.door - 1.4; fade = 1; cam.x = P.x; } }; else if (Math.abs(P.x - TOWN.tower) < 2.2) p = { t: '进入钟楼', f: () => panelTower() }; }
+  else if (run) {
+    let b = null; for (const q of run.chests) if (!q.open && Math.abs(q.x - P.x) < 1.2 && Math.abs(q.y - P.y) < 1.6) b = q;
+    if (b) { p = { t: b.t > 0 ? '搜索中…' : '搜箱子（按住）', hold: true, c: b }; if (input.act) { b.t += 1 / 60 * (dtNow * 60); if (b.t >= SEARCH) { b.open = true; b.t = 0; sfx.chest(); const n = irand(2, 3) + (b.gold ? 1 : 0); for (let i = 0; i < 2 + irand(0, 3); i++) spawnDrop(run, b.x, b.y - .7, { coin: irand(4, 9) + Math.round(b.depth * 12) }); for (let i = 0; i < n - 1; i++) spawnDrop(run, b.x, b.y - .7, { item: makeItem(b.depth + (b.gold ? .6 : 0)) }); if (Math.random() < .3) spawnDrop(run, b.x, b.y - .7, { potion: 1 }); } } else b.t = Math.max(0, b.t - dtNow); }
+  }
+  prompt = p; const el = $('hint'); if (p) { if (el.textContent !== p.t) el.textContent = p.t; el.style.display = 'block'; } else el.style.display = 'none';
+}
+function act() { if (prompt && !prompt.hold) prompt.f(); }
+$('hint').addEventListener('pointerdown', e => { e.preventDefault(); input.act = true; act(); });
+for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) $('hint').addEventListener(ev, () => { input.act = false; });
+
+// ---------- panels ----------
+function openPanel(html) { $('pin').innerHTML = html; $('panel').style.display = 'block'; modal = true; input.l = input.r = 0; input.joy = 0; input.shoot = false; }
+function closePanel() { $('panel').style.display = 'none'; modal = false; }
+$('pin').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && ACT[b.dataset.a]) ACT[b.dataset.a](b.dataset.i); });
+const cellHTML = (it, a, i, sel) => it ? `<div class="cell${sel ? ' sel' : ''}" data-a="${a}" data-i="${i}" style="color:${RAR[it.r].c}">${KIND[it.k]}</div>` : `<div class="cell"></div>`;
+let sel = null;
+function panelBag() {
+  const list = scene === 'cave' && run ? run.bag : save.stash, inCave = scene === 'cave', s = stats(), e = save.equip, it = sel && (sel.eq ? e[sel.eq] : list[sel.i]);
+  const slot = (k, n) => e[k] ? `<div class="cell${sel && sel.eq === k ? ' sel' : ''}" data-a="eq" data-i="${k}" style="color:${RAR[e[k].r].c}">${e[k].name}<small>${n}</small></div>` : `<div class="cell"><small>${n}（空）</small></div>`;
+  openPanel(`<h2>${inCave ? '背包' : '仓库'}</h2><div class="sub">金币 ${save.gold}${inCave ? ` · 本趟 +${run.gold}` : ''} · 攻击 ${s.dmg} · 生命 ${s.hp}</div>
+  <h3>身上</h3><div class="slots">${slot('bow', '武器')}${slot('armor', '装备')}${slot('acc', '饰品')}</div>
+  <h3>${inCave ? `这一趟 ${run.bag.length}/${run.cap}（撤离才算带走）` : `仓库 ${list.length} 件`}</h3><div class="grid">${list.map((x, i) => cellHTML(x, 'it', i, sel && !sel.eq && sel.i === i)).join('') || ''}${Array(Math.max(0, 12 - list.length)).fill('<div class="cell"></div>').join('')}</div>
+  <div id="detail">${it ? `<span style="color:${RAR[it.r].c}">${RAR[it.r].n} · ${it.name}</span><br>${itemStat(it)} · 售价 ${it.v}` : '点一件东西查看。'}</div>
+  <div class="row">${it && !sel.eq && it.k !== 'gem' && !inCave ? '<button class="act main" data-a="wear">装备</button>' : ''}${it && sel.eq && !inCave ? '<button class="act" data-a="off">卸下</button>' : ''}<button class="act" data-a="close">关闭</button></div>`);
+}
+function panelBar() {
+  const sum = save.stash.reduce((a, b) => a + b.v, 0);
+  sel = null; openPanel(`<h2>老板</h2><div class="sub">“又活着回来了。”<br>金币 ${save.gold} · 药水 ${save.potions} · 下过 ${save.runs} 次魔窟，活着出来 ${save.out} 次</div>
+  <div class="row"><button class="act main" data-a="potion" ${save.gold < 25 ? 'disabled' : ''}>买药水 · 25 金币</button></div>
+  <div class="row"><button class="act" data-a="sellgem" ${save.stash.some(i => i.k === 'gem') ? '' : 'disabled'}>卖掉所有宝石</button><button class="act" data-a="sellall" ${save.stash.length ? '' : 'disabled'}>卖掉全部仓库（${sum}）</button></div>
+  <div class="row"><button class="act" data-a="close">走开</button></div>`);
+}
+function panelTower() { openPanel(`<h2>钟楼</h2><div class="sub">钟摆后面有一道门，通往魔窟。<br>那里一片迷雾，宝箱和怪物都藏在里面。<br>带出来的才算你的；倒下了，这一趟的东西全部丢掉。</div><div class="row"><button class="act main" data-a="go">传送到魔窟</button><button class="act" data-a="close">算了</button></div>`); }
+function panelResult(ok, title, r, n, v) {
+  const names = r.bag.slice(0, 18).map(i => `<span style="color:${RAR[i.r].c}">${i.name}</span>`).join('、');
+  openPanel(`<h2>${ok ? '撤离成功' : '没能回来'}</h2><div class="sub">${ok ? `从${title}回到了酒馆` : title}</div><div class="sub">${ok ? `带回金币 ${r.gold}，物品 ${n} 件（价值 ${v}）` : `丢失金币 ${r.gold}，物品 ${n} 件（价值 ${v}）`}<br>${names}<br>击败怪物 ${r.kills} · 用时 ${Math.floor(r.time / 60)} 分 ${Math.floor(r.time % 60)} 秒</div><div class="row"><button class="act main" data-a="close">回到酒馆</button></div>`);
+}
+const ACT = {
+  close: () => { sel = null; closePanel(); }, go: () => { closePanel(); fade = 1; enterCave(); },
+  it: i => { sel = { i: +i }; panelBag(); }, eq: k => { sel = { eq: k }; panelBag(); },
+  wear: () => { const it = save.stash[sel.i], old = save.equip[it.k]; save.stash.splice(sel.i, 1); save.equip[it.k] = it; if (old) save.stash.push(old); sel = null; persist(); panelBag(); },
+  off: () => { const k = sel.eq; save.stash.push(save.equip[k]); save.equip[k] = null; sel = null; persist(); panelBag(); },
+  potion: () => { if (save.gold >= 25) { save.gold -= 25; save.potions++; persist(); sfx.coin(); panelBar(); } },
+  sellgem: () => { const g = save.stash.filter(i => i.k === 'gem'); save.gold += g.reduce((a, b) => a + b.v, 0); save.stash = save.stash.filter(i => i.k !== 'gem'); persist(); sfx.coin(); panelBar(); },
+  sellall: () => { save.gold += save.stash.reduce((a, b) => a + b.v, 0); save.stash = []; persist(); sfx.coin(); panelBar(); },
+};
+$('bagBtn').addEventListener('click', () => { if (modal) return; sel = null; panelBag(); });
+
+// ---------- input ----------
+const K = { KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r' };
+function audio() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); }
+addEventListener('keydown', e => { if (e.repeat) return; audio(); if (K[e.code]) input[K[e.code]] = 1; if (['KeyW', 'ArrowUp', 'Space'].includes(e.code)) { input.up = true; input.upPressed = true; e.preventDefault(); } if (e.code === 'KeyS' || e.code === 'ArrowDown') input.down = true; if (e.code === 'KeyE' || e.code === 'Enter') { input.act = true; if (!modal) act(); } if (e.code === 'KeyQ') input.potion = true; if (e.code === 'KeyB' || e.code === 'Tab') { e.preventDefault(); if (modal) closePanel(); else { sel = null; panelBag(); } } if (e.code === 'Escape' && modal) closePanel(); if (e.code === 'KeyJ') input.shoot = true; });
+addEventListener('keyup', e => { if (K[e.code]) input[K[e.code]] = 0; if (['KeyW', 'ArrowUp', 'Space'].includes(e.code)) input.up = false; if (e.code === 'KeyS' || e.code === 'ArrowDown') input.down = false; if (e.code === 'KeyE' || e.code === 'Enter') input.act = false; if (e.code === 'KeyJ') input.shoot = false; });
+let joyId = null, joy0 = 0, joyNow = 0, joyY = 0;
+cv.addEventListener('pointerdown', e => {
+  audio();
+  if (e.pointerType === 'mouse') { input.mouse = true; input.mx = e.clientX; input.my = e.clientY; }
+  if (scene === 'town' && towerHit && !modal) { const [x, y, w, h] = towerHit; if (e.clientX > x && e.clientX < x + w && e.clientY > y && e.clientY < y + h) { panelTower(); return; } }
+  if (e.pointerType === 'mouse') { if (scene === 'cave') input.shoot = true; return; }
+  if (joyId === null && e.clientX < W * .55) { joyId = e.pointerId; joy0 = joyNow = e.clientX; joyY = e.clientY; cv.setPointerCapture(e.pointerId); }
+});
+cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { input.mouse = true; input.mx = e.clientX; input.my = e.clientY; } if (e.pointerId === joyId) { joyNow = e.clientX; input.joy = clamp((joyNow - joy0) / 46, -1, 1); input.down = e.clientY - joyY > 46; } });
+for (const ev of ['pointerup', 'pointercancel']) cv.addEventListener(ev, e => { if (e.pointerType === 'mouse') input.shoot = false; if (e.pointerId === joyId) { joyId = null; input.joy = 0; input.down = false; } });
+function hold(id, on, off) { const el = $(id); el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); audio(); el.classList.add('on'); on(); el.setPointerCapture(e.pointerId); }); for (const ev of ['pointerup', 'pointercancel']) el.addEventListener(ev, () => { el.classList.remove('on'); off(); }); }
+hold('bJump', () => { input.up = true; input.upPressed = true; input.mouse = false; }, () => { input.up = false; });
+hold('bShoot', () => { input.shoot = true; input.mouse = false; }, () => { input.shoot = false; });
+hold('bPotion', () => { input.potion = true; }, () => {});
+
+// ---------- the frame ----------
+let last = performance.now(), dtNow = 1 / 60;
+function draw(t) {
+  C.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const sh = shake > 0 ? shake * 16 : 0; if (sh) C.translate(rand(-sh, sh), rand(-sh, sh));
+  if (scene === 'cave' && run) drawCave(t);
+  else {
+    const gy = scene === 'town' ? drawTown(t) : drawTavern(t), wx = x => (x - cam.x) * S + W / 2, wy = y => gy + y * S;
+    drawHunter(wx, wy, t); drawCrow(wx, wy, t); drawFloats(wx, wy);
+    text(`金币 ${save.gold}`, 14, 66, 13, [255, 236, 190], .95, 'left');
+    if (scene === 'tavern' && save.runs === 0 && !modal) text(touch ? '左边滑动走路 · 到门口点“出门”' : 'A / D 走路 · E 互动 · B 背包', W / 2, H * .9, 14, [255, 255, 255], .75);
+    if (scene === 'town' && !modal) text('点钟楼，去魔窟', W / 2, H * .9, 14, [255, 255, 255], .7);
+  }
+  if (fade > 0) rect(-20, -20, W + 40, H + 40, [14, 10, 32], clamp(fade));
+}
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now; dtNow = dt;
+  if (!MANUAL) update(dt);
+  draw(time);
+  const inCave = scene === 'cave' && !modal, show = touch ? (inCave ? 'flex' : 'none') : 'none', j = touch && !modal ? 'flex' : 'none';
+  $('bJump').style.display = j; $('bShoot').style.display = show; $('bPotion').style.display = show;
+  requestAnimationFrame(frame);
+}
+const MANUAL = location.search.includes('manual');
+updatePrompt();
+cam.x = P.x; crow.y = -3;
+requestAnimationFrame(frame);
+window.__sdc = { P, crow, input, save, get run() { return run; }, get scene() { return scene; }, set scene(v) { scene = v; }, enterCave, leaveCave, panelTower, panelBar, panelBag, closePanel, tick: s => { for (let t = 0; t < s; t += 1 / 60) { dtNow = 1 / 60; update(1 / 60); } }, genCave, reset: () => { localStorage.removeItem(KEY); } };
+</script></body></html>
