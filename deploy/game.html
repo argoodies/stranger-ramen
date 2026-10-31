@@ -1592,15 +1592,12 @@ function drawRing(x, y, r, a = 1) {
   ctx.beginPath(); ctx.ellipse(x, y + r * .2, r * .8, r * .8, 0, 0, TAU); ctx.strokeStyle = css([250, 208, 110], a); ctx.lineWidth = Math.max(1.5, r * .3); ctx.stroke();
   poly([[x, y - r * 1.25], [x + r * .42, y - r * .78], [x, y - r * .36], [x - r * .42, y - r * .78]], [226, 244, 255], a);
 }
-function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a monk's Celtic cross in copper gold, tilted, reduced to a few plain solids: two beams and a round ring, each a lit face, a mid face and a dark side
-  const lit = [250, 208, 150], mid = [222, 156, 96], dark = [128, 72, 56], k = r * .86, rot = .6, cs = Math.cos(rot), sn = Math.sin(rot), cx = x + k * .05, cy = y + k * .08, d = k * .14, dx = d * (.55 * cs + .8 * sn), dy = d * (.8 * cs - .55 * sn), oy = -k * .42;
+function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a monk's Celtic cross in copper gold, tilted, two beams and a round ring in one plane: a single flat piece, its front all lit, its side dark
+  const lit = [244, 190, 128], dark = [128, 72, 56], k = r * .86, rot = .6, cs = Math.cos(rot), sn = Math.sin(rot), cx = x - k * .19, cy = y - k * .006, d = k * .14, dx = d * (.55 * cs + .8 * sn), dy = d * (.8 * cs - .55 * sn), oy = -k * .42;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
-  const R = k * .72, Ri = k * .5, A = -rot - Math.PI * 3 / 4, ringPath = (ox, oz, q0, q1) => { ctx.beginPath(); ctx.arc(ox, oy + oz, R, q0, q1); ctx.arc(ox, oy + oz, Ri, q1, q0, true); ctx.closePath(); };
-  ringPath(dx, dy, 0, TAU); ctx.fillStyle = css(dark, a); ctx.fill();      // the ring's depth
-  ringPath(0, 0, A, A + Math.PI); ctx.fillStyle = css(lit, a); ctx.fill(); ringPath(0, 0, A + Math.PI, A + TAU); ctx.fillStyle = css(mid, a); ctx.fill();      // a true circle: half to the light, half away
-  const beam = (x0, y0, x1, y1, along) => { poly([[x1, y0], [x1 + dx, y0 + dy], [x1 + dx, y1 + dy], [x0 + dx, y1 + dy], [x0, y1], [x1, y1]], dark, a);
-    if (along) { const m = (x0 + x1) / 2; poly([[x0, y0], [m, y0], [m, y1], [x0, y1]], lit, a); poly([[m, y0], [x1, y0], [x1, y1], [m, y1]], mid, a); } else { const m = (y0 + y1) / 2; poly([[x0, y0], [x1, y0], [x1, m], [x0, m]], lit, a); poly([[x0, m], [x1, m], [x1, y1], [x0, y1]], mid, a); } };
-  const w = k * .15; beam(-w, oy - k * 1, w, k * 1.3, true); beam(-k * 1.02, oy - w, k * 1.02, oy + w, false);
+  const R = k * .72, Ri = k * .5, w = k * .15, X = k * 1.02, top = oy - k, bot = k * 1.3, shape = (ox, oz, c) => { ctx.fillStyle = css(c, a); ctx.beginPath(); ctx.arc(ox, oy + oz, R, 0, TAU); ctx.arc(ox, oy + oz, Ri, TAU, 0, true); ctx.fill(); ctx.fillRect(ox - w, top + oz, 2 * w, bot - top); ctx.fillRect(ox - X, oy - w + oz, 2 * X, 2 * w); };      // the beams and the ring as one flat piece
+  for (let i = 8; i >= 1; i--) shape(dx * i / 8, dy * i / 8, dark);      // its depth, all of a piece
+  shape(0, 0, lit);      // its one flat front face, all in the light
   ctx.restore();
 }
 function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn in his hands (x, y: his feet; K: his size). A blade in mid-stroke is not drawn: the arc of the cut stands for it.
