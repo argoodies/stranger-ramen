@@ -21,7 +21,7 @@ def stroke(pts, w=W, cut=(1, 1)):      # a polyline as a polygon with mitred joi
 def box(x0, y0, x1, y1, c=14, w=W):      # a closed box with its bottom-right and top-left corners cut, as the 口 of the original
     return [stroke([(x0 + c, y0), (x1, y0), (x1, y1 - c), (x1 - c, y1), (x0, y1), (x0, y0 + c), (x0 + c, y0)], w, (0, 0))]
 GLYPHS = {
- '十': lambda: [stroke([(32, 80), (198, 80)]), stroke([(115, 0), (115, 231)])],      # a Celtic cross: the arms short and high, the foot long
+ '十': lambda: [stroke([(0, 108), (230, 108)]), stroke([(115, 0), (115, 231)])],
  '字': lambda: [stroke([(116, 0), (116, 30)]), stroke([(6, 72), (6, 44), (222, 44), (222, 72)], W, (1, 1)), stroke([(58, 88), (172, 88), (122, 132)], W, (1, 0)), stroke([(116, 136), (116, 214), (92, 231)], W, (0, 1)), stroke([(0, 158), (230, 158)])],
  '星': lambda: box(52, 2, 180, 100) + [stroke([(60, 51), (172, 51)], W, (0, 0)), stroke([(70, 112), (34, 150)]), stroke([(46, 137), (204, 137)]), stroke([(116, 118), (116, 222)], W, (1, 0)), stroke([(54, 178), (182, 178)]), stroke([(2, 222), (230, 222)])],
  '小': lambda: [stroke([(116, 0), (116, 212), (90, 231)], W, (1, 1)), stroke([(62, 66), (14, 160)]), stroke([(170, 66), (218, 160)])],
@@ -32,7 +32,7 @@ GLYPHS = {
 S = 21      # English: the stroke of MELO's capitals
 LAT = {      # x, in a box from cap height 306 to baseline 496, x-height 362
  'S': (120, lambda: [stroke([(120, 316), (22, 316), (10, 330), (10, 386), (22, 398), (108, 398), (120, 410), (120, 472), (108, 486), (0, 486)], S)]),
- 't': (112, lambda: [stroke([(56, 306), (56, 498)], 15, (1, 1)), stroke([(0, 366), (112, 366)], 15)]),      # the same Celtic cross as the 十
+ 't': (88, lambda: [stroke([(34, 322), (34, 472), (48, 486), (86, 486)], S), stroke([(0, 372), (86, 372)], S)]),
  'r': (78, lambda: [stroke([(10, 362), (10, 496)], S), stroke([(21, 396), (46, 372), (78, 372)], S, (0, 1))]),
  'c': (104, lambda: [stroke([(104, 372), (24, 372), (10, 386), (10, 472), (24, 486), (104, 486)], S)]),
  'o': (120, lambda: [stroke([(24, 372), (96, 372), (110, 386), (110, 472), (96, 486), (24, 486), (10, 472), (10, 386), (24, 372)], S, (0, 0))]),
@@ -51,10 +51,9 @@ SLOT = [162, 435, 700, 940, 1194, 1441]      # where MELO's six letters stood
 def chinese(l):
     mine = []
     for ch, x in zip('星穹十字小' + ('镇' if l == 'hans' else '鎮'), SLOT): mine += shift(GLYPHS[ch](), x, 310)
-    cx, cy = SLOT[2] + 115, 310 + 80; ring = lambda rr, sg: [(cx + rr * math.cos(sg * i * math.tau / 64), cy + rr * math.sin(sg * i * math.tau / 64)) for i in range(64)]
-    return mine, [ring(60, 1), ring(44, -1)], (154, 288, 1526, 266)      # 十 with a ring round its crossing, as on a Celtic cross
+    return mine, [], (154, 288, 1526, 266)
 def english():
-    en = subs('en'); keep = []; x = 150; mine = []; GAP = 26; ringed = False
+    en = subs('en'); keep = []; x = 150; mine = []; GAP = 26
     a, l, n = pick_x(en, 323, 441), pick_x(en, 1521, 1543), pick_x(en, 787, 891)
     def put(ps, x0, x1):
         nonlocal x; keep.extend(shift(ps, x - x0, -7 if ps is n else 0)); x += x1 - x0 + GAP
@@ -62,10 +61,7 @@ def english():
         if ch == ' ': x += 50; continue
         if ch == 'a': put(a, 323, 441)
         elif ch == 'n': put(n, 787, 891)
-        else:
-            if ch == 't' and not ringed:      # the first t is the English title's cross: a ring round its crossing, as on the 十
-                ringed = True; rx, ry = x + 56, 366; keep += [[(rx + rr * math.cos(sg * i * math.tau / 64), ry + rr * math.sin(sg * i * math.tau / 64)) for i in range(64)] for rr, sg in ((40, 1), (28, -1))]
-            w, f = LAT[ch]; mine += shift(f(), x); x += w + GAP
+        else: w, f = LAT[ch]; mine += shift(f(), x); x += w + GAP
     return mine, keep, (140, 290, x - 140, 235)
 html = open(f'{ROOT}/index.html').read()
 for l in ('hans', 'hant', 'en'):
