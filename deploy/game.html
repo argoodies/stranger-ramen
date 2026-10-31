@@ -1676,21 +1676,18 @@ function bagSlabs() {
   for (const id of loose) if (P0[id] == null) { const k = out.indexOf(null); if (k < 0) break; out[k] = id; P0[id] = k; }
   return out;
 }
-function glassWell(cx, cy, w, h, lit) {      // a hollow pressed into the frosted glass: darker within, a shadow under its top lip, a bright rim along its lower edge
-  const x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * .26;
-  rrect(x, y, w, h, r); ctx.fillStyle = css(lit ? [255, 240, 200] : [20, 16, 50], lit ? .2 : .16); ctx.fill();
-  ctx.save(); rrect(x, y, w, h, r); ctx.clip(); const g = ctx.createLinearGradient(0, y, 0, y + h * .45); g.addColorStop(0, css([12, 8, 40], .3)); g.addColorStop(1, css([12, 8, 40], 0)); ctx.fillStyle = g; ctx.fillRect(x, y, w, h * .45);
-  const q = ctx.createLinearGradient(0, y + h * .6, 0, y + h); q.addColorStop(0, css([255, 255, 255], 0)); q.addColorStop(1, css([255, 255, 255], .12)); ctx.fillStyle = q; ctx.fillRect(x, y + h * .6, w, h * .4); ctx.restore();
-  rrect(x + .5, y + .5, w - 1, h - 1, r); const e = ctx.createLinearGradient(0, y, 0, y + h); e.addColorStop(0, css([20, 14, 50], .32)); e.addColorStop(.5, css([255, 255, 255], .12)); e.addColorStop(1, css([255, 255, 255], lit ? .9 : .55)); ctx.strokeStyle = e; ctx.lineWidth = 1; ctx.stroke();
+function glassWell(cx, cy, w, h, lit) {      // a place in the backpack: a plain flat tile, one tint and no shading, like everything else in the town
+  const x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * .2;
+  rrect(x, y, w, h, r); ctx.fillStyle = css(lit ? [255, 236, 190] : [255, 255, 255], lit ? .42 : .13); ctx.fill();
 }
-function drawBag(t) {      // what you wear sits in three glass hollows, what you carry in twelve below, all one size and the whole of it centred; things are moved by dragging, a tap only shows what a thing is
+function drawBag(t) {      // what you wear sits on three flat tiles, what you carry on twelve below, all one size and the whole of it centred; things are moved by dragging, a tap only shows what a thing is
   mvBack(true); const L = S(), cell = 62, hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const c = clamp(Math.min((W - 40) / 4 - 14, (H - 300) / 6.2), 44, 66), p = c + 14, top = Math.max(84, (H - (c + 34 + 30 + 3 * p - 14 + 110)) / 2);      // c: a hollow's size, p: the pitch of the grid; the block is hollows + labels + grid + room for a description
   const well = (cx, cy, id, place) => { const sel = id && bag.sel === id, held = dg && dg.id === id, over = dg && dg.over === place;
-    spots.push([cx, cy, place]); if (sel || over) glow(cx, cy, c * .9, [255, 236, 170], over ? .7 : .5);
+    spots.push([cx, cy, place]);
     glassWell(cx, cy, c, c, sel || over);
     if (id) hits.push([cx - cell / 2, cy - cell / 2, id, place]);
-    if (id && !held) { const by = cy - Math.sin(t * 2 + cx * .05) * 1.2; glow(cx, by, c * .55, [255, 240, 200], .3); drawItem(id, cx, by, c * .3);
+    if (id && !held) { const by = cy - Math.sin(t * 2 + cx * .05) * 1.2; drawItem(id, cx, by, c * .3);
       const n = typeof place === 'number' ? rest(id) : 0; if (n > 1) { const bx = cx + c / 2 - 6, byy = cy + c / 2 - 6; circ(bx, byy, 8, [255, 236, 190]); ctx.font = `400 11px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([60, 40, 90]); ctx.fillText(String(n), bx, byy + .5); } } };      // a stack shows how many lie there
   const yA = top + c / 2;
   ['weapon', 'acc', 'drink'].forEach((k, n) => { const cx = W / 2 + (n - 1) * p * 1.25, id = has.includes(save.equip[k]) ? save.equip[k] : null; well(cx, yA, id, k); thinText(L.bagSlots[n], cx, yA + c / 2 + 17, 12, [255, 255, 255], .75); });      // weapon, charm, drink: what you have on
@@ -1698,7 +1695,7 @@ function drawBag(t) {      // what you wear sits in three glass hollows, what yo
   for (let n = 0; n < 12; n++) well(W / 2 + (n % 4 - 1.5) * p, yB + (n >> 2) * p, slabs[n], n);
   const yD = yB + 2 * p + c / 2 + 38;
   if (bag.sel) { thinText(L.items[bag.sel][0], W / 2, yD, 17, [255, 236, 190]); ctx.font = `300 13px ${THINF}`; wrapText(L.items[bag.sel][1], Math.min(W - 64, 300)).forEach((l, k) => { ctx.font = `300 13px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css([255, 255, 255], .85); ctx.fillText(l, W / 2, yD + 30 + k * 21); }); }
-  if (dg) { glow(dg.x, dg.y - c * .3, c * .8, [255, 240, 200], .5); drawItem(dg.id, dg.x, dg.y - c * .3, c * .36); }      // the thing in your hand follows the finger
+  if (dg) { drawItem(dg.id, dg.x, dg.y - c * .3, c * .36); }      // the thing in your hand follows the finger
   bag.box = [W / 2 - 2.5 * p, top - 20, W / 2 + 2.5 * p, yD + 96];
 }
 function bagTap(x, y) {      // finger down: pick a thing up, or (off the panel) close the backpack
