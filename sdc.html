@@ -40,7 +40,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 // Built by tools/mksdc.py, which fills in the drawing code of index.html below.
 const cv = document.getElementById('c'), ctx = cv.getContext('2d'), $ = id => document.getElementById(id);
 let W = 0, H = 0, DPR = 1;
-let mode = 'sdc', titleBox = null, moonAt = null, starCache = null, figNoShadow = false;
+let titleBox = null, moonAt = null, starCache = null, figNoShadow = false;
 /*ENGINE*/
 const rand = (a, b) => a + Math.random() * (b - a), irand = (a, b) => Math.floor(rand(a, b + 1));
 const THIN = '"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif';
@@ -73,9 +73,8 @@ const itemStat = it => it.k === 'gem' ? `价值 ${it.v} 金币` : it.k === 'bow'
 const stats = () => { const e = save.equip; return { dmg: 12 + (e.bow ? e.bow.dmg : 0), hp: 100 + (e.armor ? e.armor.hp : 0), spd: 4.4 * (1 + (e.acc ? e.acc.spd : 0)), sight: 7 + (e.acc ? e.acc.sight : 0) }; };
 
 // ---------- sound ----------
-let AC = null;
-function tone(f, d = .1, type = 'sine', v = .08, slide = 0) { if (!AC) return; const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime; o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0005, t + d); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d); }
-const sfx = { shoot: () => tone(520, .12, 'triangle', .07, -300), hit: () => tone(180, .09, 'square', .05, -80), coin: () => { tone(990, .07, 'sine', .06); setTimeout(() => tone(1320, .1, 'sine', .06), 60); }, chest: () => { tone(330, .12, 'triangle', .08); setTimeout(() => tone(494, .14, 'triangle', .08), 90); setTimeout(() => tone(660, .2, 'triangle', .08), 190); }, hurt: () => tone(120, .18, 'sawtooth', .07, -50), out: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, .24, 'sine', .07), i * 110)) };
+function blip(f, d = .1, type = 'sine', v = .08, slide = 0) { if (!AC || !master) return; const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime; o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0005, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d); }
+const sfx = { shoot: () => blip(520, .12, 'triangle', .07, -300), hit: () => blip(180, .09, 'square', .05, -80), coin: () => { blip(990, .07, 'sine', .06); setTimeout(() => blip(1320, .1, 'sine', .06), 60); }, chest: () => { blip(330, .12, 'triangle', .08); setTimeout(() => blip(494, .14, 'triangle', .08), 90); setTimeout(() => blip(660, .2, 'triangle', .08), 190); }, hurt: () => blip(120, .18, 'sawtooth', .07, -50), out: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => blip(f, .24, 'sine', .07), i * 110)) };
 
 // ---------- state ----------
 const P = { x: 4, y: 3.5, face: [1, 0], hp: 100, inv: 0, draw: 0, aim: [1, 0], step: 0, moved: 0, speed: 0, dash: 0, dashCd: 0, dashDir: [1, 0], path: [] };
@@ -164,7 +163,7 @@ function update(dt) {
   P.speed = moving ? st.spd * kk : 0;
   if (moving && P.draw <= 0) P.face = w;
   if (P.dashCd > 0) P.dashCd -= dt;
-  if (input.dash && scene === 'cave' && P.dashCd <= 0 && !input.shoot) { P.dash = .2; P.dashCd = .9; P.dashDir = moving ? w : P.face; P.inv = Math.max(P.inv, .24); tone(300, .1, 'triangle', .05, 200); crow.shot = 1; } input.dash = false;
+  if (input.dash && scene === 'cave' && P.dashCd <= 0 && !input.shoot) { P.dash = .2; P.dashCd = .9; P.dashDir = moving ? w : P.face; P.inv = Math.max(P.inv, .24); blip(300, .1, 'triangle', .05, 200); crow.shot = 1; } input.dash = false;
   if (P.dash > 0) { P.dash -= dt; tryMove(P, P.dashDir[0] * 11 * dt, P.dashDir[1] * 11 * dt, canStand); P.step += dt * 14; }
   else if (moving) { P.bump = false; tryMove(P, w[0] * P.speed * dt, w[1] * P.speed * dt, canStand); P.step += dt * P.speed * 2; }
   P.moved = moving ? P.moved + dt : 0;
@@ -178,7 +177,7 @@ function update(dt) {
   else if (tgt) { const dx = tgt.x - P.x, dy = tgt.y - P.y, d = Math.hypot(dx, dy) || 1; P.aim = [dx / d, dy / d]; } else P.aim = P.face;
   if (input.shoot) { P.draw = Math.min(.7, P.draw + dt + 1e-4); P.face = P.aim; }
   else if (P.draw > 0) { const k = clamp(P.draw / .7, .35, 1), sp = 11 + 9 * k; c.arrows.push({ x: P.x, y: P.y, vx: P.aim[0] * sp, vy: P.aim[1] * sp, dmg: st.dmg * (.55 + .75 * k), t: 1.6, stuck: false }); P.draw = 0; sfx.shoot(); crow.shot = 1; }
-  if (input.potion) { input.potion = false; if (c.potions > 0 && P.hp < st.hp) { c.potions--; P.hp = Math.min(st.hp, P.hp + 50); say('+50', P.x, P.y, [150, 240, 170]); tone(660, .2, 'sine', .07); } }
+  if (input.potion) { input.potion = false; if (c.potions > 0 && P.hp < st.hp) { c.potions--; P.hp = Math.min(st.hp, P.hp + 50); say('+50', P.x, P.y, [150, 240, 170]); blip(660, .2, 'sine', .07); } }
   reveal(c, P.x, P.y, st.sight); if (crow.state === 'fly') reveal(c, crow.x, crow.y, 2.6);      // the fog lifts round the hunter and, a little, round the crow
   for (let i = c.arrows.length - 1; i >= 0; i--) { const a = c.arrows[i]; a.t -= dt; if (a.t <= 0) { c.arrows.splice(i, 1); continue; } if (a.stuck) continue;
     let gone = false; for (let k = 0; k < 3 && !a.stuck && !gone; k++) { a.x += a.vx * dt / 3; a.y += a.vy * dt / 3; if (caveSolid(a.x, a.y)) { a.stuck = true; a.t = 1; break; } for (const m of c.mobs) if (Math.hypot(a.x - m.x, a.y - m.y) < m.r + .14) { hurtMob(c, m, a.dmg); gone = true; break; } } if (gone) c.arrows.splice(i, 1); }
@@ -215,7 +214,7 @@ function hurtMob(c, m, n) {
 function spawnDrop(c, x, y, o) { const a = rand(0, TAU), sp = rand(1, 3); c.drops.push(Object.assign({ x, y, z: .4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: rand(3, 5), age: 0 }, o)); }
 function take(c, d) {
   if (d.coin) { c.gold += d.coin; sfx.coin(); return true; }
-  if (d.potion) { c.potions++; say('药水', d.x, d.y, [150, 240, 170]); tone(800, .1); return true; }
+  if (d.potion) { c.potions++; say('药水', d.x, d.y, [150, 240, 170]); blip(800, .1); return true; }
   if (c.bag.length >= c.cap) { if (!d.warned) { d.warned = 1; say('背包满了', P.x, P.y, [255, 200, 160]); } return false; }
   c.bag.push(d.item); sfx.coin(); say(d.item.name, d.x, d.y, hexRGB(RAR[d.item.r].c)); return true;
 }
@@ -397,7 +396,8 @@ $('bagBtn').addEventListener('click', () => { if (modal) return; sel = null; pan
 
 // ---------- input ----------
 const K = { KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r', KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd' };
-function audio() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); }
+function audio() { if (!AC) initAudio(); if (AC && AC.state === 'suspended') AC.resume(); }
+restartGame = () => {};      // a dead sound context here is rebuilt, never worth throwing away a trip into the cave
 addEventListener('keydown', e => { if (e.repeat) return; audio(); if (K[e.code]) { input[K[e.code]] = 1; e.preventDefault(); } if (e.code === 'Space') { input.dash = true; e.preventDefault(); } if (e.code === 'KeyE' || e.code === 'Enter') { input.act = true; if (!modal) act(); } if (e.code === 'KeyQ') input.potion = true; if (e.code === 'KeyB' || e.code === 'Tab') { e.preventDefault(); if (modal) closePanel(); else { sel = null; panelBag(); } } if (e.code === 'Escape' && modal) closePanel(); if (e.code === 'KeyJ') input.shoot = true; });
 addEventListener('keyup', e => { if (K[e.code]) input[K[e.code]] = 0; if (e.code === 'KeyE' || e.code === 'Enter') input.act = false; if (e.code === 'KeyJ') input.shoot = false; });
 let joyId = null, joy0 = [0, 0];
@@ -439,6 +439,7 @@ function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now; dtNow = dt;
   if (!MANUAL) update(dt);
   draw(time);
+  mode = scene === 'cave' ? 'tower' : scene === 'town' ? 'world' : 'stall'; musicTick();      // the game's own music: the shop's warm tune in the tavern, the town's in the town, the tower's minor one in the cave
   const show = touch && scene === 'cave' && !modal ? 'flex' : 'none';
   $('bDash').style.display = show; $('bShoot').style.display = show; $('bPotion').style.display = show;
   $('rot').style.display = touch && H > W ? 'flex' : 'none';
@@ -447,5 +448,5 @@ function frame(now) {
 const MANUAL = location.search.includes('manual');
 updatePrompt();
 requestAnimationFrame(frame);
-window.__sdc = { P, crow, input, save, cam, v, get run() { return run; }, get scene() { return scene; }, enterCave, goTown, goTavern, leaveCave, panelTower, panelBar, panelBag, closePanel, tick: q => { for (let t = 0; t < q; t += 1 / 60) { dtNow = 1 / 60; update(1 / 60); } }, genCave };
+window.__sdc = { get audio() { return { state: AC && AC.state, mode, barIdx, nextBar: nextBar && +nextBar.toFixed(1), time: AC && +AC.currentTime.toFixed(1) }; }, P, crow, input, save, cam, v, get run() { return run; }, get scene() { return scene; }, enterCave, goTown, goTavern, leaveCave, panelTower, panelBar, panelBag, closePanel, tick: q => { for (let t = 0; t < q; t += 1 / 60) { dtNow = 1 / 60; update(1 / 60); } }, genCave };
 </script></body></html>

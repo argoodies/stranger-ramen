@@ -9,7 +9,7 @@ def lines(a, b):      # from the line starting with a up to (not including) the 
     i = src.index('\n' + a) + 1; return src[i:src.index('\n' + b, i) + 1]
 def one(start):       # one whole line
     i = src.index('\n' + start) + 1; return src[i:src.index('\n', i) + 1]
-parts = [one('const TAU'), lines('const clamp = ', '// One face everywhere'), block('class View'), block('function fig('), one('const PAL = '), one('let CLOTH'),
+parts = [one('const TAU'), lines('const clamp = ', '// One face everywhere'), lines('let AC = null, bus', '// ------------------------------------------------------------ world'), block('class View'), block('function fig('), one('const PAL = '), one('let CLOTH'),
          lines('const DOOR = [-5, 3]', 'function bfs('), block('function bfs('), block('function tree('), block('function lamp('), block('function drawTower('), block('function drawBarHouse('), block('function drawHouse('),
          one('const SKYD = '), block('function skyNow('), block('function drawSky('), one('const HALF = 180'), one('function gameHour'), one('function clockHands')]
 html = tpl.replace('/*ENGINE*/', '\n'.join(parts))

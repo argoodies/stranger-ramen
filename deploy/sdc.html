@@ -40,7 +40,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 // Built by tools/mksdc.py, which fills in the drawing code of index.html below.
 const cv = document.getElementById('c'), ctx = cv.getContext('2d'), $ = id => document.getElementById(id);
 let W = 0, H = 0, DPR = 1;
-let mode = 'sdc', titleBox = null, moonAt = null, starCache = null, figNoShadow = false;
+let titleBox = null, moonAt = null, starCache = null, figNoShadow = false;
 const TAU = Math.PI * 2, C30 = Math.cos(Math.PI / 6);
 
 const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
@@ -79,6 +79,108 @@ function rrect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
+
+let AC = null, bus, master, muted = false, nextBar = 0, barIdx = 0, boilGain = null, mode = 'title';
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+let initAudio = function () {
+  if (AC) return;
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    master = AC.createGain(); master.gain.value = 0.85; master.connect(AC.destination);
+    const conv = AC.createConvolver(), len = (AC.sampleRate * 3) | 0, buf = AC.createBuffer(2, len, AC.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / AC.sampleRate / 0.8); }
+    conv.buffer = buf; const wet = AC.createGain(); wet.gain.value = 0.5;
+    bus = AC.createGain(); bus.connect(master); bus.connect(conv); conv.connect(wet); wet.connect(master);
+    const nb = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), nd = nb.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const ns = AC.createBufferSource(); ns.buffer = nb; ns.loop = true;
+    const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 420; bp.Q.value = 0.8;
+    boilGain = AC.createGain(); boilGain.gain.value = 0; ns.connect(bp); bp.connect(boilGain); boilGain.connect(master); ns.start();
+    nextBar = AC.currentTime + 0.1;
+  } catch (e) { AC = null; }
+};
+function tone(f, t, dur, vol, type = 'sine') {
+  const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + 0.05);
+}
+function chime(m, when = 0, vol = 0.2, dec = 1.6) {
+  if (!AC) return; const t = AC.currentTime + when, f = mtof(m);
+  tone(f, t, dec, vol); tone(2 * f, t, dec * 0.45, vol * 0.3); tone(4.2 * f, t, 0.12, vol * 0.12);
+}
+function bell(f, vol = 0.22) {
+  if (!AC) return; const t = AC.currentTime;
+  for (const [r, a, d] of [[0.5, .55, 4.5], [1, 1, 3.4], [1.19, .55, 2.6], [1.5, .32, 2], [2, .45, 1.5], [2.74, .22, 1], [4.07, .1, .45]]) tone(f * r, t, d, vol * a);
+}
+function pad(notes, t, dur) {
+  for (const m of notes) for (const det of [1.0035, 0.9965]) {
+    const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = mtof(m) * det;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.028, t + 2.4); g.gain.setValueAtTime(0.028, t + dur - 2.6); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + 0.1);
+  }
+}
+const MUSIC = {
+  world: [[[38, 45, 50, 54, 57, 64], [62, 64, 66, 69, 71, 74, 76, 78]], [[35, 42, 47, 50, 54, 61], [59, 62, 64, 66, 69, 71, 74]], [[43, 50, 55, 59, 62, 69], [67, 69, 71, 74, 76, 79]], [[45, 52, 57, 61, 64], [69, 71, 73, 76, 78, 81]]],
+  tower: [[[38, 45, 50, 53, 57, 64], [62, 65, 67, 69, 72, 74, 77]], [[34, 41, 50, 53, 58], [58, 62, 65, 67, 70, 74]], [[36, 43, 52, 55, 60], [60, 64, 67, 69, 72, 76]], [[33, 45, 52, 57, 60], [57, 60, 64, 67, 69, 72]]],
+  stall: [[[43, 50, 55, 59, 62], [67, 69, 71, 74, 76, 79]], [[40, 47, 52, 55, 62], [64, 67, 69, 71, 74, 76]], [[36, 43, 52, 55, 64], [60, 64, 67, 69, 72, 76]], [[38, 45, 50, 54, 57], [62, 66, 69, 71, 74, 78]]],
+};
+MUSIC.church = [[[36, 43, 48, 52, 55, 60], [60, 64, 67, 72, 76, 79]], [[41, 48, 53, 57, 60], [60, 65, 69, 72, 77, 81]], [[43, 50, 55, 59, 62], [62, 67, 71, 74, 79]], [[40, 48, 52, 55, 60, 64], [64, 67, 72, 76, 79, 84]]];      // inside the church: slow, bright chords, nothing warlike
+let melIdx = 3;
+// keep the music alive across tab switches / app backgrounding: resume the context, or rebuild it if the browser killed it
+function hushAudio() {
+  if (!AC || AC.state !== 'running') return;
+  const ctx = AC, t = ctx.currentTime;
+  try { master.gain.cancelScheduledValues(t); master.gain.setTargetAtTime(0, t, .012); if (boilGain) boilGain.gain.value = 0; } catch (e) {}
+  setTimeout(() => { if (document.hidden && ctx.state === 'running') { const p = ctx.suspend(); if (p && p.catch) p.catch(() => {}); } }, 70);
+}
+function unhush() { if (AC && master && AC.state === 'running') { const t = AC.currentTime; try { master.gain.cancelScheduledValues(t); master.gain.setTargetAtTime(.85, t, .08); } catch (e) {} } }
+window.__hush = hushAudio;
+function wakeAudio(gesture) {
+  unhush();
+  if (!AC) { if (gesture && mode !== 'title') initAudio(); return; }
+  if (AC.state === 'closed') { AC = null; if (gesture) initAudio(); return; }
+  if (AC.state !== 'running') {
+    const old = AC, p = old.resume();
+    if (p && p.then) p.then(unhush, () => {});
+    // still not running shortly after a real tap → throw the dead context away and start a fresh one
+    if (gesture) setTimeout(() => { if (AC === old && old.state !== 'running') { try { old.close(); } catch (e) {} AC = null; initAudio(); } }, 600);
+  }
+}
+let wakeSeq = 0, restartGame = () => location.reload();
+const audioAlive = t0 => AC && AC.state === 'running' && AC.currentTime > t0 + 0.05;
+function returnCheck() {
+  if (mode === 'title' || !AC || document.hidden) return;
+  const seq = ++wakeSeq, live = () => seq === wakeSeq && !document.hidden;
+  wakeAudio(false);
+  setTimeout(() => { if (!live()) return; const t0 = AC ? AC.currentTime : 0;
+    setTimeout(() => { if (!live() || audioAlive(t0)) return;             // sound is running again: nothing to do
+      try { AC.close(); } catch (e) {} AC = null; initAudio();              // dead context: build a fresh one
+      const t1 = AC ? AC.currentTime : 0;
+      setTimeout(() => { if (live() && !audioAlive(t1)) restartGame(); }, 700);   // still silent: start the game over
+    }, 400);
+  }, 500);
+}
+window.__wake = returnCheck;
+document.addEventListener('visibilitychange', () => { if (document.hidden) hushAudio(); else returnCheck(); });
+window.addEventListener('pagehide', hushAudio);
+window.addEventListener('pageshow', e => { if (e.persisted) returnCheck(); else wakeAudio(false); });
+window.addEventListener('focus', () => wakeAudio(false));
+for (const ev of ['pointerdown', 'touchend', 'keydown']) window.addEventListener(ev, () => wakeAudio(true), true);
+function musicTick() {
+  if (!AC || AC.state !== 'running') return;
+  if (boilGain && mode !== 'stall' && boilGain.gain.value > 0) boilGain.gain.value = 0;      // the simmer is a shop sound only
+  if (nextBar < AC.currentTime - .05) nextBar = AC.currentTime + .15;   // came back after being away: pick the music up right now
+  while (nextBar < AC.currentTime + 1.2) {
+    const [ch, sc] = (MUSIC[mode] || MUSIC.world)[barIdx++ % 4];
+    pad(ch, nextBar, 8.5);
+    for (let i = 0; i < 10; i++) if (Math.random() < (mode === 'stall' ? 0.3 : 0.4)) {
+      melIdx = clamp(melIdx + pick([-2, -1, -1, 1, 1, 2]), 0, sc.length - 1);
+      const t = nextBar + i * 0.6 - AC.currentTime; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);
+    }
+    nextBar += 6;
+  }
+}
+
 
 class View {
   constructor(cx, cy, s) { this.cx = cx; this.cy = cy; this.s = s; }
@@ -327,9 +429,8 @@ const itemStat = it => it.k === 'gem' ? `价值 ${it.v} 金币` : it.k === 'bow'
 const stats = () => { const e = save.equip; return { dmg: 12 + (e.bow ? e.bow.dmg : 0), hp: 100 + (e.armor ? e.armor.hp : 0), spd: 4.4 * (1 + (e.acc ? e.acc.spd : 0)), sight: 7 + (e.acc ? e.acc.sight : 0) }; };
 
 // ---------- sound ----------
-let AC = null;
-function tone(f, d = .1, type = 'sine', v = .08, slide = 0) { if (!AC) return; const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime; o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0005, t + d); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d); }
-const sfx = { shoot: () => tone(520, .12, 'triangle', .07, -300), hit: () => tone(180, .09, 'square', .05, -80), coin: () => { tone(990, .07, 'sine', .06); setTimeout(() => tone(1320, .1, 'sine', .06), 60); }, chest: () => { tone(330, .12, 'triangle', .08); setTimeout(() => tone(494, .14, 'triangle', .08), 90); setTimeout(() => tone(660, .2, 'triangle', .08), 190); }, hurt: () => tone(120, .18, 'sawtooth', .07, -50), out: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, .24, 'sine', .07), i * 110)) };
+function blip(f, d = .1, type = 'sine', v = .08, slide = 0) { if (!AC || !master) return; const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime; o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0005, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d); }
+const sfx = { shoot: () => blip(520, .12, 'triangle', .07, -300), hit: () => blip(180, .09, 'square', .05, -80), coin: () => { blip(990, .07, 'sine', .06); setTimeout(() => blip(1320, .1, 'sine', .06), 60); }, chest: () => { blip(330, .12, 'triangle', .08); setTimeout(() => blip(494, .14, 'triangle', .08), 90); setTimeout(() => blip(660, .2, 'triangle', .08), 190); }, hurt: () => blip(120, .18, 'sawtooth', .07, -50), out: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => blip(f, .24, 'sine', .07), i * 110)) };
 
 // ---------- state ----------
 const P = { x: 4, y: 3.5, face: [1, 0], hp: 100, inv: 0, draw: 0, aim: [1, 0], step: 0, moved: 0, speed: 0, dash: 0, dashCd: 0, dashDir: [1, 0], path: [] };
@@ -418,7 +519,7 @@ function update(dt) {
   P.speed = moving ? st.spd * kk : 0;
   if (moving && P.draw <= 0) P.face = w;
   if (P.dashCd > 0) P.dashCd -= dt;
-  if (input.dash && scene === 'cave' && P.dashCd <= 0 && !input.shoot) { P.dash = .2; P.dashCd = .9; P.dashDir = moving ? w : P.face; P.inv = Math.max(P.inv, .24); tone(300, .1, 'triangle', .05, 200); crow.shot = 1; } input.dash = false;
+  if (input.dash && scene === 'cave' && P.dashCd <= 0 && !input.shoot) { P.dash = .2; P.dashCd = .9; P.dashDir = moving ? w : P.face; P.inv = Math.max(P.inv, .24); blip(300, .1, 'triangle', .05, 200); crow.shot = 1; } input.dash = false;
   if (P.dash > 0) { P.dash -= dt; tryMove(P, P.dashDir[0] * 11 * dt, P.dashDir[1] * 11 * dt, canStand); P.step += dt * 14; }
   else if (moving) { P.bump = false; tryMove(P, w[0] * P.speed * dt, w[1] * P.speed * dt, canStand); P.step += dt * P.speed * 2; }
   P.moved = moving ? P.moved + dt : 0;
@@ -432,7 +533,7 @@ function update(dt) {
   else if (tgt) { const dx = tgt.x - P.x, dy = tgt.y - P.y, d = Math.hypot(dx, dy) || 1; P.aim = [dx / d, dy / d]; } else P.aim = P.face;
   if (input.shoot) { P.draw = Math.min(.7, P.draw + dt + 1e-4); P.face = P.aim; }
   else if (P.draw > 0) { const k = clamp(P.draw / .7, .35, 1), sp = 11 + 9 * k; c.arrows.push({ x: P.x, y: P.y, vx: P.aim[0] * sp, vy: P.aim[1] * sp, dmg: st.dmg * (.55 + .75 * k), t: 1.6, stuck: false }); P.draw = 0; sfx.shoot(); crow.shot = 1; }
-  if (input.potion) { input.potion = false; if (c.potions > 0 && P.hp < st.hp) { c.potions--; P.hp = Math.min(st.hp, P.hp + 50); say('+50', P.x, P.y, [150, 240, 170]); tone(660, .2, 'sine', .07); } }
+  if (input.potion) { input.potion = false; if (c.potions > 0 && P.hp < st.hp) { c.potions--; P.hp = Math.min(st.hp, P.hp + 50); say('+50', P.x, P.y, [150, 240, 170]); blip(660, .2, 'sine', .07); } }
   reveal(c, P.x, P.y, st.sight); if (crow.state === 'fly') reveal(c, crow.x, crow.y, 2.6);      // the fog lifts round the hunter and, a little, round the crow
   for (let i = c.arrows.length - 1; i >= 0; i--) { const a = c.arrows[i]; a.t -= dt; if (a.t <= 0) { c.arrows.splice(i, 1); continue; } if (a.stuck) continue;
     let gone = false; for (let k = 0; k < 3 && !a.stuck && !gone; k++) { a.x += a.vx * dt / 3; a.y += a.vy * dt / 3; if (caveSolid(a.x, a.y)) { a.stuck = true; a.t = 1; break; } for (const m of c.mobs) if (Math.hypot(a.x - m.x, a.y - m.y) < m.r + .14) { hurtMob(c, m, a.dmg); gone = true; break; } } if (gone) c.arrows.splice(i, 1); }
@@ -469,7 +570,7 @@ function hurtMob(c, m, n) {
 function spawnDrop(c, x, y, o) { const a = rand(0, TAU), sp = rand(1, 3); c.drops.push(Object.assign({ x, y, z: .4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: rand(3, 5), age: 0 }, o)); }
 function take(c, d) {
   if (d.coin) { c.gold += d.coin; sfx.coin(); return true; }
-  if (d.potion) { c.potions++; say('药水', d.x, d.y, [150, 240, 170]); tone(800, .1); return true; }
+  if (d.potion) { c.potions++; say('药水', d.x, d.y, [150, 240, 170]); blip(800, .1); return true; }
   if (c.bag.length >= c.cap) { if (!d.warned) { d.warned = 1; say('背包满了', P.x, P.y, [255, 200, 160]); } return false; }
   c.bag.push(d.item); sfx.coin(); say(d.item.name, d.x, d.y, hexRGB(RAR[d.item.r].c)); return true;
 }
@@ -651,7 +752,8 @@ $('bagBtn').addEventListener('click', () => { if (modal) return; sel = null; pan
 
 // ---------- input ----------
 const K = { KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r', KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd' };
-function audio() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); }
+function audio() { if (!AC) initAudio(); if (AC && AC.state === 'suspended') AC.resume(); }
+restartGame = () => {};      // a dead sound context here is rebuilt, never worth throwing away a trip into the cave
 addEventListener('keydown', e => { if (e.repeat) return; audio(); if (K[e.code]) { input[K[e.code]] = 1; e.preventDefault(); } if (e.code === 'Space') { input.dash = true; e.preventDefault(); } if (e.code === 'KeyE' || e.code === 'Enter') { input.act = true; if (!modal) act(); } if (e.code === 'KeyQ') input.potion = true; if (e.code === 'KeyB' || e.code === 'Tab') { e.preventDefault(); if (modal) closePanel(); else { sel = null; panelBag(); } } if (e.code === 'Escape' && modal) closePanel(); if (e.code === 'KeyJ') input.shoot = true; });
 addEventListener('keyup', e => { if (K[e.code]) input[K[e.code]] = 0; if (e.code === 'KeyE' || e.code === 'Enter') input.act = false; if (e.code === 'KeyJ') input.shoot = false; });
 let joyId = null, joy0 = [0, 0];
@@ -693,6 +795,7 @@ function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now; dtNow = dt;
   if (!MANUAL) update(dt);
   draw(time);
+  mode = scene === 'cave' ? 'tower' : scene === 'town' ? 'world' : 'stall'; musicTick();      // the game's own music: the shop's warm tune in the tavern, the town's in the town, the tower's minor one in the cave
   const show = touch && scene === 'cave' && !modal ? 'flex' : 'none';
   $('bDash').style.display = show; $('bShoot').style.display = show; $('bPotion').style.display = show;
   $('rot').style.display = touch && H > W ? 'flex' : 'none';
@@ -701,5 +804,5 @@ function frame(now) {
 const MANUAL = location.search.includes('manual');
 updatePrompt();
 requestAnimationFrame(frame);
-window.__sdc = { P, crow, input, save, cam, v, get run() { return run; }, get scene() { return scene; }, enterCave, goTown, goTavern, leaveCave, panelTower, panelBar, panelBag, closePanel, tick: q => { for (let t = 0; t < q; t += 1 / 60) { dtNow = 1 / 60; update(1 / 60); } }, genCave };
+window.__sdc = { get audio() { return { state: AC && AC.state, mode, barIdx, nextBar: nextBar && +nextBar.toFixed(1), time: AC && +AC.currentTime.toFixed(1) }; }, P, crow, input, save, cam, v, get run() { return run; }, get scene() { return scene; }, enterCave, goTown, goTavern, leaveCave, panelTower, panelBar, panelBag, closePanel, tick: q => { for (let t = 0; t < q; t += 1 / 60) { dtNow = 1 / 60; update(1 / 60); } }, genCave };
 </script></body></html>
