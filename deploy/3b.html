@@ -561,18 +561,6 @@ function logoSized(im, sc) {      // the strokes ready-made at the size they are
     return { ...q, c }; });
   im._sized = { sc, list }; return list;
 }
-function logoPoints(im) {      // spots on the strokes of the lettering where a glint may land, found once
-  if (im._pts) return im._pts; const pts = [];
-  try { const c = logoThin(im), w = c.width, h = c.height, d = c.getContext('2d').getImageData(0, 0, w, h).data; for (let n = 0; n < 6000 && pts.length < 240; n++) { const x = (Math.random() * w) | 0, y = (Math.random() * h) | 0; if (d[(y * w + x) * 4 + 3] > 200) pts.push([x, y]); } } catch (e) {}
-  return im._pts = pts;
-}
-function logoSpark(im, x, y, w, h, tt) {      // now and then a single point on a letter catches the light: a small four-pointed star that opens and closes
-  const pts = logoPoints(im); if (!pts.length || tt < 1.8) return; const k = w / im.naturalWidth, B = 2.6, D = .95, j = Math.floor((tt - 1.8) / B), ph = (tt - 1.8 - j * B) / D; if (ph >= 1) return;
-  const r = Math.sin(j * 78.233) * 43758.5453, q = pts[Math.floor((r - Math.floor(r)) * pts.length)], u = Math.sin(Math.PI * ph) ** 2, px = x + q[0] * k, py = y + q[1] * k, R = h * (.34 + .3 * Math.abs(Math.sin(j * 3.7))) * u;
-  ctx.save(); ctx.shadowColor = 'transparent'; glow(px, py, R * 1.5, [255, 244, 210], .9 * u);
-  for (const a of [0, Math.PI / 2]) { const c = Math.cos(a), n = Math.sin(a); poly([[px + c * R, py + n * R], [px - n * R * .07, py + c * R * .07], [px - c * R, py - n * R], [px + n * R * .07, py - c * R * .07]], [255, 252, 236], u); }
-  circ(px, py, R * .1, [255, 255, 255], u); ctx.restore();
-}
 function logoWaver(im, x, y, w, h, tt) {      // the logo drawn crisp: its strokes ready-made at the size shown and laid on whole device pixels; it fades in with the title and then stays still (tt: seconds since the title began)
   const pad = h * .12, oc = logoCv || (logoCv = document.createElement('canvas')), cw = Math.ceil((w + pad * 2) * DPR), ch = Math.ceil((h + pad * 2) * DPR);
   if (oc.width !== cw || oc.height !== ch) { oc.width = cw; oc.height = ch; }
@@ -851,7 +839,7 @@ function drawWorld(t, dt) {
     const tt = titleT0 == null ? -1 : titleT0;
     { const u = ease(clamp((tt - .35) / 1.2)), im = LOGO[LANG] || LOGO.hans, ok = im.complete && im.naturalWidth, ar = ok ? im.naturalHeight / im.naturalWidth : .17, lw = Math.min(W * .7, 480, H * .075 / ar), TF = titleFrame(), lx = W / 2 - lw / 2, lh = ok ? lw * ar : fs;      // dead centre across, over the tower
       y = TF.ty;      // centred across, just above the spire      // the logo, to the right of the clock face, as wide as the room there allows
-      titleBox = { cx: lx + lw / 2, hw: lw / 2, y, fs: lh, u }; if (u > 0 && ok) { ctx.globalAlpha = .96 * u; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; logoWaver(im, lx, y - lh / 2, lw, lh, tt); logoSpark(im, lx, y - lh / 2, lw, lh, tt); ctx.globalAlpha = 1; } } ctx.restore();
+      titleBox = { cx: lx + lw / 2, hw: lw / 2, y, fs: lh, u }; if (u > 0 && ok) { ctx.globalAlpha = .96 * u; ctx.shadowColor = `rgba(8,6,28,${.5 * u})`; logoWaver(im, lx, y - lh / 2, lw, lh, tt); ctx.globalAlpha = 1; } } ctx.restore();
     // no "tap anywhere to start" hint: any tap starts at once      // the fade is carried in the colours themselves, not globalAlpha, which Safari ignores for text drawn with a shadow      // the whole title fades in at once, where it stands; nothing moves or changes size
   }
   if (mode === 'world' && zoomTarget > .5 && !bag.open) { if (zoomHintT0 == null) zoomHintT0 = t; tapHint('tapGo', t - zoomHintT0); } else zoomHintT0 = null;      // the zoomed-out view of the town: a tap anywhere goes back in
