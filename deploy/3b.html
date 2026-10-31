@@ -1593,17 +1593,16 @@ function drawRing(x, y, r, a = 1) {
   ctx.beginPath(); ctx.ellipse(x, y + r * .2, r * .8, r * .8, 0, 0, TAU); ctx.strokeStyle = css([250, 208, 110], a); ctx.lineWidth = Math.max(1.5, r * .3); ctx.stroke();
   poly([[x, y - r * 1.25], [x + r * .42, y - r * .78], [x, y - r * .36], [x - r * .42, y - r * .78]], [226, 244, 255], a);
 }
-function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a gold ring pendant cut like the buildings of the town: the ring's faces take the light in three tones with a bevel inside it, a faceted cross stands in the ring, and a small diamond hangs it
-  const lit = [255, 232, 170], mid = [238, 196, 112], dark = [190, 132, 76], cy = y + r * .1, R = r * .98, B = r * .8, I = r * .7;
-  const arc = (r0, r1, q0, q1, c) => { ctx.beginPath(); ctx.arc(x, cy, r0, q0, q1); ctx.arc(x, cy, r1, q1, q0, true); ctx.closePath(); ctx.fillStyle = css(c, a); ctx.fill(); };
-  poly([[x, cy - R - r * .03], [x + r * .1, cy - R - r * .14], [x, cy - R - r * .25], [x - r * .1, cy - R - r * .14]], mid, a); poly([[x, cy - R - r * .03], [x + r * .1, cy - R - r * .14], [x, cy - R - r * .25]], dark, a);      // the little diamond it hangs by
-  const A = -Math.PI * 5 / 6, Bq = -Math.PI / 6, Cq = Math.PI / 2;      // three faces round the ring, lit from above and to the left, as the town is
-  arc(R, B, A, Bq, lit); arc(R, B, Bq, Cq, dark); arc(R, B, Cq, A + TAU, mid);
-  arc(B, I, A, Bq, dark); arc(B, I, Bq, Cq, mid); arc(B, I, Cq, A + TAU, lit);      // the bevel inside the ring: the same faces, turned the other way to the light
-  const w = r * .105, L = I * .84, H = I * .66, by = cy - I * .14, tip = r * .1;      // the cross: each arm a ridge, split down its length into a lit face and a shaded one, its ends cut to a point
-  poly([[x, cy - L - tip], [x - w, cy - L], [x - w, cy + L], [x, cy + L + tip]], lit, a); poly([[x, cy - L - tip], [x + w, cy - L], [x + w, cy + L], [x, cy + L + tip]], dark, a);
-  poly([[x - H - tip, by], [x - H, by - w], [x + H, by - w], [x + H + tip, by]], mid, a); poly([[x - H - tip, by], [x - H, by + w], [x + H, by + w], [x + H + tip, by]], dark, a);
-  poly([[x, by - w * 1.5], [x + w * 1.5, by], [x, by + w * 1.5], [x - w * 1.5, by]], lit, a); poly([[x, by - w * 1.5], [x + w * 1.5, by], [x, by + w * 1.5]], mid, a);
+function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a monk's Celtic cross in copper gold, tilted, reduced to a few plain solids: two beams and a round ring, each a lit face, a mid face and a dark side
+  const lit = [250, 208, 150], mid = [222, 156, 96], dark = [128, 72, 56], k = r * .86, rot = .6, cs = Math.cos(rot), sn = Math.sin(rot), cx = x + k * .05, cy = y + k * .08, d = k * .14, dx = d * (.55 * cs + .8 * sn), dy = d * (.8 * cs - .55 * sn), oy = -k * .42;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+  const R = k * .72, Ri = k * .5, A = -rot - Math.PI * 3 / 4, ringPath = (ox, oz, q0, q1) => { ctx.beginPath(); ctx.arc(ox, oy + oz, R, q0, q1); ctx.arc(ox, oy + oz, Ri, q1, q0, true); ctx.closePath(); };
+  ringPath(dx, dy, 0, TAU); ctx.fillStyle = css(dark, a); ctx.fill();      // the ring's depth
+  ringPath(0, 0, A, A + Math.PI); ctx.fillStyle = css(lit, a); ctx.fill(); ringPath(0, 0, A + Math.PI, A + TAU); ctx.fillStyle = css(mid, a); ctx.fill();      // a true circle: half to the light, half away
+  const beam = (x0, y0, x1, y1, along) => { poly([[x1, y0], [x1 + dx, y0 + dy], [x1 + dx, y1 + dy], [x0 + dx, y1 + dy], [x0, y1], [x1, y1]], dark, a);
+    if (along) { const m = (x0 + x1) / 2; poly([[x0, y0], [m, y0], [m, y1], [x0, y1]], lit, a); poly([[m, y0], [x1, y0], [x1, y1], [m, y1]], mid, a); } else { const m = (y0 + y1) / 2; poly([[x0, y0], [x1, y0], [x1, m], [x0, m]], lit, a); poly([[x0, m], [x1, m], [x1, y1], [x0, y1]], mid, a); } };
+  const w = k * .15; beam(-w, oy - k * 1, w, k * 1.3, true); beam(-k * 1.02, oy - w, k * 1.02, oy + w, false);
+  ctx.restore();
 }
 function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn in his hands (x, y: his feet; K: his size). A blade in mid-stroke is not drawn: the arc of the cut stands for it.
   if (!armed()) return; const sl = sleepy(), hx = x + K * .3, hy = y - K * .42;
