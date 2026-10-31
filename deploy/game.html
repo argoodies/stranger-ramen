@@ -1592,9 +1592,17 @@ function drawRing(x, y, r, a = 1) {
   ctx.beginPath(); ctx.ellipse(x, y + r * .2, r * .8, r * .8, 0, 0, TAU); ctx.strokeStyle = css([250, 208, 110], a); ctx.lineWidth = Math.max(1.5, r * .3); ctx.stroke();
   poly([[x, y - r * 1.25], [x + r * .42, y - r * .78], [x, y - r * .36], [x - r * .42, y - r * .78]], [226, 244, 255], a);
 }
-function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a small gold cross on a pale shield
-  glow(x, y, r * 1.8, [170, 214, 255], .8 * a); poly([[x - r * .8, y - r * .9], [x + r * .8, y - r * .9], [x + r * .8, y + r * .15], [x, y + r * 1.05], [x - r * .8, y + r * .15]], [214, 232, 255], a);
-  ctx.fillStyle = css([236, 196, 110], a); ctx.fillRect(x - r * .13, y - r * .65, r * .26, r * 1.2); ctx.fillRect(x - r * .45, y - r * .32, r * .9, r * .26);
+function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a gold ring pendant cut like the buildings of the town: the ring's faces take the light in three tones with a bevel inside it, a faceted cross stands in the ring, and a small diamond hangs it
+  const lit = [255, 232, 170], mid = [238, 196, 112], dark = [190, 132, 76], cy = y + r * .1, R = r * .98, B = r * .8, I = r * .7;
+  const arc = (r0, r1, q0, q1, c) => { ctx.beginPath(); ctx.arc(x, cy, r0, q0, q1); ctx.arc(x, cy, r1, q1, q0, true); ctx.closePath(); ctx.fillStyle = css(c, a); ctx.fill(); };
+  poly([[x, cy - R - r * .03], [x + r * .1, cy - R - r * .14], [x, cy - R - r * .25], [x - r * .1, cy - R - r * .14]], mid, a); poly([[x, cy - R - r * .03], [x + r * .1, cy - R - r * .14], [x, cy - R - r * .25]], dark, a);      // the little diamond it hangs by
+  const A = -Math.PI * 5 / 6, Bq = -Math.PI / 6, Cq = Math.PI / 2;      // three faces round the ring, lit from above and to the left, as the town is
+  arc(R, B, A, Bq, lit); arc(R, B, Bq, Cq, dark); arc(R, B, Cq, A + TAU, mid);
+  arc(B, I, A, Bq, dark); arc(B, I, Bq, Cq, mid); arc(B, I, Cq, A + TAU, lit);      // the bevel inside the ring: the same faces, turned the other way to the light
+  const w = r * .105, L = I * .84, H = I * .66, by = cy - I * .14, tip = r * .1;      // the cross: each arm a ridge, split down its length into a lit face and a shaded one, its ends cut to a point
+  poly([[x, cy - L - tip], [x - w, cy - L], [x - w, cy + L], [x, cy + L + tip]], lit, a); poly([[x, cy - L - tip], [x + w, cy - L], [x + w, cy + L], [x, cy + L + tip]], dark, a);
+  poly([[x - H - tip, by], [x - H, by - w], [x + H, by - w], [x + H + tip, by]], mid, a); poly([[x - H - tip, by], [x - H, by + w], [x + H, by + w], [x + H + tip, by]], dark, a);
+  poly([[x, by - w * 1.5], [x + w * 1.5, by], [x, by + w * 1.5], [x - w * 1.5, by]], lit, a); poly([[x, by - w * 1.5], [x + w * 1.5, by], [x, by + w * 1.5]], mid, a);
 }
 function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn in his hands (x, y: his feet; K: his size). A blade in mid-stroke is not drawn: the arc of the cut stands for it.
   if (!armed()) return; const sl = sleepy(), hx = x + K * .3, hy = y - K * .42;
@@ -2343,7 +2351,7 @@ function drawChurch(t, dt) {
     else if (f.k === 'drop') { const y0 = q[1] - K * (.7 - .5 * u); circ(q[0] + K * .12, y0, K * .07, [200, 30, 50], 1 - u); poly([[q[0] + K * .12, y0 - K * .16], [q[0] + K * .06, y0 - K * .02], [q[0] + K * .18, y0 - K * .02]], [200, 30, 50], 1 - u); }      // a drop of blood falls
     else if (f.k === 'ring') { const r = s * (.4 + 2.2 * eout(u)) * 1.22; ctx.beginPath(); ctx.ellipse(q[0], q[1], r, r * .577, 0, 0, TAU); ctx.strokeStyle = css([255, 232, 150], 1 - u); ctx.lineWidth = s * .12 * (1 - u) + 1; ctx.stroke(); glow(q[0], q[1] - K * .6, K * 2.2, [255, 236, 170], 1 - u); }
     else if (f.k === 'zap') { const pts = [[q[0], q[1]]]; let zx = q[0], zy = q[1]; for (let i = 1; i <= 7; i++) { zy -= s * 1.3; zx += Math.sin(i * 12.9898 + f.x * 78.233) * s * .5; pts.push([zx, zy]); } line(pts, [200, 180, 255], s * .22 * (1 - u) + 1, .6 * (1 - u)); line(pts, [255, 255, 255], s * .09 * (1 - u) + 1, 1 - u); glow(q[0], q[1] - K * .5, K * 2.4, [190, 170, 255], 1 - u); if (u < .25) { ctx.fillStyle = css([220, 210, 255], .25 * (1 - u * 4)); ctx.fillRect(0, 0, W, H); } }
-    else if (f.k === 'shield') { const cy = q[1] - K * .6, r = K * (1 + .25 * eout(u)); ctx.beginPath(); ctx.arc(q[0], cy, r, 0, TAU); ctx.fillStyle = css([170, 214, 255], .35 * (1 - u)); ctx.fill(); ctx.strokeStyle = css([226, 240, 255], 1 - u); ctx.lineWidth = Math.max(2, K * .08); ctx.stroke(); drawGuard(q[0], cy - r * 1.1, K * .28, 1 - u); }
+    else if (f.k === 'shield') { const cy = q[1] - K * .6, r = K * (.9 + .5 * eout(u)), fa = clamp((1 - u) * 1.6); ctx.beginPath(); ctx.arc(q[0], cy, r, 0, TAU); ctx.strokeStyle = css([255, 232, 170], .8 * (1 - u)); ctx.lineWidth = Math.max(2, K * .07); ctx.stroke(); drawGuard(q[0], cy - K * (1.25 + .12 * eout(u)), K * (.34 + .1 * eout(Math.min(1, u * 3))), fa); }      // the charm rises over the chef in a widening gold ring
     else if (f.k === 'hat') { { const cy0 = q[1] - K * .8, r = K * (1.02 + .2 * eout(u)); ctx.beginPath(); ctx.arc(q[0], cy0, r, 0, TAU); ctx.fillStyle = css([255, 220, 90], .2 * (1 - u)); ctx.fill(); ctx.strokeStyle = css([255, 214, 70], .95 * (1 - u)); ctx.lineWidth = Math.max(1.5, K * .05); ctx.stroke(); } }      // a blow turned aside by the Advocate's shield: just a yellow ring, only as the blow lands
     else if (f.k === 'cast') { const g = f.to || f, b = P(g.x, g.y), kk = K * (g.kind === 'whirl' ? 1.2 : 1), end = b[1] - kk * 2.27, cy = end - kk * .9 * (1 - eout(u)); glow(b[0], cy, kk * (.9 - .45 * u), [236, 200, 120], .8 * (1 - u * .5)); drawScales(b[0], cy, kk * (.36 - .16 * eout(u)), 1); }      // no beam: a pair of scales takes shape above whoever is shielded and settles over its head
     else if (f.k === 'bolt') { const a = P(f.x, f.y, .6), b = P(f.x1, f.y1, .6); line([a, b], [255, 236, 170], s * .14 * (1 - u) + 1, 1 - u); glow(b[0], b[1], s * .9, [255, 236, 170], 1 - u); } }
