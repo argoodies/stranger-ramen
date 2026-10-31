@@ -6,10 +6,7 @@
 html,body{margin:0;height:100%;background:#16122c;overflow:hidden;font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif;font-weight:300;color:#fff;-webkit-user-select:none;user-select:none;touch-action:none}
 #rot{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:#1e1a44;font-size:16px;line-height:2;z-index:9;text-align:center}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-.btn{position:fixed;display:none;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;font:inherit;font-size:15px;padding:0;-webkit-tap-highlight-color:transparent;touch-action:none}
-.btn.on{background:rgba(255,255,255,.34)}
-#hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(26px + env(safe-area-inset-bottom));padding:9px 18px;border-radius:22px;background:rgba(20,16,44,.72);border:1px solid rgba(255,255,255,.3);font-size:14px;display:none;white-space:nowrap;cursor:pointer}
-#bagBtn{position:fixed;top:calc(12px + env(safe-area-inset-top));left:12px;padding:8px 14px;border-radius:20px;background:rgba(20,16,44,.6);border:1px solid rgba(255,255,255,.3);color:#fff;font:inherit;font-size:13px}
+#hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(26px + env(safe-area-inset-bottom));padding:9px 18px;border-radius:22px;background:rgba(20,16,44,.72);border:1px solid rgba(255,255,255,.3);font-size:14px;display:none;white-space:nowrap;}
 #panel{position:fixed;inset:0;display:none;background:rgba(36,30,78,.86);overflow:auto;padding:calc(18px + env(safe-area-inset-top)) 16px 26px;box-sizing:border-box;touch-action:pan-y}
 #panel .in{max-width:520px;margin:0 auto}
 #panel h2{font-weight:200;font-size:22px;letter-spacing:.3em;text-align:center;margin:6px 0 4px}
@@ -22,16 +19,13 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .act{padding:10px 20px;border-radius:22px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff;font:inherit;font-size:14px}
 .act.main{background:#ffe6a8;color:#3a2c5a;border-color:#ffe6a8;font-weight:400}
 .act:disabled{opacity:.4}
+.foc{outline:2px solid #ffe6a8;outline-offset:2px}
 #detail{min-height:58px;text-align:center;font-size:13.5px;line-height:1.7;margin-top:12px}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.slots .cell{aspect-ratio:auto;height:62px;flex-direction:column;font-size:15px}.slots small{font-size:10.5px;opacity:.7;font-weight:300}
 </style></head><body>
 <canvas id="c"></canvas>
-<button id="bagBtn">背包</button>
 <div id="hint"></div>
-<button class="btn" id="bShoot" style="width:88px;height:88px;right:calc(26px + env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom))">射</button>
-<button class="btn" id="bDash" style="width:62px;height:62px;right:calc(126px + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom))">闪</button>
-<button class="btn" id="bPotion" style="width:50px;height:50px;right:calc(40px + env(safe-area-inset-right));bottom:calc(124px + env(safe-area-inset-bottom));font-size:13px">药</button>
-<div id="rot">请把手机横过来<br>这个游戏要横屏玩</div>
+<div id="rot">这个游戏用键盘或手柄玩<br>请接上手柄，或用电脑打开</div>
 <div id="panel"><div class="in" id="pin"></div></div>
 <script>
 'use strict';
@@ -439,7 +433,7 @@ let scene = 'tavern', time = 0, fade = 1, modal = false, shake = 0, s = 40;
 const v = new View(0, 0, 40), cam = { x: 4, y: 3.5 };
 let run = null;      // the current trip into the cave
 const floats = [];
-const input = { l: 0, r: 0, u: 0, d: 0, jx: 0, jy: 0, shoot: false, mx: 0, my: 0, mouse: false, act: false, dash: false, potion: false };
+const input = { l: 0, r: 0, u: 0, d: 0, jx: 0, jy: 0, ax: 0, ay: 0, shoot: false, act: false, dash: false, potion: false };
 const say = (t, x, y, c = [255, 255, 255]) => floats.push({ s: t, x, y, z: 1.8, c, t: 1.4 });
 // screen direction -> world direction on the 2:1 diamond
 function screenToWorld(sx, sy) { const a = sx / (2 * C30), b = sy; const x = a + b, y = b - a, n = Math.hypot(x, y) || 1; return [x / n, y / n]; }
@@ -529,7 +523,7 @@ function update(dt) {
   c.time += dt;
   // the bow: hold to draw, let go to loose; the aim is the mouse, or on a touch screen the nearest thing in sight
   const tgt = nearestMob(c, 10);
-  if (input.mouse) { const q = v.inv(input.mx, input.my + s * .6), dx = q[0] - P.x, dy = q[1] - P.y, d = Math.hypot(dx, dy) || 1; P.aim = [dx / d, dy / d]; }
+  if (Math.hypot(input.ax, input.ay) > .4) P.aim = screenToWorld(input.ax, input.ay);
   else if (tgt) { const dx = tgt.x - P.x, dy = tgt.y - P.y, d = Math.hypot(dx, dy) || 1; P.aim = [dx / d, dy / d]; } else P.aim = P.face;
   if (input.shoot) { P.draw = Math.min(.7, P.draw + dt + 1e-4); P.face = P.aim; }
   else if (P.draw > 0) { const k = clamp(P.draw / .7, .35, 1), sp = 11 + 9 * k; c.arrows.push({ x: P.x, y: P.y, vx: P.aim[0] * sp, vy: P.aim[1] * sp, dmg: st.dmg * (.55 + .75 * k), t: 1.6, stuck: false }); P.draw = 0; sfx.shoot(); crow.shot = 1; }
@@ -633,10 +627,7 @@ function drawTown(t) {
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
   objs.push({ k: P.x + P.y + .01, d: () => drawHunter(t) }, { k: P.x + P.y + .4, d: drawCrow });
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
-  const a = v.P(0, 0, 13), b = v.P(0, 0, -.2); towerHit = [a[0] - s * 2, a[1], s * 4, b[1] - a[1]];
-  const bp = v.P(6.6, 3.5, 0), bq = v.P(6.6, 3.5, 2); barHit = [bp[0] - s * 1.4, bq[1], s * 2.8, bp[1] - bq[1] + s * .5];
 }
-let towerHit = null, barHit = null;
 function drawTavern(t) {
   G.n = 1; TINT = [40, 30, 96]; TK = .1; SHADOW = [58, 40, 96]; camera(9);
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css([30, 24, 62])); g.addColorStop(1, css([22, 18, 46])); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -689,6 +680,7 @@ function drawCave(t) {
   text(`生命 ${Math.ceil(P.hp)} / ${st.hp}`, 14, top + 19, 12, [255, 255, 255], .85, 'left'); text(`金币 ${c.gold}   背包 ${c.bag.length}/${c.cap}   药水 ${c.potions}`, 14, top + 37, 12.5, [255, 236, 190], .95, 'left');
   drawMap(c);
   if (c.at_) text('撤离中，站住别动……', W / 2, H * .2, 15, [200, 244, 255]);
+  text(usePad ? '左摇杆走 · 右摇杆瞄准 · Ⓧ/扳机 射 · Ⓑ 翻滚 · Ⓐ 搜 · Ⓨ 药 · Start 背包' : 'WASD 走 · J 射（自动瞄准）· K/空格 翻滚 · E 搜 · Q 药 · B 背包', W / 2, H - 16, 12.5, [255, 255, 255], .62);
 }
 function drawMap(c) {      // the little map is turned like the world: a diamond
   const k = Math.min(.82, W * .17 / CS), cx = W - CS * k - 14, cy = 14 + CS * k * .5, q = (i, j) => [cx + (i - j) * k * C30, cy + (i + j) * k * .5];
@@ -703,18 +695,30 @@ const SEARCH = 1.1;      // seconds it takes to go through a chest
 let prompt = null;
 function updatePrompt() {
   let p = null; const near = (x, y, r) => Math.hypot(P.x - x, P.y - y) < r;
-  if (scene === 'tavern') { if (near(.6, TAV.door[1], 1.4)) p = { t: '出门', f: goTown }; else if (near(3, 1.9, 1.7)) p = { t: '和老板说话', f: panelBar }; else if (near(TAV.chest[0], TAV.chest[1], 1.5)) p = { t: '打开仓库', f: panelBag }; }
+  if (scene === 'tavern') { if (near(.6, TAV.door[1], 1.4)) p = { t: '出门', f: goTown }; else if (near(3, 1.9, 1.7)) p = { t: '和老板说话', f: panelBar }; else if (near(TAV.chest[0], TAV.chest[1], 1.5)) p = { t: '打开仓库', f: () => { sel = null; focusKey = null; panelBag(); } }; }
   else if (scene === 'town') { if (near(5.2, 3.5, 1.3)) p = { t: '回酒馆', f: goTavern }; else if (near(3.5, .5, 1.6)) p = { t: '进入钟楼', f: panelTower }; }
   else if (run) { let b = null; for (const q of run.chests) if (!q.open && near(q.x, q.y, 1.05)) b = q;
     if (b) { p = { t: b.t > 0 ? '搜索中…' : '搜箱子（按住）', hold: true }; if (input.act) { b.t += dtNow; if (b.t >= SEARCH) { b.open = true; b.t = 0; sfx.chest(); const n = irand(2, 3) + (b.gold ? 1 : 0); for (let i = 0; i < 2 + irand(0, 3); i++) spawnDrop(run, b.x, b.y, { coin: irand(4, 9) + Math.round(b.depth * 12) }); for (let i = 0; i < n - 1; i++) spawnDrop(run, b.x, b.y, { item: makeItem(b.depth + (b.gold ? .6 : 0)) }); if (Math.random() < .3) spawnDrop(run, b.x, b.y, { potion: 1 }); } } else b.t = Math.max(0, b.t - dtNow); } }
-  prompt = p; const el = $('hint'); if (p) { if (el.textContent !== p.t) el.textContent = p.t; el.style.display = 'block'; } else el.style.display = 'none';
+  prompt = p; const el = $('hint'), tx = p && `${usePad ? 'Ⓐ' : 'E'}  ${p.t}`; if (p) { if (el.textContent !== tx) el.textContent = tx; el.style.display = 'block'; } else el.style.display = 'none';
 }
 function act() { if (prompt && !prompt.hold) prompt.f(); }
-$('hint').addEventListener('pointerdown', e => { e.preventDefault(); input.act = true; act(); });
-for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) $('hint').addEventListener(ev, () => { input.act = false; });
+
 // ---------- panels ----------
-function openPanel(html) { $('pin').innerHTML = html; $('panel').style.display = 'block'; modal = true; input.l = input.r = 0; input.joy = 0; input.shoot = false; }
+function openPanel(html) { $('pin').innerHTML = html; $('panel').style.display = 'block'; modal = true; input.shoot = false; input.act = false; pickFocus(); }
 function closePanel() { $('panel').style.display = 'none'; modal = false; }
+// menus by keys or pad: one thing has the focus; a direction moves it to the nearest thing that way, and it stays put when a panel redraws
+let focusKey = null;
+const focusable = () => [...$('pin').querySelectorAll('[data-a]:not(:disabled)')], keyOf = e => e.dataset.a + ':' + (e.dataset.i || '');
+function setFocus(e) { for (const o of $('pin').querySelectorAll('.foc')) o.classList.remove('foc'); if (!e) return; e.classList.add('foc'); focusKey = keyOf(e); e.scrollIntoView({ block: 'nearest' }); }
+function pickFocus() { const l = focusable(); setFocus(l.find(e => keyOf(e) === focusKey) || l.find(e => e.classList.contains('main')) || l[0]); }
+function moveFocus(dx, dy) {
+  const l = focusable(), cur = $('pin').querySelector('.foc'); if (!cur) return pickFocus();
+  const c = cur.getBoundingClientRect(), cx = c.left + c.width / 2, cy = c.top + c.height / 2; let best = null, bs = 1e9;
+  for (const e of l) { if (e === cur) continue; const r = e.getBoundingClientRect(), x = r.left + r.width / 2 - cx, y = r.top + r.height / 2 - cy, along = x * dx + y * dy, side = Math.abs(x * dy) + Math.abs(y * dx); if (along < 4) continue; const sc = along + side * 2.5; if (sc < bs) { bs = sc; best = e; } }
+  if (best) { setFocus(best); blip(700, .04, 'sine', .03); }
+}
+const confirmFocus = () => { const e = $('pin').querySelector('.foc'); if (e) e.click(); };
+const backPanel = () => { sel = null; focusKey = null; closePanel(); };
 $('pin').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && ACT[b.dataset.a]) ACT[b.dataset.a](b.dataset.i); });
 const cellHTML = (it, a, i, sel) => it ? `<div class="cell${sel ? ' sel' : ''}" data-a="${a}" data-i="${i}" style="color:${RAR[it.r].c}">${KIND[it.k]}</div>` : `<div class="cell"></div>`;
 let sel = null;
@@ -724,19 +728,19 @@ function panelBag() {
   openPanel(`<h2>${inCave ? '背包' : '仓库'}</h2><div class="sub">金币 ${save.gold}${inCave ? ` · 本趟 +${run.gold}` : ''} · 攻击 ${s.dmg} · 生命 ${s.hp}</div>
   <h3>身上</h3><div class="slots">${slot('bow', '武器')}${slot('armor', '装备')}${slot('acc', '饰品')}</div>
   <h3>${inCave ? `这一趟 ${run.bag.length}/${run.cap}（撤离才算带走）` : `仓库 ${list.length} 件`}</h3><div class="grid">${list.map((x, i) => cellHTML(x, 'it', i, sel && !sel.eq && sel.i === i)).join('') || ''}${Array(Math.max(0, 12 - list.length)).fill('<div class="cell"></div>').join('')}</div>
-  <div id="detail">${it ? `<span style="color:${RAR[it.r].c}">${RAR[it.r].n} · ${it.name}</span><br>${itemStat(it)} · 售价 ${it.v}` : '点一件东西查看。'}</div>
+  <div id="detail">${it ? `<span style="color:${RAR[it.r].c}">${RAR[it.r].n} · ${it.name}</span><br>${itemStat(it)} · 售价 ${it.v}` : '选一件东西查看。'}</div>
   <div class="row">${it && !sel.eq && it.k !== 'gem' && !inCave ? '<button class="act main" data-a="wear">装备</button>' : ''}${it && sel.eq && !inCave ? '<button class="act" data-a="off">卸下</button>' : ''}<button class="act" data-a="close">关闭</button></div>`);
 }
 function panelBar() {
   const sum = save.stash.reduce((a, b) => a + b.v, 0);
-  sel = null; openPanel(`<h2>老板</h2><div class="sub">“又活着回来了。”<br>金币 ${save.gold} · 药水 ${save.potions} · 下过 ${save.runs} 次魔窟，活着出来 ${save.out} 次</div>
+  sel = null; focusKey = null; openPanel(`<h2>老板</h2><div class="sub">“又活着回来了。”<br>金币 ${save.gold} · 药水 ${save.potions} · 下过 ${save.runs} 次魔窟，活着出来 ${save.out} 次</div>
   <div class="row"><button class="act main" data-a="potion" ${save.gold < 25 ? 'disabled' : ''}>买药水 · 25 金币</button></div>
   <div class="row"><button class="act" data-a="sellgem" ${save.stash.some(i => i.k === 'gem') ? '' : 'disabled'}>卖掉所有宝石</button><button class="act" data-a="sellall" ${save.stash.length ? '' : 'disabled'}>卖掉全部仓库（${sum}）</button></div>
   <div class="row"><button class="act" data-a="close">走开</button></div>`);
 }
-function panelTower() { openPanel(`<h2>钟楼</h2><div class="sub">钟摆后面有一道门，通往魔窟。<br>那里一片迷雾，宝箱和怪物都藏在里面。<br>带出来的才算你的；倒下了，这一趟的东西全部丢掉。</div><div class="row"><button class="act main" data-a="go">传送到魔窟</button><button class="act" data-a="close">算了</button></div>`); }
+function panelTower() { focusKey = null; openPanel(`<h2>钟楼</h2><div class="sub">钟摆后面有一道门，通往魔窟。<br>那里一片迷雾，宝箱和怪物都藏在里面。<br>带出来的才算你的；倒下了，这一趟的东西全部丢掉。</div><div class="row"><button class="act main" data-a="go">传送到魔窟</button><button class="act" data-a="close">算了</button></div>`); }
 function panelResult(ok, title, r, n, v) {
-  const names = r.bag.slice(0, 18).map(i => `<span style="color:${RAR[i.r].c}">${i.name}</span>`).join('、');
+  focusKey = null; const names = r.bag.slice(0, 18).map(i => `<span style="color:${RAR[i.r].c}">${i.name}</span>`).join('、');
   openPanel(`<h2>${ok ? '撤离成功' : '没能回来'}</h2><div class="sub">${ok ? `从${title}回到了酒馆` : title}</div><div class="sub">${ok ? `带回金币 ${r.gold}，物品 ${n} 件（价值 ${v}）` : `丢失金币 ${r.gold}，物品 ${n} 件（价值 ${v}）`}<br>${names}<br>击败怪物 ${r.kills} · 用时 ${Math.floor(r.time / 60)} 分 ${Math.floor(r.time % 60)} 秒</div><div class="row"><button class="act main" data-a="close">回到酒馆</button></div>`);
 }
 const ACT = {
@@ -748,36 +752,49 @@ const ACT = {
   sellgem: () => { const g = save.stash.filter(i => i.k === 'gem'); save.gold += g.reduce((a, b) => a + b.v, 0); save.stash = save.stash.filter(i => i.k !== 'gem'); persist(); sfx.coin(); panelBar(); },
   sellall: () => { save.gold += save.stash.reduce((a, b) => a + b.v, 0); save.stash = []; persist(); sfx.coin(); panelBar(); },
 };
-$('bagBtn').addEventListener('click', () => { if (modal) return; sel = null; panelBag(); });
 
-// ---------- input ----------
+// ---------- input: keyboard or gamepad, nothing else ----------
 const K = { KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r', KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd' };
+const NAV = { KeyA: [-1, 0], ArrowLeft: [-1, 0], KeyD: [1, 0], ArrowRight: [1, 0], KeyW: [0, -1], ArrowUp: [0, -1], KeyS: [0, 1], ArrowDown: [0, 1] };
+let usePad = false, sawKey = false;
 function audio() { if (!AC) initAudio(); if (AC && AC.state === 'suspended') AC.resume(); }
 restartGame = () => {};      // a dead sound context here is rebuilt, never worth throwing away a trip into the cave
-addEventListener('keydown', e => { if (e.repeat) return; audio(); if (K[e.code]) { input[K[e.code]] = 1; e.preventDefault(); } if (e.code === 'Space') { input.dash = true; e.preventDefault(); } if (e.code === 'KeyE' || e.code === 'Enter') { input.act = true; if (!modal) act(); } if (e.code === 'KeyQ') input.potion = true; if (e.code === 'KeyB' || e.code === 'Tab') { e.preventDefault(); if (modal) closePanel(); else { sel = null; panelBag(); } } if (e.code === 'Escape' && modal) closePanel(); if (e.code === 'KeyJ') input.shoot = true; });
-addEventListener('keyup', e => { if (K[e.code]) input[K[e.code]] = 0; if (e.code === 'KeyE' || e.code === 'Enter') input.act = false; if (e.code === 'KeyJ') input.shoot = false; });
-let joyId = null, joy0 = [0, 0];
-const inRect = (r, x, y) => r && x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3];
-function walkTo(x, y) {      // a tap on the town or the tavern floor: walk there, as in the game
-  const q = v.inv(x, y), c = [Math.floor(P.x), Math.floor(P.y)], t = [Math.floor(q[0]), Math.floor(q[1])];
-  if (scene === 'town') { if (townOK(q[0], q[1])) { const walkOK = bfs2(c, t); if (walkOK) P.path = walkOK.slice(1); } }
-  else if (tavOK(q[0], q[1])) P.path = [t];
-}
-function bfs2(from, to) { const q = [from], prev = new Map([[key(from[0], from[1]), null]]); while (q.length) { const c = q.shift(); if (c[0] === to[0] && c[1] === to[1]) { const p = []; let k = c; while (k) { p.unshift(k); k = prev.get(key(k[0], k[1])); } return p; } for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = [c[0] + a, c[1] + b], kk = key(n[0], n[1]); if (inTown(n[0], n[1]) && !blocked.has(kk) && !prev.has(kk)) { prev.set(kk, c); q.push(n); } } } return null; }
-cv.addEventListener('pointerdown', e => {
-  audio(); try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch (err) {}
-  if (e.pointerType === 'mouse') { input.mouse = true; input.mx = e.clientX; input.my = e.clientY; }
-  if (scene === 'town' && !modal) { if (inRect(towerHit, e.clientX, e.clientY)) { panelTower(); return; } if (inRect(barHit, e.clientX, e.clientY)) { P.path = (bfs2([Math.floor(P.x), Math.floor(P.y)], BDOOR) || []).slice(1); return; } }
-  if (scene !== 'cave') { if (e.pointerType === 'mouse' || e.clientX > W * .4) walkTo(e.clientX, e.clientY); }
-  if (e.pointerType === 'mouse') { if (scene === 'cave') input.shoot = true; return; }
-  if (joyId === null && e.clientX < W * .5) { joyId = e.pointerId; joy0 = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); }
+const openBag = () => { sel = null; focusKey = null; panelBag(); };
+addEventListener('keydown', e => {
+  if (['Space', 'Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+  usePad = false; sawKey = true; audio();
+  if (modal) { if (NAV[e.code]) moveFocus(...NAV[e.code]); else if (!e.repeat && ['Enter', 'KeyE', 'Space', 'KeyJ'].includes(e.code)) confirmFocus(); else if (!e.repeat && ['Escape', 'KeyB', 'Tab', 'KeyK'].includes(e.code)) backPanel(); return; }
+  if (e.repeat) return;
+  if (K[e.code]) input[K[e.code]] = 1;
+  if (e.code === 'Space' || e.code === 'KeyK') input.dash = true;
+  if (e.code === 'KeyE' || e.code === 'Enter') { input.act = true; act(); }
+  if (e.code === 'KeyQ') input.potion = true;
+  if (e.code === 'KeyB' || e.code === 'Tab') openBag();
+  if (e.code === 'KeyJ') input.shoot = true;
 });
-cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { input.mouse = true; input.mx = e.clientX; input.my = e.clientY; } if (e.pointerId === joyId) { const dx = e.clientX - joy0[0], dy = e.clientY - joy0[1], d = Math.hypot(dx, dy), k = Math.min(1, d / 46) / (d || 1); input.jx = dx * k; input.jy = dy * k; } });
-for (const ev of ['pointerup', 'pointercancel']) cv.addEventListener(ev, e => { if (e.pointerType === 'mouse') input.shoot = false; if (e.pointerId === joyId) { joyId = null; input.jx = input.jy = 0; } });
-function hold(id, on, off) { const el = $(id); el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); audio(); el.classList.add('on'); on(); el.setPointerCapture(e.pointerId); }); for (const ev of ['pointerup', 'pointercancel']) el.addEventListener(ev, () => { el.classList.remove('on'); off(); }); }
-hold('bDash', () => { input.dash = true; input.mouse = false; }, () => {});
-hold('bShoot', () => { input.shoot = true; input.mouse = false; }, () => { input.shoot = false; });
-hold('bPotion', () => { input.potion = true; }, () => {});
+addEventListener('keyup', e => { if (K[e.code]) input[K[e.code]] = 0; if (e.code === 'KeyE' || e.code === 'Enter') input.act = false; if (e.code === 'KeyJ') input.shoot = false; });
+addEventListener('blur', () => { input.l = input.r = input.u = input.d = 0; input.shoot = input.act = false; });
+// the standard gamepad: left stick or d-pad to move, right stick to aim, Ⓐ use, Ⓧ or the triggers to draw the bow, Ⓑ roll, Ⓨ potion, Start or Back the backpack
+const gp = { prev: [], navT: 0, held: false };
+function pollPad(dt) {
+  const list = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : [], g = list[0];
+  if (!g) { if (usePad) { input.jx = input.jy = input.ax = input.ay = 0; if (gp.held) { input.shoot = input.act = false; gp.held = false; } } return; }
+  const on = i => !!(g.buttons[i] && (g.buttons[i].pressed || g.buttons[i].value > .4)), edge = i => on(i) && !gp.prev[i], dz = v => Math.abs(v) < .2 ? 0 : v;
+  const lx = dz(g.axes[0] || 0), ly = dz(g.axes[1] || 0), rx = dz(g.axes[2] || 0), ry = dz(g.axes[3] || 0), dx = (on(15) ? 1 : 0) - (on(14) ? 1 : 0), dy = (on(13) ? 1 : 0) - (on(12) ? 1 : 0);
+  if (lx || ly || rx || ry || dx || dy || g.buttons.some(b => b.pressed)) { if (!usePad) usePad = true; audio(); }
+  if (usePad) {
+    if (modal) {
+      input.jx = input.jy = 0; gp.navT -= dt; const nx = Math.abs(dx) ? dx : Math.abs(lx) > .5 ? Math.sign(lx) : 0, ny = Math.abs(dy) ? dy : Math.abs(ly) > .5 ? Math.sign(ly) : 0;
+      if (nx || ny) { if (gp.navT <= 0) { moveFocus(nx, nx ? 0 : ny); gp.navT = .2; } } else gp.navT = 0;
+      if (edge(0)) confirmFocus(); else if (edge(1) || edge(9) || edge(8)) backPanel();
+    } else {
+      input.jx = lx + dx; input.jy = ly + dy; input.ax = rx; input.ay = ry; gp.held = true;
+      input.shoot = on(2) || on(7) || on(6) || on(5); input.act = on(0);
+      if (edge(0)) act(); if (edge(1) || edge(4)) input.dash = true; if (edge(3)) input.potion = true; if (edge(9) || edge(8)) openBag();
+    }
+  }
+  gp.prev = g.buttons.map(b => b.pressed || b.value > .4);
+}
 
 // ---------- the frame ----------
 let last = performance.now(), dtNow = 1 / 60;
@@ -787,18 +804,16 @@ function draw(t) {
   else {
     if (scene === 'town') drawTown(t); else drawTavern(t);
     TK = 0; drawFloats(); text(`金币 ${save.gold}`, 14, 66, 13, [255, 236, 190], .95, 'left');
-    if (!modal) { if (scene === 'tavern' && save.runs === 0) text(touch ? '滑动左边走路，也可以点地面 · 从左边的门出去' : 'WASD 走路或点地面 · E 互动 · B 背包 · 从左边的门出去', W / 2, H - 22, 13, [255, 255, 255], .75); if (scene === 'town') text('点钟楼，去魔窟', W / 2, H - 22, 13, [255, 255, 255], .75); }
+    if (!modal) { const h = usePad ? '左摇杆走路 · Ⓐ 互动 · Start 背包' : 'WASD 走路 · E 互动 · B 背包'; text(scene === 'town' ? `${h} · 到钟楼门口进入魔窟` : `${h} · 从左边的门出去`, W / 2, H - 16, 13, [255, 255, 255], .7); }
   }
   if (fade > 0) { ctx.fillStyle = css([14, 10, 32], clamp(fade)); ctx.fillRect(-20, -20, W + 40, H + 40); }
 }
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now; dtNow = dt;
-  if (!MANUAL) update(dt);
+  pollPad(dt); if (!MANUAL) update(dt);
   draw(time);
   mode = scene === 'cave' ? 'tower' : scene === 'town' ? 'world' : 'stall'; musicTick();      // the game's own music: the shop's warm tune in the tavern, the town's in the town, the tower's minor one in the cave
-  const show = touch && scene === 'cave' && !modal ? 'flex' : 'none';
-  $('bDash').style.display = show; $('bShoot').style.display = show; $('bPotion').style.display = show;
-  $('rot').style.display = touch && H > W ? 'flex' : 'none';
+  $('rot').style.display = touch && !usePad && !sawKey ? 'flex' : 'none';
   requestAnimationFrame(frame);
 }
 const MANUAL = location.search.includes('manual');
