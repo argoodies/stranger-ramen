@@ -575,7 +575,7 @@ function logoWaver(im, x, y, w, h, tt) {      // the logo drawn crisp: its strok
 }
 let titleBox = null;      // where the title's letters sit (and how far they have faded in), so the stars behind them can go dim
 // the sun by day, by night a round moon the same size in the colour of autumn wood
-const ORBD = [255, 216, 150], ORBN = [196, 150, 100];
+const ORBD = [255, 216, 150], ORBN = [236, 196, 132];
 function drawOrb(x, y, r, n) { circ(x, y, r, mix(ORBD, ORBN, n)); }
 function drawSky(top, mid, bot, t, starA = 1) {
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css(top)); g.addColorStop(.5, css(mid)); g.addColorStop(1, css(bot));
