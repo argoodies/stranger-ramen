@@ -574,13 +574,9 @@ function logoWaver(im, x, y, w, h, tt) {      // the logo drawn crisp: its strok
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false; ctx.drawImage(oc, Math.round(q.x), Math.round(q.y)); ctx.restore();
 }
 let titleBox = null;      // where the title's letters sit (and how far they have faded in), so the stars behind them can go dim
-// the sun by day, the 🌙 by night: a disc with a smaller one taken out of its upper left, so the crescent opens up and to the left, a little larger than the sun; one fades into the other as night falls
-function drawOrb(x, y, r, n) {
-  if (n < 1) circ(x, y, r, [255, 216, 150], 1 - n);
-  if (n <= 0) return;
-  r *= 1.18; const R = r * .82, d = r * .26, cx = (R * R - r * r - d * d) / (2 * d), cy = Math.sqrt(r * r - cx * cx), a = Math.atan2(cy, cx), b = Math.atan2(cy, cx + d);
-  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.beginPath(); ctx.arc(0, 0, r, -a, a); ctx.arc(-d, 0, R, b, -b, true); ctx.closePath(); ctx.fillStyle = css([250, 204, 60], n); ctx.fill(); ctx.restore();
-}
+// the sun by day, by night a round moon the same size in the colour of autumn wood
+const ORBD = [255, 216, 150], ORBN = [196, 150, 100];
+function drawOrb(x, y, r, n) { circ(x, y, r, mix(ORBD, ORBN, n)); }
 function drawSky(top, mid, bot, t, starA = 1) {
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css(top)); g.addColorStop(.5, css(mid)); g.addColorStop(1, css(bot));
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -794,7 +790,7 @@ const titleFrame = () => {      // the title and the island as one group, centre
 function drawWorld(t, dt) {
   TINT = [40, 30, 96]; TK = lerp(0.03, 0.2, G.n); SHADOW = [58, 40, 96];
   moonAt = [W * 0.8, H * 0.13]; skyNow(t, storyRain ? .4 : 0, storyRain ? 0 : 1); moonAt = null; if (storySky) storySky(t); if (storyRain) rainField(wv, t, wv.s * .72, 'far');      // the rain that lands behind the island      // the story's shooting stars belong to the sky, behind everything
-  const mx = W * 0.8, my = H * 0.13, sunc = mix([255, 216, 150], [255, 205, 60], G.n); if (!storyRain) { glow(mx, my, 150, sunc, .5 * (1 - G.n)); drawOrb(mx, my, 26, G.n); }      // under the story's rain: no moon, no birds
+  const mx = W * 0.8, my = H * 0.13, sunc = mix(ORBD, ORBN, G.n); if (!storyRain) { glow(mx, my, 150, sunc, lerp(.5, .1, G.n)); drawOrb(mx, my, 26, G.n); }      // under the story's rain: no moon, no birds
   if (!storyRain) for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], G.n), 2, lerp(.95, .7, G.n)); }
   if (hideChef && tw.view) drawTowerView(t, false);      // what happens in the sky, behind everything that stands on the ground
   zoomOut = lerp(zoomOut, zoomTarget, 1 - Math.pow(0.02, dt));

@@ -73,7 +73,7 @@ boot = """<script>
   function drawLobby(t, dt) {
     BG.dark = lerp(BG.dark, 0, 1 - Math.pow(.002, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
     moonAt = [W * .8, H * .14]; drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark); moonAt = null;
-    const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [255, 205, 60], g.dark); glow(mx, my, 130, sc, .45 * (1 - g.dark)); drawOrb(mx, my, 22, g.dark); drawGeese3(t, g.dark);
+    const mx = W * .8, my = H * .14, sc = mix(ORBD, ORBN, g.dark); glow(mx, my, 130, sc, lerp(.45, .1, g.dark)); drawOrb(mx, my, 22, g.dark); drawGeese3(t, g.dark);
     if (appear) { appear.t += dt; while (appear.said < APPEAR.length && appear.t >= APPEAR[appear.said][0]) APPEAR[appear.said++][1](); if (appear.t >= APPEAR_END) appear = null; }
     const fadeT = ap(0) < 1, realCtx = ctx; let tc = null;      // while it fades in, the table is drawn whole onto a canvas of its own and laid over the sky, so its layers don't show through one another
     if (fadeT) { tc = tableCv || (tableCv = document.createElement('canvas')); if (tc.width !== cv.width || tc.height !== cv.height) { tc.width = cv.width; tc.height = cv.height; } ctx = tc.getContext('2d'); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, tc.width, tc.height); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
