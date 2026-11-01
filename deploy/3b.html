@@ -2510,7 +2510,8 @@ function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.strin
 function gcRecord(won, role) {
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
   GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win'); gcAch('win_' + role);
-  if (GCS.streak >= 3) gcAch('streak_3'); if (GCS.streak >= 5) gcAch('streak_5'); if (GCS.wins >= 10) gcAch('wins_10'); if (GCS.wins >= 50) gcAch('wins_50');
+  for (const n of [3, 5, 7, 10, 15]) if (GCS.streak >= n) gcAch('streak_' + n);
+  for (const n of [5, 10, 25, 50, 100, 200]) if (GCS.wins >= n) gcAch('wins_' + n);
   gcPost({ t: 'score', v: GCS.best });
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.best) gcPost({ t: 'score', v: GCS.best }); };      // once signed in: anything earned before sign-in goes up too
@@ -2595,6 +2596,7 @@ async function playBotc() {
     await bsay(ST, S().dawnQuiet);
     if ((raw = win())) break;
     if (g.night > 12) { raw = 'evil'; break; }
+    if (!g.auto && [3, 4, 5, 7].includes(g.night)) gcAch('day_' + g.night);      // a game that lasts: the third, fourth, fifth and seventh day
     // ---- day: the other two say who they are (the Pukka lies)
     for (const v of [1, 2]) if (g.alive[v]) {
       const r = roles[v] === 'pukka' ? bluff : roles[v]; claim[v] = r;

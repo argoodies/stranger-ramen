@@ -24,7 +24,18 @@ A = [('pc.first_win', 10, True, ('First Win', '首胜', '首勝'), ('Win a game.
  ('pc.streak_3', 20, True, ('Three in a Row', '三连胜', '三連勝'), ('Win three games in a row.', '连续赢下三局。', '連續贏下三局。')),
  ('pc.streak_5', 40, True, ('Five in a Row', '五连胜', '五連勝'), ('Win five games in a row.', '连续赢下五局。', '連續贏下五局。')),
  ('pc.wins_10', 20, True, ('Ten Wins', '十胜', '十勝'), ('Win ten games.', '累计赢下十局。', '累計贏下十局。')),
- ('pc.wins_50', 50, True, ('Fifty Wins', '五十胜', '五十勝'), ('Win fifty games.', '累计赢下五十局。', '累計贏下五十局。'))]
+ ('pc.wins_50', 50, True, ('Fifty Wins', '五十胜', '五十勝'), ('Win fifty games.', '累计赢下五十局。', '累計贏下五十局。')),
+ ('pc.day_3', 10, True, ('Third Day', '第三个白天', '第三個白天'), ('Reach the third day of a game.', '一局游戏进行到第三个白天。', '一局遊戲進行到第三個白天。')),
+ ('pc.day_4', 20, True, ('Fourth Day', '第四个白天', '第四個白天'), ('Reach the fourth day of a game.', '一局游戏进行到第四个白天。', '一局遊戲進行到第四個白天。')),
+ ('pc.day_5', 30, True, ('Fifth Day', '第五个白天', '第五個白天'), ('Reach the fifth day of a game.', '一局游戏进行到第五个白天。', '一局遊戲進行到第五個白天。')),
+ ('pc.day_7', 50, True, ('A Long Week', '漫长的一周', '漫長的一週'), ('Reach the seventh day of a game.', '一局游戏进行到第七个白天。', '一局遊戲進行到第七個白天。')),
+ ('pc.streak_7', 50, True, ('Seven in a Row', '七连胜', '七連勝'), ('Win seven games in a row.', '连续赢下七局。', '連續贏下七局。')),
+ ('pc.streak_10', 70, True, ('Ten in a Row', '十连胜', '十連勝'), ('Win ten games in a row.', '连续赢下十局。', '連續贏下十局。')),
+ ('pc.streak_15', 100, True, ('Fifteen in a Row', '十五连胜', '十五連勝'), ('Win fifteen games in a row.', '连续赢下十五局。', '連續贏下十五局。')),
+ ('pc.wins_5', 10, True, ('Five Wins', '五胜', '五勝'), ('Win five games.', '累计赢下五局。', '累計贏下五局。')),
+ ('pc.wins_25', 30, True, ('Twenty-Five Wins', '二十五胜', '二十五勝'), ('Win twenty-five games.', '累计赢下二十五局。', '累計贏下二十五局。')),
+ ('pc.wins_100', 70, True, ('One Hundred Wins', '一百胜', '一百勝'), ('Win one hundred games.', '累计赢下一百局。', '累計贏下一百局。')),
+ ('pc.wins_200', 100, True, ('Two Hundred Wins', '两百胜', '兩百勝'), ('Win two hundred games.', '累计赢下两百局。', '累計贏下兩百局。'))]
 st, d = J('GET', f'/v1/gameCenterDetails/{GC}/gameCenterAchievements?limit=100')
 have = {a['attributes']['vendorIdentifier']: a['id'] for a in d.get('data', [])}
 for vid, pts, show, names, how in A:
