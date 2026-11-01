@@ -138,6 +138,6 @@ assert src.count(MEL) == 1, 'music melody line not found in index.html'
 src = src.replace(MEL, "const t = nextBar + i * 0.6 - AC.currentTime; if (window.__3bQuietMs && performance.now() + t * 1000 < window.__3bQuietMs) continue; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);", 1)      # /3b: the music's little melody notes keep out of the opening's 咚 咚 咚 丁零定 (the chord underneath plays on)
 i = src.rfind('</body>')
 out = src[:i] + boot + src[i:] if i >= 0 else src + boot
-out = out.replace('<title>', '<title>三人染 · ', 1) if '<title>' in out else out
+import re as _re; out = _re.sub(r'<title>[^<]*</title>', '<title>三人染</title>', out, count=1)      # its own name, not the main game's
 open(os.path.join(ROOT, 'deploy', '3b.html'), 'w', encoding='utf-8').write(out)
 print('deploy/3b.html', len(out), 'bytes')
