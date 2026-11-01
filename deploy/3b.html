@@ -2781,7 +2781,7 @@ if (location.hash) {
         const [ox, oy, cx, cy, gx, gy] = leaf(sg, 1), b0 = at(sg, .92, 0); ctx.beginPath(); ctx.moveTo(x, sp - C * .3); ctx.lineTo(b0[0], b0[1] - C * .3); ctx.lineTo(ox, oy); ctx.quadraticCurveTo(cx, cy, gx, gy); ctx.closePath(); ctx.fillStyle = css(sg < 0 ? paper : shade); ctx.fill();
         for (const u of [.25, .5, .75]) { const [ax, ay, bx, by2, dx, dy] = leaf(sg, u); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(bx, by2, dx, dy); ctx.strokeStyle = css(edge); ctx.lineWidth = Math.max(.7, s * .01); ctx.stroke(); }
         const e = at(sg, 1, 0), r = at(sg, 0, 0); poly([[r[0], r[1] - C * .5], [e[0], e[1] - C * .5], [e[0], e[1] + C * .5], [r[0], r[1] + C * .5]], purple); };
-      ctx.save(); ctx.translate(x, by); ctx.scale(.78, .78); ctx.translate(-x, -by); side(-1); side(1); poly([[x - Sp, sp - C * .5], [x + Sp, sp - C * .5], [x + Sp, sp + C * .9], [x - Sp, sp + C * .9]], purpleD); ctx.restore();      // the flat spine
+      ctx.save(); ctx.translate(x, by); ctx.scale(1.33, 1.33); ctx.translate(-x, -by); side(-1); side(1); poly([[x - Sp, sp - C * .5], [x + Sp, sp - C * .5], [x + Sp, sp + C * .9], [x - Sp, sp + C * .9]], purpleD); ctx.restore();      // the flat spine
     } else {
       ctx.fillStyle = css([210, 48, 58]); rrect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
       const T = rb().btn, fs = T.length > 3 ? s * .25 : s * .31; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
