@@ -169,8 +169,8 @@ function drawGeese3(t, n) {      // three geese crossing the sky, exactly as ove
 function drawBotc(t, dt) {
   const g = BG; g.dark = lerp(g.dark, g.isNight ? 1 : 0, 1 - Math.pow(0.03, dt));
   TINT = [30, 30, 90]; TK = lerp(0.04, 0.34, g.dark); SHADOW = [58, 40, 96];
-  drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark);
-  const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [252, 244, 220], g.dark); glow(mx, my, 130, sc, .45); circ(mx, my, 22, sc); drawGeese3(t, g.dark);
+  moonAt = [W * .8, H * .14]; drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark); moonAt = null;
+  const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [255, 205, 60], g.dark); glow(mx, my, 130, sc, .45 * (1 - g.dark)); drawOrb(mx, my, 22, g.dark); drawGeese3(t, g.dark);
   const s = Math.min(W / 11.2, (H - 250) / 8.6), v = new View(W / 2, H * .6, s), P = v.P.bind(v);
   const top = [92, 168, 162], under = [70, 96, 130];
   v.disc(0, 0, -3.6, 1.1, 1.1, under); v.disc(0, 0, -2.5, 2.3, .9, under); v.disc(0, 0, -1.6, 3.4, 1.0, mix(under, top, .3)); v.disc(0, 0, -.6, 4.3, .6, top); v.disc(0, 0, 0, 2.3, 0, [120, 190, 180]);
@@ -199,7 +199,7 @@ function drawBotc(t, dt) {
     toks.push(i);
     BHIT[i] = [p[0], p[1] - K * .8, K * .8];
   });
-  if (g.dark > .02) { ctx.fillStyle = css([10, 10, 40], .3 * g.dark); ctx.fillRect(0, 0, W, H); }
+  if (g.dark > .02) { ctx.fillStyle = css([10, 10, 40], .3 * g.dark); ctx.fillRect(0, 0, W, H); drawOrb(mx, my, 22, g.dark); }      // the night falls over everything but the moon
   // tokens over heads: your own role all game long; at the end everyone's role, shrouds for the dead, and 醉 / 毒 reminders
   const R = clamp(s * .62, 17, 30);
   for (const i of toks) {

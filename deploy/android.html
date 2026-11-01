@@ -22,7 +22,6 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     radial-gradient(0.8px 0.8px at 44.9% 42.2vh,rgba(255,250,230,0.53) 99%,transparent),
     radial-gradient(0.9px 0.9px at 42.7% 29.9vh,rgba(255,250,230,0.40) 99%,transparent),
     radial-gradient(0.9px 0.9px at 63.8% 34.7vh,rgba(255,250,230,0.65) 99%,transparent),
-    radial-gradient(0.7px 0.7px at 76.7% 12.7vh,rgba(255,250,230,0.47) 99%,transparent),
     radial-gradient(0.7px 0.7px at 89.2% 29.3vh,rgba(255,250,230,0.50) 99%,transparent),
     radial-gradient(1.0px 1.0px at 55.1% 17.6vh,rgba(255,250,230,0.43) 99%,transparent),
     radial-gradient(0.8px 0.8px at 71.3% 12.4vh,rgba(255,250,230,0.64) 99%,transparent),
@@ -57,7 +56,6 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     radial-gradient(1.0px 1.0px at 80.0% 3.0vh,rgba(255,250,230,0.49) 99%,transparent),
     radial-gradient(1.0px 1.0px at 10.7% 50.5vh,rgba(255,250,230,0.69) 99%,transparent),
     radial-gradient(0.8px 0.8px at 34.7% 31.5vh,rgba(255,250,230,0.68) 99%,transparent),
-    radial-gradient(0.7px 0.7px at 78.6% 17.9vh,rgba(255,250,230,0.66) 99%,transparent),
     radial-gradient(0.7px 0.7px at 89.2% 14.1vh,rgba(255,250,230,0.63) 99%,transparent),
     radial-gradient(0.7px 0.7px at 53.9% 22.9vh,rgba(255,250,230,0.31) 99%,transparent),
     radial-gradient(0.7px 0.7px at 45.3% 41.0vh,rgba(255,250,230,0.40) 99%,transparent),
@@ -115,11 +113,11 @@ main{min-height:100vh;min-height:100svh;max-width:460px;margin:0 auto;padding:ca
 .btn.dl{display:block;width:100%;max-width:340px}.btn.dl small{white-space:nowrap;font-size:11.5px;letter-spacing:.02em}
 footer{color:rgba(255,250,230,.7);padding-top:34px}
 #wx{display:none;position:fixed;inset:0;z-index:99;background:rgba(10,8,30,.86);color:#f4ecdc;font-family:var(--thin);text-align:center}#wx.on{display:block}#wx svg{position:absolute;top:calc(6px + env(safe-area-inset-top));right:18px}#wx .msg{position:absolute;top:calc(118px + env(safe-area-inset-top));left:24px;right:24px;font:300 17px/1.9 var(--thin);letter-spacing:.06em}#wx .msg b{font-weight:400;color:#ffe6aa}#wx .msg small{display:block;margin-top:10px;font-size:13px;opacity:.7;letter-spacing:.02em}
-.moon{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 78% 16vh,rgba(252,244,220,.275) 0,rgba(252,244,220,0) 74px)}.moon svg{position:absolute;left:calc(78% - 26px);top:calc(16vh - 26px)}main{position:relative;z-index:1}
+.moon{position:fixed;inset:0;pointer-events:none;z-index:0}.moon svg{position:absolute;left:calc(78% - 26px);top:calc(16vh - 26px)}main{position:relative;z-index:1}
 </style>
 </head>
 <body>
-<div class="moon" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="26" fill="rgb(252,244,220)"/></svg></div>
+<div class="moon" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52"><path transform="rotate(45 26 26)" d="M6.24 9.11A26 26 0 1 1 6.24 42.89A21.32 21.32 0 1 0 6.24 9.11Z" fill="rgb(250,204,60)"/></svg></div>
 <main>
   <div class="top">
     <img class="icon" src="/icon.png" alt="星穹十字物语">
