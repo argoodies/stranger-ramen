@@ -167,7 +167,7 @@ function fadedDraw(a, fn) {      // draw something made of overlapping pieces at
 function drawGeese3(t, n) {      // three geese crossing the sky, exactly as over the town in the main game: white by day, a soft grey by night (n: how far into the night)
   for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], n), 2, lerp(.95, .7, n)); } }
 function drawBotc(t, dt) {
-  const g = BG; g.dark = lerp(g.dark, g.isNight ? 1 : 0, 1 - Math.pow(0.03, dt));
+  const g = BG; g.dark = lerp(g.dark, g.isNight ? 1 : 0, 1 - Math.pow(0.002, dt));
   TINT = [30, 30, 90]; TK = lerp(0.04, 0.34, g.dark); SHADOW = [58, 40, 96];
   moonAt = [W * .8, H * .14]; drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark); moonAt = null;
   const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [255, 205, 60], g.dark); glow(mx, my, 130, sc, .45 * (1 - g.dark)); drawOrb(mx, my, 22, g.dark); drawGeese3(t, g.dark);

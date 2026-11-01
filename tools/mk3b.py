@@ -72,7 +72,7 @@ boot = """<script>
     let yy = by + pad; for (const r of rows) { ctx.save(); ctx.globalAlpha *= al; roleToken(bx + pad + R, yy + r.h / 2, R, r.id); ctx.restore();
       const ty0 = yy + r.h / 2 - r.lines.length * lh / 2; r.lines.forEach((l, k) => text(l, bx + pad + R * 2 + gap, ty0 + lh * (k + .5), fs, [50, 36, 70], al, 'left', true)); yy += r.h + rowGap; } }
   function drawLobby(t, dt) {
-    BG.dark = lerp(BG.dark, 0, 1 - Math.pow(.03, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
+    BG.dark = lerp(BG.dark, 0, 1 - Math.pow(.002, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
     moonAt = [W * .8, H * .14]; drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark); moonAt = null;
     const mx = W * .8, my = H * .14, sc = mix([255, 216, 150], [255, 205, 60], g.dark); glow(mx, my, 130, sc, .45 * (1 - g.dark)); drawOrb(mx, my, 22, g.dark); drawGeese3(t, g.dark);
     if (appear) { appear.t += dt; while (appear.said < APPEAR.length && appear.t >= APPEAR[appear.said][0]) APPEAR[appear.said++][1](); if (appear.t >= APPEAR_END) appear = null; }
@@ -133,7 +133,7 @@ boot = '<script>\n' + botc3 + '\n</script>\n' + boot
 KICK = "\nrequestAnimationFrame(frame);\n</script>"
 assert src.count(KICK) == 1, 'frame kick-off not found in index.html'
 src = src.replace(KICK, "\n</script>", 1)      # /3b: the main game must not draw a frame (its title over the town) before /3b has taken over; the boot script starts the frames
-src = src.replace('</head>', '<style>html,body{background:linear-gradient(rgb(226,150,130),rgb(214,166,156) 45%,rgb(96,140,150))}#title{display:none!important}</style>\n</head>', 1)      # the lobby's daytime sky behind the page, never the night navy, and never the title
+src = src.replace('</head>', '<style>html,body{background:linear-gradient(rgb(226,150,130),rgb(214,166,156) 50%,rgb(204,150,148))}#title{display:none!important}</style>\n</head>', 1)      # the lobby's daytime sky behind the page, never the night navy, and never the title
 MEL = "const t = nextBar + i * 0.6 - AC.currentTime; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);"
 assert src.count(MEL) == 1, 'music melody line not found in index.html'
 src = src.replace(MEL, "const t = nextBar + i * 0.6 - AC.currentTime; if (window.__3bQuietMs && performance.now() + t * 1000 < window.__3bQuietMs) continue; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);", 1)      # /3b: the music's little melody notes keep out of the opening's 咚 咚 咚 丁零定 (the chord underneath plays on)
