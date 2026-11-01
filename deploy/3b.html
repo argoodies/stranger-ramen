@@ -2777,10 +2777,10 @@ if (location.hash) {
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
     const px = v => Math.round(v * DPR) / DPR, q = P(1.1, -.62, 2.0), w = s * 1.38, h = s * .5, x = px(q[0]), y = px(q[1]);      // still (no bob), on whole device pixels: the lettering stays crisp
     if (LANG === 'en') {      // in English no label: a thick open book hanging in the air, seen from the side, purple boards and white pages
-      const W = s * .78, T = s * .46, C = s * .1, by = y + Math.sin(t * 1.6) * s * .04, sp = by + s * .2, purple = [132, 96, 190], pd = [92, 62, 146], paper = [250, 246, 238], ps = [214, 208, 216], side = sg => { const ox = x + sg * W, oy = by - s * .02;
-        poly([[x, sp], [ox, oy], [ox, oy + C], [x, sp + C]], sg < 0 ? purple : pd);      // the board
-        ctx.beginPath(); ctx.moveTo(x, sp); ctx.lineTo(ox - sg * s * .05, oy); ctx.lineTo(ox - sg * s * .05, oy - T * .55); ctx.quadraticCurveTo(x + sg * W * .5, oy - T * 1.45, x, sp - T * .9); ctx.closePath(); ctx.fillStyle = css(sg < 0 ? paper : ps); ctx.fill();      // the block of pages, swelling toward the spine
-        for (let k = 1; k < 4; k++) { const u = k / 4, e = oy - T * .55 * u, m = sp - T * .9 * u; line([[x + sg * s * .02, m], [ox - sg * s * .06, e]], [176, 166, 190], Math.max(.8, s * .012)); } };      // page edges
+      const W = s * .48, T = s * .26, C = s * .055, by = y + Math.sin(t * 1.6) * s * .03, sp = by + s * .14, ey = sp - s * .05, paper = [250, 246, 238], purple = [122, 86, 182], edge = [190, 180, 200], arc = (sg, u) => { const ox = x + sg * (W - s * .03), oe = ey - C * .3 - T * .42 * u, q = sp - C * .3 - T * 1.15 * u, st = sp - C * .3 - T * .62 * u; return [ox, oe, x + sg * W * .42, q, x, st]; }, side = sg => {      // one half in true profile: the board underneath, and the pages seen end on, curving up from the board and down into the spine
+        const [ox, oe, cx, cy, sx, sy] = arc(sg, 1); ctx.beginPath(); ctx.moveTo(x, sp - C * .3); ctx.lineTo(x + sg * (W - s * .03), ey - C * .3); ctx.lineTo(ox, oe); ctx.quadraticCurveTo(cx, cy, sx, sy); ctx.closePath(); ctx.fillStyle = css(paper); ctx.fill();
+        for (const u of [.25, .5, .75]) { const [ax, ay, bx, by2, dx, dy] = arc(sg, u); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(bx, by2, dx, dy); ctx.strokeStyle = css(edge); ctx.lineWidth = Math.max(.7, s * .01); ctx.stroke(); }      // the leaves, one over another
+        poly([[x, sp - C * .5], [x + sg * W, ey - C * .5], [x + sg * W, ey + C * .5], [x, sp + C * .5]], purple); };      // the board
       side(-1); side(1);
     } else {
       ctx.fillStyle = css([210, 48, 58]); rrect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
