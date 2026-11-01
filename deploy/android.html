@@ -8,7 +8,7 @@
 <style>
 :root{--serif:"Noto Serif SC","Songti SC","STSong","Source Han Serif SC",Georgia,serif;--thin:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Microsoft YaHei UI",sans-serif;--cream:#f4ecdc;--gold:#ffe6aa}
 *{box-sizing:border-box}
-html{background:#141233}
+html{background:rgb(18,18,46)}
 html,body{margin:0}
 body{min-height:100vh;color:var(--cream);font-family:var(--thin);font-weight:300;-webkit-font-smoothing:antialiased;}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
@@ -88,12 +88,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     radial-gradient(1.0px 1.0px at 4.0% 58.4vh,rgba(255,250,230,0.46) 99%,transparent),
     radial-gradient(1.3px 1.3px at 42.2% 68.4vh,rgba(255,250,230,0.53) 99%,transparent),
     radial-gradient(1.1px 1.1px at 14.9% 68.9vh,rgba(255,250,230,0.75) 99%,transparent),
-    radial-gradient(2.0px 2.0px at 13.1% 7.2vh,rgba(255,250,230,1.00) 99%,transparent),
-    radial-gradient(2.0px 2.0px at 66.9% 27.8vh,rgba(255,250,230,1.00) 99%,transparent),
-    radial-gradient(2.0px 2.0px at 11.5% 56.5vh,rgba(255,250,230,1.00) 99%,transparent),
-    radial-gradient(2.0px 2.0px at 62.1% 48.9vh,rgba(255,250,230,1.00) 99%,transparent),
+    radial-gradient(1.6px 1.6px at 13.1% 7.2vh,rgba(255,250,230,.75) 99%,transparent),
+    radial-gradient(1.6px 1.6px at 66.9% 27.8vh,rgba(255,250,230,.75) 99%,transparent),
+    radial-gradient(1.6px 1.6px at 11.5% 56.5vh,rgba(255,250,230,.75) 99%,transparent),
+    radial-gradient(1.6px 1.6px at 62.1% 48.9vh,rgba(255,250,230,.75) 99%,transparent),
     linear-gradient(118deg,rgba(150,150,220,0) 30%,rgba(150,150,220,.11) 50%,rgba(150,150,220,0) 70%),
-    linear-gradient(180deg,#141233 0,#1e1a4a 34vh,#3a2a60 62vh,#7a5078 84vh,#d98d80 100vh,#e9a48c 100%) no-repeat}
+    linear-gradient(180deg,rgb(30,44,84) 0,rgb(46,38,84) 50vh,rgb(18,18,46) 100vh) no-repeat}
 a{color:var(--gold)}
 .wrap{max-width:960px;margin:0 auto;padding:0 24px}
 .icon{width:120px;height:120px;border-radius:27px;box-shadow:0 14px 44px rgba(8,6,28,.55);background:#18163c;color:transparent;overflow:hidden}
@@ -106,14 +106,14 @@ h1{font:200 clamp(34px,9vw,60px) var(--thin);letter-spacing:.22em;margin:26px 0 
 .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b9a888}
 .btn small{display:block;margin-top:5px;font-size:12px;letter-spacing:.04em;opacity:.62}
 .chip{display:inline-block;padding:9px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.3);font:300 13px var(--thin);letter-spacing:.14em;opacity:.8}
-footer{padding:44px 24px calc(40px + env(safe-area-inset-bottom));text-align:center;font:300 12.5px var(--thin);letter-spacing:.1em;color:#3a2440}
-footer a{color:#3a2440;text-decoration:none;border-bottom:1px solid rgba(58,36,64,.4);margin:0 8px}
+footer{padding:44px 24px calc(40px + env(safe-area-inset-bottom));text-align:center;font:300 12.5px var(--thin);letter-spacing:.1em;color:rgba(255,250,230,.7)}
+footer a{color:rgba(255,250,230,.7);text-decoration:none;border-bottom:1px solid rgba(255,250,230,.3);margin:0 8px}
 
 html,body{overscroll-behavior:none}
 main{min-height:100vh;min-height:100svh;max-width:460px;margin:0 auto;padding:calc(36px + env(safe-area-inset-top)) 24px 0;text-align:center;display:flex;flex-direction:column;align-items:center}
 .top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0 26px}
 .btn.dl{display:block;width:100%;max-width:340px}.btn.dl small{white-space:nowrap;font-size:11.5px;letter-spacing:.02em}
-footer{color:rgba(58,36,64,.85);padding-top:34px}
+footer{color:rgba(255,250,230,.7);padding-top:34px}
 #wx{display:none;position:fixed;inset:0;z-index:99;background:rgba(10,8,30,.86);color:#f4ecdc;font-family:var(--thin);text-align:center}#wx.on{display:block}#wx svg{position:absolute;top:calc(6px + env(safe-area-inset-top));right:18px}#wx .msg{position:absolute;top:calc(118px + env(safe-area-inset-top));left:24px;right:24px;font:300 17px/1.9 var(--thin);letter-spacing:.06em}#wx .msg b{font-weight:400;color:#ffe6aa}#wx .msg small{display:block;margin-top:10px;font-size:13px;opacity:.7;letter-spacing:.02em}
 .moon{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 78% 16vh,rgba(252,244,220,.275) 0,rgba(252,244,220,0) 74px)}.moon svg{position:absolute;left:calc(78% - 26px);top:calc(16vh - 26px)}main{position:relative;z-index:1}
 </style>
