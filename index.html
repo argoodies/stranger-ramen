@@ -574,11 +574,11 @@ function logoWaver(im, x, y, w, h, tt) {      // the logo drawn crisp: its strok
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false; ctx.drawImage(oc, Math.round(q.x), Math.round(q.y)); ctx.restore();
 }
 let titleBox = null;      // where the title's letters sit (and how far they have faded in), so the stars behind them can go dim
-// the sun by day, the 🌙 by night: a disc with a smaller one taken out of its upper left, so the crescent opens up and to the left; one fades into the other as night falls
+// the sun by day, the 🌙 by night: a disc with a smaller one taken out of its upper left, so the crescent opens up and to the left, a little larger than the sun; one fades into the other as night falls
 function drawOrb(x, y, r, n) {
   if (n < 1) circ(x, y, r, [255, 216, 150], 1 - n);
   if (n <= 0) return;
-  const R = r * .82, d = r * .26, cx = (R * R - r * r - d * d) / (2 * d), cy = Math.sqrt(r * r - cx * cx), a = Math.atan2(cy, cx), b = Math.atan2(cy, cx + d);
+  r *= 1.18; const R = r * .82, d = r * .26, cx = (R * R - r * r - d * d) / (2 * d), cy = Math.sqrt(r * r - cx * cx), a = Math.atan2(cy, cx), b = Math.atan2(cy, cx + d);
   ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.beginPath(); ctx.arc(0, 0, r, -a, a); ctx.arc(-d, 0, R, b, -b, true); ctx.closePath(); ctx.fillStyle = css([250, 204, 60], n); ctx.fill(); ctx.restore();
 }
 function drawSky(top, mid, bot, t, starA = 1) {
