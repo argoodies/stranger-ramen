@@ -125,7 +125,6 @@ async function playBotc() {
   g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
   g.over = true; if (!g.auto) resultMusic(mine === fin);
   await bsay(ST, fin === 'good' ? S().goodWins : S().evilWins);
-  await bsay(ST, S().bye);
   await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
   if (!g.auto && run === g.run && mode === 'tower') leaveTower();
   return g.result;
