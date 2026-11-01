@@ -331,10 +331,11 @@ function fig(x, y, k, o = {}) {
     ctx.beginPath(); ctx.ellipse(hx, hy - hr * .5, hr * 1.3, hr * .85, 0, Math.PI, TAU); ctx.fillStyle = css(hair, a); ctx.fill();
     ell(hx, hy + hr * .5, hr * .42, hr * .2, [226, 18, 48], a); circ(hx + hr * 1.25, hy - hr * .85, hr * .3, [226, 18, 48], a);
   }
-  if (kind === 'drunk') {      // a flat cap: a low crown pulled down over the head, the peak sticking out in front
-    poly([[hx + .04 * k, hy - .12 * k], [hx + .38 * k, hy - .07 * k], [hx + .36 * k, hy - .03 * k], [hx + .04 * k, hy - .05 * k]], hd, a);
-    ctx.beginPath(); ctx.ellipse(hx - .01 * k, hy - .07 * k, .215 * k, .17 * k, 0, Math.PI, TAU); ctx.closePath(); ctx.fillStyle = css(hl, a); ctx.fill();
-    poly([[hx - .225 * k, hy - .07 * k], [hx + .205 * k, hy - .07 * k], [hx + .205 * k, hy - .035 * k], [hx - .225 * k, hy - .035 * k]], mix(hat, shade, .12), a);
+  if (kind === 'drunk' || kind === 'cap') {      // a flat cap: a low crown pulled down over the head, the peak sticking out in front (o.peak: 1 to the right, -1 to the left)
+    const sg = o.peak || 1, cx = u => hx + sg * u * k;
+    poly([[cx(.04), hy - .12 * k], [cx(.38), hy - .07 * k], [cx(.36), hy - .03 * k], [cx(.04), hy - .05 * k]], hd, a);
+    ctx.beginPath(); ctx.ellipse(cx(-.01), hy - .07 * k, .215 * k, .17 * k, 0, Math.PI, TAU); ctx.closePath(); ctx.fillStyle = css(hl, a); ctx.fill();
+    poly([[cx(-.225), hy - .07 * k], [cx(.205), hy - .07 * k], [cx(.205), hy - .035 * k], [cx(-.225), hy - .035 * k]], mix(hat, shade, .12), a);
   } else if (kind === 'ida' || kind === 'ft') {
     const tip = [hx + lean * .3 * k, hy - .66 * k];
     poly([[hx - .21 * k, hy - .08 * k], [hx, hy - .04 * k], tip], hl, a); poly([[hx, hy - .04 * k], [hx + .21 * k, hy - .08 * k], tip], hd, a);
