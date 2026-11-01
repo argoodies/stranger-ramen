@@ -4,7 +4,7 @@
   assets/posters/night_9x16.png   1080x1920  the table at night, each player's role token over their head, no text
   assets/posters/night_2x3.png    1200x1800  the same at 2:3, the moon in the sky
   assets/posters/lobby_2x3.png    1200x1800  the opening screen (daytime lobby: Storyteller, you, 小染书), the sun in the sky
-  assets/role-icons/trio.png      1024x1024  the three tokens fanned out on the night sky, Pukka on top, no shadows, no coloured glow
+  assets/role-icons/trio.png      1024x1024  the three tokens overlapping on the night sky, no coloured glow
 
 Each image is the game's own canvas, exported from inside the page once the scene is set (deploy/3b.html is
 built first with tools/mk3b.py). The geese are left out so nothing crosses the sky.
@@ -30,9 +30,8 @@ setTimeout(async () => { await tk(4.2); frame(performance.now()); """ + EXPORT +
 TRIO = """window.requestAnimationFrame = () => 0;
 setTimeout(() => { const N = 1024, c2 = document.createElement('canvas'); c2.width = c2.height = N; const real = ctx, keep = [W, H]; ctx = c2.getContext('2d'); W = H = N;
   drawSky(SKYN[0], SKYN[1], SKYN[2], 3.7, 1);
-  const g0 = glow, e0 = ell;
-  glow = () => {}; ell = (x, y, a, b, c, al) => { if (al !== .4) e0(x, y, a, b, c, al); };
-  try { [['sailor', .25, .625, -.42], ['heretic', .5, .375, 0], ['pukka', .75, .625, .42]].forEach(([id, fx, fy, rot]) => { ctx.save(); ctx.translate(N * fx, N * fy); ctx.rotate(rot); roleToken(0, 0, N * .205, id); ctx.restore(); }); } finally { glow = g0; ell = e0; }
+  const r = N * .17, cy = N * .5, d = r * .8 / N, g0 = glow; glow = () => {};
+  try { [['sailor', .5 - d], ['heretic', .5], ['pukka', .5 + d]].forEach(([id, fx]) => roleToken(N * fx, cy, r, id)); } finally { glow = g0; }
   ctx = real; [W, H] = keep; const ta = document.createElement('textarea'); ta.id = 'png'; ta.textContent = c2.toDataURL('image/png'); document.body.appendChild(ta); document.title = 'ok'; }, 500);"""
 
 def render(script, size, dsf, out, resize=None):
