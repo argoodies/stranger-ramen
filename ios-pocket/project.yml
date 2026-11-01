@@ -9,16 +9,16 @@ targets:
     platform: iOS
     sources:
       - path: App
-      - path: ../ios/App/AppDelegate.swift
       - path: web
         type: folder
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.argoodies
-        MARKETING_VERSION: "0.0.1"
+        MARKETING_VERSION: "0.0.2"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_FILE: App/Info.plist
+        CODE_SIGN_ENTITLEMENTS: App/PocketClocktower.entitlements
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.0"

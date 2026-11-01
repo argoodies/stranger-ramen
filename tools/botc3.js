@@ -1,3 +1,15 @@
+// ---- Game Center, in the app only: wins are counted on the device and reported through the native shell; on the web gcPost does nothing
+const GCK = 'pocket_gc'; let GCS = { wins: 0, streak: 0, best: 0, ach: {} }; try { GCS = Object.assign(GCS, JSON.parse(localStorage.getItem(GCK) || '{}')); } catch (e) {}
+function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } catch (e) {} }
+function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
+function gcRecord(won, role) {
+  if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
+  GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win'); gcAch('win_' + role);
+  if (GCS.streak >= 3) gcAch('streak_3'); if (GCS.streak >= 5) gcAch('streak_5'); if (GCS.wins >= 10) gcAch('wins_10'); if (GCS.wins >= 50) gcAch('wins_50');
+  gcPost({ t: 'score', v: GCS.best });
+}
+window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.best) gcPost({ t: 'score', v: GCS.best }); };      // once signed in: anything earned before sign-in goes up too
+{ let was = null; setInterval(() => { const on = !!(window.__3b && window.__3b.lobby); if (on !== was) { was = on; gcPost({ t: 'lobby', on }); } }, 500); }      // the Game Center button shows in the lobby only
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).
 
@@ -106,7 +118,7 @@ async function playBotc() {
       const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
       const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
       if (yes >= need) {
-        if (roles[nom] === 'sailor' && sailorSafe()) { if (nom === 0 && (!g.auto || g.testBadges)) unlockBadge('sailor'); recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
+        if (roles[nom] === 'sailor' && sailorSafe()) { if (nom === 0 && (!g.auto || g.testBadges)) gcAch('trick_sailor'); recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
         else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, S().voteExec(yes, nom)); }
       } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, S().voteFail(yes, need)); }
       g.votes = null;
@@ -119,10 +131,11 @@ async function playBotc() {
   g.reveal = true; g.revealT = 0; g.pukkaSober = g.alive[pi] && g.drunk !== pi; if (!g.auto) [62, 69, 74].forEach((m, k) => chime(m, k * .15, .16, 1.6));
   g.result = { raw, fin, hereticOn, nights: g.night, won: mine === fin };
   if (!g.auto || g.testBadges) {
-    if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0) unlockBadge('pukka');      // won with two poison marks on the table
-    if (roles[0] === 'heretic' && mine === fin && g.deathBy[0] === 'exec') unlockBadge('heretic');                                                // nominated yourself, executed, and won
+    if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0) gcAch('trick_pukka');      // won with two poison marks on the table
+    if (roles[0] === 'heretic' && mine === fin && g.deathBy[0] === 'exec') gcAch('trick_heretic');                                                // nominated yourself, executed, and won
   }
   g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
+  if (!g.auto) gcRecord(mine === fin, roles[0]);
   g.over = true; if (!g.auto) resultMusic(mine === fin);
   await bsay(ST, fin === 'good' ? S().goodWins : S().evilWins);
   await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
