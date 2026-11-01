@@ -48,7 +48,7 @@ boot = """<script>
   const INTRO = ['sailor', 'heretic', 'pukka'];
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
     const px = v => Math.round(v * DPR) / DPR, q = P(1.1, -.62, 2.0), w = s * 1.38, h = s * .5, x = px(q[0]), y = px(q[1]);      // still (no bob), on whole device pixels: the lettering stays crisp
-    if (LANG === 'en') {      // in English, on the web and in the app alike, no label: a stiff open book hanging in the air, a true 3D model seen square on from a little above; in Chinese the red label
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc) {      // wherever Game Center is there (the app), in every language, no label: a stiff open book hanging in the air, a true 3D model seen square on from a little above; on the web always the red label
       let ox = 0, oy = 0; const W = s * .46, L = s * .56, T = s * .13, C = s * .07, Sp = s * .055, al = .42, yaw = 0, pit = .62, paper = [250, 246, 238], leafEdge = [222, 214, 214], board = [146, 118, 181], boardD = [120, 94, 156], ca = Math.cos(al), sa = Math.sin(al),
         P3 = (X, Y, Z) => { const x1 = X * Math.cos(yaw) + Z * Math.sin(yaw), z1 = Z * Math.cos(yaw); return [ox + x1, oy - (Y * Math.cos(pit) + z1 * Math.sin(pit))]; },      // X across, Y up, Z away from you; isometric like the rest of the game: no perspective, near and far edges the same length
         pt = (sg, u, h, z) => P3(sg * (Sp + u * ca - h * sa), u * sa + h * ca, z), u0 = (T * sa - Sp) / ca, ln = L * .44, lc = L * .5, wp = W * .87;
