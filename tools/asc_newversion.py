@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- A new opening screen: the title stands centred above the clock tower\n- Now and then a letter of the title steams like a hot bowl of noodles\n- Tap once to start, no waiting\n- A tidier backpack, with hollows all one size",
-       'zh-Hant': "· 全新開始畫面：標題置中，立在鐘樓上方\n· 標題的字偶爾會像熱湯一樣冒氣\n· 點一下馬上開始，不用等待\n· 背包重新整理，凹槽大小一致",
-       'zh-Hans': "· 全新开始画面：标题居中，立在钟楼上方\n· 标题的字偶尔会像热汤一样冒气\n· 点一下马上开始，不用等待\n· 背包重新整理，凹槽大小一致"}
+NEW = {'en-US': "- The game is now Starcross Tales, with a new icon\n- A new opening screen: tap once to start\n- The Guardian Cross has a new copper-gold look\n- A truer night sky\n- A tidier backpack with plain flat tiles",
+       'zh-Hant': "· 遊戲改名星穹十字物語，換上新圖示\n· 全新的開始畫面，點一下馬上開始\n· 守護十字換上銅金色的新樣子\n· 星空更像真正的夜空\n· 背包改成簡潔的平面格子",
+       'zh-Hans': "· 游戏改名星穹十字物语，换上新图标\n· 全新的开始画面，点一下马上开始\n· 守护十字换上铜金色的新样子\n· 星空更像真正的夜空\n· 背包改成简洁的平面格子"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
