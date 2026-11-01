@@ -43,7 +43,7 @@ Church: cross the bridge to the church on its little island, light the torch and
 Hand-drawn isometric scenes and soft generative music."""
 T = {'zh-Hans': ('星穹十字物语', '星空下的悬浮小镇', HANS, '休闲,放松,散步,等距,星空,钟楼,十字,风景,拉面,料理,酒馆,教堂'),
      'zh-Hant': ('星穹十字物語', '星空下的懸浮小鎮', HANT, '休閒,放鬆,散步,等距,星空,鐘樓,十字,風景,拉麵,料理,酒館,教堂'),
-     'en-US': ('Starcross Tales', 'A floating town under the stars', EN, 'cozy,relax,wander,isometric,stars,clock tower,cross,scenery,ramen,cooking,tavern,church')}
+     'en-US': ('Starcross Tales', 'Floating town under the stars', EN, 'cozy,relax,wander,isometric,stars,clock tower,cross,scenery,ramen,cooking,tavern,church')}
 def J(m, p, b=None):
     st, tx = req(m, p, b)
     if st >= 300: print('!!', m, p, st, tx[:400].replace('\n', ' '))
