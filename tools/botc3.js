@@ -10,7 +10,8 @@ function gcRecord(won, role) {
   gcPost({ t: 'score', v: GCS.best });
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.best) gcPost({ t: 'score', v: GCS.best }); };      // once signed in: anything earned before sign-in goes up too
-let gcBtn = null; window.__gcOn = photo => { const b = { img: null }; if (photo) { b.img = new Image(); b.img.src = 'data:image/jpeg;base64,' + photo; } gcBtn = b; };      // signed in: a round button beside the player in the lobby, the player's Game Center photo on it
+window.__gcOn = (photo, name) => { if (document.getElementById('gcpill')) return; const b = document.createElement('button'); b.id = 'gcpill'; b.style.cssText = "position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:7px;max-width:62vw;height:34px;padding:0 13px 0 4px;border:0;border-radius:17px;background:rgba(30,24,60,.62);color:#f4ecdc;font:300 13px var(--serif);letter-spacing:.04em;cursor:pointer;-webkit-tap-highlight-color:transparent";      // signed in: a capsule at the top of the screen all game long, the player's photo and name on it; a tap opens Game Center
+  const im = document.createElement('span'); im.style.cssText = 'flex:none;width:26px;height:26px;border-radius:50%;background:#8464ac center/cover' + (photo ? `;background-image:url(data:image/jpeg;base64,${photo})` : ''); const t = document.createElement('span'); t.textContent = name || 'Game Center'; t.style.cssText = 'overflow:hidden;white-space:nowrap;text-overflow:ellipsis'; b.append(im, t); b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); gcPost({ t: 'dash' }); }); document.body.appendChild(b); };
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).
 
@@ -208,7 +209,7 @@ function drawBotc(t, dt) {
       const pp = pop((g.revealT - i * .25) / .45); if (pp <= 0) continue;
       roleToken(tx, ty, R * pp, g.roles[i]);
       if (!g.alive[i]) shroud(tx, ty, R * pp, clamp((g.revealT - 1.0 - i * .2) / .4));
-      const ra = clamp((g.revealT - 1.5) / .4), mr = R * .44, my = ty + R * .72; let k = 0, mp = () => [tx + R * 1.1 + k++ * mr * 2.1, my];      // reminders: lower right, each further one beside the last
+      const ra = clamp((g.revealT - 1.5) / .4), mr = R * .56, my = ty + R * .65; let k = 0, mp = () => [tx + R * 1.2 + k++ * R * 1.2, my];      // reminders: lower right, each further one beside the last
       if (g.drunk === i) roleToken(...mp(), mr, 'sailor', ra);
       // one Pukka token for the poison that killed them, one for tonight's poison: the same player can carry both
       if (g.deadPoison === i && g.pukkaSober) roleToken(...mp(), mr, 'pukka', ra);

@@ -94,10 +94,11 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
                 self.present(viewController, animated: true)
             } else if GKLocalPlayer.local.isAuthenticated {
                 self.webView?.evaluateJavaScript("window.__gcSync && window.__gcSync()", completionHandler: nil)
-                // the game draws its own round button beside the player, the system's can only sit in a corner
+                // the game draws its own capsule at the top of the screen, the system's can only sit in a corner
                 GKLocalPlayer.local.loadPhoto(for: .small) { [weak self] photo, _ in
                     let data = photo?.jpegData(compressionQuality: 0.8)?.base64EncodedString() ?? ""
-                    self?.webView?.evaluateJavaScript("window.__gcOn && window.__gcOn('\(data)')", completionHandler: nil)
+                    let name = (try? JSONSerialization.data(withJSONObject: [GKLocalPlayer.local.displayName])).flatMap { String(data: $0, encoding: .utf8) } ?? "[\"\"]"
+                    self?.webView?.evaluateJavaScript("window.__gcOn && window.__gcOn('\(data)', \(name)[0])", completionHandler: nil)
                 }
             }
         }
