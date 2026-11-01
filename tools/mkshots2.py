@@ -6,6 +6,7 @@
   4 the island at night, zoomed out, the chef before the clock tower; no "tap" hint
   5 the church, round two: the torch just lit, the chef a step in front of it, both whirlwinds there with their health bars
   6 the view from the top of the clock tower at night, the moment the shooting star crosses the sky
+  7 ordinary play: the chef on the path in the town at night, close up, as in the game
 usage: tools/mkshots2.py [langs] [iphone|ipad|both]     e.g. tools/mkshots2.py hans iphone
 out: /dev/shm/botc/shots4/<locale>/iphone_N.png (1290x2796) and ipad_N.png (2048x2732)"""
 import os, sys, subprocess
@@ -27,6 +28,7 @@ SCENES_ALL = {
  4: """setTimeout(() => { G.n = 1; G.t = HALF + 20; mode = 'world'; $('title').style.display = 'none'; zoomOut = zoomTarget = 1; fade = 0; tapHint = () => {}; { const st = document.createElement('style'); st.textContent = '#zoom,#lang,#enter{display:none!important}'; document.head.appendChild(st); } player.x = TDOOR[0] + .5; player.y = TDOOR[1] + 1.5; player.path = []; }, 300);""",
  5: """setTimeout(() => { save.knife = true; save.equip.weapon = 'knife'; enterChurch(); fade = 0; const c = church, p = c.p; c.tier = 2; p.x = p.tx = TORCH[0] + 1.0; p.y = p.ty = TORCH[1] + .35; c.cam = null; churchIgnite();
       setInterval(() => c.foes.forEach(f => { f.app = 0; f.cd = 99; f.wt = 99; f.wind = 0; }), 30); }, 300);""",
+ 7: """setTimeout(() => { G.n = 1; G.t = HALF + 20; mode = 'world'; $('title').style.display = 'none'; zoomOut = zoomTarget = 0; titleK = 0; fade = 0; tapHint = () => {}; worldHint = 0; player.x = -.5; player.y = 3.5; player.path = []; camX = player.x; camY = player.y; }, 300);""",
  6: """setTimeout(() => { G.n = 1; G.t = HALF + 20; $('title').style.display = 'none'; enterTower(); towerShow(); fade = 0; tapHint = () => {};
       Object.assign(tw.view, { kind: 'meteor', night: true, t: TSTAR + .47 }); updateTower = () => {};
       { const st = document.createElement('style'); st.textContent = '#zoom,#lang,#enter,#leave{display:none!important}'; document.head.appendChild(st); } }, 300);""",
