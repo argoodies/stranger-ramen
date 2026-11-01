@@ -1350,7 +1350,7 @@ function bowlTopMini(x, y, r, b) {
 // round character token, as in the video: cream disc + flat icon (blue = good, red = evil)
 function roleToken(x, y, r, role, a = 1, mono = null, thin = false) {
   if (r <= 1) return;
-  const evil = role === 'pukka', c = mono || (evil ? [206, 40, 62] : [60, 130, 230]), c2 = mono || mix(c, [255, 255, 255], .5), w = thin ? r * .075 : Math.max(1.5, r * .11);      // thin: drawn small on a card, the lines keep to the token's own proportions
+  const evil = role === 'pukka', c = mono || (evil ? [206, 40, 62] : [60, 130, 230]), c2 = mono || mix(c, [255, 255, 255], .5), w = r * (thin ? .075 : .11);      // the lines keep to the token's own proportions at every size; thin: drawn small on a card
   ctx.save(); ctx.globalAlpha = a;
   if (!mono) { if (r > 12) glow(x, y, r * 1.7, c, .5); ell(x, y + r * .08, r, r, [20, 12, 40], .4); circ(x, y, r, [206, 190, 160]); circ(x, y, r * .88, [244, 232, 208]); }
   const q = r * .95;

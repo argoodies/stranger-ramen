@@ -208,13 +208,13 @@ function drawBotc(t, dt) {
       const pp = pop((g.revealT - i * .25) / .45); if (pp <= 0) continue;
       roleToken(tx, ty, R * pp, g.roles[i]);
       if (!g.alive[i]) shroud(tx, ty, R * pp, clamp((g.revealT - 1.0 - i * .2) / .4));
-      const ra = clamp((g.revealT - 1.5) / .4); let k = 0;
-      if (g.drunk === i) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'sailor', ra);
+      const ra = clamp((g.revealT - 1.5) / .4), mr = R * .44, my = ty + R * .72; let k = 0, mp = () => [tx + R * 1.1 + k++ * mr * 2.1, my];      // reminders: lower right, each further one beside the last
+      if (g.drunk === i) roleToken(...mp(), mr, 'sailor', ra);
       // one Pukka token for the poison that killed them, one for tonight's poison: the same player can carry both
-      if (g.deadPoison === i && g.pukkaSober) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra);
-      if (g.poisoned === i && g.pukkaSober) roleToken(tx + R * 1.2 + k++ * R * 1.2, ty + R * .65, R * .56, 'pukka', ra);
-      if (g.goneDrunk === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'sailor', ra); shroud(mx, my, R * .56, ra); }
-      if (g.gonePoison === i) { const mx = tx + R * 1.2 + k++ * R * 1.2, my = ty + R * .65; roleToken(mx, my, R * .56, 'pukka', ra); shroud(mx, my, R * .56, ra); }
+      if (g.deadPoison === i && g.pukkaSober) roleToken(...mp(), mr, 'pukka', ra);
+      if (g.poisoned === i && g.pukkaSober) roleToken(...mp(), mr, 'pukka', ra);
+      if (g.goneDrunk === i) { const [gx, gy] = mp(); roleToken(gx, gy, mr, 'sailor', ra); shroud(gx, gy, mr, ra); }
+      if (g.gonePoison === i) { const [gx, gy] = mp(); roleToken(gx, gy, mr, 'pukka', ra); shroud(gx, gy, mr, ra); }
     } else if (i === 0 && g.showMine) roleToken(tx, ty, R, g.roles[0]);
   }
   // what is being said
