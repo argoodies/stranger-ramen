@@ -42,9 +42,20 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         webView?.evaluateJavaScript("window.__wake && window.__wake()", completionHandler: nil)
     }
 
+    private let sky = CAGradientLayer()
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        sky.frame = view.bounds
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 14 / 255, green: 12 / 255, blue: 36 / 255, alpha: 1)
+        // the game's daytime sky behind the web view, so nothing dark shows while the page loads
+        let rgb: [[CGFloat]] = [[226, 150, 130], [214, 166, 156], [204, 150, 148]]
+        sky.colors = rgb.map { UIColor(red: $0[0] / 255, green: $0[1] / 255, blue: $0[2] / 255, alpha: 1).cgColor }
+        sky.frame = view.bounds
+        view.layer.insertSublayer(sky, at: 0)
 
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
@@ -60,8 +71,8 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         webView = WKWebView(frame: view.bounds, configuration: config)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.isOpaque = false
-        webView.backgroundColor = view.backgroundColor
-        webView.scrollView.backgroundColor = view.backgroundColor
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
         webView.scrollView.isScrollEnabled = false
         webView.scrollView.bounces = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
@@ -82,8 +93,12 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
             if let viewController = viewController {
                 self.present(viewController, animated: true)
             } else if GKLocalPlayer.local.isAuthenticated {
-                GKAccessPoint.shared.location = .topLeading
                 self.webView?.evaluateJavaScript("window.__gcSync && window.__gcSync()", completionHandler: nil)
+                // the game draws its own round button beside the player, the system's can only sit in a corner
+                GKLocalPlayer.local.loadPhoto(for: .small) { [weak self] photo, _ in
+                    let data = photo?.jpegData(compressionQuality: 0.8)?.base64EncodedString() ?? ""
+                    self?.webView?.evaluateJavaScript("window.__gcOn && window.__gcOn('\(data)')", completionHandler: nil)
+                }
             }
         }
     }
@@ -92,8 +107,8 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "gc", let body = message.body as? [String: Any], let type = body["t"] as? String else { return }
         switch type {
-        case "lobby":
-            GKAccessPoint.shared.isActive = (body["on"] as? Bool ?? false) && GKLocalPlayer.local.isAuthenticated
+        case "dash":
+            GKAccessPoint.shared.trigger(handler: {})
         case "ach":
             guard GKLocalPlayer.local.isAuthenticated, let id = body["id"] as? String else { return }
             let achievement = GKAchievement(identifier: id)

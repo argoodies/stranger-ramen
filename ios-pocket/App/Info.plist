@@ -14,7 +14,7 @@
   <key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
   <key>LSRequiresIPhoneOS</key><true/>
   <key>ITSAppUsesNonExemptEncryption</key><false/>
-  <key>UILaunchScreen</key><dict/>
+  <key>UILaunchScreen</key><dict><key>UIColorName</key><string>LaunchSky</string></dict>
   <key>UIRequiresFullScreen</key><true/>
   <key>UIStatusBarHidden</key><true/>
   <key>UIViewControllerBasedStatusBarAppearance</key><true/>

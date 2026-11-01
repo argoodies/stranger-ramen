@@ -10,7 +10,7 @@ function gcRecord(won, role) {
   gcPost({ t: 'score', v: GCS.best });
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.best) gcPost({ t: 'score', v: GCS.best }); };      // once signed in: anything earned before sign-in goes up too
-{ let was = null; setInterval(() => { const on = !!(window.__3b && window.__3b.lobby); if (on !== was) { was = on; gcPost({ t: 'lobby', on }); } }, 500); }      // the Game Center button shows in the lobby only
+let gcBtn = null; window.__gcOn = photo => { const b = { img: null }; if (photo) { b.img = new Image(); b.img.src = 'data:image/jpeg;base64,' + photo; } gcBtn = b; };      // signed in: a round button beside the player in the lobby, the player's Game Center photo on it
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).
 
