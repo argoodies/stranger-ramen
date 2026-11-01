@@ -48,16 +48,15 @@ boot = """<script>
   const INTRO = ['sailor', 'heretic', 'pukka'];
   function drawBook(t, P, s) {      // a red capsule where the grimoire lies in the game, just right of the Storyteller: 小染书, straight, in white
     const px = v => Math.round(v * DPR) / DPR, q = P(1.1, -.62, 2.0), w = s * 1.38, h = s * .5, x = px(q[0]), y = px(q[1]);      // still (no bob), on whole device pixels: the lettering stays crisp
-    if (LANG === 'en') {      // in English, on the web and in the app alike, no label: a stiff open book hanging in the air, a true 3D model seen from a little above and turned toward the Storyteller; in Chinese the red label
-      let ox = 0, oy = 0; const W = s * .46, L = s * .56, T = s * .13, C = s * .07, Sp = s * .055, al = .42, yaw = -.26, pit = .62, paper = [250, 246, 238], leafEdge = [222, 214, 214], board = [146, 118, 181], boardD = [120, 94, 156], ca = Math.cos(al), sa = Math.sin(al),
-        P3 = (X, Y, Z) => { const x1 = X * Math.cos(yaw) + Z * Math.sin(yaw), z1 = Z * Math.cos(yaw) - X * Math.sin(yaw), k = 1 / (1 + z1 / (s * 6)); return [ox + x1 * k, oy - (Y * Math.cos(pit) + z1 * Math.sin(pit)) * k]; },      // X across, Y up, Z away from you; the far end a touch smaller
+    if (LANG === 'en') {      // in English, on the web and in the app alike, no label: a stiff open book hanging in the air, a true 3D model seen square on from a little above; in Chinese the red label
+      let ox = 0, oy = 0; const W = s * .46, L = s * .56, T = s * .13, C = s * .07, Sp = s * .055, al = .42, yaw = 0, pit = .62, paper = [250, 246, 238], leafEdge = [222, 214, 214], board = [146, 118, 181], boardD = [120, 94, 156], ca = Math.cos(al), sa = Math.sin(al),
+        P3 = (X, Y, Z) => { const x1 = X * Math.cos(yaw) + Z * Math.sin(yaw), z1 = Z * Math.cos(yaw), k = 1 / (1 + z1 / (s * 6)); return [ox + x1 * k, oy - (Y * Math.cos(pit) + z1 * Math.sin(pit)) * k]; },      // X across, Y up, Z away from you; the far end a touch smaller
         pt = (sg, u, h, z) => P3(sg * (Sp + u * ca - h * sa), u * sa + h * ca, z), u0 = (T * sa - Sp) / ca, ln = L * .44, lc = L * .5, wp = W * .87;
       { const qs = []; for (const sg of [-1, 1]) for (const z of [-lc, lc]) qs.push(pt(sg, W, 0, z), pt(sg, W, -C, z), pt(sg, wp, T, z), pt(sg, u0, T, z), pt(sg, 0, -C, z)); const ys = qs.map(q => q[1]); ox = x - pt(1, u0, T, ln)[0]; oy = y + Math.sin(t * 1.6) * s * .03 - (Math.min(...ys) + Math.max(...ys)) / 2; }      // up and down centred on the red label's spot; across, the top of the V sits right under the sparkle
       for (const sg of [-1, 1]) { poly([pt(sg, W, 0, -lc), pt(sg, W, 0, lc), pt(sg, W, -C, lc), pt(sg, W, -C, -lc)], boardD); poly([pt(sg, 0, 0, -lc), pt(sg, W, 0, -lc), pt(sg, W, 0, lc), pt(sg, 0, 0, lc)], board); poly([pt(sg, 0, 0, -lc), pt(sg, W, 0, -lc), pt(sg, W, -C, -lc), pt(sg, 0, -C, -lc)], boardD); }      // the covers, their near edges a shade darker
       poly([P3(-Sp, 0, -lc), P3(Sp, 0, -lc), P3(Sp, 0, lc), P3(-Sp, 0, lc)], board); poly([P3(-Sp, 0, -lc), P3(Sp, 0, -lc), P3(Sp, -C, -lc), P3(-Sp, -C, -lc)], boardD);      // the spine
       for (const sg of [-1, 1]) { poly([pt(sg, -Sp / ca, 0, -ln), pt(sg, wp, 0, -ln), pt(sg, wp, T, -ln), pt(sg, u0, T, -ln)], leafEdge); poly([pt(sg, wp, 0, -ln), pt(sg, wp, 0, ln), pt(sg, wp, T, ln), pt(sg, wp, T, -ln)], leafEdge); }      // the pages' thickness
       for (const sg of [-1, 1]) poly([pt(sg, u0, T, -ln), pt(sg, wp, T, -ln), pt(sg, wp, T, ln), pt(sg, u0, T, ln)], paper);      // and their faces, one solid white
-      line([pt(1, u0, T, -ln), pt(1, u0, T, ln)], [226, 220, 222], s * .02);      // the crease down the middle
     } else {
       ctx.fillStyle = css([210, 48, 58]); rrect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
       const T = rb().btn, fs = T.length > 3 ? s * .25 : s * .31; ctx.font = `600 ${fs}px ${KIDF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
