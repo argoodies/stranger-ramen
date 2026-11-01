@@ -94,22 +94,14 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
                 self.present(viewController, animated: true)
             } else if GKLocalPlayer.local.isAuthenticated {
                 self.webView?.evaluateJavaScript("window.__gcSync && window.__gcSync()", completionHandler: nil)
-                // the game draws its own capsule at the top of the screen, the system's can only sit in a corner
-                GKLocalPlayer.local.loadPhoto(for: .small) { [weak self] photo, _ in
-                    let data = photo?.jpegData(compressionQuality: 0.8)?.base64EncodedString() ?? ""
-                    let name = (try? JSONSerialization.data(withJSONObject: [GKLocalPlayer.local.displayName])).flatMap { String(data: $0, encoding: .utf8) } ?? "[\"\"]"
-                    self?.webView?.evaluateJavaScript("window.__gcOn && window.__gcOn('\(data)', \(name)[0])", completionHandler: nil)
-                }
             }
         }
     }
 
-    // messages from the game: an achievement, the best streak, and whether the lobby is showing
+    // messages from the game: an achievement and the best streak
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "gc", let body = message.body as? [String: Any], let type = body["t"] as? String else { return }
         switch type {
-        case "dash":
-            GKAccessPoint.shared.trigger(handler: {})
         case "ach":
             guard GKLocalPlayer.local.isAuthenticated, let id = body["id"] as? String else { return }
             let achievement = GKAchievement(identifier: id)
