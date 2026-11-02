@@ -2509,6 +2509,9 @@ if (location.hash) {
 <script>
 // ---- Game Center, in the app only: wins are counted on the device and reported through the native shell; on the web gcPost does nothing
 const GCK = 'pocket_gc'; let GCS = { wins: 0, streak: 0, best: 0, ach: {} }; try { GCS = Object.assign(GCS, JSON.parse(localStorage.getItem(GCK) || '{}')); } catch (e) {}
+// achievements that no longer exist (role first wins, two earlier role tricks) are dropped, so they are never sent again
+const GCA = ['first_win', 'streak_3', 'streak_5', 'day_3', 'day_5', 'day_7', 'exec_survive', 'self_reverse', 'trick_pukka'].concat([5, 10, 25, 50, 100, 200, 300, 500, 1000].map(n => 'wins_' + n));
+for (const id of Object.keys(GCS.ach || {})) if (!GCA.includes(id)) delete GCS.ach[id];
 function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } catch (e) {} }
 function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
 function gcRecord(won, role) {

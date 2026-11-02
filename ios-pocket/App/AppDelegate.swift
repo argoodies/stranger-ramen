@@ -98,19 +98,35 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         }
     }
 
-    // messages from the game: an achievement and the best streak
+    // TestFlight only (a sandbox receipt): a Game Center failure shows as a small note at the top for a few seconds;
+    // nothing shows when all goes well, and the App Store build never shows it
+    private let isTestFlight = Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+
+    private func testNote(_ text: String) {
+        guard isTestFlight else { return }
+        guard let data = try? JSONSerialization.data(withJSONObject: [text]), let arg = String(data: data, encoding: .utf8) else { return }
+        let js = "(function(t){var d=document.createElement('div');d.textContent=t[0];d.style.cssText='position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 10px);transform:translateX(-50%);z-index:99999;max-width:88%;padding:7px 11px;border-radius:9px;background:rgba(0,0,0,.8);color:#fff;font:12px -apple-system,sans-serif;pointer-events:none';document.body.appendChild(d);setTimeout(function(){d.remove()},6000)})(\(arg))"
+        DispatchQueue.main.async { self.webView?.evaluateJavaScript(js, completionHandler: nil) }
+    }
+
+    // messages from the game: an achievement and the total wins
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "gc", let body = message.body as? [String: Any], let type = body["t"] as? String else { return }
         switch type {
         case "ach":
-            guard GKLocalPlayer.local.isAuthenticated, let id = body["id"] as? String else { return }
+            guard let id = body["id"] as? String else { return }
+            guard GKLocalPlayer.local.isAuthenticated else { return testNote("Game Center: not signed in, \(id) not sent") }
             let achievement = GKAchievement(identifier: id)
             achievement.percentComplete = 100
             achievement.showsCompletionBanner = true
-            GKAchievement.report([achievement], withCompletionHandler: nil)
+            GKAchievement.report([achievement]) { [weak self] error in
+                if let error = error { self?.testNote("Game Center refused \(id): \(error.localizedDescription)") }
+            }
         case "score":
             guard GKLocalPlayer.local.isAuthenticated, let value = (body["v"] as? NSNumber)?.intValue else { return }
-            GKLeaderboard.submitScore(value, context: 0, player: GKLocalPlayer.local, leaderboardIDs: ["pc.total_wins"], completionHandler: { _ in })
+            GKLeaderboard.submitScore(value, context: 0, player: GKLocalPlayer.local, leaderboardIDs: ["pc.total_wins"]) { [weak self] error in
+                if let error = error { self?.testNote("Game Center refused the score \(value): \(error.localizedDescription)") }
+            }
         default:
             break
         }
