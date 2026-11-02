@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """App Store listing for Tiny Clocktower (app 6829382085), English only: version string, store text, URLs, category,
-review contact and screenshots (iphone_N / ipad_N from a folder, made by /tmp-style staging of deploy/3b.html).
+review contact and screenshots (iphone_N / ipad_N from a folder).
 usage: tiny_store.py <versionString> <screenshotDir> [buildNumber]"""
 import sys, json, os, hashlib, urllib.request, time
 sys.path.insert(0, '/root'); from asc_api import req
