@@ -167,7 +167,6 @@ function drawGeese3(t, n) {      // three geese crossing the sky, exactly as ove
   for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], n), 2, lerp(.95, .7, n)); } }
 // the player, a boy with soft full hair, dark top, blue shorts and white sneakers: walks the four diagonals in small quick steps, the back foot flicking up, the body nearly still. ph: the step (null: standing); flip: 1 right, -1 left; away: going up the screen
 function drawHero(x, y, k, ph, flip = 1, away = true) {
-  k *= 1.16;      // as tall as the other players: his head and legs are slimmer than their cones
   const R = [214, 62, 70], RD = [168, 44, 66], SK = [247, 228, 210], SH = [246, 242, 238], D = [246, 242, 238], BL = [40, 36, 46], tone = c => [mix(c, [255, 255, 255], .12), mix(c, [70, 50, 110], .26)], P = poly;
   ctx.save(); ctx.translate(x, y); ctx.scale(flip, 1); ctx.translate(-x, -y); const by = y - (ph == null ? 0 : Math.abs(Math.cos(ph)) * .01 * k), sl = away ? -.5 : .5, tilt = away ? -1 : 1; if (!figNoShadow) ell(x, y, .2 * k, .06 * k, [20, 12, 40], .3);
   const leg = (off, back) => { const hipx = x + (back ? -.035 : .035) * k, hipy = by - .3 * k; let st, up = 0, kx, ky = hipy + .13 * k;
@@ -178,10 +177,10 @@ function drawHero(x, y, k, ph, flip = 1, away = true) {
   if (away) { leg(0, false); leg(Math.PI, true); } else { leg(Math.PI, true); leg(0, false); }
   const [pa, pb] = tone(BL), [a, b] = tone(D); P([[x - .15 * k, by - .46 * k], [x, by - .46 * k], [x, by - .29 * k], [x - .17 * k, by - .29 * k]], pa); P([[x, by - .46 * k], [x + .15 * k, by - .46 * k], [x + .17 * k, by - .29 * k], [x, by - .29 * k]], pb);
   P([[x - .1 * k, by - .86 * k], [x, by - .86 * k], [x, by - .42 * k], [x - .19 * k, by - .42 * k]], a); P([[x, by - .86 * k], [x + .1 * k, by - .86 * k], [x + .19 * k, by - .42 * k], [x, by - .42 * k]], b);
-  P([[x - .135 * k, by - .9 * k], [x + .135 * k, by - .9 * k], [x + .115 * k, by - .78 * k], [x - .025 * k, by - .78 * k], [x - .06 * k, by - .5 * k], [x - .185 * k, by - .5 * k]], R);      // a red scarf, one end hanging down
   const hx = x, hy = by - 1.03 * k, r = .17 * k;
   const shape = (pts, c) => { ctx.beginPath(); ctx.moveTo(hx + pts[0] * r, hy + pts[1] * r); for (let n = 2; n < pts.length; n += 4) ctx.quadraticCurveTo(hx + pts[n] * r, hy + pts[n + 1] * r, hx + pts[n + 2] * r, hy + pts[n + 3] * r); ctx.closePath(); ctx.fillStyle = css(c); ctx.fill(); };      
   circ(hx, hy, r, SK); for (const m of [-1, 1]) { const pts = [.04, -1.42, -.7, -1.5, -1.08, -.92, -1.26, -.5, -1.2, 0, -1.2, .24, -1.06, .42, -.94, .24, -.8, 0, -.66, .2, -.46, .26, -.34, .08, -.28, -.04, -.14, .14, .04, .18]; shape(pts.map((v, n) => n % 2 ? v : v * m), [28, 26, 34]); }      // the same black hair whichever way he walks: symmetrical, lying close to the head, a few soft locks over the forehead
+  ctx.beginPath(); ctx.arc(hx, hy - r * .16, r * 1.28, Math.PI * .98, Math.PI * 2.02); ctx.closePath(); ctx.fillStyle = css(R); ctx.fill(); P([[hx - r * 1.16, hy - r * .22], [hx - r * 2.02, hy - r * .02], [hx - r * 1.98, hy - r * .18], [hx - r * 1.12, hy - r * .46]], RD); circ(hx - r * .03, hy - r * 1.44, r * .13, RD);      // a red cap over the hair, the peak turned backwards
   ctx.restore();
 }
 function drawBotc(t, dt) {
@@ -211,8 +210,8 @@ function drawBotc(t, dt) {
     if (g.pop && g.pop.who === i) { const u = g.pop.t / .45, k2 = 1 + .55 * eout(u); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * k2, s * .35 * k2, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .95 * (1 - u) * (1 - u)); ctx.lineWidth = 3.5 * (1 - u * .6); ctx.stroke(); g.pop.t += dt; if (g.pop.t >= .45) g.pop = null; }
     if (i === 0) glow(p[0], p[1] - K * .6, K * 1.2, [255, 240, 200], .3);
     const look = dead ? { kind: 'bare', body: [236, 236, 255], head: [236, 236, 255], a: .45 } : Object.assign({}, BLOOK[i], asleep ? { a: .55 } : {});
-    fadedDraw(look.a == null ? 1 : look.a, () => i === 0 && !dead ? drawHero(p[0], p[1], K) : fig(p[0], p[1], K, Object.assign({}, look, { a: 1 })));      // asleep or dead: faded as a whole, so the hat never shows the head through it
-    if (dead) { ctx.beginPath(); ctx.ellipse(p[0], p[1] - K * 1.33, K * .2, K * .06, 0, 0, TAU); ctx.strokeStyle = css([255, 250, 220], .8); ctx.lineWidth = 2; ctx.stroke(); }
+    fadedDraw(look.a == null ? 1 : look.a, () => i === 0 ? drawHero(p[0], p[1], K) : fig(p[0], p[1], K, Object.assign({}, look, { a: 1 })));      // asleep or dead: faded as a whole, so the hat never shows the head through it
+    if (dead) { ctx.beginPath(); ctx.ellipse(p[0], p[1] - K * (i === 0 ? 1.44 : 1.33), K * .2, K * .06, 0, 0, TAU); ctx.strokeStyle = css([255, 250, 220], .8); ctx.lineWidth = 2; ctx.stroke(); }
     if (g.votes && g.votes[i] != null) { const vx = p[0] + K * .62, vy = p[1] - K * 1.1; if (g.votes[i]) { glow(vx, vy, 24, [255, 214, 110], .7); poly([[vx, vy - 13], [vx + 9, vy], [vx, vy + 13], [vx - 9, vy]], [255, 214, 110]); } else line([[vx - 7, vy], [vx + 7, vy]], [200, 190, 220], 3, .8); }
     toks.push(i);
     BHIT[i] = [p[0], p[1] - K * .8, K * .8];
