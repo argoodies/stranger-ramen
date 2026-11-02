@@ -7,8 +7,8 @@ Only what each version finally shipped with; changes that were tried and rolled 
 
 ## 0.0.6 — 上架候选 · Release candidate（2026-11-02）
 
-> 当前绑定 build 30（build 32 构建中）。标 ★ 的条目已在代码和 Game Center 中完成，但还要出一个新包才会进 App。
-> Bound to build 30. Items marked ★ are done in the code and in Game Center but need one more build to reach the app.
+> 当前绑定 build 32（已含下面全部改动；★ 为 build 31/32 才进 App 的条目）。
+> Bound to build 32, which has everything below; ★ marks what first reached the app in builds 31/32.
 
 **规则 · Rules**
 - 一局打到第七个白天，游戏强制结算，好人获胜，异端的颠倒不生效；说书人会宣布“第七个白天到了，强制结算：善良阵营获胜”。之前最多可到第 12 天，然后判邪恶胜。
