@@ -5,7 +5,7 @@ usage: tiny_store.py <versionString> <screenshotDir> [buildNumber]"""
 import sys, json, os, hashlib, urllib.request, time
 sys.path.insert(0, '/root'); from asc_api import req
 APP = '6829382085'; VER, SHOTS = sys.argv[1], sys.argv[2]; BN = sys.argv[3] if len(sys.argv) > 3 else None
-SITE = 'https://ramen-puzzle.fly.dev'
+SITE = 'https://tiny-clocktower.fly.dev'      # the app's own little site (tiny-site/), apart from the game's
 SUB = 'A pocket game of hidden roles'
 DESC = """Three seats, one Storyteller, and a secret in every hand.
 
@@ -45,10 +45,10 @@ L = J('GET', f'/v1/appStoreVersions/{VID}/appStoreVersionLocalizations')['data']
 for l in L:
     if l['attributes']['locale'] != 'en-US': J('DELETE', f"/v1/appStoreVersionLocalizations/{l['id']}"); print('removed', l['attributes']['locale'])
 LID = next(l['id'] for l in L if l['attributes']['locale'] == 'en-US')
-J('PATCH', f'/v1/appStoreVersionLocalizations/{LID}', {'data': {'type': 'appStoreVersionLocalizations', 'id': LID, 'attributes': {'description': DESC, 'keywords': KW, 'promotionalText': PROMO, 'supportUrl': SITE + '/tiny/support', 'marketingUrl': SITE + '/tiny/support'}}}); print('text ok')
+J('PATCH', f'/v1/appStoreVersionLocalizations/{LID}', {'data': {'type': 'appStoreVersionLocalizations', 'id': LID, 'attributes': {'description': DESC, 'keywords': KW, 'promotionalText': PROMO, 'supportUrl': SITE + '/support', 'marketingUrl': SITE + '/support'}}}); print('text ok')
 ai = J('GET', f'/v1/apps/{APP}/appInfos')['data'][0]
 for l in J('GET', f"/v1/appInfos/{ai['id']}/appInfoLocalizations")['data']:
-    J('PATCH', f"/v1/appInfoLocalizations/{l['id']}", {'data': {'type': 'appInfoLocalizations', 'id': l['id'], 'attributes': {'subtitle': SUB, 'privacyPolicyUrl': SITE + '/tiny/privacy'}}}); print('info', l['attributes']['locale'])
+    J('PATCH', f"/v1/appInfoLocalizations/{l['id']}", {'data': {'type': 'appInfoLocalizations', 'id': l['id'], 'attributes': {'subtitle': SUB, 'privacyPolicyUrl': SITE + '/privacy'}}}); print('info', l['attributes']['locale'])
 J('PATCH', f"/v1/appInfos/{ai['id']}", {'data': {'type': 'appInfos', 'id': ai['id'], 'relationships': {'primaryCategory': {'data': {'type': 'appCategories', 'id': 'GAMES'}}, 'primarySubcategoryOne': {'data': {'type': 'appCategories', 'id': 'GAMES_BOARD'}}, 'primarySubcategoryTwo': {'data': {'type': 'appCategories', 'id': 'GAMES_STRATEGY'}}}}}); print('category ok')
 c = J('GET', '/v1/apps/6782641107/betaAppReviewDetail')['data']['attributes']
 rd = J('GET', f'/v1/appStoreVersions/{VID}/appStoreReviewDetail', ok=(200, 404)).get('data')
