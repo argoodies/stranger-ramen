@@ -173,7 +173,7 @@ function drawHero(x, y, k, ph, flip = 1, away = true) {
   const leg = (off, back) => { const hipx = x + (back ? -.035 : .035) * k, hipy = by - .3 * k; let st, up = 0, kx, ky = hipy + .13 * k;
     if (ph == null) { st = back ? -.04 : .04; kx = (hipx + x + st * k) / 2; }
     else { const q = ((ph + off) / TAU % 1 + 1) % 1; if (q < .5) { st = .12 - .48 * q; kx = (hipx + x + st * k) / 2 + .012 * k; } else { const u = (q - .5) / .5, e = Math.sin(u * Math.PI); st = -.12 + .24 * u - .07 * e * (1 - u); up = .08 * e * (1 - u * .55); kx = hipx + (.02 + .045 * e) * k; } }
-    const fx = x + st * k, fy = y + st * sl * k - up * k; ctx.strokeStyle = css(back ? mix(SK, [70, 50, 110], .2) : SK); ctx.lineWidth = .062 * k; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(hipx, hipy); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy - .04 * k); ctx.stroke();
+    const fx = x + st * k, fy = y + st * sl * k - up * k; ctx.strokeStyle = css(back ? mix(SK, [70, 50, 110], .06) : SK); ctx.lineWidth = .062 * k; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(hipx, hipy); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy - .04 * k); ctx.stroke();
     P([[fx - .04 * k, fy - .068 * k], [fx + .03 * k, fy + (-.068 + tilt * .012) * k], [fx + .105 * k, fy + (-.03 + tilt * .02) * k], [fx + .105 * k, fy + (.012 + tilt * .02) * k], [fx - .04 * k, fy + .012 * k]], SH); };
   if (away) { leg(0, false); leg(Math.PI, true); } else { leg(Math.PI, true); leg(0, false); }
   const [pa, pb] = tone(BL), [a, b] = tone(D); P([[x - .15 * k, by - .46 * k], [x, by - .46 * k], [x, by - .29 * k], [x - .17 * k, by - .29 * k]], pa); P([[x, by - .46 * k], [x + .15 * k, by - .46 * k], [x + .17 * k, by - .29 * k], [x, by - .29 * k]], pb);
