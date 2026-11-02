@@ -18,11 +18,6 @@ Combined result for 1–2 November 2026: only what is still in effect now. Anyth
 
 **界面**
 - 语言菜单里，当前正在使用的语言排在最上面，其余依次是简体中文、繁體中文、English，最后是跟随系统。
-- 页面标题改为“三人染”。
-
-**开发与发布**
-- 页面不再被搜索引擎收录（返回 noindex），也不在任何公开页面上出现链接，只作调试用。
-- 新增小红书小工具打包：`tools/mkxhs.py` 把页面改写成小工具规范（脚本外置并降到 ES2017、存储走小工具 Storage API、补齐 Chrome 61 的 CSS 基线），GitHub Action `xhs-zip.yml` 按需打出 zip，并用 minitool-zip-builder skill 的审计脚本把关。
 
 ## English
 
@@ -39,8 +34,3 @@ Combined result for 1–2 November 2026: only what is still in effect now. Anyth
 
 **Interface**
 - In the language menu the language in use sits at the top, followed by 简体中文, 繁體中文 and English, with "follow the system" last.
-- The page title is now 三人染.
-
-**Development and release**
-- The page is kept out of search engines (noindex) and linked from no public page; it is for debugging only.
-- New Xiaohongshu mini-tool packaging: `tools/mkxhs.py` rewrites the page to the mini-tool rules (scripts moved out and lowered to ES2017, storage through the mini-tool Storage API, a Chrome 61 CSS baseline), and the GitHub Action `xhs-zip.yml` builds the zip on demand, gated by the minitool-zip-builder skill's audit script.
