@@ -16,7 +16,7 @@ L = ['en-US', 'zh-Hans', 'zh-Hant']
 # id, points, shown before earned, names (en, hans, hant), how (en, hans, hant)
 A = [('pc.first_win', 10, True, ('First Win', '首胜', '首勝'), ('Win a game.', '赢下一局。', '贏下一局。')),
  ('pc.trick_pukka', 20, False, ('Double Dose', '双份毒药', '雙份毒藥'), ('Win as evil with two players poisoned by you.', '以邪恶阵营获胜，两名玩家都中了你的毒。', '以邪惡陣營獲勝，兩名玩家都中了你的毒。')),
- ('pc.exec_survive', 20, False, ('Execution Void', '处决无效', '處決無效'), ('Be executed, and do not die.', '被处决，却没有死。', '被處決，卻沒有死。')),
+ ('pc.exec_survive', 20, False, ('Undying', '不死之身', '不死之身'), ('Be executed, and do not die.', '被处决，却没有死。', '被處決，卻沒有死。')),
  ('pc.self_reverse', 20, False, ('Turn the Tables', '亲手逆转', '親手逆轉'), ('Be executed, and set off your own reversal of the result.', '被处决，并亲手触发胜负反转。', '被處決，並親手觸發勝負反轉。')),
  ('pc.streak_3', 20, True, ('Three in a Row', '三连胜', '三連勝'), ('Win three games in a row.', '连续赢下三局。', '連續贏下三局。')),
  ('pc.streak_5', 40, True, ('Five in a Row', '五连胜', '五連勝'), ('Win five games in a row.', '连续赢下五局。', '連續贏下五局。')),

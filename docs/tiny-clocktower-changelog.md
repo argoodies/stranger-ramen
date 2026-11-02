@@ -20,8 +20,8 @@ Only what each version finally shipped with; changes that were tried and rolled 
 - ★ 排行榜改为“总胜场”（原为最长连胜），分数上限 9999。
   ★ The leaderboard now ranks total wins instead of the best streak, capped at 9999.
 - 成就调整 · Achievement changes:
-  - ★ 成就里不再出现具体角色名：去掉三个角色专属首胜成就；角色成就为“处决无效”（被处决却没有死）、“亲手逆转”（被处决并亲手触发胜负反转）和“双份毒药”。
-    ★ No role names in achievements: the three role first-win achievements are gone; the role achievements are Execution Void (executed, and you don't die), Turn the Tables (executed, and your own reversal flips the result) and Double Dose.
+  - ★ 成就里不再出现具体角色名：去掉三个角色专属首胜成就；角色成就为“不死之身”（被处决却没有死）、“亲手逆转”（被处决并亲手触发胜负反转）和“双份毒药”。
+    ★ No role names in achievements: the three role first-win achievements are gone; the role achievements are Undying (executed, and you don't die), Turn the Tables (executed, and your own reversal flips the result) and Double Dose.
   - “双份毒药”（原“双重标记”）现在要求两名不同的玩家各带一个毒。
     Double Dose (formerly Two Marks) now needs the poison on two different players.
   - “漫长的一周”改为：一局打到第七天、触发强制结算并以好人身份获胜。
