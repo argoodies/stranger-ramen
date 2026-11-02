@@ -165,8 +165,9 @@ function fadedDraw(a, fn) {      // draw something made of overlapping pieces at
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha *= a; ctx.drawImage(oc, 0, 0); ctx.restore(); }
 function drawGeese3(t, n) {      // three geese crossing the sky, exactly as over the town in the main game: white by day, a soft grey by night (n: how far into the night)
   for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], n), 2, lerp(.95, .7, n)); } }
-// the player, a boy in a red cap, dark top, blue shorts and white sneakers: walks the four diagonals in small quick steps, the back foot flicking up, the body nearly still. ph: the step (null: standing); flip: 1 right, -1 left; away: going up the screen
+// the player, a boy with soft full hair, dark top, blue shorts and white sneakers: walks the four diagonals in small quick steps, the back foot flicking up, the body nearly still. ph: the step (null: standing); flip: 1 right, -1 left; away: going up the screen
 function drawHero(x, y, k, ph, flip = 1, away = true) {
+  k *= 1.16;      // as tall as the other players: his head and legs are slimmer than their cones
   const R = [214, 62, 70], RD = [168, 44, 66], SK = [247, 228, 210], SH = [246, 242, 238], D = [44, 40, 62], BL = [70, 120, 200], tone = c => [mix(c, [255, 255, 255], .12), mix(c, [70, 50, 110], .26)], P = poly;
   ctx.save(); ctx.translate(x, y); ctx.scale(flip, 1); ctx.translate(-x, -y); const by = y - (ph == null ? 0 : Math.abs(Math.cos(ph)) * .01 * k), sl = away ? -.5 : .5, tilt = away ? -1 : 1; if (!figNoShadow) ell(x, y, .2 * k, .06 * k, [20, 12, 40], .3);
   const leg = (off, back) => { const hipx = x + (back ? -.035 : .035) * k, hipy = by - .3 * k; let st, up = 0, kx, ky = hipy + .13 * k;
@@ -177,9 +178,9 @@ function drawHero(x, y, k, ph, flip = 1, away = true) {
   if (away) { leg(0, false); leg(Math.PI, true); } else { leg(Math.PI, true); leg(0, false); }
   const [pa, pb] = tone(BL), [a, b] = tone(D); P([[x - .15 * k, by - .46 * k], [x, by - .46 * k], [x, by - .29 * k], [x - .17 * k, by - .29 * k]], pa); P([[x, by - .46 * k], [x + .15 * k, by - .46 * k], [x + .17 * k, by - .29 * k], [x, by - .29 * k]], pb);
   P([[x - .1 * k, by - .86 * k], [x, by - .86 * k], [x, by - .42 * k], [x - .19 * k, by - .42 * k]], a); P([[x, by - .86 * k], [x + .1 * k, by - .86 * k], [x + .19 * k, by - .42 * k], [x, by - .42 * k]], b);
-  const hx = x + .01 * k, hy = by - 1.03 * k, r = .17 * k;
-  if (away) { circ(hx, hy, r * 1.03, R); ctx.save(); ctx.beginPath(); ctx.arc(hx, hy, r * 1.03, 0, TAU); ctx.clip(); P([[hx - r * 1.2, hy + r * .42], [hx + r * 1.2, hy + r * .42], [hx + r * 1.2, hy + r * 1.2], [hx - r * 1.2, hy + r * 1.2]], mix(R, [70, 50, 110], .16)); ctx.restore(); P([[hx - r * .78, hy + r * .42], [hx - r * .08, hy + r * .42], [hx - r * .42, hy + r * 1.16], [hx - r * 1.22, hy + r * .98]], RD); circ(hx - r * .12, hy - r, r * .13, RD); }
-  else { circ(hx, hy, r, SK); ctx.beginPath(); ctx.arc(hx, hy, r * 1.03, Math.PI * .9, Math.PI * 2.06); ctx.closePath(); ctx.fillStyle = css(R); ctx.fill(); P([[hx - r * .95, hy + r * .14], [hx - r * 1.75, hy + r * .32], [hx - r * 1.7, hy + r * .16], [hx - r * .9, hy - r * .08]], RD); }
+  const hx = x, hy = by - 1.03 * k, r = .17 * k;
+  const shape = (pts, c) => { ctx.beginPath(); ctx.moveTo(hx + pts[0] * r, hy + pts[1] * r); for (let n = 2; n < pts.length; n += 4) ctx.quadraticCurveTo(hx + pts[n] * r, hy + pts[n + 1] * r, hx + pts[n + 2] * r, hy + pts[n + 3] * r); ctx.closePath(); ctx.fillStyle = css(c); ctx.fill(); };      
+  circ(hx, hy, r, SK); for (const m of [-1, 1]) { const pts = [.04, -1.66, -.8, -1.82, -1.22, -1, -1.46, -.6, -1.46, -.12, -1.28, -.16, -1.16, -.2, -1.22, .2, -1.08, .52, -.92, .3, -.78, -.02, -.68, .26, -.46, .4, -.36, .14, -.3, -.06, -.16, .2, .04, .34]; shape(pts.map((v, n) => n % 2 ? v : v * m), [28, 26, 34]); }      // the same black hair whichever way he walks: symmetrical, a full rounded crown, a small flick at each side and a few thick locks over the forehead
   ctx.restore();
 }
 function drawBotc(t, dt) {
