@@ -5,10 +5,6 @@ Combined result for 1–2 November 2026: only what is still in effect now. Anyth
 
 ## 中文
 
-**规则**
-- 一局打到第七个白天就强制结算，好人获胜，异端的颠倒不生效；说书人会宣布“第七个白天到了，强制结算：善良阵营获胜”。原来最多到第 12 天，然后判邪恶胜。
-- 结局时说书人不再说“欢迎下次再玩”。
-
 **画面**
 - 白天天空去掉底部的青色，改为整片红霞；页面加载时的背景也随之改成红霞，不再露出青色。
 - 夜晚的月亮是秋冬木色的圆月，只带一点点泛光；月亮圆盘里不再透出星星。
@@ -20,10 +16,6 @@ Combined result for 1–2 November 2026: only what is still in effect now. Anyth
 - 语言菜单里，当前正在使用的语言排在最上面，其余依次是简体中文、繁體中文、English，最后是跟随系统。
 
 ## English
-
-**Rules**
-- A game that reaches the seventh day is settled there and then: good wins, and the Heretic's reversal does not apply. The Storyteller announces "The seventh day has come. The game is settled: good wins." Previously a game could run to day 12 and then went to evil.
-- The Storyteller no longer says goodbye at the end.
 
 **Look**
 - The day sky loses its teal lower band and is rosy all the way down; the page's loading background matches, so no teal shows while it loads.
