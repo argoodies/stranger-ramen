@@ -110,7 +110,7 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
             GKAchievement.report([achievement], withCompletionHandler: nil)
         case "score":
             guard GKLocalPlayer.local.isAuthenticated, let value = (body["v"] as? NSNumber)?.intValue else { return }
-            GKLeaderboard.submitScore(value, context: 0, player: GKLocalPlayer.local, leaderboardIDs: ["pc.best_streak"], completionHandler: { _ in })
+            GKLeaderboard.submitScore(value, context: 0, player: GKLocalPlayer.local, leaderboardIDs: ["pc.total_wins"], completionHandler: { _ in })
         default:
             break
         }

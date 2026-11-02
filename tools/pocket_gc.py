@@ -29,9 +29,6 @@ A = [('pc.first_win', 10, True, ('First Win', '首胜', '首勝'), ('Win a game.
  ('pc.day_4', 20, True, ('Fourth Day', '第四个白天', '第四個白天'), ('Reach the fourth day of a game.', '一局游戏进行到第四个白天。', '一局遊戲進行到第四個白天。')),
  ('pc.day_5', 30, True, ('Fifth Day', '第五个白天', '第五個白天'), ('Reach the fifth day of a game.', '一局游戏进行到第五个白天。', '一局遊戲進行到第五個白天。')),
  ('pc.day_7', 50, True, ('A Long Week', '漫长的一周', '漫長的一週'), ('Play a game to the seventh day and win the forced settlement on the good side.', '一局进行到第七天，触发强制结算，以好人身份获胜。', '一局進行到第七天，觸發強制結算，以好人身份獲勝。')),
- ('pc.streak_7', 50, True, ('Seven in a Row', '七连胜', '七連勝'), ('Win seven games in a row.', '连续赢下七局。', '連續贏下七局。')),
- ('pc.streak_10', 70, True, ('Ten in a Row', '十连胜', '十連勝'), ('Win ten games in a row.', '连续赢下十局。', '連續贏下十局。')),
- ('pc.streak_15', 100, True, ('Fifteen in a Row', '十五连胜', '十五連勝'), ('Win fifteen games in a row.', '连续赢下十五局。', '連續贏下十五局。')),
  ('pc.wins_5', 10, True, ('Five Wins', '五胜', '五勝'), ('Win five games.', '累计赢下五局。', '累計贏下五局。')),
  ('pc.wins_25', 30, True, ('Twenty-Five Wins', '二十五胜', '二十五勝'), ('Win twenty-five games.', '累计赢下二十五局。', '累計贏下二十五局。')),
  ('pc.wins_100', 70, True, ('One Hundred Wins', '一百胜', '一百勝'), ('Win one hundred games.', '累计赢下一百局。', '累計贏下一百局。')),
@@ -50,10 +47,10 @@ for vid, pts, show, names, how in A:
 print('achievements', len(have))
 st, d = J('GET', f'/v1/gameCenterDetails/{GC}/gameCenterLeaderboards?limit=20')
 lb = {a['attributes']['vendorIdentifier']: a['id'] for a in d.get('data', [])}
-if 'pc.best_streak' not in lb:
-    st, d = J('POST', '/v1/gameCenterLeaderboards', {'data': {'type': 'gameCenterLeaderboards', 'attributes': {'referenceName': 'Best win streak', 'vendorIdentifier': 'pc.best_streak', 'defaultFormatter': 'INTEGER', 'submissionType': 'BEST_SCORE', 'scoreSortType': 'DESC', 'scoreRangeStart': '0', 'scoreRangeEnd': '10000'}, 'relationships': {'gameCenterDetail': {'data': {'type': 'gameCenterDetails', 'id': GC}}}}})
+if 'pc.total_wins' not in lb:
+    st, d = J('POST', '/v1/gameCenterLeaderboards', {'data': {'type': 'gameCenterLeaderboards', 'attributes': {'referenceName': 'Total wins', 'vendorIdentifier': 'pc.total_wins', 'defaultFormatter': 'INTEGER', 'submissionType': 'BEST_SCORE', 'scoreSortType': 'DESC', 'scoreRangeStart': '0', 'scoreRangeEnd': '100000'}, 'relationships': {'gameCenterDetail': {'data': {'type': 'gameCenterDetails', 'id': GC}}}}})
     if st < 300:
-        lid = d['data']['id']; lb['pc.best_streak'] = lid
-        for loc, n in zip(L, ('Best Win Streak', '最长连胜', '最長連勝')):
+        lid = d['data']['id']; lb['pc.total_wins'] = lid
+        for loc, n in zip(L, ('Most Wins', '总胜场', '總勝場')):
             J('POST', '/v1/gameCenterLeaderboardLocalizations', {'data': {'type': 'gameCenterLeaderboardLocalizations', 'attributes': {'locale': loc, 'name': n}, 'relationships': {'gameCenterLeaderboard': {'data': {'type': 'gameCenterLeaderboards', 'id': lid}}}}})
 print('leaderboard', lb)

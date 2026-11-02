@@ -24,7 +24,7 @@ When the game ends, every token turns over, with the drunk and poisoned markers,
 
 • A full game in a few minutes
 • Calm isometric art and soft generative music
-• Game Center achievements and a best-streak leaderboard
+• Game Center achievements and a most-wins leaderboard
 • No ads, no accounts, no data collected
 • English, 简体中文 and 繁體中文"""
 KW = 'social deduction,hidden role,bluff,storyteller,mystery,logic,deduction,detective,secret,party'
