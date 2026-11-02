@@ -210,8 +210,8 @@ function drawBotc(t, dt) {
     if (g.pop && g.pop.who === i) { const u = g.pop.t / .45, k2 = 1 + .55 * eout(u); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * k2, s * .35 * k2, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .95 * (1 - u) * (1 - u)); ctx.lineWidth = 3.5 * (1 - u * .6); ctx.stroke(); g.pop.t += dt; if (g.pop.t >= .45) g.pop = null; }
     if (i === 0) glow(p[0], p[1] - K * .6, K * 1.2, [255, 240, 200], .3);
     const look = dead ? { kind: 'bare', body: [236, 236, 255], head: [236, 236, 255], a: .45 } : Object.assign({}, BLOOK[i], asleep ? { a: .55 } : {});
-    fadedDraw(look.a == null ? 1 : look.a, () => i === 0 ? drawHero(p[0], p[1], K) : fig(p[0], p[1], K, Object.assign({}, look, { a: 1 })));      // asleep or dead: faded as a whole, so the hat never shows the head through it
-    if (dead) { ctx.beginPath(); ctx.ellipse(p[0], p[1] - K * (i === 0 ? 1.44 : 1.33), K * .2, K * .06, 0, 0, TAU); ctx.strokeStyle = css([255, 250, 220], .8); ctx.lineWidth = 2; ctx.stroke(); }
+    fadedDraw(look.a == null ? 1 : look.a, () => fig(p[0], p[1], K, Object.assign({}, look, { a: 1 })));      // asleep or dead: faded as a whole, so the hat never shows the head through it
+    if (dead) { ctx.beginPath(); ctx.ellipse(p[0], p[1] - K * 1.33, K * .2, K * .06, 0, 0, TAU); ctx.strokeStyle = css([255, 250, 220], .8); ctx.lineWidth = 2; ctx.stroke(); }
     if (g.votes && g.votes[i] != null) { const vx = p[0] + K * .62, vy = p[1] - K * 1.1; if (g.votes[i]) { glow(vx, vy, 24, [255, 214, 110], .7); poly([[vx, vy - 13], [vx + 9, vy], [vx, vy + 13], [vx - 9, vy]], [255, 214, 110]); } else line([[vx - 7, vy], [vx + 7, vy]], [200, 190, 220], 3, .8); }
     toks.push(i);
     BHIT[i] = [p[0], p[1] - K * .8, K * .8];
