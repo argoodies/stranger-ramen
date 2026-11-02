@@ -4,7 +4,7 @@ function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } ca
 function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
 function gcRecord(won, role) {
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
-  GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win'); gcAch('win_' + role);
+  GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win');
   for (const n of [3, 5]) if (GCS.streak >= n) gcAch('streak_' + n);
   for (const n of [5, 10, 25, 50, 100, 200, 300, 500, 1000]) if (GCS.wins >= n) gcAch('wins_' + n);
   gcPost({ t: 'score', v: GCS.wins });      // the leaderboard ranks total wins

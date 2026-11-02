@@ -15,12 +15,9 @@ print('detail', GC)
 L = ['en-US', 'zh-Hans', 'zh-Hant']
 # id, points, shown before earned, names (en, hans, hant), how (en, hans, hant)
 A = [('pc.first_win', 10, True, ('First Win', '首胜', '首勝'), ('Win a game.', '赢下一局。', '贏下一局。')),
- ('pc.win_sailor', 10, True, ('Sailor Wins', '水手获胜', '水手獲勝'), ('Win as the Sailor.', '以水手身份获胜。', '以水手身份獲勝。')),
- ('pc.win_heretic', 10, True, ('Heretic Wins', '异端获胜', '異端獲勝'), ('Win as the Heretic.', '以异端分子身份获胜。', '以異端分子身份獲勝。')),
- ('pc.win_pukka', 10, True, ('Pukka Wins', '普卡获胜', '普卡獲勝'), ('Win as the Pukka.', '以普卡身份获胜。', '以普卡身份獲勝。')),
- ('pc.trick_sailor', 20, False, ('Hard to Kill', '死不了', '死不了'), ('As the sober Sailor, survive your own execution vote.', '作为清醒的水手，被处决投票通过却活下来。', '作為清醒的水手，被處決投票通過卻活下來。')),
- ('pc.trick_pukka', 20, False, ('Two Marks', '双重标记', '雙重標記'), ('Win as the Pukka with your mark on two different players.', '以普卡身份获胜，且场上有两名玩家各带一个普卡标记。', '以普卡身份獲勝，且場上有兩名玩家各帶一個普卡標記。')),
- ('pc.trick_heretic', 20, False, ('Martyr', '殉道者', '殉道者'), ('As the Heretic, be executed and still win.', '作为异端分子被处决，却赢了。', '作為異端分子被處決，卻贏了。')),
+ ('pc.trick_sailor', 20, False, ('Still Standing', '票决不倒', '票決不倒'), ('Have the table vote to execute you, and live through it.', '处决你的投票通过了，你却安然无恙。', '處決你的投票通過了，你卻安然無恙。')),
+ ('pc.trick_pukka', 20, False, ('Double Dose', '双份毒药', '雙份毒藥'), ('Win on the evil side with your poison on two different players.', '以邪恶阵营获胜，且场上有两名不同的玩家都带着你下的毒。', '以邪惡陣營獲勝，且場上有兩名不同的玩家都帶著你下的毒。')),
+ ('pc.trick_heretic', 20, False, ('Win by Losing', '以败为胜', '以敗為勝'), ('Be executed, and win anyway.', '被投票处决，却依然赢了。', '被投票處決，卻依然贏了。')),
  ('pc.streak_3', 20, True, ('Three in a Row', '三连胜', '三連勝'), ('Win three games in a row.', '连续赢下三局。', '連續贏下三局。')),
  ('pc.streak_5', 40, True, ('Five in a Row', '五连胜', '五連勝'), ('Win five games in a row.', '连续赢下五局。', '連續贏下五局。')),
  ('pc.wins_10', 20, True, ('Ten Wins', '十胜', '十勝'), ('Win ten games.', '累计赢下十局。', '累計贏下十局。')),
