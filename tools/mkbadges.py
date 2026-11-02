@@ -41,7 +41,7 @@ def renderA(script, size, dsf, out):      # as render(), but keeps the transpare
     if not m: sys.exit(f'{out}: no image came back')
     Image.open(io.BytesIO(base64.b64decode(m.group(1)))).convert('RGBA').save(out, optimize=True); print(out)
 IDS = {'first_win': ('wins', '1', ''), 
-       'trick_sailor': ('trick', '', 'sailor'), 'trick_heretic': ('trick', '', 'heretic'), 'trick_pukka': ('trick', '', 'pukka')}
+       'trick_pukka': ('trick', '', 'pukka')}
 for n in (3, 5): IDS[f'streak_{n}'] = ('streak', str(n), '')
 for n in (5, 10, 25, 50, 100, 200, 300, 500, 1000): IDS[f'wins_{n}'] = ('wins', str(n), '')
 for n in (3, 5, 7): IDS[f'day_{n}'] = ('day', str(n), '')
