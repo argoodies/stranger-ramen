@@ -12,9 +12,9 @@ DESC = """Three seats, one Storyteller, and a secret in every hand.
 Tiny Clocktower is a pocket-sized game of hidden roles for one player. You and two computer players sit around a small floating table. Each of you is dealt a role in secret, and only the Storyteller knows the truth.
 
 THE ROLES
-• The Unsinkable (good): each night, choose a player — either you or they are drunk until dusk. You can't die.
-• The Contrarian (good): whoever wins, loses, and whoever loses, wins — even if you are dead.
-• The Poisoner (evil): each night, poison a player. The player poisoned the night before dies.
+• Good: each night, choose a player — either you or they are drunk until dusk. You can't die.
+• Good: whoever wins, loses, and whoever loses, wins — even if you are dead.
+• Evil: each night, poison a player. The player poisoned the night before dies.
 
 NIGHT AND DAY
 At night, the roles act in the dark. By day, the others claim who they are — and one of them may be lying. Then you nominate, everyone votes, and the table decides who is executed. A drunk or poisoned player's ability quietly fails, so nothing is quite what it seems. Reach the seventh day and the game is settled: good wins.
