@@ -7,8 +7,8 @@ Only what each version finally shipped with; changes that were tried and rolled 
 
 ## 0.0.6 — 上架候选 · Release candidate（2026-11-02）
 
-> 当前绑定 build 32（已含下面全部改动；★ 为 build 31/32 才进 App 的条目）。
-> Bound to build 32, which has everything below; ★ marks what first reached the app in builds 31/32.
+> 当前绑定 build 33（已含下面全部改动；★ 为 build 31–33 才进 App 的条目）。
+> Bound to build 33, which has everything below; ★ marks what first reached the app in builds 31–33.
 
 **规则 · Rules**
 - 一局打到第七个白天，游戏强制结算，好人获胜，异端的颠倒不生效；说书人会宣布“第七个白天到了，强制结算：善良阵营获胜”。之前最多可到第 12 天，然后判邪恶胜。
@@ -20,8 +20,8 @@ Only what each version finally shipped with; changes that were tried and rolled 
 - ★ 排行榜改为“总胜场”（原为最长连胜），分数上限 9999。
   ★ The leaderboard now ranks total wins instead of the best streak, capped at 9999.
 - 成就调整 · Achievement changes:
-  - ★ 成就里不再出现具体角色名：去掉三个角色专属首胜成就；技巧成就只保留“双份毒药”（另外两个只是角色本身的能力，已删除）。
-    ★ No role names in achievements: the three role first-win achievements are gone; of the trick achievements only Double Dose remains (the other two were just the roles' own abilities and are gone).
+  - ★ 成就里不再出现具体角色名：去掉三个角色专属首胜成就；角色成就为“处决无效”（被处决却没有死）、“亲手逆转”（被处决并亲手触发胜负反转）和“双份毒药”。
+    ★ No role names in achievements: the three role first-win achievements are gone; the role achievements are Execution Void (executed, and you don't die), Turn the Tables (executed, and your own reversal flips the result) and Double Dose.
   - “双份毒药”（原“双重标记”）现在要求两名不同的玩家各带一个毒。
     Double Dose (formerly Two Marks) now needs the poison on two different players.
   - “漫长的一周”改为：一局打到第七天、触发强制结算并以好人身份获胜。

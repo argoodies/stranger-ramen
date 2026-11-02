@@ -119,7 +119,7 @@ async function playBotc() {
       const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
       const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
       if (yes >= need) {
-        if (roles[nom] === 'sailor' && sailorSafe()) { recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
+        if (roles[nom] === 'sailor' && sailorSafe()) { if (nom === 0 && (!g.auto || g.testBadges)) gcAch('exec_survive');      /* 处决无效: you were executed and did not die */ recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
         else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, S().voteExec(yes, nom)); }
       } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, S().voteFail(yes, need)); }
       g.votes = null;
@@ -133,6 +133,7 @@ async function playBotc() {
   g.result = { raw, fin, hereticOn, nights: g.night, won: mine === fin };
   if (!g.auto || g.testBadges) {
     if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0 && g.deadPoison !== g.poisoned) gcAch('trick_pukka');      // won with the Pukka's mark on two different players
+    if (roles[0] === 'heretic' && g.deathBy[0] === 'exec' && hereticOn) gcAch('self_reverse');      // 亲手逆转: executed, and your own reversal flipped the result
   }
   g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
   if (!g.auto && g.forceGood && mine === 'good') gcAch('day_7');      // 漫长的一周: the game ran to the seventh day and you, on the good side, won the forced settlement
