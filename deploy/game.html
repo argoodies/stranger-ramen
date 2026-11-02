@@ -331,10 +331,7 @@ function fig(x, y, k, o = {}) {
     ctx.beginPath(); ctx.ellipse(hx, hy - hr * .5, hr * 1.3, hr * .85, 0, Math.PI, TAU); ctx.fillStyle = css(hair, a); ctx.fill();
     ell(hx, hy + hr * .5, hr * .42, hr * .2, [226, 18, 48], a); circ(hx + hr * 1.25, hy - hr * .85, hr * .3, [226, 18, 48], a);
   }
-  if (kind === 'cap') {      // a round sun hat: a wide brim all the way round, a domed crown and a band
-    ell(hx, hy - .07 * k, .31 * k, .085 * k, hd, a); ell(hx, hy - .085 * k, .31 * k, .085 * k, hl, a);
-    ctx.beginPath(); ctx.ellipse(hx, hy - .1 * k, .18 * k, .19 * k, 0, Math.PI, TAU); ctx.closePath(); ctx.fillStyle = css(hat, a); ctx.fill(); ell(hx, hy - .1 * k, .18 * k, .045 * k, hd, a);
-  } else if (kind === 'drunk') {      // a flat cap: a low crown pulled down over the head, the peak sticking out in front (o.peak: 1 to the right, -1 to the left)
+  if (kind === 'drunk' || kind === 'cap') {      // a flat cap: a low crown pulled down over the head, the peak sticking out in front (o.peak: 1 to the right, -1 to the left)
     const sg = o.peak || 1, cx = u => hx + sg * u * k;
     poly([[cx(.04), hy - .12 * k], [cx(.38), hy - .07 * k], [cx(.36), hy - .03 * k], [cx(.04), hy - .05 * k]], hd, a);
     ctx.beginPath(); ctx.ellipse(cx(-.01), hy - .07 * k, .215 * k, .17 * k, 0, Math.PI, TAU); ctx.closePath(); ctx.fillStyle = css(hl, a); ctx.fill();
