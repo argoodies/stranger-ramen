@@ -1,0 +1,52 @@
+name: Xiaohongshu mini-tool zip
+
+# Builds the three-player game (/3b) as a 小红书 mini-tool package: tools/mk3b.py makes deploy/3b.html from index.html,
+# tools/mkxhs.py rewrites it to the container's rules (external classic scripts lowered to ES2017 / Chrome 61, the
+# Storage JS API with a localStorage fallback, a Chrome 61 CSS baseline) and zips it with index.html at the root; the
+# minitool-zip-builder skill's audit script is the gate. The zip is kept as a run artifact and a release asset (xhs-<run>).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    name: Build and audit the mini-tool zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build /3b from the game sources
+        run: python3 tools/mk3b.py
+
+      - name: Rewrite and zip for the mini-tool container
+        run: python3 tools/mkxhs.py "dist/xhs/sanrenran-${{ github.run_number }}.zip"
+
+      - name: Audit (minitool-zip-builder)
+        run: |
+          python3 .claude/skills/minitool-zip-builder/scripts/audit_artifact.py dist/xhs/pkg
+          python3 .claude/skills/minitool-zip-builder/scripts/audit_artifact.py "dist/xhs/sanrenran-${{ github.run_number }}.zip"
+          node .claude/skills/minitool-zip-builder/scripts/audit_artifact.mjs dist/xhs/pkg
+          unzip -l "dist/xhs/sanrenran-${{ github.run_number }}.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sanrenran-xhs-${{ github.run_number }}
+          path: dist/xhs/sanrenran-${{ github.run_number }}.zip
+
+      - name: Publish as a release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "xhs-${{ github.run_number }}" "dist/xhs/sanrenran-${{ github.run_number }}.zip" \
+            --title "Xiaohongshu mini-tool zip ${{ github.run_number }}" \
+            --notes "三人染 as a 小红书 mini-tool package, built from ${{ github.sha }}. Upload it on the creator platform, check it in the simulator, then scan with an Android and an iOS phone."

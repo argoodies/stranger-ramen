@@ -9,3 +9,4 @@ android/app/build/
 deploy/*.apk
 deploy/*.hap
 deploy/harmony.html
+dist/
