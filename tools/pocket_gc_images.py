@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Upload assets/achievements/<id>.png (from tools/mkbadges.py) as the Game Center image of each Tiny Clocktower achievement, in every language.
-Replaces an image already there. usage: pocket_gc_images.py"""
+Replaces an image already there. usage: pocket_gc_images.py [id ...]   (e.g. first_win trick_pukka; default all)"""
 import sys, os, json, hashlib, urllib.request
 sys.path.insert(0, '/root'); from asc_api import req
 GC = 'dac05b71-54d0-4da1-a3d9-03d18c09804f'; DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'achievements')
@@ -12,6 +12,7 @@ st, d = J('GET', f'/v1/gameCenterDetails/{GC}/gameCenterAchievements?limit=100&i
 locs = {x['id']: x for x in d.get('included', [])}
 for a in d['data']:
     vid = a['attributes']['vendorIdentifier']; f = os.path.join(DIR, vid.split('.', 1)[1] + '.png')
+    if sys.argv[1:] and vid.split('.', 1)[1] not in sys.argv[1:]: continue
     if not os.path.exists(f): print('no image for', vid); continue
     data = open(f, 'rb').read()
     for l in a['relationships']['localizations']['data']:

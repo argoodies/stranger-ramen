@@ -3,7 +3,8 @@
 One 1024x1024 PNG per achievement into assets/achievements/<id>.png (Game Center shows them in a circle, so each fills a round medallion):
   all in white lines on a transparent ground, inside a white ring:
   wins: a star with the count   streaks: a flame with the count   days: the sun with the day
-  roles: that role's emblem     tricks: the emblem and a sparkle   first: the open book and its sparkle
+  roles: that role's emblem   first win: the star with 1
+  tricks: the anchor in a lifebuoy (survived the vote), the Pukka's mark twice (two poison marks), the Heretic's cross under a halo (the martyr)
 usage: tools/mkbadges.py [id ...]"""
 import os, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,7 +28,9 @@ setTimeout(() => { const N = 1024, c2 = document.createElement('canvas'); c2.wid
   else if (KIND === 'streak') { const s = .95; ctx.beginPath(); ctx.moveTo(C, C - N * .33 * s); ctx.bezierCurveTo(C + N * .09 * s, C - N * .16 * s, C + N * .27 * s, C - N * .08 * s, C + N * .23 * s, C + N * .12 * s); ctx.bezierCurveTo(C + N * .21 * s, C + N * .28 * s, C + N * .09 * s, C + N * .34 * s, C, C + N * .34 * s); ctx.bezierCurveTo(C - N * .09 * s, C + N * .34 * s, C - N * .21 * s, C + N * .28 * s, C - N * .23 * s, C + N * .12 * s); ctx.bezierCurveTo(C - N * .27 * s, C - N * .08 * s, C - N * .09 * s, C - N * .16 * s, C, C - N * .33 * s); ctx.closePath(); ctx.stroke(); num(NUM, C + N * .1, N * .15); }
   else if (KIND === 'day') { ctx.beginPath(); ctx.arc(C, C, N * .19, 0, TAU); ctx.stroke(); for (let k = 0; k < 12; k++) { const a = k * TAU / 12; ctx.beginPath(); ctx.moveTo(C + Math.cos(a) * N * .26, C + Math.sin(a) * N * .26); ctx.lineTo(C + Math.cos(a) * N * .34, C + Math.sin(a) * N * .34); ctx.stroke(); } num(NUM, C, N * .17); }
   else if (KIND === 'role') emblem(C, C, N * .38);
-  else if (KIND === 'trick') { emblem(C - N * .02, C + N * .02, N * .32); spark(C + N * .24, C - N * .23, N * .045); }
+  else if (KIND === 'trick' && ROLE === 'sailor') { emblem(C, C, N * .25); ctx.lineWidth = lw * .8; for (const r of [N * .3, N * .37]) { ctx.beginPath(); ctx.arc(C, C, r, 0, TAU); ctx.stroke(); } for (let k = 0; k < 4; k++) { const a = Math.PI / 4 + k * Math.PI / 2; for (const d of [-.16, .16]) { ctx.beginPath(); ctx.moveTo(C + Math.cos(a + d) * N * .3, C + Math.sin(a + d) * N * .3); ctx.lineTo(C + Math.cos(a + d) * N * .37, C + Math.sin(a + d) * N * .37); ctx.stroke(); } } }      // survived the vote: the anchor inside a lifebuoy
+  else if (KIND === 'trick' && ROLE === 'pukka') { emblem(C - N * .14, C - N * .1, N * .21); emblem(C + N * .15, C + N * .13, N * .21); }      // two poison marks at once: the Pukka's mark twice
+  else if (KIND === 'trick') { emblem(C, C + N * .08, N * .3); ctx.lineWidth = lw * .9; ctx.beginPath(); ctx.ellipse(C, C - N * .19, N * .16, N * .05, 0, 0, TAU); ctx.stroke(); }      // executed and still won: the Heretic's cross under a halo
   else { const bx = C, by = C + N * .12, w = N * .27, h = N * .2, d = N * .07; path([[bx, by], [bx - w, by - d], [bx - w, by - d - h], [bx, by - h]]); path([[bx, by], [bx + w, by - d], [bx + w, by - d - h], [bx, by - h]]); ctx.beginPath(); ctx.moveTo(bx - w, by - d); ctx.lineTo(bx - w, by - d + N * .05); ctx.lineTo(bx, by + N * .05); ctx.lineTo(bx + w, by - d + N * .05); ctx.lineTo(bx + w, by - d); ctx.stroke(); spark(C, C - N * .2, N * .055); }
   ctx = real; [W, H] = keep; const ta = document.createElement('textarea'); ta.id = 'png'; ta.textContent = c2.toDataURL('image/png'); document.body.appendChild(ta); document.title = 'ok'; }, 500);"""
 def renderA(script, size, dsf, out):      # as render(), but keeps the transparency
@@ -37,7 +40,7 @@ def renderA(script, size, dsf, out):      # as render(), but keeps the transpare
     m = re.search(r'<textarea id="png">data:image/png;base64,([^<]+)</textarea>', dom)
     if not m: sys.exit(f'{out}: no image came back')
     Image.open(io.BytesIO(base64.b64decode(m.group(1)))).convert('RGBA').save(out, optimize=True); print(out)
-IDS = {'first_win': ('first', '', ''), 'win_sailor': ('role', '', 'sailor'), 'win_heretic': ('role', '', 'heretic'), 'win_pukka': ('role', '', 'pukka'),
+IDS = {'first_win': ('wins', '1', ''), 'win_sailor': ('role', '', 'sailor'), 'win_heretic': ('role', '', 'heretic'), 'win_pukka': ('role', '', 'pukka'),
        'trick_sailor': ('trick', '', 'sailor'), 'trick_heretic': ('trick', '', 'heretic'), 'trick_pukka': ('trick', '', 'pukka')}
 for n in (3, 5, 7, 10, 15): IDS[f'streak_{n}'] = ('streak', str(n), '')
 for n in (5, 10, 25, 50, 100, 200): IDS[f'wins_{n}'] = ('wins', str(n), '')
