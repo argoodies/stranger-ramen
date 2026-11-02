@@ -155,7 +155,7 @@ const STR = {
     iVote: '我举手。', iDont: '我不举手。',
     myNom: n => '我提名' + (n === 0 ? '我自己' : st[n]) + '。', myNoNom: '我不提名。', myVote: '我举手。', myNoVote: '我不举手。', votePrompt: '点击被提名人，完成举手投票。',
     voteSafe: (y, i) => y + ' 票，够了。可是' + st[i] + '没有死。', voteExec: (y, i) => y + ' 票，够了。' + st[i] + '被处决了。', voteFail: (y, n) => '只有 ' + y + ' 票，需要 ' + n + ' 票。今天没有人被处决。',
-    noNom: '今天没有人被提名。', goodWins: '善良阵营获胜。', evilWins: '邪恶阵营获胜。', bye: '欢迎下次再玩。',
+    noNom: '今天没有人被提名。', goodWins: '善良阵营获胜。', goodForced: '第七个白天到了，强制结算：善良阵营获胜。', evilWins: '邪恶阵营获胜。', bye: '欢迎下次再玩。',
   }; })(),
   hant: (() => { const st = ['你', '左邊那位', '右邊那位'], who = (v, t) => t === v ? '自己' : t === 0 ? '你' : '他'; return {
     title: '星穹十字物語', auto: '跟隨系統',
@@ -185,7 +185,7 @@ const STR = {
     iVote: '我舉手。', iDont: '我不舉手。',
     myNom: n => '我提名' + (n === 0 ? '我自己' : st[n]) + '。', myNoNom: '我不提名。', myVote: '我舉手。', myNoVote: '我不舉手。', votePrompt: '點擊被提名人，完成舉手投票。',
     voteSafe: (y, i) => y + ' 票，夠了。可是' + st[i] + '沒有死。', voteExec: (y, i) => y + ' 票，夠了。' + st[i] + '被處決了。', voteFail: (y, n) => '只有 ' + y + ' 票，需要 ' + n + ' 票。今天沒有人被處決。',
-    noNom: '今天沒有人被提名。', goodWins: '善良陣營獲勝。', evilWins: '邪惡陣營獲勝。', bye: '歡迎下次再玩。',
+    noNom: '今天沒有人被提名。', goodWins: '善良陣營獲勝。', goodForced: '第七個白天到了，強制結算：善良陣營獲勝。', evilWins: '邪惡陣營獲勝。', bye: '歡迎下次再玩。',
   }; })(),
   en: (() => { const st = ['you', 'the player on the left', 'the player on the right'], cap = x => x[0].toUpperCase() + x.slice(1), who = (v, t) => t === v ? 'myself' : t === 0 ? 'you' : 'them'; return {
     title: 'Starcross Tales', auto: 'System',
@@ -215,7 +215,7 @@ const STR = {
     iVote: 'I raise my hand.', iDont: "I don't raise my hand.",
     myNom: n => 'I nominate ' + (n === 0 ? 'myself' : st[n]) + '.', myNoNom: 'I nominate no one.', myVote: 'I raise my hand.', myNoVote: "I don't raise my hand.", votePrompt: 'Tap the nominee to raise your hand and vote.',
     voteSafe: (y, i) => y + ' votes. Enough, yet ' + st[i] + (i === 0 ? ' do' : ' does') + ' not die.', voteExec: (y, i) => y + ' votes. Enough. ' + cap(st[i]) + (i === 0 ? ' are' : ' is') + ' executed.', voteFail: (y, n) => 'Only ' + y + (y === 1 ? ' vote; ' : ' votes; ') + n + ' needed. No one is executed today.',
-    noNom: 'No one was nominated today.', goodWins: 'Good wins.', evilWins: 'Evil wins.', bye: 'Come and play again.',
+    noNom: 'No one was nominated today.', goodWins: 'Good wins.', goodForced: 'The seventh day has come. The game is settled: good wins.', evilWins: 'Evil wins.', bye: 'Come and play again.',
   }; })(),
 };
 let langPref = 'auto', LANG = 'hans';

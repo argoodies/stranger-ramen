@@ -6,7 +6,7 @@ function gcRecord(won, role) {
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
   GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win'); gcAch('win_' + role);
   for (const n of [3, 5, 7, 10, 15]) if (GCS.streak >= n) gcAch('streak_' + n);
-  for (const n of [5, 10, 25, 50, 100, 200]) if (GCS.wins >= n) gcAch('wins_' + n);
+  for (const n of [5, 10, 25, 50, 100, 200, 500, 1000]) if (GCS.wins >= n) gcAch('wins_' + n);
   gcPost({ t: 'score', v: GCS.best });
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.best) gcPost({ t: 'score', v: GCS.best }); };      // once signed in: anything earned before sign-in goes up too
@@ -39,7 +39,7 @@ function botcTap(x, y) {
 async function playBotc() {
   const g = BG, run = ++g.run, ST = 'st', live = () => g.alive.filter(Boolean).length;
   const roles = ['sailor', 'pukka', 'heretic']; for (let i = 2; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [roles[i], roles[j]] = [roles[j], roles[i]]; }
-  Object.assign(g, { snaps: [], roles, alive: [true, true, true], drunk: -1, poisoned: -1, night: 0, isNight: false, votes: null, reveal: false, revealT: 0, showMine: false, deathBy: [null, null, null], gonePoison: -1, goneDrunk: -1, deadPoison: -1, over: false, result: null, log: [] });
+  Object.assign(g, { snaps: [], roles, alive: [true, true, true], drunk: -1, poisoned: -1, night: 0, forceGood: false, isNight: false, votes: null, reveal: false, revealT: 0, showMine: false, deathBy: [null, null, null], gonePoison: -1, goneDrunk: -1, deadPoison: -1, over: false, result: null, log: [] });
   const si = roles.indexOf('sailor'), pi = roles.indexOf('pukka'), hi = roles.indexOf('heretic');
   // the Pukka's poison only works while the Pukka is sober. A player the Pukka kills is still poisoned at the time of death
   // (deadPoison), so their ability stays off: a Heretic killed this way does not flip the result.
@@ -89,8 +89,8 @@ async function playBotc() {
     g.isNight = false;
     await bsay(ST, S().dawnQuiet);
     if ((raw = win())) break;
-    if (g.night > 12) { raw = 'evil'; break; }
-    if (!g.auto && [3, 4, 5, 7].includes(g.night)) gcAch('day_' + g.night);      // a game that lasts: the third, fourth, fifth and seventh day
+    if (g.night >= 7) { raw = 'good'; g.forceGood = true; break; }      // the seventh day dawns: good has outlasted evil and wins outright, whatever the Heretic
+    if (!g.auto && [3, 4, 5].includes(g.night)) gcAch('day_' + g.night);      // a game that lasts: the third, fourth and fifth day (the seventh ends it, above)
     // ---- day: the other two say who they are (the Pukka lies)
     for (const v of [1, 2]) if (g.alive[v]) {
       const r = roles[v] === 'pukka' ? bluff : roles[v]; claim[v] = r;
@@ -128,17 +128,18 @@ async function playBotc() {
   }
   if (run !== g.run) return null;
   // ---- the end: apply the Heretic
-  const hereticOn = g.drunk !== hi && !poisonedNow(hi), fin = hereticOn ? (raw === 'good' ? 'evil' : 'good') : raw, mine = roles[0] === 'pukka' ? 'evil' : 'good';
+  const hereticOn = !g.forceGood && g.drunk !== hi && !poisonedNow(hi), fin = hereticOn ? (raw === 'good' ? 'evil' : 'good') : raw, mine = roles[0] === 'pukka' ? 'evil' : 'good';
   g.reveal = true; g.revealT = 0; g.pukkaSober = g.alive[pi] && g.drunk !== pi; if (!g.auto) [62, 69, 74].forEach((m, k) => chime(m, k * .15, .16, 1.6));
   g.result = { raw, fin, hereticOn, nights: g.night, won: mine === fin };
   if (!g.auto || g.testBadges) {
-    if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0) gcAch('trick_pukka');      // won with two poison marks on the table
+    if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0 && g.deadPoison !== g.poisoned) gcAch('trick_pukka');      // won with the Pukka's mark on two different players
     if (roles[0] === 'heretic' && mine === fin && g.deathBy[0] === 'exec') gcAch('trick_heretic');                                                // nominated yourself, executed, and won
   }
   g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
+  if (!g.auto && g.forceGood && mine === 'good') gcAch('day_7');      // 漫长的一周: the game ran to the seventh day and you, on the good side, won the forced settlement
   if (!g.auto) gcRecord(mine === fin, roles[0]);
   g.over = true; if (!g.auto) resultMusic(mine === fin);
-  await bsay(ST, fin === 'good' ? S().goodWins : S().evilWins);
+  await bsay(ST, g.forceGood ? S().goodForced : fin === 'good' ? S().goodWins : S().evilWins);
   await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
   if (!g.auto && run === g.run && mode === 'tower') leaveTower();
   return g.result;

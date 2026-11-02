@@ -24,7 +24,7 @@ setTimeout(() => { const N = 1024, c2 = document.createElement('canvas'); c2.wid
   const spark = (x, y, r) => path([[x, y - r * 1.3], [x + r, y], [x, y + r * 1.3], [x - r, y]]);
   const emblem = (x, y, r) => { const o = document.createElement('canvas'); o.width = o.height = N; const me = ctx; ctx = o.getContext('2d'); roleToken(x, y, r, ROLE, 1, WT); const im = ctx.getImageData(0, 0, N, N), d = im.data; for (let q = 0; q < d.length; q += 4) if (d[q + 3]) { const k = Math.max(0, Math.min(1, (d[q] - 128) / 127)); d[q] = d[q + 1] = d[q + 2] = 255; d[q + 3] *= k; } ctx.putImageData(im, 0, 0); ctx = me; ctx.drawImage(o, 0, 0); };      // the role's emblem in white only: the Heretic's inner line becomes a gap
   ring();
-  if (KIND === 'wins') { const pts = []; for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? N * .15 : N * .33; pts.push([C + Math.cos(a) * r, C + N * .03 + Math.sin(a) * r]); } path(pts); num(NUM, C + N * .03, NUM.length > 2 ? N * .1 : N * .13); }      // the count right on the star's own centre
+  if (KIND === 'wins') { const pts = []; for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? N * .15 : N * .33; pts.push([C + Math.cos(a) * r, C + N * .03 + Math.sin(a) * r]); } path(pts); num(NUM, C + N * .03, NUM.length > 3 ? N * .08 : NUM.length > 2 ? N * .1 : N * .13); }      // the count right on the star's own centre
   else if (KIND === 'streak') { const P = (u, v) => [C + u * N, C + v * N]; ctx.beginPath(); ctx.moveTo(...P(0, .34)); ctx.bezierCurveTo(...P(-.17, .34), ...P(-.25, .22), ...P(-.23, .07)); ctx.bezierCurveTo(...P(-.22, -.04), ...P(-.17, -.1), ...P(-.19, -.21)); ctx.bezierCurveTo(...P(-.1, -.15), ...P(-.07, -.08), ...P(-.07, -.02)); ctx.bezierCurveTo(...P(-.1, -.15), ...P(-.04, -.28), ...P(.03, -.38)); ctx.bezierCurveTo(...P(.04, -.26), ...P(.1, -.2), ...P(.15, -.12)); ctx.bezierCurveTo(...P(.16, -.17), ...P(.17, -.2), ...P(.17, -.24)); ctx.bezierCurveTo(...P(.25, -.12), ...P(.26, .02), ...P(.23, .12)); ctx.bezierCurveTo(...P(.2, .26), ...P(.12, .34), ...P(0, .34)); ctx.closePath(); ctx.stroke(); num(NUM, C + N * .14, NUM.length > 1 ? N * .13 : N * .15); }      // a flame with its tongues, the run in it
   else if (KIND === 'day') { ctx.beginPath(); ctx.arc(C, C, N * .19, 0, TAU); ctx.stroke(); for (let k = 0; k < 12; k++) { const a = k * TAU / 12; ctx.beginPath(); ctx.moveTo(C + Math.cos(a) * N * .26, C + Math.sin(a) * N * .26); ctx.lineTo(C + Math.cos(a) * N * .34, C + Math.sin(a) * N * .34); ctx.stroke(); } num(NUM, C, N * .17); }
   else if (KIND === 'role') emblem(C, C, N * .38);
@@ -43,7 +43,7 @@ def renderA(script, size, dsf, out):      # as render(), but keeps the transpare
 IDS = {'first_win': ('wins', '1', ''), 'win_sailor': ('role', '', 'sailor'), 'win_heretic': ('role', '', 'heretic'), 'win_pukka': ('role', '', 'pukka'),
        'trick_sailor': ('trick', '', 'sailor'), 'trick_heretic': ('trick', '', 'heretic'), 'trick_pukka': ('trick', '', 'pukka')}
 for n in (3, 5, 7, 10, 15): IDS[f'streak_{n}'] = ('streak', str(n), '')
-for n in (5, 10, 25, 50, 100, 200): IDS[f'wins_{n}'] = ('wins', str(n), '')
+for n in (5, 10, 25, 50, 100, 200, 500, 1000): IDS[f'wins_{n}'] = ('wins', str(n), '')
 for n in (3, 4, 5, 7): IDS[f'day_{n}'] = ('day', str(n), '')
 want = sys.argv[1:] or list(IDS)
 out = os.path.join(ROOT, 'assets', 'achievements'); os.makedirs(out, exist_ok=True)
