@@ -2533,7 +2533,7 @@ const ABIL = {
   pukka: '你是恶魔。每个夜晚，你要选一名玩家：他中毒。上一个因你中毒的人会在这时死去，然后恢复健康。',
   heretic: '只要你没有醉酒或中毒，这一局赢的算输、输的算赢——哪怕你已经死了。',
 };
-const stN = i => i === 0 ? '你' : i === 1 ? '左边那位' : '右边那位', npcN = (v, i) => i === v ? '我' : i === 0 ? '你' : '他', BLOOK = [{ kind: 'chef', apron: [220, 80, 80] }, { kind: 'cap', hat: [90, 150, 230] }, { kind: 'cap', hat: [240, 190, 110] }];
+const stN = i => i === 0 ? '你' : i === 1 ? '左边那位' : '右边那位', npcN = (v, i) => i === v ? '我' : i === 0 ? '你' : '他', BLOOK = [{ kind: 'chef', apron: [220, 80, 80] }, { kind: 'ida', hat: [90, 150, 230] }, { kind: 'ida', hat: [240, 190, 110] }];
 const BG = { run: 0, auto: false, roles: [], alive: [], drunk: -1, poisoned: -1, night: 0, dark: 0, isNight: false, bubble: null, wait: null, votes: null, reveal: false, over: false, result: null };
 const BHIT = {};
 function bsay(who, txt) { return new Promise(res => { if (BG.auto) return res(); BG.bubble = { who, text: txt }; BG.wait = { type: 'say', res }; }); }
