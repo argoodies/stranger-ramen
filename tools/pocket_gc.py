@@ -26,13 +26,13 @@ A = [('pc.first_win', 10, True, ('First Win', '首胜', '首勝'), ('Win a game.
  ('pc.wins_10', 20, True, ('Ten Wins', '十胜', '十勝'), ('Win ten games.', '累计赢下十局。', '累計贏下十局。')),
  ('pc.wins_50', 50, True, ('Fifty Wins', '五十胜', '五十勝'), ('Win fifty games.', '累计赢下五十局。', '累計贏下五十局。')),
  ('pc.day_3', 10, True, ('Third Day', '第三个白天', '第三個白天'), ('Reach the third day of a game.', '一局游戏进行到第三个白天。', '一局遊戲進行到第三個白天。')),
- ('pc.day_4', 20, True, ('Fourth Day', '第四个白天', '第四個白天'), ('Reach the fourth day of a game.', '一局游戏进行到第四个白天。', '一局遊戲進行到第四個白天。')),
  ('pc.day_5', 30, True, ('Fifth Day', '第五个白天', '第五個白天'), ('Reach the fifth day of a game.', '一局游戏进行到第五个白天。', '一局遊戲進行到第五個白天。')),
  ('pc.day_7', 50, True, ('A Long Week', '漫长的一周', '漫長的一週'), ('Play a game to the seventh day and win the forced settlement on the good side.', '一局进行到第七天，触发强制结算，以好人身份获胜。', '一局進行到第七天，觸發強制結算，以好人身份獲勝。')),
  ('pc.wins_5', 10, True, ('Five Wins', '五胜', '五勝'), ('Win five games.', '累计赢下五局。', '累計贏下五局。')),
  ('pc.wins_25', 30, True, ('Twenty-Five Wins', '二十五胜', '二十五勝'), ('Win twenty-five games.', '累计赢下二十五局。', '累計贏下二十五局。')),
  ('pc.wins_100', 70, True, ('One Hundred Wins', '一百胜', '一百勝'), ('Win one hundred games.', '累计赢下一百局。', '累計贏下一百局。')),
  ('pc.wins_200', 100, True, ('Two Hundred Wins', '两百胜', '兩百勝'), ('Win two hundred games.', '累计赢下两百局。', '累計贏下兩百局。')),
+ ('pc.wins_300', 100, True, ('Three Hundred Wins', '三百胜', '三百勝'), ('Win three hundred games.', '累计赢下三百局。', '累計贏下三百局。')),
  ('pc.wins_500', 100, True, ('Five Hundred Wins', '五百胜', '五百勝'), ('Win five hundred games.', '累计赢下五百局。', '累計贏下五百局。')),
  ('pc.wins_1000', 100, True, ('A Thousand Wins', '一千胜', '一千勝'), ('Win a thousand games.', '累计赢下一千局。', '累計贏下一千局。'))]
 st, d = J('GET', f'/v1/gameCenterDetails/{GC}/gameCenterAchievements?limit=100')

@@ -43,8 +43,8 @@ def renderA(script, size, dsf, out):      # as render(), but keeps the transpare
 IDS = {'first_win': ('wins', '1', ''), 'win_sailor': ('role', '', 'sailor'), 'win_heretic': ('role', '', 'heretic'), 'win_pukka': ('role', '', 'pukka'),
        'trick_sailor': ('trick', '', 'sailor'), 'trick_heretic': ('trick', '', 'heretic'), 'trick_pukka': ('trick', '', 'pukka')}
 for n in (3, 5): IDS[f'streak_{n}'] = ('streak', str(n), '')
-for n in (5, 10, 25, 50, 100, 200, 500, 1000): IDS[f'wins_{n}'] = ('wins', str(n), '')
-for n in (3, 4, 5, 7): IDS[f'day_{n}'] = ('day', str(n), '')
+for n in (5, 10, 25, 50, 100, 200, 300, 500, 1000): IDS[f'wins_{n}'] = ('wins', str(n), '')
+for n in (3, 5, 7): IDS[f'day_{n}'] = ('day', str(n), '')
 want = sys.argv[1:] or list(IDS)
 out = os.path.join(ROOT, 'assets', 'achievements'); os.makedirs(out, exist_ok=True)
 for a in want:
