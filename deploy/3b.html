@@ -2689,6 +2689,7 @@ function drawHero(x, y, k, ph, flip = 1, away = true) {
   const hx = x, hy = by - 1.03 * k, r = .17 * k;
   const shape = (pts, c) => { ctx.beginPath(); ctx.moveTo(hx + pts[0] * r, hy + pts[1] * r); for (let n = 2; n < pts.length; n += 4) ctx.quadraticCurveTo(hx + pts[n] * r, hy + pts[n + 1] * r, hx + pts[n + 2] * r, hy + pts[n + 3] * r); ctx.closePath(); ctx.fillStyle = css(c); ctx.fill(); };      
   circ(hx, hy, r, SK); for (const m of [-1, 1]) { const pts = [.04, -1.42, -.7, -1.5, -1.08, -.92, -1.26, -.5, -1.2, 0, -1.2, .24, -1.06, .42, -.94, .24, -.8, 0, -.66, .2, -.46, .26, -.34, .08, -.28, -.04, -.14, .14, .04, .18]; shape(pts.map((v, n) => n % 2 ? v : v * m), [28, 26, 34]); }      // the same black hair whichever way he walks: symmetrical, lying close to the head, a few soft locks over the forehead
+  ctx.beginPath(); ctx.arc(hx, hy - r * .16, r * 1.36, Math.PI * .98, Math.PI * 2.02); ctx.closePath(); ctx.fillStyle = css(R); ctx.fill(); P([[hx - r * 1.24, hy - r * .22], [hx - r * 2.1, hy - r * .02], [hx - r * 2.06, hy - r * .18], [hx - r * 1.2, hy - r * .46]], RD); circ(hx - r * .03, hy - r * 1.52, r * .13, RD);      // a red cap over the hair, the peak turned backwards
   ctx.restore();
 }
 function drawBotc(t, dt) {
