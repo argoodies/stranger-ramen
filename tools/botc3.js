@@ -168,7 +168,7 @@ function drawGeese3(t, n) {      // three geese crossing the sky, exactly as ove
 // the player, a boy with soft full hair, dark top, blue shorts and white sneakers: walks the four diagonals in small quick steps, the back foot flicking up, the body nearly still. ph: the step (null: standing); flip: 1 right, -1 left; away: going up the screen
 function drawHero(x, y, k, ph, flip = 1, away = true) {
   k *= 1.16;      // as tall as the other players: his head and legs are slimmer than their cones
-  const R = [214, 62, 70], RD = [168, 44, 66], SK = [247, 228, 210], SH = [246, 242, 238], D = [44, 40, 62], BL = [70, 120, 200], tone = c => [mix(c, [255, 255, 255], .12), mix(c, [70, 50, 110], .26)], P = poly;
+  const R = [214, 62, 70], RD = [168, 44, 66], SK = [247, 228, 210], SH = [246, 242, 238], D = [246, 242, 238], BL = [40, 36, 46], tone = c => [mix(c, [255, 255, 255], .12), mix(c, [70, 50, 110], .26)], P = poly;
   ctx.save(); ctx.translate(x, y); ctx.scale(flip, 1); ctx.translate(-x, -y); const by = y - (ph == null ? 0 : Math.abs(Math.cos(ph)) * .01 * k), sl = away ? -.5 : .5, tilt = away ? -1 : 1; if (!figNoShadow) ell(x, y, .2 * k, .06 * k, [20, 12, 40], .3);
   const leg = (off, back) => { const hipx = x + (back ? -.035 : .035) * k, hipy = by - .3 * k; let st, up = 0, kx, ky = hipy + .13 * k;
     if (ph == null) { st = back ? -.04 : .04; kx = (hipx + x + st * k) / 2; }
@@ -178,9 +178,10 @@ function drawHero(x, y, k, ph, flip = 1, away = true) {
   if (away) { leg(0, false); leg(Math.PI, true); } else { leg(Math.PI, true); leg(0, false); }
   const [pa, pb] = tone(BL), [a, b] = tone(D); P([[x - .15 * k, by - .46 * k], [x, by - .46 * k], [x, by - .29 * k], [x - .17 * k, by - .29 * k]], pa); P([[x, by - .46 * k], [x + .15 * k, by - .46 * k], [x + .17 * k, by - .29 * k], [x, by - .29 * k]], pb);
   P([[x - .1 * k, by - .86 * k], [x, by - .86 * k], [x, by - .42 * k], [x - .19 * k, by - .42 * k]], a); P([[x, by - .86 * k], [x + .1 * k, by - .86 * k], [x + .19 * k, by - .42 * k], [x, by - .42 * k]], b);
+  P([[x - .03 * k, by - .84 * k], [x - .14 * k, by - .8 * k], [x - .19 * k, by - .5 * k], [x - .07 * k, by - .5 * k]], R); P([[x - .135 * k, by - .9 * k], [x + .135 * k, by - .9 * k], [x + .115 * k, by - .78 * k], [x - .115 * k, by - .78 * k]], R);      // a red scarf, one end hanging down
   const hx = x, hy = by - 1.03 * k, r = .17 * k;
   const shape = (pts, c) => { ctx.beginPath(); ctx.moveTo(hx + pts[0] * r, hy + pts[1] * r); for (let n = 2; n < pts.length; n += 4) ctx.quadraticCurveTo(hx + pts[n] * r, hy + pts[n + 1] * r, hx + pts[n + 2] * r, hy + pts[n + 3] * r); ctx.closePath(); ctx.fillStyle = css(c); ctx.fill(); };      
-  circ(hx, hy, r, SK); for (const m of [-1, 1]) { const pts = [.04, -1.66, -.8, -1.82, -1.22, -1, -1.46, -.6, -1.46, -.12, -1.28, -.16, -1.16, -.2, -1.22, .2, -1.08, .52, -.92, .3, -.78, -.02, -.68, .26, -.46, .4, -.36, .14, -.3, -.06, -.16, .2, .04, .34]; shape(pts.map((v, n) => n % 2 ? v : v * m), [28, 26, 34]); }      // the same black hair whichever way he walks: symmetrical, a full rounded crown, a small flick at each side and a few thick locks over the forehead
+  circ(hx, hy, r, SK); for (const m of [-1, 1]) { const pts = [.04, -1.42, -.7, -1.5, -1.08, -.92, -1.26, -.5, -1.2, 0, -1.2, .24, -1.06, .42, -.94, .24, -.8, 0, -.66, .2, -.46, .26, -.34, .08, -.28, -.04, -.14, .14, .04, .18]; shape(pts.map((v, n) => n % 2 ? v : v * m), [28, 26, 34]); }      // the same black hair whichever way he walks: symmetrical, lying close to the head, a few soft locks over the forehead
   ctx.restore();
 }
 function drawBotc(t, dt) {
