@@ -6,15 +6,15 @@ import sys, json, os, hashlib, urllib.request, time
 sys.path.insert(0, '/root'); from asc_api import req
 APP = '6829382085'; VER, SHOTS = sys.argv[1], sys.argv[2]; BN = sys.argv[3] if len(sys.argv) > 3 else None
 SITE = 'https://tiny-clocktower.fly.dev'      # the app's own little site (tiny-site/), apart from the game's
-SUB = 'A pocket game of hidden roles'
+SUB = 'A pocket-sized clocktower game'
 DESC = """Three seats, one Storyteller, and a secret in every hand.
 
 Tiny Clocktower is a pocket-sized game of hidden roles for one player. You and two computer players sit around a small floating table. Each of you is dealt a role in secret, and only the Storyteller knows the truth.
 
 THE ROLES
-• Sailor (good): each night, choose a player — either you or they are drunk until dusk. You can't die.
-• Heretic (good): whoever wins, loses, and whoever loses, wins — even if you are dead.
-• Pukka (evil): each night, poison a player. The player poisoned the night before dies.
+• The Unsinkable (good): each night, choose a player — either you or they are drunk until dusk. You can't die.
+• The Contrarian (good): whoever wins, loses, and whoever loses, wins — even if you are dead.
+• The Poisoner (evil): each night, poison a player. The player poisoned the night before dies.
 
 NIGHT AND DAY
 At night, the roles act in the dark. By day, the others claim who they are — and one of them may be lying. Then you nominate, everyone votes, and the table decides who is executed. A drunk or poisoned player's ability quietly fails, so nothing is quite what it seems. Reach the seventh day and the game is settled: good wins.

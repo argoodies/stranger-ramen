@@ -7,7 +7,7 @@ Only what each version finally shipped with; changes that were tried and rolled 
 
 ## 0.0.6 — 上架候选 · Release candidate（2026-11-02）
 
-> 当前绑定 build 30。标 ★ 的条目已在代码和 Game Center 中完成，但还要出一个新包才会进 App。
+> 当前绑定 build 30（build 31 构建中）。标 ★ 的条目已在代码和 Game Center 中完成，但还要出一个新包才会进 App。
 > Bound to build 30. Items marked ★ are done in the code and in Game Center but need one more build to reach the app.
 
 **规则 · Rules**
@@ -20,8 +20,10 @@ Only what each version finally shipped with; changes that were tried and rolled 
 - ★ 排行榜改为“总胜场”（原为最长连胜），分数上限 9999。
   ★ The leaderboard now ranks total wins instead of the best streak, capped at 9999.
 - 成就调整 · Achievement changes:
-  - “双重标记”现在要求两名不同的玩家各带一个普卡标记。
-    "Two Marks" now needs the Pukka's mark on two different players.
+  - ★ 成就里不再出现具体角色名：去掉三个角色专属首胜成就；三个技巧成就改名为“票决不倒”“双份毒药”“以败为胜”。
+    ★ No role names in achievements: the three role first-win achievements are gone; the three trick achievements are now Still Standing, Double Dose and Win by Losing.
+  - “双份毒药”（原“双重标记”）现在要求两名不同的玩家各带一个毒。
+    Double Dose (formerly Two Marks) now needs the poison on two different players.
   - “漫长的一周”改为：一局打到第七天、触发强制结算并以好人身份获胜。
     "A Long Week" now means reaching the seventh day and winning the forced settlement on the good side.
   - 新增五百胜、一千胜；★ 新增三百胜。
