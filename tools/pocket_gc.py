@@ -48,7 +48,7 @@ print('achievements', len(have))
 st, d = J('GET', f'/v1/gameCenterDetails/{GC}/gameCenterLeaderboards?limit=20')
 lb = {a['attributes']['vendorIdentifier']: a['id'] for a in d.get('data', [])}
 if 'pc.total_wins' not in lb:
-    st, d = J('POST', '/v1/gameCenterLeaderboards', {'data': {'type': 'gameCenterLeaderboards', 'attributes': {'referenceName': 'Total wins', 'vendorIdentifier': 'pc.total_wins', 'defaultFormatter': 'INTEGER', 'submissionType': 'BEST_SCORE', 'scoreSortType': 'DESC', 'scoreRangeStart': '0', 'scoreRangeEnd': '100000'}, 'relationships': {'gameCenterDetail': {'data': {'type': 'gameCenterDetails', 'id': GC}}}}})
+    st, d = J('POST', '/v1/gameCenterLeaderboards', {'data': {'type': 'gameCenterLeaderboards', 'attributes': {'referenceName': 'Total wins', 'vendorIdentifier': 'pc.total_wins', 'defaultFormatter': 'INTEGER', 'submissionType': 'BEST_SCORE', 'scoreSortType': 'DESC', 'scoreRangeStart': '0', 'scoreRangeEnd': '9999'}, 'relationships': {'gameCenterDetail': {'data': {'type': 'gameCenterDetails', 'id': GC}}}}})
     if st < 300:
         lid = d['data']['id']; lb['pc.total_wins'] = lid
         for loc, n in zip(L, ('Most Wins', '总胜场', '總勝場')):
