@@ -2674,6 +2674,23 @@ function fadedDraw(a, fn) {      // draw something made of overlapping pieces at
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha *= a; ctx.drawImage(oc, 0, 0); ctx.restore(); }
 function drawGeese3(t, n) {      // three geese crossing the sky, exactly as over the town in the main game: white by day, a soft grey by night (n: how far into the night)
   for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], n), 2, lerp(.95, .7, n)); } }
+// the player, a boy in a red cap, dark top, blue shorts and white sneakers: walks the four diagonals in small quick steps, the back foot flicking up, the body nearly still. ph: the step (null: standing); flip: 1 right, -1 left; away: going up the screen
+function drawHero(x, y, k, ph, flip = 1, away = true) {
+  const R = [214, 62, 70], RD = [168, 44, 66], SK = [247, 228, 210], SH = [246, 242, 238], D = [44, 40, 62], BL = [70, 120, 200], tone = c => [mix(c, [255, 255, 255], .12), mix(c, [70, 50, 110], .26)], P = poly;
+  ctx.save(); ctx.translate(x, y); ctx.scale(flip, 1); ctx.translate(-x, -y); const by = y - (ph == null ? 0 : Math.abs(Math.cos(ph)) * .01 * k), sl = away ? -.5 : .5, tilt = away ? -1 : 1; if (!figNoShadow) ell(x, y, .2 * k, .06 * k, [20, 12, 40], .3);
+  const leg = (off, back) => { const hipx = x + (back ? -.035 : .035) * k, hipy = by - .3 * k; let st, up = 0, kx, ky = hipy + .13 * k;
+    if (ph == null) { st = back ? -.04 : .04; kx = (hipx + x + st * k) / 2; }
+    else { const q = ((ph + off) / TAU % 1 + 1) % 1; if (q < .5) { st = .12 - .48 * q; kx = (hipx + x + st * k) / 2 + .012 * k; } else { const u = (q - .5) / .5, e = Math.sin(u * Math.PI); st = -.12 + .24 * u - .07 * e * (1 - u); up = .08 * e * (1 - u * .55); kx = hipx + (.02 + .045 * e) * k; } }
+    const fx = x + st * k, fy = y + st * sl * k - up * k; ctx.strokeStyle = css(back ? mix(SK, [70, 50, 110], .2) : SK); ctx.lineWidth = .062 * k; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(hipx, hipy); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy - .04 * k); ctx.stroke();
+    P([[fx - .04 * k, fy - .068 * k], [fx + .03 * k, fy + (-.068 + tilt * .012) * k], [fx + .105 * k, fy + (-.03 + tilt * .02) * k], [fx + .105 * k, fy + (.012 + tilt * .02) * k], [fx - .04 * k, fy + .012 * k]], SH); };
+  if (away) { leg(0, false); leg(Math.PI, true); } else { leg(Math.PI, true); leg(0, false); }
+  const [pa, pb] = tone(BL), [a, b] = tone(D); P([[x - .15 * k, by - .46 * k], [x, by - .46 * k], [x, by - .29 * k], [x - .17 * k, by - .29 * k]], pa); P([[x, by - .46 * k], [x + .15 * k, by - .46 * k], [x + .17 * k, by - .29 * k], [x, by - .29 * k]], pb);
+  P([[x - .1 * k, by - .86 * k], [x, by - .86 * k], [x, by - .42 * k], [x - .19 * k, by - .42 * k]], a); P([[x, by - .86 * k], [x + .1 * k, by - .86 * k], [x + .19 * k, by - .42 * k], [x, by - .42 * k]], b);
+  const hx = x + .01 * k, hy = by - 1.03 * k, r = .17 * k;
+  if (away) { circ(hx, hy, r * 1.03, R); ctx.save(); ctx.beginPath(); ctx.arc(hx, hy, r * 1.03, 0, TAU); ctx.clip(); P([[hx - r * 1.2, hy + r * .42], [hx + r * 1.2, hy + r * .42], [hx + r * 1.2, hy + r * 1.2], [hx - r * 1.2, hy + r * 1.2]], mix(R, [70, 50, 110], .16)); ctx.restore(); P([[hx - r * .78, hy + r * .42], [hx - r * .08, hy + r * .42], [hx - r * .42, hy + r * 1.16], [hx - r * 1.22, hy + r * .98]], RD); circ(hx - r * .12, hy - r, r * .13, RD); }
+  else { circ(hx, hy, r, SK); ctx.beginPath(); ctx.arc(hx, hy, r * 1.03, Math.PI * .9, Math.PI * 2.06); ctx.closePath(); ctx.fillStyle = css(R); ctx.fill(); P([[hx - r * .95, hy + r * .14], [hx - r * 1.75, hy + r * .32], [hx - r * 1.7, hy + r * .16], [hx - r * .9, hy - r * .08]], RD); }
+  ctx.restore();
+}
 function drawBotc(t, dt) {
   const g = BG; g.dark = lerp(g.dark, g.isNight ? 1 : 0, 1 - Math.pow(0.002, dt));
   TINT = [30, 30, 90]; TK = lerp(0.04, 0.34, g.dark); SHADOW = [58, 40, 96];
@@ -2701,7 +2718,7 @@ function drawBotc(t, dt) {
     if (g.pop && g.pop.who === i) { const u = g.pop.t / .45, k2 = 1 + .55 * eout(u); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .7 * k2, s * .35 * k2, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .95 * (1 - u) * (1 - u)); ctx.lineWidth = 3.5 * (1 - u * .6); ctx.stroke(); g.pop.t += dt; if (g.pop.t >= .45) g.pop = null; }
     if (i === 0) glow(p[0], p[1] - K * .6, K * 1.2, [255, 240, 200], .3);
     const look = dead ? { kind: 'bare', body: [236, 236, 255], head: [236, 236, 255], a: .45 } : Object.assign({}, BLOOK[i], asleep ? { a: .55 } : {});
-    fadedDraw(look.a == null ? 1 : look.a, () => fig(p[0], p[1], K, Object.assign({}, look, { a: 1 })));      // asleep or dead: faded as a whole, so the hat never shows the head through it
+    fadedDraw(look.a == null ? 1 : look.a, () => i === 0 && !dead ? drawHero(p[0], p[1], K) : fig(p[0], p[1], K, Object.assign({}, look, { a: 1 })));      // asleep or dead: faded as a whole, so the hat never shows the head through it
     if (dead) { ctx.beginPath(); ctx.ellipse(p[0], p[1] - K * 1.33, K * .2, K * .06, 0, 0, TAU); ctx.strokeStyle = css([255, 250, 220], .8); ctx.lineWidth = 2; ctx.stroke(); }
     if (g.votes && g.votes[i] != null) { const vx = p[0] + K * .62, vy = p[1] - K * 1.1; if (g.votes[i]) { glow(vx, vy, 24, [255, 214, 110], .7); poly([[vx, vy - 13], [vx + 9, vy], [vx, vy + 13], [vx - 9, vy]], [255, 214, 110]); } else line([[vx - 7, vy], [vx + 7, vy]], [200, 190, 220], 3, .8); }
     toks.push(i);
@@ -2839,7 +2856,7 @@ if (location.hash) {
         if (!me.say && !me.talk && !intro) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .9, s * .45, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .35 + .35 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }      // he is waiting for you
         glow(p[0], p[1] - K * .8, K * 1.4, [200, 170, 255], .3); fig(p[0], p[1], K * 1.2, { kind: 'teller', body: [132, 100, 172], hat: [70, 52, 100] }); }); lv.st = [p[0], p[1] - K * .8, K * .95];      // no grimoire beside him while you stroll: the 小染书 capsule lies there instead
         if (!me.say && !me.talk && !intro && seenBook) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
-      drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); fadedDraw(ap(2), () => { glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); }); };
+      drawMe = () => { const p = P(me.x, me.y); if (moving) { const q = P(me.tx, me.ty); me.flip = q[0] >= p[0] ? 1 : -1; me.away = q[1] < p[1]; } fadedDraw(ap(2), () => { glow(p[0], p[1] - K * .6, K * 1.2, [255, 240, 200], .3); drawHero(p[0], p[1], K, moving ? me.hop / .53 * TAU : null, me.flip || 1, me.away !== false); }); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
     if (!me.say && !me.talk) fadedDraw(ap(3), () => drawBook(t, P, s)); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
