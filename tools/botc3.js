@@ -3,7 +3,7 @@ const GCK = 'pocket_gc'; let GCS = { wins: 0, streak: 0, best: 0, ach: {} }; try
 // achievements that no longer exist (role first wins, two earlier role tricks) are dropped, so they are never sent again
 const GCA = ['first_win', 'wins_100', 'wins_300', 'wins_1000', 'day_7', 'exec_survive', 'drink_alone', 'self_reverse', 'all_tokens', 'trick_pukka', 'self_poison'];
 for (const id of Object.keys(GCS.ach || {})) if (!GCA.includes(id)) delete GCS.ach[id];
-function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } catch (e) {} }
+function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } catch (e) {} if (typeof window.__miniGC === 'function') window.__miniGC(m); }      // the Xiaohongshu build listens here for its leaderboard
 function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
 function gcRecord(won, role) {
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }

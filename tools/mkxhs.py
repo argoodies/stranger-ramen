@@ -10,6 +10,8 @@ Chrome 61 baseline, so the page is rewritten, not just zipped:
     through window.__kv instead of localStorage;
   * CSS that Chrome 61 cannot parse gets a baseline: inset, flex gap, max(), min(); safe areas use the container's
     --safe-area-inset-* variables with env() behind them;
+  * rank.js (tools/xhs_rank.js) adds the total-wins leaderboard on clients 9.51+ (mini-tool submitScore / getRankList /
+    getMyRank); without it, or without nickname authorisation, nothing shows;
   * index.html sits at the zip root with only .html and .js beside it.
 usage: tools/mkxhs.py [out.zip]      (needs node/npx for esbuild and acorn; default out: dist/xhs/sanrenran.zip)"""
 import os, re, sys, json, shutil, subprocess, zipfile
@@ -64,7 +66,7 @@ must('viewport-fit=cover' in html, 'viewport lacks viewport-fit=cover')
 BOOT = r"""/* boot: the saved game comes from the mini-tool Storage JS API when the client has it (9.46+), else from localStorage;
    the game reads and writes through window.__kv; then app1.js, app2.js and app3.js load in order */
 (function () {
-  var KEYS = %s, APPS = ['./app1.js', './app2.js', './app3.js'], mem = {}, useApi = false, started = false;
+  var KEYS = %s, APPS = ['./app1.js', './app2.js', './app3.js', './rank.js'], mem = {}, useApi = false, started = false;
   function quiet(fn) { try { return fn(); } catch (e) { return null; } }
   KEYS.forEach(function (k) { var v = quiet(function () { return localStorage.getItem(k); }); if (typeof v === 'string') mem[k] = v; });
   function mt() { return window.xhs && window.xhs.miniTool; }
@@ -88,7 +90,8 @@ BOOT = r"""/* boot: the saved game comes from the mini-tool Storage JS API when 
     return Promise.resolve(quiet(function () { return m.getLaunchOptions(); })).then(build, function () { return 0; });
   }
   setTimeout(start, 1500);      /* never let a slow container keep the game from starting */
-  version().then(function (v) {
+  var vp = version(); window.__xhsBuild = vp;      /* the leaderboard (rank.js) checks the client version too */
+  vp.then(function (v) {
     var m = mt();
     if (Math.floor(v / 1000) < 9460 || !m || typeof m.getStorage !== 'function' || typeof m.setStorage !== 'function') return;
     useApi = true;
@@ -109,7 +112,8 @@ for k, js in enumerate(scripts):
     raw = os.path.join(STAGE, f'.raw{k + 1}.js'); open(raw, 'w', encoding='utf-8').write(js)
     r = subprocess.run(['npx', '--yes', ESBUILD, raw, '--target=es2017,chrome61', '--charset=utf8', '--legal-comments=none', '--minify-whitespace', f'--outfile={os.path.join(STAGE, f"app{k + 1}.js")}'], capture_output=True, text=True)
     must(r.returncode == 0, f'esbuild app{k + 1}: {r.stderr[-800:]}'); os.remove(raw)
-for f in ['boot.js', 'app1.js', 'app2.js', 'app3.js']:      # the Chrome 61 gate: every script must parse as ES2017
+shutil.copy(os.path.join(ROOT, 'tools', 'xhs_rank.js'), os.path.join(STAGE, 'rank.js'))      # the leaderboard, written in ES5
+for f in ['boot.js', 'app1.js', 'app2.js', 'app3.js', 'rank.js']:      # the Chrome 61 gate: every script must parse as ES2017
     r = subprocess.run(['npx', '--yes', '-p', ACORN, 'acorn', '--ecma2017', '--silent', os.path.join(STAGE, f)], capture_output=True, text=True)
     must(r.returncode == 0, f'{f} is not ES2017: {r.stderr[-600:] or r.stdout[-600:]}')
     body = open(os.path.join(STAGE, f), encoding='utf-8').read()
@@ -119,5 +123,5 @@ for f in ['boot.js', 'app1.js', 'app2.js', 'app3.js']:      # the Chrome 61 gate
 os.makedirs(os.path.dirname(OUT_ZIP), exist_ok=True)
 if os.path.exists(OUT_ZIP): os.remove(OUT_ZIP)
 with zipfile.ZipFile(OUT_ZIP, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:      # the files themselves at the root, not the folder
-    for f in ['index.html', 'boot.js', 'app1.js', 'app2.js', 'app3.js']: z.write(os.path.join(STAGE, f), f)
+    for f in ['index.html', 'boot.js', 'app1.js', 'app2.js', 'app3.js', 'rank.js']: z.write(os.path.join(STAGE, f), f)
 print(OUT_ZIP, os.path.getsize(OUT_ZIP), 'bytes')
