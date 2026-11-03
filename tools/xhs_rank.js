@@ -68,6 +68,9 @@
     '#xpanel .msg{padding:26px 12px;text-align:center;color:#999;font-size:14px}' +
     '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
     '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}' +
+    '#xpanel .sk i{display:block;height:12px;border-radius:6px;background:#f0f0f0;background:-webkit-linear-gradient(left,#f2f2f2 25%,#e6e6e6 50%,#f2f2f2 75%);background:linear-gradient(90deg,#f2f2f2 25%,#e6e6e6 50%,#f2f2f2 75%);background-size:200% 100%;-webkit-animation:xsh 1.3s linear infinite;animation:xsh 1.3s linear infinite}' +
+    '#xpanel .sk .rk i{width:16px}#xpanel .sk .sc i{width:38px}#xpanel .row.sk{height:41px;box-sizing:border-box}' +      // the height of a real row
+    '@-webkit-keyframes xsh{from{background-position:150% 0}to{background-position:-50% 0}}@keyframes xsh{from{background-position:150% 0}to{background-position:-50% 0}}' +
     // the language button and its menu in the same manner as the board: a white circle, a white card, the chosen language in red
     // a small black see-through circle (26px, in a 40px tap area) holding the mark; no shadow, no grey edge
     '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important}#lang svg{display:block;margin:0 auto}#lang::before{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(0,0,0,.35);z-index:-1}#lang{position:relative;z-index:0}' +
@@ -76,6 +79,24 @@
     '#langMenu button+button{margin-top:2px}#langMenu button.on{background:#FFF0F2!important;color:#FF2442!important;font-weight:600!important}';
   document.head.appendChild(css);
   btn = document.createElement('button'); btn.id = 'xcap'; btn.setAttribute('aria-label', 'rank');
+  function inkCentre(el) {      // the capsule's words, drawn on a canvas and centred by their ink: drawing and measuring use the same
+    // engine, font and metrics, so the words sit in the middle whatever font the device has (a DOM line box rounds the font's ascent
+    // and descent, which no measurement can line up with). Crisp at the screen's pixel density; the words stay as the label.
+    try {
+      var text = el.getAttribute('data-t') || el.textContent; if (!text) return;
+      el.setAttribute('data-t', text); el.setAttribute('aria-label', text);
+      var cs = getComputedStyle(el), px = parseFloat(cs.fontSize) || 15, dpr = Math.max(1, window.devicePixelRatio || 1);
+      var font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + px + 'px ' + cs.fontFamily;
+      var cv = document.createElement('canvas'), g = cv.getContext('2d'); g.font = font;
+      var box = el.parentNode && el.parentNode.clientHeight, m = g.measureText(text), H = box > px ? box : Math.ceil(px * 1.5), W = Math.ceil(m.width);      // as tall as the capsule inside: nothing left to round
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.cssText = 'display:block;position:static;width:' + W + 'px;height:' + H + 'px;margin:0;pointer-events:none';      // the game styles every canvas fixed and full-screen: not this one
+      g = cv.getContext('2d'); g.scale(dpr, dpr); g.font = font; g.fillStyle = cs.color;
+      if (typeof m.actualBoundingBoxAscent === 'number') { g.textBaseline = 'alphabetic'; g.fillText(text, 0, H / 2 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2); }
+      else { g.textBaseline = 'middle'; g.fillText(text, 0, H / 2); }      // older engines: the font's own middle
+      el.textContent = ''; el.appendChild(cv);
+      el.style.webkitTransform = el.style.transform = 'none'; el.style.lineHeight = el.style.height = '';
+    } catch (e) {}
+  }
   function capLabel() { btn.innerHTML = '<span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg></span><span class="tx">' + esc(t('title')) + '</span><span class="ar"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="#FF2442" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l4 4-4 4"/></svg></span>'; }      // a drawn chevron: a text \u203a sits on the font\'s baseline, not in the middle
   // level with the container's own top buttons (getWindowInfo, 9.49+), in the middle of the screen; the safe area otherwise
   function place() {
@@ -88,6 +109,7 @@
   panel = document.createElement('div'); panel.id = 'xpanel';
   panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="ft"></div>';
   document.body.appendChild(btn); document.body.appendChild(panel);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { var tx = btn.querySelector('.tx'); if (tx) inkCentre(tx); });      // again once the real font is in
   // the language button: Xiaohongshu's translate mark in a black see-through circle, two white rounded squares overlapping corner to corner,
   // 文 on the upper left one, A on the lower right one, drawn as strokes (centred whatever font the phone has) in see-through black;
   // a cut-out gap keeps the squares apart
@@ -125,7 +147,10 @@
     panel.querySelector('.tt').textContent = t('title');
     panel.classList.add('open');
     if (cache && Date.now() - cacheAt < CACHE) return render(cache);      // fresh enough: straight to the board, no spinner
-    list.innerHTML = '<div class="msg"><div class="spin"></div>' + t('wait') + '</div>'; foot.innerHTML = '';
+    // loading: skeleton rows the size of the real ones, so the board opens at its full height and does not jump when the data comes
+    var sk = '', W = [62, 48, 70, 54, 44, 66, 58, 50, 68, 46, 60, 52];
+    for (var k = 0; k < W.length; k++) sk += '<div class="row sk"><span class="rk"><i></i></span><span class="nm"><i style="width:' + W[k] + '%"></i></span><span class="sc"><i></i></span></div>';
+    list.innerHTML = sk; list.scrollTop = 0; foot.innerHTML = '<div class="row sk me"><span class="rk"><i></i></span><span class="nm"><i style="width:30%"></i></span><span class="sc"><i></i></span></div>';
     var t0 = Date.now(), MINSPIN = 600;      // the spinner stays at least this long, so a quick answer does not flicker
     var after = function (f) { return function (x) { setTimeout(function () { if (panel.classList.contains('open')) f(x); }, Math.max(0, MINSPIN - (Date.now() - t0))); }; };
     load().then(after(render), after(function () { list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; }));
@@ -139,7 +164,8 @@
     close(); e.stopPropagation(); e.preventDefault();
   }, true);
   var lastLang = '';
-  function show(v) { if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } btn.classList.toggle('on', v); }
+  // shown first, so the words are drawn to the capsule's real height
+  function show(v) { btn.classList.toggle('on', v); if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); inkCentre(btn.querySelector('.tx')); } }
   setInterval(function () { var v = ok && wonNow && !!window.__3bLang; show(v); if (!v) close(); }, 300);      // the floating island's lobby, after a win in this session; never hidden for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,

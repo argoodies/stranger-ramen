@@ -18,6 +18,24 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
 (function () {
   const inApp = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc);
   if (!inApp) return;
+  function inkCentre(el) {      // the capsule's words, drawn on a canvas and centred by their ink: drawing and measuring use the same
+    // engine, font and metrics, so the words sit in the middle whatever font the device has (a DOM line box rounds the font's ascent
+    // and descent, which no measurement can line up with). Crisp at the screen's pixel density; the words stay as the label.
+    try {
+      var text = el.getAttribute('data-t') || el.textContent; if (!text) return;
+      el.setAttribute('data-t', text); el.setAttribute('aria-label', text);
+      var cs = getComputedStyle(el), px = parseFloat(cs.fontSize) || 15, dpr = Math.max(1, window.devicePixelRatio || 1);
+      var font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + px + 'px ' + cs.fontFamily;
+      var cv = document.createElement('canvas'), g = cv.getContext('2d'); g.font = font;
+      var box = el.parentNode && el.parentNode.clientHeight, m = g.measureText(text), H = box > px ? box : Math.ceil(px * 1.5), W = Math.ceil(m.width);      // as tall as the capsule inside: nothing left to round
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.cssText = 'display:block;position:static;width:' + W + 'px;height:' + H + 'px;margin:0;pointer-events:none';      // the game styles every canvas fixed and full-screen: not this one
+      g = cv.getContext('2d'); g.scale(dpr, dpr); g.font = font; g.fillStyle = cs.color;
+      if (typeof m.actualBoundingBoxAscent === 'number') { g.textBaseline = 'alphabetic'; g.fillText(text, 0, H / 2 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2); }
+      else { g.textBaseline = 'middle'; g.fillText(text, 0, H / 2); }      // older engines: the font's own middle
+      el.textContent = ''; el.appendChild(cv);
+      el.style.webkitTransform = el.style.transform = 'none'; el.style.lineHeight = el.style.height = '';
+    } catch (e) {}
+  }
   const T = { hans: '总胜场榜', hant: '總勝場榜', en: 'Most Wins' };
   const make = () => {
     const st = document.createElement('style');
@@ -42,10 +60,11 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     let lastLang = '';
     b.addEventListener('click', e => { e.stopPropagation(); gcPost({ t: 'board' }); });
     document.body.appendChild(b);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const tx = b.querySelector('.tx'); if (tx) inkCentre(tx); });      // again once the real font is in
     setInterval(() => {
       const on = !!window.__wonThisSession && !!window.__3bLang;
-      if (on && lastLang !== LANG) { lastLang = LANG; b.innerHTML = label(); }
-      b.classList.toggle('on', on);
+      b.classList.toggle('on', on);      // shown first, so the words are drawn to the capsule's real height
+      if (on && lastLang !== LANG) { lastLang = LANG; b.innerHTML = label(); inkCentre(b.querySelector('.tx')); }
     }, 300);
   };
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
