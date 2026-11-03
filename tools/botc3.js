@@ -29,9 +29,12 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     st.textContent = '#gccap{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:none;align-items:center;height:36px;padding:0 12.25px 0 9.75px;border-radius:18px;border:.5px solid rgba(255,255,255,.22);background:rgba(28,22,34,.32);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.12);font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif;letter-spacing:-.01em;color:#fff;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .15s}' +
       '#gccap.on{display:flex}#gccap:active{opacity:.55}#gccap svg{display:block}#gccap .ic{margin-right:7px}#gccap .ch{margin-left:6px}' +
       '#gccap .tx{display:block}' +      // the words are an outline (svgWords): its box is its ink, so centring the box centres the words
-      '#lang,#langMenu{display:none!important}';      // the app is English only: no language button
+      // the language menu: an iOS menu of glass with a blue tick (the button itself is the shared 文A mark, tools/mk3b.py)
+      '#langMenu{gap:0!important;padding:6px 0!important;min-width:180px;border-radius:14px!important;border:.5px solid rgba(255,255,255,.55)!important;background:rgba(246,246,248,.72)!important;-webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;box-shadow:0 10px 36px rgba(0,0,0,.18)}' +
+      '#langMenu button{position:relative;border-radius:0!important;padding:11px 44px 11px 18px!important;font:400 16px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif!important;letter-spacing:-.01em!important;color:rgba(0,0,0,.86)!important;background:transparent!important}' +
+      '#langMenu button+button{border-top:.5px solid rgba(60,60,67,.18)}#langMenu button:active{background:rgba(0,0,0,.06)!important}' +
+      '#langMenu button.on::after{content:"";position:absolute;right:18px;top:50%;width:6px;height:11px;margin-top:-7px;border:solid #007AFF;border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}';
     document.head.appendChild(st);
-    if (typeof setLang === 'function') setLang('en');      // English, whatever the system language
     const b = document.createElement('button'); b.id = 'gccap'; b.setAttribute('aria-label', 'Game Center');
     const label = () => '<svg class="ic" width="20" height="20" viewBox="0 0 24 24"><g transform="translate(.8 .5)" style="mix-blend-mode:normal">' +      // Game Center's bubbles: purple, pink, yellow, blue
       '<circle cx="9" cy="13" r="7.2" fill="#8E5BEA" fill-opacity=".92"/><circle cx="14.5" cy="8.5" r="5.6" fill="#FF3B6B" fill-opacity=".9"/>' +

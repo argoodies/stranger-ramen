@@ -21,6 +21,14 @@ boot = """<script>
 // Storyteller; tap the table to stroll about it, tap the Storyteller to talk, and the game begins in the night. When it is over
 // the picture fades back to the lobby.
 (() => {
+  // the language button on every platform (web, app, Xiaohongshu): Xiaohongshu's translate mark in a small black see-through circle,
+  // two white rounded squares overlapping corner to corner, 文 upper left and A lower right drawn as strokes in see-through black
+  // (centred whatever font the device has); a cut-out gap (a mask) keeps the squares apart. Each platform styles the menu itself.
+  const MARK = '<svg width="14" height="14" viewBox="0 0 24 24"><defs><mask id="xlm"><rect width="24" height="24" fill="#fff"/><rect x="9.8" y="9.8" width="14.2" height="14.2" rx="3.6" fill="#000"/></mask></defs>' +
+    '<rect x="1" y="1" width="12" height="12" rx="2.8" fill="#fff" mask="url(#xlm)"/><g fill="none" stroke="rgba(0,0,0,.55)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5v1M3.9 5.2h6.2M9.2 5.5Q8.2 8.8 4 10.5M4.9 5.5Q6.2 8.8 10.2 10.5"/></g>' +
+    '<rect x="11" y="11" width="12" height="12" rx="2.8" fill="#fff"/><g fill="none" stroke="rgba(0,0,0,.55)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"><path d="M14.3 20.2L17 13.8l2.7 6.4M15.35 18.1h3.3"/></g></svg>';
+  const MARK_CSS = '#lang{position:relative;z-index:0;width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important;line-height:0}' +
+    '#lang svg{display:block;margin:0 auto}#lang:active{opacity:.6}#lang::before{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(0,0,0,.35);z-index:-1}';
   const L3 = { hans: ['我们开始吧。'], hant: ['我們開始吧。'], en: ["Let's begin."] }, say3 = () => (L3[LANG] || L3.hans)[0];
   const me = { x: 3 * Math.cos(Math.PI / 4), y: 3 * Math.sin(Math.PI / 4), tx: 0, ty: 0, hop: 0, talk: false, say: null }; me.tx = me.x; me.ty = me.y;
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
@@ -117,7 +125,7 @@ boot = """<script>
   const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter']) { const el = $(id); if (el) el.style.display = 'none'; }
     mode = 'tower'; tw.view = null; fade = 0; BG.dark = 0; BG.isNight = false;
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));z-index:20';      // the language button in the bottom-right corner, its menu opening upward
-    box.appendChild($('lang')); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; m.style.left = 'auto'; m.style.right = '0'; const order = () => { for (const l of ['hans', 'hant', 'en', 'auto']) m.append(m.querySelector(`[data-l=${l}]`)); m.prepend(m.querySelector(`[data-l=${LANG}]`)); }, set0 = setLang; setLang = p => { set0(p); order(); }; order(); box.appendChild(m);      /* whichever language is in use, chosen or the system's, tops the list */ document.body.appendChild(box); { const st = document.createElement('style'); st.textContent = '#bag,#bspeed,#bfreeze,#bclose{display:none!important}'; document.head.appendChild(st); }      /* /3b has no backpack */ };
+    const lbn = $('lang'); lbn.innerHTML = MARK; box.appendChild(lbn); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; m.style.left = 'auto'; m.style.right = '0'; for (const l of ['auto', 'en', 'hans', 'hant']) m.append(m.querySelector(`[data-l=${l}]`)); box.appendChild(m);      /* one fixed order: the system's, then English, 简体, 繁體 */ { const st = document.createElement('style'); st.textContent = MARK_CSS; document.head.appendChild(st); } document.body.appendChild(box); { const st = document.createElement('style'); st.textContent = '#bag,#bspeed,#bfreeze,#bclose{display:none!important}'; document.head.appendChild(st); }      /* /3b has no backpack */ };
   window.__3bQuietMs = performance.now() + (APPEAR_END + .1) * 1000;      // no melody notes from the music until the opening is over
   if (!location.hash) go();      // at once, before the first frame: straight onto the table in the air, no fade, no title, no town
   requestAnimationFrame(frame);      // only now do the frames begin

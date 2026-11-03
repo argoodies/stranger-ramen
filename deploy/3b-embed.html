@@ -2540,9 +2540,12 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     st.textContent = '#gccap{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:none;align-items:center;height:36px;padding:0 12.25px 0 9.75px;border-radius:18px;border:.5px solid rgba(255,255,255,.22);background:rgba(28,22,34,.32);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.12);font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif;letter-spacing:-.01em;color:#fff;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .15s}' +
       '#gccap.on{display:flex}#gccap:active{opacity:.55}#gccap svg{display:block}#gccap .ic{margin-right:7px}#gccap .ch{margin-left:6px}' +
       '#gccap .tx{display:block}' +      // the words are an outline (svgWords): its box is its ink, so centring the box centres the words
-      '#lang,#langMenu{display:none!important}';      // the app is English only: no language button
+      // the language menu: an iOS menu of glass with a blue tick (the button itself is the shared 文A mark, tools/mk3b.py)
+      '#langMenu{gap:0!important;padding:6px 0!important;min-width:180px;border-radius:14px!important;border:.5px solid rgba(255,255,255,.55)!important;background:rgba(246,246,248,.72)!important;-webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;box-shadow:0 10px 36px rgba(0,0,0,.18)}' +
+      '#langMenu button{position:relative;border-radius:0!important;padding:11px 44px 11px 18px!important;font:400 16px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif!important;letter-spacing:-.01em!important;color:rgba(0,0,0,.86)!important;background:transparent!important}' +
+      '#langMenu button+button{border-top:.5px solid rgba(60,60,67,.18)}#langMenu button:active{background:rgba(0,0,0,.06)!important}' +
+      '#langMenu button.on::after{content:"";position:absolute;right:18px;top:50%;width:6px;height:11px;margin-top:-7px;border:solid #007AFF;border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}';
     document.head.appendChild(st);
-    if (typeof setLang === 'function') setLang('en');      // English, whatever the system language
     const b = document.createElement('button'); b.id = 'gccap'; b.setAttribute('aria-label', 'Game Center');
     const label = () => '<svg class="ic" width="20" height="20" viewBox="0 0 24 24"><g transform="translate(.8 .5)" style="mix-blend-mode:normal">' +      // Game Center's bubbles: purple, pink, yellow, blue
       '<circle cx="9" cy="13" r="7.2" fill="#8E5BEA" fill-opacity=".92"/><circle cx="14.5" cy="8.5" r="5.6" fill="#FF3B6B" fill-opacity=".9"/>' +
@@ -2825,6 +2828,14 @@ if (location.hash) {
 // Storyteller; tap the table to stroll about it, tap the Storyteller to talk, and the game begins in the night. When it is over
 // the picture fades back to the lobby.
 (() => {
+  // the language button on every platform (web, app, Xiaohongshu): Xiaohongshu's translate mark in a small black see-through circle,
+  // two white rounded squares overlapping corner to corner, 文 upper left and A lower right drawn as strokes in see-through black
+  // (centred whatever font the device has); a cut-out gap (a mask) keeps the squares apart. Each platform styles the menu itself.
+  const MARK = '<svg width="14" height="14" viewBox="0 0 24 24"><defs><mask id="xlm"><rect width="24" height="24" fill="#fff"/><rect x="9.8" y="9.8" width="14.2" height="14.2" rx="3.6" fill="#000"/></mask></defs>' +
+    '<rect x="1" y="1" width="12" height="12" rx="2.8" fill="#fff" mask="url(#xlm)"/><g fill="none" stroke="rgba(0,0,0,.55)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5v1M3.9 5.2h6.2M9.2 5.5Q8.2 8.8 4 10.5M4.9 5.5Q6.2 8.8 10.2 10.5"/></g>' +
+    '<rect x="11" y="11" width="12" height="12" rx="2.8" fill="#fff"/><g fill="none" stroke="rgba(0,0,0,.55)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"><path d="M14.3 20.2L17 13.8l2.7 6.4M15.35 18.1h3.3"/></g></svg>';
+  const MARK_CSS = '#lang{position:relative;z-index:0;width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important;line-height:0}' +
+    '#lang svg{display:block;margin:0 auto}#lang:active{opacity:.6}#lang::before{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(0,0,0,.35);z-index:-1}';
   const L3 = { hans: ['我们开始吧。'], hant: ['我們開始吧。'], en: ["Let's begin."] }, say3 = () => (L3[LANG] || L3.hans)[0];
   const me = { x: 3 * Math.cos(Math.PI / 4), y: 3 * Math.sin(Math.PI / 4), tx: 0, ty: 0, hop: 0, talk: false, say: null }; me.tx = me.x; me.ty = me.y;
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
@@ -2921,7 +2932,7 @@ if (location.hash) {
   const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter']) { const el = $(id); if (el) el.style.display = 'none'; }
     mode = 'tower'; tw.view = null; fade = 0; BG.dark = 0; BG.isNight = false;
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));z-index:20';      // the language button in the bottom-right corner, its menu opening upward
-    box.appendChild($('lang')); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; m.style.left = 'auto'; m.style.right = '0'; const order = () => { for (const l of ['hans', 'hant', 'en', 'auto']) m.append(m.querySelector(`[data-l=${l}]`)); m.prepend(m.querySelector(`[data-l=${LANG}]`)); }, set0 = setLang; setLang = p => { set0(p); order(); }; order(); box.appendChild(m);      /* whichever language is in use, chosen or the system's, tops the list */ document.body.appendChild(box); { const st = document.createElement('style'); st.textContent = '#bag,#bspeed,#bfreeze,#bclose{display:none!important}'; document.head.appendChild(st); }      /* /3b has no backpack */ };
+    const lbn = $('lang'); lbn.innerHTML = MARK; box.appendChild(lbn); const m = $('langMenu'); m.style.top = 'auto'; m.style.bottom = '46px'; m.style.left = 'auto'; m.style.right = '0'; for (const l of ['auto', 'en', 'hans', 'hant']) m.append(m.querySelector(`[data-l=${l}]`)); box.appendChild(m);      /* one fixed order: the system's, then English, 简体, 繁體 */ { const st = document.createElement('style'); st.textContent = MARK_CSS; document.head.appendChild(st); } document.body.appendChild(box); { const st = document.createElement('style'); st.textContent = '#bag,#bspeed,#bfreeze,#bclose{display:none!important}'; document.head.appendChild(st); }      /* /3b has no backpack */ };
   window.__3bQuietMs = performance.now() + (APPEAR_END + .1) * 1000;      // no melody notes from the music until the opening is over
   if (!location.hash) go();      // at once, before the first frame: straight onto the table in the air, no fade, no title, no town
   requestAnimationFrame(frame);      // only now do the frames begin
