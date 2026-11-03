@@ -1,0 +1,67 @@
+<html><body><script>
+const TAU = Math.PI * 2, N = 1024, C = N / 2, R = 500;
+const css = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+function disc(ctx) {      // the role token's own disc: tan rim, cream face
+  ctx.beginPath(); ctx.arc(C, C, R, 0, TAU); ctx.fillStyle = css([206, 190, 160]); ctx.fill();
+  ctx.beginPath(); ctx.arc(C, C, R * .88, 0, TAU); ctx.fillStyle = css([244, 232, 208]); ctx.fill();
+}
+function num(ctx, n, y, size, col, maxw = R * 1.05) {
+  ctx.font = `400 ${size}px "Noto Sans CJK SC", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  const m = ctx.measureText(n), h = m.actualBoundingBoxAscent - m.actualBoundingBoxDescent;
+  let s = size; if (m.width > maxw) { s = size * maxw / m.width; ctx.font = `400 ${s}px "Noto Sans CJK SC", sans-serif`; }
+  const m2 = ctx.measureText(n), h2 = m2.actualBoundingBoxAscent;
+  ctx.fillStyle = css(col); ctx.fillText(n, C, y + h2 / 2);
+}
+function leaf(ctx, x, y, ang, len, wid, col) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(len * .5, -wid, len, 0); ctx.quadraticCurveTo(len * .5, wid, 0, 0); ctx.fillStyle = css(col); ctx.fill(); ctx.restore();
+}
+function wins(ctx, n) {
+  const col = [184, 132, 36], rr = R * .62;
+  ctx.lineCap = 'round'; ctx.strokeStyle = css(col); ctx.lineWidth = 26;
+  for (const sgn of [-1, 1]) {
+    ctx.beginPath(); ctx.arc(C, C + 20, rr, Math.PI / 2 + sgn * .25, Math.PI / 2 + sgn * 2.35, sgn < 0); ctx.stroke();
+    for (let k = 0; k < 6; k++) {
+      const a = Math.PI / 2 + sgn * (.5 + k * .33), x = C + Math.cos(a) * rr, y = C + 20 + Math.sin(a) * rr;
+      const tang = a + sgn * Math.PI / 2;
+      leaf(ctx, x, y, tang - sgn * .55, 112, 40, col); leaf(ctx, x, y, tang + sgn * .55 - Math.PI * 0 , 0, 0, col);
+      leaf(ctx, x, y, a + Math.PI - sgn * .2, 96, 34, col);
+    }
+  }
+  num(ctx, n, C + 10, 330, col, R * .66);
+}
+function streak(ctx, n) {      // a flame in the middle of the token, the number inside it
+  const col = [206, 40, 62], fh = 640, fw = 360, cx = C, by = C + fh * .42, ty = C - fh * .58;
+  ctx.beginPath(); ctx.moveTo(cx, ty);
+  ctx.bezierCurveTo(cx + fw * .08, ty + fh * .22, cx + fw * .62, ty + fh * .36, cx + fw * .62, ty + fh * .68);
+  ctx.bezierCurveTo(cx + fw * .62, by - fh * .08, cx + fw * .32, by, cx, by);
+  ctx.bezierCurveTo(cx - fw * .32, by, cx - fw * .62, by - fh * .08, cx - fw * .62, ty + fh * .68);
+  ctx.bezierCurveTo(cx - fw * .62, ty + fh * .5, cx - fw * .4, ty + fh * .4, cx - fw * .3, ty + fh * .28);
+  ctx.bezierCurveTo(cx - fw * .26, ty + fh * .4, cx - fw * .18, ty + fh * .44, cx - fw * .12, ty + fh * .45);
+  ctx.bezierCurveTo(cx - fw * .16, ty + fh * .3, cx - fw * .08, ty + fh * .12, cx, ty);
+  ctx.fillStyle = css(col); ctx.fill();
+  // hollowed out: a cream inner flame, the number inside it in red
+  const ih = fh * .56, iw = fw * .74, iby = by - fh * .06, ity = iby - ih;
+  ctx.beginPath(); ctx.moveTo(cx, ity);
+  ctx.bezierCurveTo(cx + iw * .1, ity + ih * .25, cx + iw * .62, ity + ih * .4, cx + iw * .62, ity + ih * .7);
+  ctx.bezierCurveTo(cx + iw * .62, iby - ih * .1, cx + iw * .32, iby, cx, iby);
+  ctx.bezierCurveTo(cx - iw * .32, iby, cx - iw * .62, iby - ih * .1, cx - iw * .62, ity + ih * .7);
+  ctx.bezierCurveTo(cx - iw * .62, ity + ih * .4, cx - iw * .1, ity + ih * .25, cx, ity);
+  ctx.fillStyle = css([244, 232, 208]); ctx.fill();
+  num(ctx, n, iby - ih * .34, 210, col, iw * .58);
+}
+function day(ctx, n) {
+  const col = [240, 168, 12], rr = R * .5;      // the sun's bright yellow
+  ctx.lineCap = 'round'; ctx.strokeStyle = css(col);
+  ctx.lineWidth = 34; ctx.beginPath(); ctx.arc(C, C, rr, 0, TAU); ctx.stroke();
+  ctx.lineWidth = 40;
+  for (let k = 0; k < 12; k++) { const a = k * TAU / 12, r1 = rr + 52, r2 = rr + (k % 2 ? 105 : 135);
+    ctx.beginPath(); ctx.moveTo(C + Math.cos(a) * r1, C + Math.sin(a) * r1); ctx.lineTo(C + Math.cos(a) * r2, C + Math.sin(a) * r2); ctx.stroke(); }
+  num(ctx, n, C + 4, 320, col, R * .7);
+}
+const KIND = { wins, streak, day }, out = {};
+for (const [id, k, n] of JSON.parse(decodeURIComponent(location.hash.slice(1)))) {
+  const c = document.createElement('canvas'); c.width = c.height = N; const ctx = c.getContext('2d'); disc(ctx); KIND[k](ctx, n); out[id] = c.toDataURL();
+}
+document.fonts.ready.then(() => { document.body.textContent = '@@' + JSON.stringify(out) + '@@'; });
+</script></body></html>

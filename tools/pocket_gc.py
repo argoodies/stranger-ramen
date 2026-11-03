@@ -15,7 +15,7 @@ print('detail', GC)
 L = ['en-US', 'zh-Hans', 'zh-Hant']
 # id, points, shown before earned, names (en, hans, hant), how (en, hans, hant)
 A = [('pc.first_win', 10, True, ('First Win', '首胜', '首勝'), ('Win a game.', '赢下一局。', '贏下一局。')),
- ('pc.trick_pukka', 20, True, ('Double Dose', '双份毒药', '雙份毒藥'), ('Win as evil with two players poisoned by you.', '以邪恶阵营获胜，两名玩家都中了你的毒。', '以邪惡陣營獲勝，兩名玩家都中了你的毒。')),
+ ('pc.trick_pukka', 20, True, ('Double Dose', '双份毒药', '雙份毒藥'), ('Have two players poisoned by you.', '两名玩家都中了你的毒。', '兩名玩家都中了你的毒。')),
  ('pc.exec_survive', 20, True, ('Undying', '不死之身', '不死之身'), ('Be executed, and do not die.', '被处决，却没有死。', '被處決，卻沒有死。')),
  ('pc.self_reverse', 20, True, ('Turn the Tables', '亲手逆转', '親手逆轉'), ('Be executed, and set off your own reversal of the result.', '被处决，并亲手触发胜负反转。', '被處決，並親手觸發勝負反轉。')),
  ('pc.streak_3', 20, True, ('Three in a Row', '三连胜', '三連勝'), ('Win three games in a row.', '连续赢下三局。', '連續贏下三局。')),
@@ -24,7 +24,7 @@ A = [('pc.first_win', 10, True, ('First Win', '首胜', '首勝'), ('Win a game.
  ('pc.wins_50', 50, True, ('Fifty Wins', '五十胜', '五十勝'), ('Win fifty games.', '累计赢下五十局。', '累計贏下五十局。')),
  ('pc.day_3', 10, True, ('Third Day', '第三个白天', '第三個白天'), ('Reach the third day of a game.', '一局游戏进行到第三个白天。', '一局遊戲進行到第三個白天。')),
  ('pc.day_5', 30, True, ('Fifth Day', '第五个白天', '第五個白天'), ('Reach the fifth day of a game.', '一局游戏进行到第五个白天。', '一局遊戲進行到第五個白天。')),
- ('pc.day_7', 50, True, ('A Long Week', '漫长的一周', '漫長的一週'), ('Play a game to the seventh day and win the forced settlement on the good side.', '一局进行到第七天，触发强制结算，以好人身份获胜。', '一局進行到第七天，觸發強制結算，以好人身份獲勝。')),
+ ('pc.day_7', 50, True, ('A Long Week', '漫长的一周', '漫長的一週'), ('Last to day seven and win as good.', '撑到第七天，以好人身份获胜。', '撐到第七天，以好人身份獲勝。')),
  ('pc.wins_5', 10, True, ('Five Wins', '五胜', '五勝'), ('Win five games.', '累计赢下五局。', '累計贏下五局。')),
  ('pc.wins_25', 30, True, ('Twenty-Five Wins', '二十五胜', '二十五勝'), ('Win twenty-five games.', '累计赢下二十五局。', '累計贏下二十五局。')),
  ('pc.wins_100', 70, True, ('One Hundred Wins', '一百胜', '一百勝'), ('Win one hundred games.', '累计赢下一百局。', '累計贏下一百局。')),

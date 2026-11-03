@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Game Center achievement images for Tiny Clocktower: only four designs, 1024x1024 PNGs into assets/achievements/<id>.png.
+"""Game Center achievement images for Tiny Clocktower, 1024x1024 PNGs into assets/achievements/<id>.png, all in the role tokens' style.
   the three role achievements show that role's token, drawn by the game's own roleToken (index.html), on a transparent ground:
     exec_survive (Undying) the anchor token   self_reverse (Turn the Tables) the cross token   trick_pukka (Double Dose) the arrow token
-  every other achievement is the app icon (ios-pocket/.../icon_1024.png)
+  every other achievement is a token of the same disc with a number (tools/badgeart.html), in the game's font:
+    wins and first win: a gold laurel wreath   streaks: a red flame, hollow, the number inside   days: the sun's yellow
 usage: tools/mkbadges.py      (needs the Playwright chrome-headless-shell)"""
 import os, re, json, base64, shutil, subprocess, tempfile
 from PIL import Image, ImageDraw, ImageChops
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'assets', 'achievements')
-ICON = os.path.join(ROOT, 'ios-pocket', 'App', 'Assets.xcassets', 'AppIcon.appiconset', 'icon_1024.png')
+ART = os.path.join(ROOT, 'tools', 'badgeart.html')
 HS = '/root/.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell'
 ROLES = {'exec_survive': 'sailor', 'self_reverse': 'heretic', 'trick_pukka': 'pukka'}
-OTHERS = ['first_win', 'streak_3', 'streak_5', 'day_3', 'day_5', 'day_7'] + [f'wins_{n}' for n in (5, 10, 25, 50, 100, 200, 300, 500, 1000)]
+OTHERS = [('first_win', 'wins', '1')] + [(f'wins_{n}', 'wins', str(n)) for n in (5, 10, 25, 50, 100, 200, 300, 500, 1000)] + [(f'streak_{n}', 'streak', str(n)) for n in (3, 5)] + [(f'day_{n}', 'day', str(n)) for n in (3, 5, 7)]
 N, R = 1024, 500      # the token fills the round medallion Game Center shows
 
 # ---- the tokens, from the game's own drawing code
@@ -38,6 +39,10 @@ for role, url in json.loads(m.group(1)).items():
     im = Image.open(__import__('io').BytesIO(base64.b64decode(url.split(',')[1]))).convert('RGBA')
     im.putalpha(ImageChops.multiply(im.getchannel('A'), mask)); tokens[role] = im
 for a, role in ROLES.items(): tokens[role].save(os.path.join(OUT, a + '.png'), optimize=True); print(a, role)
-icon = Image.open(ICON).convert('RGB'); assert icon.size == (N, N)
-for a in OTHERS: icon.save(os.path.join(OUT, a + '.png'), optimize=True)
-print('app icon:', len(OTHERS))
+import urllib.parse
+r = subprocess.run([HS, '--no-sandbox', '--disable-gpu', '--virtual-time-budget=5000', '--dump-dom', 'file://' + ART + '#' + urllib.parse.quote(json.dumps(OTHERS))], capture_output=True, text=True, timeout=120)
+m = re.search(r'@@(\{.*?\})@@', r.stdout, re.S)
+if not m: raise SystemExit('no number badges came back')
+for a, url in json.loads(m.group(1)).items():
+    Image.open(__import__('io').BytesIO(base64.b64decode(url.split(',')[1]))).convert('RGBA').save(os.path.join(OUT, a + '.png'), optimize=True)
+print('number badges:', len(OTHERS))
