@@ -68,8 +68,8 @@
     '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
     '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}' +
     // the language button and its menu in the same manner as the board: a white circle, a white card, the chosen language in red
-    // a black see-through circle holding the mark; no shadow, no grey edge
-    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(0,0,0,.35)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important}#lang svg{display:block;margin:0 auto}' +
+    // a small black see-through circle (30px, in a 40px tap area) holding the mark; no shadow, no grey edge
+    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important}#lang svg{display:block;margin:0 auto}#lang::before{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:rgba(0,0,0,.35);z-index:-1}#lang{position:relative;z-index:0}' +
     '#langMenu{padding:6px!important;min-width:150px;border:0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 10px 36px rgba(0,0,0,.2)}' +
     '#langMenu button{border-radius:10px!important;padding:10px 14px!important;font:400 15px ' + XF + '!important;letter-spacing:0!important;color:#333!important;background:transparent!important}' +
     '#langMenu button+button{margin-top:2px}#langMenu button.on{background:#FFF0F2!important;color:#FF2442!important;font-weight:600!important}';
@@ -90,7 +90,7 @@
   // the language button: Xiaohongshu's translate mark in a black see-through circle, two white rounded squares overlapping corner to corner,
   // 文 on the upper left one, A on the lower right one, in see-through black; a cut-out gap keeps the squares apart
   var lb = document.getElementById('lang');
-  if (lb) lb.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24"><defs><mask id="xlm"><rect width="24" height="24" fill="#fff"/><rect x="9.8" y="9.8" width="14.2" height="14.2" rx="3.6" fill="#000"/></mask></defs>' +
+  if (lb) lb.innerHTML = '<svg width="21" height="21" viewBox="0 0 24 24"><defs><mask id="xlm"><rect width="24" height="24" fill="#fff"/><rect x="9.8" y="9.8" width="14.2" height="14.2" rx="3.6" fill="#000"/></mask></defs>' +
     '<rect x="1" y="1" width="12" height="12" rx="2.8" fill="#fff" mask="url(#xlm)"/><text x="7.1" y="6.65" text-anchor="middle" dominant-baseline="central" font-size="7.6" font-weight="400" fill="rgba(0,0,0,.55)" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text>' +
     '<rect x="11" y="11" width="12" height="12" rx="2.8" fill="#fff"/><text x="17.05" y="17.25" text-anchor="middle" dominant-baseline="central" font-size="7.8" font-weight="500" fill="rgba(0,0,0,.55)" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';      // the gap between the squares is cut out (a mask): the circle shows through it
   list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
