@@ -1,15 +1,14 @@
 // ---- Game Center, in the app only: wins are counted on the device and reported through the native shell; on the web gcPost does nothing
 const GCK = 'pocket_gc'; let GCS = { wins: 0, streak: 0, best: 0, ach: {} }; try { GCS = Object.assign(GCS, JSON.parse(localStorage.getItem(GCK) || '{}')); } catch (e) {}
 // achievements that no longer exist (role first wins, two earlier role tricks) are dropped, so they are never sent again
-const GCA = ['first_win', 'streak_3', 'streak_5', 'day_3', 'day_5', 'day_7', 'exec_survive', 'self_reverse', 'trick_pukka'].concat([5, 10, 25, 50, 100, 200, 300, 500, 1000].map(n => 'wins_' + n));
+const GCA = ['first_win', 'wins_100', 'wins_300', 'wins_1000', 'day_7', 'exec_survive', 'drink_alone', 'self_reverse', 'all_tokens', 'trick_pukka', 'self_poison'];
 for (const id of Object.keys(GCS.ach || {})) if (!GCA.includes(id)) delete GCS.ach[id];
 function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } catch (e) {} }
 function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
 function gcRecord(won, role) {
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
   GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win');
-  for (const n of [3, 5]) if (GCS.streak >= n) gcAch('streak_' + n);
-  for (const n of [5, 10, 25, 50, 100, 200, 300, 500, 1000]) if (GCS.wins >= n) gcAch('wins_' + n);
+  for (const n of [100, 300, 1000]) if (GCS.wins >= n) gcAch('wins_' + n);
   gcPost({ t: 'score', v: GCS.wins });      // the leaderboard ranks total wins
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.wins) gcPost({ t: 'score', v: GCS.wins }); };      // once signed in: anything earned before sign-in goes up too
@@ -65,7 +64,7 @@ async function playBotc() {
       const works = !poisonedNow(si);
       const tgt = si === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickSailor)
         : (Math.random() < .25 ? si : pick([0, 1, 2].filter(k => k !== si && g.alive[k])));
-      lastPick[si] = tgt;
+      lastPick[si] = tgt; if (si === 0 && tgt === 0 && (!g.auto || g.testBadges)) gcAch('drink_alone');      // 一人饮酒: the Sailor picks himself
       if (works) g.drunk = tgt === si ? si : (Math.random() < .5 ? tgt : si);
       rec += works ? nm(si) + '选了' + (tgt === si ? '自己' : nm(tgt)) + '，醉的是' + nm(g.drunk) + '。' : nm(si) + '中着毒，能力没有生效。';
       if (si === 0) await bsay(ST, S().ok);
@@ -73,7 +72,7 @@ async function playBotc() {
     if (g.alive[pi]) {
       const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickPukka)
         : pick([0, 1, 2].filter(k => k !== pi && g.alive[k]));      // a computer Pukka never poisons himself
-      lastPick[pi] = tgt;
+      lastPick[pi] = tgt; if (pi === 0 && tgt === 0 && (!g.auto || g.testBadges)) gcAch('self_poison');      // 自毒: the Pukka poisons himself
       if (g.drunk !== pi && g.poisoned !== pi) {
         const prev = g.poisoned;
         // poisoning himself still lands, but a Pukka poisoned that night cannot make the last victim die
@@ -93,7 +92,6 @@ async function playBotc() {
     await bsay(ST, S().dawnQuiet);
     if ((raw = win())) break;
     if (g.night >= 7) { raw = 'good'; g.forceGood = true; break; }      // the seventh day dawns: good has outlasted evil and wins outright, whatever the Heretic
-    if (!g.auto && [3, 5].includes(g.night)) gcAch('day_' + g.night);      // a game that lasts: the third and fifth day (the seventh ends it, above)
     // ---- day: the other two say who they are (the Pukka lies)
     for (const v of [1, 2]) if (g.alive[v]) {
       const r = roles[v] === 'pukka' ? bluff : roles[v]; claim[v] = r;
@@ -137,6 +135,8 @@ async function playBotc() {
   if (!g.auto || g.testBadges) {
     if (roles[0] === 'pukka' && mine === fin && g.alive[pi] && g.drunk !== pi && g.deadPoison >= 0 && g.poisoned >= 0 && g.deadPoison !== g.poisoned) gcAch('trick_pukka');      // won with the Pukka's mark on two different players
     if (roles[0] === 'heretic' && g.deathBy[0] === 'exec' && hereticOn) gcAch('self_reverse');      // 亲手逆转: executed, and your own reversal flipped the result
+    const sailorMark = g.drunk === 0 || g.goneDrunk === 0, pukkaMark = ((g.poisoned === 0 || g.deadPoison === 0) && g.pukkaSober) || g.gonePoison === 0;
+    if (roles[0] === 'heretic' && g.deathBy[0] === 'exec' && sailorMark && pukkaMark) gcAch('all_tokens');      // 魅魔体质: executed, and the reveal shows both the others' reminders on you
   }
   g.recapLine = recap.map(r => r.replace(/第 (\d+) (夜|天)。/, '第$1$2，').replace(/。$/, '').replace(/。/g, '，')).join('；') + '。';
   if (!g.auto && g.forceGood && mine === 'good') gcAch('day_7');      // 漫长的一周: the game ran to the seventh day and you, on the good side, won the forced settlement

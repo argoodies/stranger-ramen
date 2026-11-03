@@ -7,8 +7,8 @@ Only what each version finally shipped with; changes that were tried and rolled 
 
 ## 0.0.6 — 上架候选 · Release candidate（2026-11-02）
 
-> 当前绑定 build 34（已含下面全部改动；★ 为 build 31–34 才进 App 的条目）。
-> Bound to build 34, which has everything below; ★ marks what first reached the app in builds 31–34.
+> 当前绑定 build 38（已含下面全部改动；★ 为 build 31–38 才进 App 的条目）。
+> Bound to build 38, which has everything below; ★ marks what first reached the app in builds 31–38.
 
 **规则 · Rules**
 - 一局打到第七个白天，游戏强制结算，好人获胜，异端的颠倒不生效；说书人会宣布“第七个白天到了，强制结算：善良阵营获胜”。之前最多可到第 12 天，然后判邪恶胜。
@@ -19,19 +19,20 @@ Only what each version finally shipped with; changes that were tried and rolled 
   Only the system's own Game Center interactions remain: the sign-in prompt and achievement banners. The game's own Game Center button is gone.
 - ★ 排行榜改为“总胜场”（原为最长连胜），分数上限 9999。
   ★ The leaderboard now ranks total wins instead of the best streak, capped at 9999.
-- 成就调整 · Achievement changes:
-  - ★ 成就里不再出现具体角色名：去掉三个角色专属首胜成就；角色成就为“不死之身”（被处决却没有死）、“亲手逆转”（被处决并亲手触发胜负反转）和“双份毒药”。
-    ★ No role names in achievements: the three role first-win achievements are gone; the role achievements are Undying (executed, and you don't die), Turn the Tables (executed, and your own reversal flips the result) and Double Dose.
-  - “双份毒药”（原“双重标记”）现在要求两名不同的玩家各带一个毒。
-    Double Dose (formerly Two Marks) now needs the poison on two different players.
-  - “漫长的一周”改为：一局打到第七天、触发强制结算并以好人身份获胜。
-    "A Long Week" now means reaching the seventh day and winning the forced settlement on the good side.
-  - 新增五百胜、一千胜；★ 新增三百胜。
-    New: 500 and 1,000 wins; ★ 300 wins.
-  - ★ 去掉第四个白天，以及七连胜、十连胜、十五连胜。
-    ★ Removed: the fourth day, and 7, 10 and 15 wins in a row.
-  - 成就徽章只有四种：三个角色成就用对应角色的 token，其余成就都用 App 图标。
-    Only four badge designs: the three role achievements show their role's token; every other achievement shows the app icon.
+- ★ 成就精简为 11 个，每个 50 分，共 550 分；文案里不出现角色名。
+  ★ Eleven achievements, 50 points each (550 in all); no role names in their texts.
+  - 胜场：首胜、一百胜、三百胜、一千胜。白天：只留“漫长的一周”（撑到第七天，以好人身份获胜）。
+    Wins: first, 100, 300 and 1,000. Days: only A Long Week (last to day seven and win as good).
+  - 角色成就：不死之身、一人饮酒（夜里选择让自己醉酒）、亲手逆转、魅魔体质（被处决时，身上带着另外两人的标记）、双份毒药（两名玩家都中了你的毒）、自毒（夜里给自己下毒）。
+    Role achievements: Undying, Drinking Alone (get yourself drunk), Turn the Tables, Irresistible (executed carrying both other players' tokens), Double Dose (two players poisoned by you) and Self-Poisoned (poison yourself).
+  - 去掉连胜、第三/第五个白天，以及五、十、二十五、五十、两百、五百胜。
+    Removed: the streaks, the third and fifth days, and 5, 10, 25, 50, 200 and 500 wins.
+  - 徽章都是 token 样式：角色成就用对应角色的 token；胜场是金色橄榄枝加手绘数字，第七天是明黄色太阳。
+    Every badge is a token: the role achievements show their role's token; wins a gold laurel wreath with a hand-drawn number, the seventh day the bright yellow sun.
+
+**Token**
+- ★ 水手的线条变细，锚顶的圆环完整，锚杆像棒棒糖杆一样接上；普卡的箭头按视觉居中。App 图标、截图、支持页随之更新。
+  ★ The Sailor's lines are finer, the anchor's ring is whole and its shank joins it like a lollipop stick; the Pukka's arrow is centred by eye. The app icon, screenshots and support page follow.
 
 **画面 · Look**
 - App 里不论哪种语言都显示紫书（网页版是红色小染书）；紫书改为等距画法，书页平直，没有透视。

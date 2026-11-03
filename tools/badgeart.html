@@ -30,19 +30,27 @@ function leaf(ctx, x, y, ang, len, wid, col) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0, 0);
   ctx.quadraticCurveTo(len * .5, -wid, len, 0); ctx.quadraticCurveTo(len * .5, wid, 0, 0); ctx.fillStyle = css(col); ctx.fill(); ctx.restore();
 }
-function wins(ctx, n) {
-  const col = [184, 132, 36], rr = R * .62;
-  ctx.lineCap = 'round'; ctx.strokeStyle = css(col); ctx.lineWidth = 26;
+function wins(ctx, n) {      // a laurel wreath: two branches rising from a crossing at the foot, paired leaves growing smaller to the tips
+  const col = [184, 132, 36], cy = C + 18, rr = R * .64;
+  ctx.lineCap = 'round'; ctx.strokeStyle = css(col); ctx.fillStyle = css(col);
   for (const sgn of [-1, 1]) {
-    ctx.beginPath(); ctx.arc(C, C + 20, rr, Math.PI / 2 + sgn * .25, Math.PI / 2 + sgn * 2.35, sgn < 0); ctx.stroke();
-    for (let k = 0; k < 6; k++) {
-      const a = Math.PI / 2 + sgn * (.5 + k * .33), x = C + Math.cos(a) * rr, y = C + 20 + Math.sin(a) * rr;
-      const tang = a + sgn * Math.PI / 2;
-      leaf(ctx, x, y, tang - sgn * .55, 112, 40, col); leaf(ctx, x, y, tang + sgn * .55 - Math.PI * 0 , 0, 0, col);
-      leaf(ctx, x, y, a + Math.PI - sgn * .2, 96, 34, col);
+    const a0 = Math.PI / 2 - sgn * .32, a1 = Math.PI / 2 - sgn * 2.55;      // from just past the foot round to near the top
+    ctx.lineWidth = 22; ctx.beginPath(); ctx.arc(C, cy, rr, a0, a1, sgn > 0); ctx.stroke();
+    const K = 8;
+    for (let k = 0; k <= K; k++) {
+      const u = k / K, a = a0 + (a1 - a0) * (.06 + .9 * u), x = C + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
+      const along = a - sgn * Math.PI / 2, len = 118 - 46 * u, wid = 44 - 15 * u;      // the stem's direction of growth
+      leaf(ctx, x, y, along + sgn * .62, len, wid, col);      // outer leaf
+      if (k < K) leaf(ctx, x, y, along - sgn * .5, len * .86, wid * .86, col);      // inner leaf, a little smaller
     }
+    const ta = a1 - sgn * .03, tx = C + Math.cos(ta) * rr, ty = cy + Math.sin(ta) * rr;
+    leaf(ctx, tx, ty, ta - sgn * Math.PI / 2, 74, 28, col);      // the tip
   }
-  num(ctx, n, C + 10, 330, col, R * .58);
+  ctx.lineWidth = 22; ctx.beginPath();      // each stem carries on past the foot and crosses the other
+  const bx = rr * Math.sin(.32), by = cy + rr * Math.cos(.32);
+  ctx.moveTo(C - bx, by); ctx.quadraticCurveTo(C - bx * .2, by + 26, C + bx * .55, by + 44);
+  ctx.moveTo(C + bx, by); ctx.quadraticCurveTo(C + bx * .2, by + 26, C - bx * .55, by + 44); ctx.stroke();
+  num(ctx, n, C + 4, 330, col, R * .58);
 }
 function streak(ctx, n) {      // a flame in the middle of the token, the number inside it
   const col = [206, 40, 62], fh = 640, fw = 360, cx = C, by = C + fh * .42, ty = C - fh * .58;

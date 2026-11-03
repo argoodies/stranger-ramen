@@ -1366,7 +1366,7 @@ function roleToken(x, y, r, role, a = 1, mono = null, thin = false) {
     L([[-.26, -.14], [.26, -.14]], c, 1.45);
     ctx.beginPath(); ctx.arc(0, q * .06, q * .46, .2, Math.PI - .2); ctx.strokeStyle = css(c); ctx.lineWidth = w * 1.6; ctx.stroke();
   } else if (role === 'pukka') {
-    ctx.translate(-q * .03, q * .09);      // the arrow's bounds sit high and a little right: centred on the token
+    ctx.translate(-q * .03, q * .06);      // centred by eye: halfway between the arrow's bounds and its weight (its heavy foot sits low)
     ctx.beginPath(); ctx.moveTo(q * .5, q * .4); ctx.lineTo(-q * .1, q * .4); ctx.bezierCurveTo(-q * .1, 0, q * .3, -q * .15, q * .1, -q * .46); ctx.lineTo(-q * .2, -q * .46);
     ctx.strokeStyle = css(c); ctx.lineWidth = w * 2.1; ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-q * .56, -q * .46); ctx.lineTo(-q * .2, -q * .7); ctx.lineTo(-q * .2, -q * .22); ctx.closePath(); ctx.fillStyle = css(c); ctx.fill();
