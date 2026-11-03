@@ -61,8 +61,9 @@ boot = """<script>
     if ('filter' in ctx) { const pd = dr * 1.6; ctx.filter = 'blur(' + (dr * .22).toFixed(1) + 'px)'; ctx.drawImage(ctx.canvas, dx - pd, dy - pd, pd * 2, pd * 2, dx - pd, dy - pd, pd * 2, pd * 2); ctx.filter = 'none'; }      // what is behind it, blurred
     ctx.fillStyle = 'rgba(255,255,255,.38)'; ctx.fillRect(dx - dr, dy - dr, dr * 2, dr * 2); ctx.restore();      // a milky white over it
     ctx.beginPath(); ctx.arc(x, y, R - .5, 0, TAU); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.stroke();      // its rim catching the light
-    for (const [cx, cy, r, c, a] of BUBBLES) { ctx.beginPath(); ctx.arc(x + (cx - 11.2) * k, y + (cy - 11.5) * k, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
-    markAt = [x, y, Math.max(24, R * 2), bm]; bookAt = null;      // a finger-sized place to tap, bigger than the ball
+    const sp = bm.busy ? t * 7 : 0, cs = Math.cos(sp), sn = Math.sin(sp);      // loading (bm.busy): the bubbles spin round in their glass
+    for (const [cx, cy, r, c, a] of BUBBLES) { const u = (cx - 11.2) * k, v = (cy - 11.5) * k; ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
+    markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
@@ -139,7 +140,7 @@ boot = """<script>
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
-    if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); markAt[3].open(); return; }      // the bubbles: the scores
+    if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table

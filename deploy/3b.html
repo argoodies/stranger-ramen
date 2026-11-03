@@ -32,7 +32,7 @@
         getLaunchOptions: function () { return Promise.resolve(window.xhs.launchOptions); },
         getWindowInfo: function () { return Promise.resolve({ windowWidth: innerWidth, windowHeight: innerHeight, safeArea: { top: 0 }, menuButtons: { back: null, me: null, share: { left: innerWidth - 90, top: 10, right: innerWidth - 10, bottom: 42, width: 80, height: 32 } } }); },
         submitScore: function (o) { best = Math.max(best, o.score); console.log('[debug · xhs] submitScore', o); return later({ score: best }); },
-        getRankList: function () { return later({ data: board().slice(0, 100).map(function (r) { return { rank: r.rank, score: r.score, nickname: r.me ? '我（调试）' : r.nickname }; }) }); },
+        getRankList: function () { return later({ data: board().slice(0, 100).map(function (r) { return { rank: r.rank, score: r.score, nickname: r.me ? '小红薯3C7A' : r.nickname }; }) }); },
         getMyRank: function () { var me = board().filter(function (r) { return r.me; })[0]; return later(me ? { status: me.rank <= 500 ? 'EXACT' : 'OVER_LIMIT', rank: me.rank, score: me.score } : { status: 'NOT_PARTICIPATING', rank: null, score: null }); }
       }
     };
@@ -2887,8 +2887,9 @@ if (location.hash) {
     if ('filter' in ctx) { const pd = dr * 1.6; ctx.filter = 'blur(' + (dr * .22).toFixed(1) + 'px)'; ctx.drawImage(ctx.canvas, dx - pd, dy - pd, pd * 2, pd * 2, dx - pd, dy - pd, pd * 2, pd * 2); ctx.filter = 'none'; }      // what is behind it, blurred
     ctx.fillStyle = 'rgba(255,255,255,.38)'; ctx.fillRect(dx - dr, dy - dr, dr * 2, dr * 2); ctx.restore();      // a milky white over it
     ctx.beginPath(); ctx.arc(x, y, R - .5, 0, TAU); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.stroke();      // its rim catching the light
-    for (const [cx, cy, r, c, a] of BUBBLES) { ctx.beginPath(); ctx.arc(x + (cx - 11.2) * k, y + (cy - 11.5) * k, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
-    markAt = [x, y, Math.max(24, R * 2), bm]; bookAt = null;      // a finger-sized place to tap, bigger than the ball
+    const sp = bm.busy ? t * 7 : 0, cs = Math.cos(sp), sn = Math.sin(sp);      // loading (bm.busy): the bubbles spin round in their glass
+    for (const [cx, cy, r, c, a] of BUBBLES) { const u = (cx - 11.2) * k, v = (cy - 11.5) * k; ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
+    markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
@@ -2965,7 +2966,7 @@ if (location.hash) {
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
-    if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); markAt[3].open(); return; }      // the bubbles: the scores
+    if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
@@ -2993,9 +2994,9 @@ if (location.hash) {
   function has() { var m = mt(); return !!(m && typeof m.submitScore === 'function' && typeof m.getRankList === 'function' && typeof m.getMyRank === 'function'); }
   function lang() { try { return LANG; } catch (e) { return 'hans'; } }
   var T = {
-    hans: { title: '排行榜', me: '我的排名', wins: '胜', none: '还没有人上榜', fail: '暂时无法加载，稍后再试', wait: '加载中…', anon: '小红书用户', out: '未上榜', close: '关闭', meAuth: '授权后显示你的排名', closed: '排行榜暂未开放', you: '我' },
-    hant: { title: '排行榜', me: '我的排名', wins: '勝', none: '還沒有人上榜', fail: '暫時無法載入，稍後再試', wait: '載入中…', anon: '小紅書用戶', out: '未上榜', close: '關閉', meAuth: '授權後顯示你的排名', closed: '排行榜暫未開放', you: '我' },
-    en: { title: 'Leaderboard', me: 'My rank', wins: 'wins', none: 'Nobody on the board yet', fail: 'Could not load, try again later', wait: 'Loading…', anon: 'Player', out: 'Not ranked', close: 'Close', meAuth: 'Your rank shows once authorised', closed: 'The leaderboard is not open yet', you: 'Me' }
+    hans: { title: '排行榜', me: '我的排名', wins: '胜', none: '还没有人上榜', fail: '暂时无法加载，稍后再试', wait: '加载中…', anon: '小红书用户', out: '未上榜', rank: '第 # 名', close: '关闭', meAuth: '授权后显示你的排名', closed: '排行榜暂未开放', you: '我' },
+    hant: { title: '排行榜', me: '我的排名', wins: '勝', none: '還沒有人上榜', fail: '暫時無法載入，稍後再試', wait: '載入中…', anon: '小紅書用戶', out: '未上榜', rank: '第 # 名', close: '關閉', meAuth: '授權後顯示你的排名', closed: '排行榜暫未開放', you: '我' },
+    en: { title: 'Leaderboard', me: 'My rank', wins: 'wins', none: 'Nobody on the board yet', fail: 'Could not load, try again later', wait: 'Loading…', anon: 'Player', out: 'Not ranked', rank: 'No. #', close: 'Close', meAuth: 'Your rank shows once authorised', closed: 'The leaderboard is not open yet', you: 'Me' }
   };
   function t(k) { return (T[lang()] || T.hans)[k]; }
   function code(e) { return e && typeof e.errCode === 'number' ? e.errCode : 0; }
@@ -3126,10 +3127,49 @@ if (location.hash) {
     if (!panel.classList.contains('open') || btn.contains(e.target) || panel.contains(e.target)) return;
     close(); e.stopPropagation(); e.preventDefault();
   }, true);
+  // ---- your own card: the ball (tools/mk3b.py) opens a small bubble over itself with you alone: a picture, your name, your wins and your rank.
+  // The platform gives no picture of the player (and the container loads no web images), so the picture is a plain one; the name is the
+  // one the board shows for you, when you are in its top 100, else 我 / Me.
+  var card = document.createElement('div'); card.id = 'xme'; document.body.appendChild(card);
+  var cardCss = document.createElement('style');
+  cardCss.textContent = '#xme{position:fixed;z-index:20;display:none;-webkit-align-items:center;align-items:center;padding:10px 16px 10px 10px;border-radius:16px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.16);font:400 13px ' + XF + ';color:#333;white-space:nowrap}' +
+    '#xme.open{display:-webkit-flex;display:flex}' +
+    '#xme::after{content:"";position:absolute;left:var(--tail,50%);bottom:-5px;width:12px;height:12px;margin-left:-6px;background:#fff;border-radius:2px;-webkit-transform:rotate(45deg);transform:rotate(45deg)}' +      // the tail, down to the ball
+    '#xme .av{-webkit-flex:none;flex:none;width:38px;height:38px;margin-right:10px;border-radius:50%;background:#f2f2f2;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}' +
+    '#xme .nm{font-size:15px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis}#xme .st{margin-top:3px;font-size:12px;color:#999}#xme .st b{font-weight:600;color:#FF2442}';
+  document.head.appendChild(cardCss);
+  var AV = '<span class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="#c9c9c9"><circle cx="12" cy="8.5" r="4.5"/><path d="M3.5 21c.6-4.4 4.1-7 8.5-7s7.9 2.6 8.5 7z"/></svg></span>';      // a plain picture: no photo to be had
+  var at = [0, 0];
+  function place() {      // over the ball, kept on screen; the tail still points at the ball
+    var w = card.offsetWidth, h = card.offsetHeight, x = Math.max(8 + w / 2, Math.min(innerWidth - 8 - w / 2, at[0]));
+    card.style.left = (x - w / 2) + 'px'; card.style.top = (at[1] - h - 12) + 'px'; card.style.setProperty('--tail', (at[0] - x + w / 2) + 'px');
+  }
+  function fill(r) {
+    var L = r[0], M = r[1], data = (L.v && L.v.data) || [], my = M.e ? null : (M.v || {}), name = t('you'), wins = Math.max(sent, (my && my.score) || 0), rk;
+    if (my && my.status === 'EXACT') { for (var i = 0; i < data.length; i++) if (data[i].rank === my.rank && data[i].nickname) name = data[i].nickname; rk = t('rank').replace('#', my.rank); }
+    else if (my && my.status === 'OVER_LIMIT') rk = t('rank').replace('#', '500+');
+    else rk = t('out');
+    card.innerHTML = AV + '<span><div class="nm">' + esc(name) + '</div><div class="st">' + wins + ' ' + t('wins') + ' · <b>' + esc(rk) + '</b></div></span>'; place();
+  }
+  var busy = false;
+  function show2(f) { return function (v) { busy = false; if (window.__boardMark) window.__boardMark.busy = false; card.classList.add('open'); f(v); }; }
+  function openMe(x, y) {
+    at = [x, y];
+    if (cache && Date.now() - cacheAt < CACHE) { card.classList.add('open'); return fill(cache); }
+    if (busy) return; busy = true; window.__boardMark.busy = true;      // loading: no card yet, the ball spins (tools/mk3b.py) until it comes
+    var t0 = Date.now(), after = function (f) { return function (v) { setTimeout(function () { if (busy) f(v); }, Math.max(0, 600 - (Date.now() - t0))); }; };
+    load().then(after(show2(fill)), after(show2(function () { card.innerHTML = AV + '<span class="st">' + t('fail') + '</span>'; place(); })));
+  }
+  function closeMe() { card.classList.remove('open'); }
+  card.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  document.addEventListener('pointerdown', function (e) {      // a tap anywhere else (the ball too) closes it and does nothing in the game
+    if (!card.classList.contains('open') || card.contains(e.target)) return;
+    closeMe(); e.stopPropagation(); e.preventDefault();
+  }, true);
   var lastLang = '';
   // shown first, so the words are drawn to the capsule's real height
   function show(v) { btn.classList.toggle('on', v); if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } }
-  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: function () { if (panel.classList.contains('open')) close(); else open(); } }; if (!window.__3bLang) close(); }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
+  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: function (x, y) { if (card.classList.contains('open')) closeMe(); else openMe(x, y); } }; if (!window.__3bLang) { close(); closeMe(); busy = false; if (window.__boardMark) window.__boardMark.busy = false; } }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.

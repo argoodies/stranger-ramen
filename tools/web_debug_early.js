@@ -29,7 +29,7 @@
         getLaunchOptions: function () { return Promise.resolve(window.xhs.launchOptions); },
         getWindowInfo: function () { return Promise.resolve({ windowWidth: innerWidth, windowHeight: innerHeight, safeArea: { top: 0 }, menuButtons: { back: null, me: null, share: { left: innerWidth - 90, top: 10, right: innerWidth - 10, bottom: 42, width: 80, height: 32 } } }); },
         submitScore: function (o) { best = Math.max(best, o.score); console.log('[debug · xhs] submitScore', o); return later({ score: best }); },
-        getRankList: function () { return later({ data: board().slice(0, 100).map(function (r) { return { rank: r.rank, score: r.score, nickname: r.me ? '我（调试）' : r.nickname }; }) }); },
+        getRankList: function () { return later({ data: board().slice(0, 100).map(function (r) { return { rank: r.rank, score: r.score, nickname: r.me ? '小红薯3C7A' : r.nickname }; }) }); },
         getMyRank: function () { var me = board().filter(function (r) { return r.me; })[0]; return later(me ? { status: me.rank <= 500 ? 'EXACT' : 'OVER_LIMIT', rank: me.rank, score: me.score } : { status: 'NOT_PARTICIPATING', rank: null, score: null }); }
       }
     };
