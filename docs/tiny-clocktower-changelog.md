@@ -7,8 +7,8 @@ Only what each version finally shipped with; changes that were tried and rolled 
 
 ## 0.0.6 — 上架候选 · Release candidate（2026-11-02）
 
-> 当前绑定 build 33（已含下面全部改动；★ 为 build 31–33 才进 App 的条目）。
-> Bound to build 33, which has everything below; ★ marks what first reached the app in builds 31–33.
+> 当前绑定 build 34（已含下面全部改动；★ 为 build 31–34 才进 App 的条目）。
+> Bound to build 34, which has everything below; ★ marks what first reached the app in builds 31–34.
 
 **规则 · Rules**
 - 一局打到第七个白天，游戏强制结算，好人获胜，异端的颠倒不生效；说书人会宣布“第七个白天到了，强制结算：善良阵营获胜”。之前最多可到第 12 天，然后判邪恶胜。
@@ -30,8 +30,8 @@ Only what each version finally shipped with; changes that were tried and rolled 
     New: 500 and 1,000 wins; ★ 300 wins.
   - ★ 去掉第四个白天，以及七连胜、十连胜、十五连胜。
     ★ Removed: the fourth day, and 7, 10 and 15 wins in a row.
-  - 所有成就都有了徽章图：白色线条、透明底。
-    Every achievement now has a badge: white line art on a transparent ground.
+  - 成就徽章只有四种：三个角色成就用对应角色的 token，其余成就都用 App 图标。
+    Only four badge designs: the three role achievements show their role's token; every other achievement shows the app icon.
 
 **画面 · Look**
 - App 里不论哪种语言都显示紫书（网页版是红色小染书）；紫书改为等距画法，书页平直，没有透视。
