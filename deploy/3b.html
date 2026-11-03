@@ -2564,7 +2564,7 @@ function gcRecord(won, role) {
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.wins) gcPost({ t: 'score', v: GCS.wins }); };      // once signed in: anything earned before sign-in goes up too
 // The app's language menu in Apple's manner: an iOS menu of glass with a blue tick (the button itself is the shared 文A mark, tools/mk3b.py).
-// The app has no leaderboard button: scores and achievements still go to Game Center, which players open from Game Center itself.
+// After a win the lobby shows Game Center's bubbles where the book was (tools/mk3b.py); a tap opens Game Center.
 (function () {
   const inApp = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc);
   if (!inApp) return;
@@ -2578,6 +2578,7 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     document.head.appendChild(st);
   };
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
+  window.__boardMark = { open: () => gcPost({ t: 'center' }) };      // the bubbles in the lobby after a win (tools/mk3b.py): Game Center itself
 })();
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).
@@ -2873,7 +2874,18 @@ if (location.hash) {
     en: { title: 'Rule Book', btn: '小染书', team: { sailor: 'Townsfolk · Good', pukka: 'Demon · Evil', heretic: 'Outsider · Good' }, name: { sailor: 'Sailor', pukka: 'Pukka', heretic: 'Heretic' },
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
-  let bookAt = null;
+  let bookAt = null, markAt = null;
+  // after a win in this visit, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
+  // the Xiaohongshu leaderboard once it works, xhs_rank.js), the book beside the Storyteller turns into Game Center's bubbles floating in
+  // the air; a tap opens the scores. The web has none: the book stays.
+  const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
+  function drawMark(t, P, s, bm) {
+    const q = P(1.1, -.62, 2.0), x = q[0], k = s * .9 / 24, bob = Math.sin(t * 1.6) * s * .06, y = q[1] - s * .38 + bob;      // floating a little above where the book lay
+    ell(x, q[1] + s * .05, s * .34 - bob * .8, s * .1 - bob * .25, [40, 60, 70], .18);      // its shadow on the table, smaller as it rises
+    glow(x, y, s * .9, [255, 255, 255], .35);
+    for (const [cx, cy, r, c, a] of BUBBLES) { ctx.beginPath(); ctx.arc(x + (cx - 12) * k, y + (cy - 11.5) * k, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
+    markAt = [x, y, s * .7, bm]; bookAt = null;
+  }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
   // the opening's sounds, over the background music and nothing else, as in the Monument Valley 血染钟楼 video's opening (botc-video/make.py):
@@ -2933,7 +2945,8 @@ if (location.hash) {
         if (!me.say && !me.talk && !intro && seenBook) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); fadedDraw(ap(2), () => { glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); }); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
-    if (!me.say && !me.talk) fadedDraw(ap(3), () => drawBook(t, P, s)); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
+    const bm = window.__wonThisSession && window.__boardMark; markAt = null;
+    if (!me.say && !me.talk) fadedDraw(ap(3), () => bm ? drawMark(t, P, s, bm) : drawBook(t, P, s)); else bookAt = null;      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
     if (me.line && (me.line.t += dt) < 2.4) { const p = P(me.x, me.y); sayBubble(p[0], p[1] - K * 1.6, me.line.text, clamp(W * .036, 12.5, 15), clamp(me.line.t * 4) * clamp((2.4 - me.line.t) * 3), W * .62); } else me.line = null;      // what you just said (a new language)
@@ -2948,6 +2961,7 @@ if (location.hash) {
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
+    if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); markAt[3].open(); return; }      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
@@ -3111,7 +3125,7 @@ if (location.hash) {
   var lastLang = '';
   // shown first, so the words are drawn to the capsule's real height
   function show(v) { btn.classList.toggle('on', v); if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } }
-  setInterval(function () { var v = ok && wonNow && !!window.__3bLang; show(v); if (!v) close(); }, 300);      // the floating island's lobby, after a win in this session; never hidden for an error
+  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: function () { if (panel.classList.contains('open')) close(); else open(); } }; if (!window.__3bLang) close(); }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.

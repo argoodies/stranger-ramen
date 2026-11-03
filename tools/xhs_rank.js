@@ -146,7 +146,7 @@
   var lastLang = '';
   // shown first, so the words are drawn to the capsule's real height
   function show(v) { btn.classList.toggle('on', v); if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } }
-  setInterval(function () { var v = ok && wonNow && !!window.__3bLang; show(v); if (!v) close(); }, 300);      // the floating island's lobby, after a win in this session; never hidden for an error
+  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: function () { if (panel.classList.contains('open')) close(); else open(); } }; if (!window.__3bLang) close(); }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.
