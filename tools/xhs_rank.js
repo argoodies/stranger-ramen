@@ -5,14 +5,14 @@
    Older clients, a missing API or no nickname authorisation (1005 / 1006): no button, and the game carries on as before.
    Plain ES5 so it passes the Chrome 61 gate as written; loaded by boot.js after the game scripts. */
 (function () {
-  var MIN = 9510, BOARD = 1, CACHE = 45000, sent = 0, pend = 0, ok = false, off = false, cache = null, cacheAt = 0, btn, panel, list, mine;
+  var MIN = 9510, BOARD = 1, CACHE = 45000, sent = 0, pend = 0, ok = false, off = false, cache = null, cacheAt = 0, btn, panel, list;
   function mt() { return window.xhs && window.xhs.miniTool; }
   function has() { var m = mt(); return !!(m && typeof m.submitScore === 'function' && typeof m.getRankList === 'function' && typeof m.getMyRank === 'function'); }
   function lang() { try { return LANG; } catch (e) { return 'hans'; } }
   var T = {
-    hans: { title: '总胜场榜', me: '我的排名', wins: '胜', none: '还没有人上榜', fail: '暂时无法加载，稍后再试', wait: '加载中…', anon: '小红书用户', out: '未上榜', close: '关闭', meAuth: '授权后显示你的排名', closed: '排行榜暂未开放' },
-    hant: { title: '總勝場榜', me: '我的排名', wins: '勝', none: '還沒有人上榜', fail: '暫時無法載入，稍後再試', wait: '載入中…', anon: '小紅書用戶', out: '未上榜', close: '關閉', meAuth: '授權後顯示你的排名', closed: '排行榜暫未開放' },
-    en: { title: 'Most Wins', me: 'My rank', wins: 'wins', none: 'Nobody on the board yet', fail: 'Could not load, try again later', wait: 'Loading…', anon: 'Player', out: 'Not ranked', close: 'Close', meAuth: 'Your rank shows once authorised', closed: 'The leaderboard is not open yet' }
+    hans: { title: '总胜场榜', me: '我的排名', wins: '胜', none: '还没有人上榜', fail: '暂时无法加载，稍后再试', wait: '加载中…', anon: '小红书用户', out: '未上榜', close: '关闭', meAuth: '授权后显示你的排名', closed: '排行榜暂未开放', you: '我' },
+    hant: { title: '總勝場榜', me: '我的排名', wins: '勝', none: '還沒有人上榜', fail: '暫時無法載入，稍後再試', wait: '載入中…', anon: '小紅書用戶', out: '未上榜', close: '關閉', meAuth: '授權後顯示你的排名', closed: '排行榜暫未開放', you: '我' },
+    en: { title: 'Most Wins', me: 'My rank', wins: 'wins', none: 'Nobody on the board yet', fail: 'Could not load, try again later', wait: 'Loading…', anon: 'Player', out: 'Not ranked', close: 'Close', meAuth: 'Your rank shows once authorised', closed: 'The leaderboard is not open yet', you: 'Me' }
   };
   function t(k) { return (T[lang()] || T.hans)[k]; }
   function code(e) { return e && typeof e.errCode === 'number' ? e.errCode : 0; }
@@ -47,52 +47,64 @@
 
   // ---- the button and the panel
   var css = document.createElement('style');
-  // the language menu's look (its translucent purple, its corners and its highlighted line), in the middle of the screen
-  css.textContent = '#xrank{position:fixed;left:14px;bottom:calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:20;display:none;padding:8px 11px;line-height:0}' +
-    '#xpanel{position:fixed;left:50%;top:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:290px;max-width:calc(100% - 40px);max-height:66%;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f4ecdc;font:300 15px var(--serif);letter-spacing:.08em}' +
+  // Xiaohongshu's own look: a white card, its red (#FF2442) for the button, the first three and your own highlighted row
+  var XF = '-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif';
+  css.textContent = '#xrank{position:fixed;left:14px;bottom:calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:20;display:none;width:40px;height:40px;padding:0;line-height:0;border:0;border-radius:50%;background:#FF2442;color:#fff;box-shadow:0 4px 12px rgba(255,36,66,.35)}' +
+    '#xrank svg{display:block;margin:0 auto}' +
+    '#xpanel{position:fixed;left:50%;top:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:300px;max-width:calc(100% - 40px);max-height:66%;padding:6px 0 10px;border-radius:16px;background:#fff;color:#333;font:400 15px ' + XF + ';box-shadow:0 10px 36px rgba(0,0,0,.22)}' +
     '#xpanel.open{display:-webkit-flex;display:flex}' +
-    '#xpanel .tt{padding:7px 12px 9px;font-size:13px;opacity:.7;letter-spacing:.12em}' +
-    '#xpanel .ls{overflow-y:auto;-webkit-overflow-scrolling:touch}' +
-    '#xpanel .row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;border-radius:11px;padding:9px 12px}' +
-    '#xpanel .rk{width:30px;opacity:.75}#xpanel .nm{-webkit-flex:1;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:8px}#xpanel .sc{white-space:nowrap}' +
-    '#xpanel .msg{padding:12px;opacity:.75;letter-spacing:.06em}' +
-    '#xpanel .me{margin-top:6px;border-radius:11px;padding:9px 12px;background:rgba(255,236,170,.2);color:#ffe9b0}' +
-    '#xpanel .me:empty{display:none}';
+    '#xpanel .tt{padding:12px 18px 10px;font-size:17px;font-weight:600;color:#333;border-bottom:1px solid #f2f2f2}' +
+    '#xpanel .ls{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 8px 0}' +
+    '#xpanel .row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;border-radius:10px;padding:10px 10px}' +
+    '#xpanel .rk{width:46px;color:#999;font-weight:600;font-style:italic}#xpanel .rk.t{color:#FF2442}' +
+    '#xpanel .nm{-webkit-flex:1;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:8px}#xpanel .sc{white-space:nowrap;color:#999;font-size:14px}' +
+    '#xpanel .row.me{background:#FFF0F2}#xpanel .row.me .rk,#xpanel .row.me .nm,#xpanel .row.me .sc{color:#FF2442}#xpanel .row.me .nm{font-weight:600}' +
+    '#xpanel .ft{padding:4px 8px 0;border-top:1px solid #f2f2f2;margin-top:4px}#xpanel .ft:empty{display:none}' +
+    '#xpanel .msg{padding:26px 12px;text-align:center;color:#999;font-size:14px}' +
+    '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
+    '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}';
   document.head.appendChild(css);
-  btn = document.createElement('button'); btn.className = 'pill'; btn.id = 'xrank'; btn.setAttribute('aria-label', 'rank');
+  btn = document.createElement('button'); btn.id = 'xrank'; btn.setAttribute('aria-label', 'rank');
   btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>';
   panel = document.createElement('div'); panel.id = 'xpanel';
-  panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="me"></div>';
+  panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="ft"></div>';
   document.body.appendChild(btn); document.body.appendChild(panel);
-  list = panel.querySelector('.ls'); mine = panel.querySelector('.me');
+  list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the
   // container loads no web images
-  function row(rk, nm, sc) { return '<div class="row"><span class="rk">' + rk + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + ' ' + t('wins') + '</span></div>'; }
+  function row(rk, nm, sc, me) {
+    return '<div class="row' + (me ? ' me' : '') + '"><span class="rk' + (typeof rk === 'number' && rk <= 3 ? ' t' : '') + '">' + rk + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + '</span></div>';
+  }
   function render(r) {
     var L = r[0], M = r[1], h = '';
-    if (L.e) {      // the list itself is refused or failed: say so, and keep the panel until it is closed
-      if (unauth(L.e)) list.innerHTML = '<div class="msg">' + t('closed') + '</div>';
-      else list.innerHTML = '<div class="msg">' + t('fail') + '</div>';
-    } else {
-      var data = (L.v && L.v.data) || [];
-      for (var i = 0; i < data.length; i++) h += row(data[i].rank, data[i].nickname == null ? t('anon') : data[i].nickname, data[i].score);
-      list.innerHTML = h || '<div class="msg">' + t('none') + '</div>';
+    foot.innerHTML = '';
+    if (L.e) { list.innerHTML = '<div class="msg">' + (unauth(L.e) ? t('closed') : t('fail')) + '</div>'; return; }
+    var data = (L.v && L.v.data) || [], my = M.e ? null : (M.v || {}), mine = my && my.status === 'EXACT' ? my.rank : 0, shown = false;
+    for (var i = 0; i < data.length; i++) {      // ranks are unique, so your own row in the top 100 is the one with your rank
+      var me = mine && data[i].rank === mine; if (me) shown = true;
+      h += row(data[i].rank, me ? t('you') : (data[i].nickname == null ? t('anon') : data[i].nickname), data[i].score + ' ' + t('wins'), me);
     }
-    if (M.e) { mine.innerHTML = unauth(M.e) ? t('meAuth') : ''; return; }      // the list stays; only your own line says why it is missing
-    var my = M.v || {}, mr = my.status === 'EXACT' ? my.rank : my.status === 'OVER_LIMIT' ? '500+' : t('out');
-    mine.innerHTML = t('me') + ' · <b style="font-weight:400;color:#ffd48c">' + mr + '</b>' + (my.status === 'EXACT' ? ' · ' + my.score + ' ' + t('wins') : '');
+    if (!data.length) h = '<div class="msg">' + t('none') + '</div>';
+    list.innerHTML = h; list.scrollTop = 0;
+    if (shown) { var el = list.querySelector('.row.me'); if (el) list.scrollTop = Math.max(0, el.offsetTop - list.clientHeight / 2); return; }      // in the list: brought into view
+    var rk = '-', sc = '', note = '';      // not in it: the same row, highlighted, pinned under the list
+    if (M.e) note = unauth(M.e) ? t('meAuth') : '';
+    else if (my.status === 'EXACT') { rk = my.rank; sc = my.score + ' ' + t('wins'); }
+    else if (my.status === 'OVER_LIMIT') rk = '500+';
+    else note = t('out');
+    foot.innerHTML = row(rk, note || t('you'), note ? '' : sc, true);
   }
   function open() {
     panel.querySelector('.tt').textContent = t('title');
-    list.innerHTML = '<div class="msg">' + t('wait') + '</div>'; mine.innerHTML = ''; panel.classList.add('open');
+    list.innerHTML = '<div class="msg"><div class="spin"></div>' + t('wait') + '</div>'; foot.innerHTML = ''; panel.classList.add('open');
     load().then(render, function () { list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; });
   }
-  // like the language menu: the trophy opens and closes it, a tap anywhere else closes it; the trophy itself stays
+  // the trophy opens and closes it, a tap anywhere else closes it (that tap does nothing in the game); the trophy itself stays
   function close() { panel.classList.remove('open'); }
   btn.addEventListener('click', function (e) { e.stopPropagation(); if (panel.classList.contains('open')) close(); else open(); });
   panel.addEventListener('pointerdown', function (e) { e.stopPropagation(); });      // scrolling the list does not reach the game
-  document.addEventListener('pointerdown', function (e) {      // as with the language menu, that first tap only closes it and does nothing in the game
+  document.addEventListener('pointerdown', function (e) {      // that first tap only closes it and does nothing in the game
     if (!panel.classList.contains('open') || btn.contains(e.target) || panel.contains(e.target)) return;
     close(); e.stopPropagation(); e.preventDefault();
   }, true);
