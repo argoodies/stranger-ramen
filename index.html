@@ -2416,7 +2416,7 @@ cv.addEventListener('pointermove', e => { if (mode === 'stall' && stall.board) b
 for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) cv.addEventListener(ev, () => { if (mode === 'stall' && stall.board) boardUp(); else if (bag.open) bagUp(); });
 // A long press must not start a text selection, a callout or the magnifying loupe (iOS shows it over a canvas unless the touch itself is cancelled).
 // Buttons are left alone so that they still get their click.
-document.addEventListener('touchstart', e => { if (!(e.target.closest && e.target.closest('button, input'))) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchstart', e => { if (!(e.target.closest && e.target.closest('button, input, [data-scroll]'))) e.preventDefault(); }, { passive: false });      // [data-scroll]: a list that scrolls by touch (the Xiaohongshu board)
 for (const ev of ['contextmenu', 'selectstart', 'gesturestart', 'dblclick']) document.addEventListener(ev, e => e.preventDefault());
 $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
 // a tap on any other button (a capsule, a pill) closes it too; taps on the picture close it in their own handlers and do nothing else
