@@ -88,11 +88,12 @@
   panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="ft"></div>';
   document.body.appendChild(btn); document.body.appendChild(panel);
   // the language button: Xiaohongshu's translate mark in a black see-through circle, two white rounded squares overlapping corner to corner,
-  // 文 on the upper left one, A on the lower right one, in see-through black; a cut-out gap keeps the squares apart
+  // 文 on the upper left one, A on the lower right one, drawn as strokes (centred whatever font the phone has) in see-through black;
+  // a cut-out gap keeps the squares apart
   var lb = document.getElementById('lang');
   if (lb) lb.innerHTML = '<svg width="21" height="21" viewBox="0 0 24 24"><defs><mask id="xlm"><rect width="24" height="24" fill="#fff"/><rect x="9.8" y="9.8" width="14.2" height="14.2" rx="3.6" fill="#000"/></mask></defs>' +
-    '<rect x="1" y="1" width="12" height="12" rx="2.8" fill="#fff" mask="url(#xlm)"/><text x="7.1" y="6.65" text-anchor="middle" dominant-baseline="central" font-size="7.6" font-weight="400" fill="rgba(0,0,0,.55)" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text>' +
-    '<rect x="11" y="11" width="12" height="12" rx="2.8" fill="#fff"/><text x="17.05" y="17.25" text-anchor="middle" dominant-baseline="central" font-size="7.8" font-weight="500" fill="rgba(0,0,0,.55)" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';      // the gap between the squares is cut out (a mask): the circle shows through it
+    '<rect x="1" y="1" width="12" height="12" rx="2.8" fill="#fff" mask="url(#xlm)"/><g fill="none" stroke="rgba(0,0,0,.55)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5v1M3.9 5.2h6.2M9.2 5.5Q8.2 8.8 4 10.5M4.9 5.5Q6.2 8.8 10.2 10.5"/></g>' +
+    '<rect x="11" y="11" width="12" height="12" rx="2.8" fill="#fff"/><g fill="none" stroke="rgba(0,0,0,.55)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"><path d="M14.3 20.2L17 13.8l2.7 6.4M15.35 18.1h3.3"/></g></svg>';      // the gap between the squares is cut out (a mask): the circle shows through it
   list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the

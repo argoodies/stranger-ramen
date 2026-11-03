@@ -6,12 +6,7 @@
   var mode = (location.search.match(/[?&]mode=(\w+)/) || [])[1] || '';
   if (mode !== 'app' && mode !== 'xhs') mode = '';
   window.__debugMode = mode;
-  window.__debugToast = function (text) {
-    var d = document.createElement('div');
-    d.textContent = text;
-    d.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:99;max-width:84%;padding:9px 14px;border-radius:10px;background:rgba(0,0,0,.78);color:#fff;font:13px -apple-system,sans-serif;text-align:center;pointer-events:none';
-    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600);
-  };
+  window.__debugToast = function (text) { console.log('[debug]', text); };      // no toasts in the project: the console only
   if (mode === 'app') {      // the app's bridge: messages go to the console; the capsule's tap says what the app would do
     window.webkit = { messageHandlers: { gc: { postMessage: function (m) {
       console.log('[debug · app] Game Center', m);
