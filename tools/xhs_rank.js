@@ -143,49 +143,28 @@
     if (!panel.classList.contains('open') || btn.contains(e.target) || panel.contains(e.target)) return;
     close(); e.stopPropagation(); e.preventDefault();
   }, true);
-  // ---- your own card: the ball (tools/mk3b.py) opens a small bubble over itself with you alone: a picture, your name, your wins and your rank.
-  // The platform gives no picture of the player (and the container loads no web images), so the picture is a plain one; the name is the
-  // one the board shows for you, when you are in its top 100, else 我 / Me.
-  var card = document.createElement('div'); card.id = 'xme'; document.body.appendChild(card);
-  var cardCss = document.createElement('style');
-  cardCss.textContent = '#xme{position:fixed;z-index:20;display:none;-webkit-align-items:center;align-items:center;padding:10px 16px 10px 10px;border-radius:16px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.16);font:400 13px ' + XF + ';color:#333;white-space:nowrap}' +
-    '#xme.open{display:-webkit-flex;display:flex}' +
-    '#xme::after{content:"";position:absolute;left:var(--tail,50%);bottom:-5px;width:12px;height:12px;margin-left:-6px;background:#fff;border-radius:2px;-webkit-transform:rotate(45deg);transform:rotate(45deg)}' +      // the tail, down to the ball
-    '#xme .av{-webkit-flex:none;flex:none;width:38px;height:38px;margin-right:10px;border-radius:50%;background:#f2f2f2;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}' +
-    '#xme .nm{font-size:15px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis}#xme .st{margin-top:3px;font-size:12px;color:#999}#xme .st b{font-weight:600;color:#FF2442}';
-  document.head.appendChild(cardCss);
-  var AV = '<span class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="#c9c9c9"><circle cx="12" cy="8.5" r="4.5"/><path d="M3.5 21c.6-4.4 4.1-7 8.5-7s7.9 2.6 8.5 7z"/></svg></span>';      // a plain picture: no photo to be had
-  var at = [0, 0];
-  function place() {      // over the ball, kept on screen; the tail still points at the ball
-    var w = card.offsetWidth, h = card.offsetHeight, x = Math.max(8 + w / 2, Math.min(innerWidth - 8 - w / 2, at[0]));
-    card.style.left = (x - w / 2) + 'px'; card.style.top = (at[1] - h - 12) + 'px'; card.style.setProperty('--tail', (at[0] - x + w / 2) + 'px');
-  }
-  function fill(r) {
-    var L = r[0], M = r[1], data = (L.v && L.v.data) || [], my = M.e ? null : (M.v || {}), name = t('you'), wins = Math.max(sent, (my && my.score) || 0), rk;
-    if (my && my.status === 'EXACT') { for (var i = 0; i < data.length; i++) if (data[i].rank === my.rank && data[i].nickname) name = data[i].nickname; rk = t('rank').replace('#', my.rank); }
-    else if (my && my.status === 'OVER_LIMIT') rk = t('rank').replace('#', '500+');
-    else rk = t('out');
-    card.innerHTML = AV + '<span><div class="nm">' + esc(name) + '</div><div class="st">' + wins + ' ' + t('wins') + ' · <b>' + esc(rk) + '</b></div></span>'; place();
+  // ---- what the ball says: tapped (tools/mk3b.py), it turns once and then tells you, in a speech bubble like everyone else's,
+  // how many games you have won and where that puts you among all players
+  var SAY = {
+    hans: { rank: '你赢了 {w} 局，全网排名第 {r}。', over: '你赢了 {w} 局，全网排名 500 名开外。', none: '你赢了 {w} 局，还没上榜。', fail: '暂时查不到排名，稍后再试。' },
+    hant: { rank: '你贏了 {w} 局，全網排名第 {r}。', over: '你贏了 {w} 局，全網排名 500 名開外。', none: '你贏了 {w} 局，還沒上榜。', fail: '暫時查不到排名，稍後再試。' },
+    en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', none: '{w} wins so far, not ranked yet.', fail: 'Could not get your rank, try again later.' }
+  };
+  function say(k, w, r) { var S = SAY[lang()] || SAY.hans; if (window.__markSay) window.__markSay(S[k].replace('{w}', w).replace('{r}', r)); }
+  function fill(res) {
+    var M = res[1], my = M.e ? null : (M.v || {}), w = Math.max(sent, (my && my.score) || 0);
+    if (!my) say('fail'); else if (my.status === 'EXACT') say('rank', w, my.rank); else if (my.status === 'OVER_LIMIT') say('over', w); else say('none', w);
   }
   var busy = false;
-  function show2(f) { return function (v) { busy = false; card.classList.add('open'); f(v); }; }
-  function openMe(x, y) {
-    at = [x, y];
-    if (busy) return; busy = true;      // the ball turns once, for a second (tools/mk3b.py); the card comes when it has stopped, or when the scores do if later
-    var t0 = Date.now(), after = function (f) { return function (v) { setTimeout(function () { if (busy) f(v); }, Math.max(0, 1000 - (Date.now() - t0))); }; };
-    if (cache && Date.now() - cacheAt < CACHE) return after(show2(fill))(cache);
-    load().then(after(show2(fill)), after(show2(function () { card.innerHTML = AV + '<span class="st">' + t('fail') + '</span>'; place(); })));
+  function openMe() {
+    if (busy) return; busy = true;      // the bubble comes when the ball has stopped turning (a second), or when the rank does if later
+    var t0 = Date.now(), after = function (f) { return function (v) { setTimeout(function () { busy = false; f(v); }, Math.max(0, 1000 - (Date.now() - t0))); }; };
+    load().then(after(fill), after(function () { say('fail'); }));
   }
-  function closeMe() { card.classList.remove('open'); }
-  card.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
-  document.addEventListener('pointerdown', function (e) {      // a tap anywhere else (the ball too) closes it and does nothing in the game
-    if (!card.classList.contains('open') || card.contains(e.target)) return;
-    closeMe(); e.stopPropagation(); e.preventDefault();
-  }, true);
   var lastLang = '';
   // shown first, so the words are drawn to the capsule's real height
   function show(v) { btn.classList.toggle('on', v); if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } }
-  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: function (x, y) { if (card.classList.contains('open')) closeMe(); else openMe(x, y); } }; if (!window.__3bLang) { close(); closeMe(); busy = false; } }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
+  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: openMe }; if (!window.__3bLang) close(); }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.

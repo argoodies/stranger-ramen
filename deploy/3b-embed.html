@@ -2844,6 +2844,8 @@ if (location.hash) {
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
   // the bubbles' spin: a tap turns them once round in a second, fast at first and slowing gently back to where they started
   const spin = { a: 0, tw: 0 };
+  let markLine = null;      // what the ball says (the Xiaohongshu build: your wins and rank), in a speech bubble over it for a few seconds
+  window.__markSay = text => { markLine = { text, t: 0 }; };
   window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };
   function turn(dt) { if (!spin.tw) return; spin.tw = Math.min(1, spin.tw + dt); const u = 1 - Math.pow(1 - spin.tw, 3); spin.a = TAU * u; if (spin.tw >= 1) { spin.tw = 0; spin.a = 0; } }
   function drawMark(t, dt, P, s, bm) {      // small, floating where the book lay, in a ball of frosted glass: the table shows through it, blurred
@@ -2855,7 +2857,8 @@ if (location.hash) {
     ctx.beginPath(); ctx.arc(x, y, R - .5, 0, TAU); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.stroke();      // its rim catching the light
     turn(dt); const cs = Math.cos(spin.a), sn = Math.sin(spin.a);
     for (const [cx, cy, r, c, a] of BUBBLES) { const u = (cx - 11.2) * k, v = (cy - 11.5) * k; ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
-    markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;      // a finger-sized place to tap, bigger than the ball
+    markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
+    if (markLine && (markLine.t += dt) < 4) sayBubble(x, y - R - s * .08, markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
