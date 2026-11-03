@@ -25,8 +25,10 @@
     pend = v;
     Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { unauth(e); }).then(function () { pend = 0; });      // refused or failed: the board can still be looked at
   }
-  var queued = [];
-  window.__miniGC = function (m) { if (m && m.t === 'score') { if (ok) submit(m.v); else queued.push(m.v); } };
+  // the capsule shows only after a win in this session: every score the game posts is a win, except the ones the launch sync
+  // sends (syncing), which carry the total from earlier sessions
+  var queued = [], syncing = false, wonNow = false;
+  window.__miniGC = function (m) { if (!m || m.t !== 'score') return; if (!syncing) wonNow = true; if (ok) submit(m.v); else queued.push(m.v); };
 
   // ---- reading: cached, with a short back-off while the board warms up (2002)
   function call(fn, args, tries) {
@@ -49,8 +51,10 @@
   var css = document.createElement('style');
   // Xiaohongshu's own look: a white card, its red (#FF2442) for the button, the first three and your own highlighted row
   var XF = '-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif';
-  css.textContent = '#xrank{position:fixed;left:14px;bottom:calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:20;display:none;width:40px;height:40px;padding:0;line-height:0;border:0;border-radius:50%;background:#FF2442;color:#fff;box-shadow:0 4px 12px rgba(255,36,66,.35)}' +
-    '#xrank svg{display:block;margin:0 auto}' +
+  css.textContent = '#xcap{position:fixed;left:50%;top:calc(8px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));-webkit-transform:translateX(-50%);transform:translateX(-50%);z-index:20;display:none;height:32px;padding:0 12px 0 4px;border:.5px solid rgba(0,0,0,.08);border-radius:16px;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(0,0,0,.12);color:#333;font:600 13px ' + XF + ';letter-spacing:.02em;white-space:nowrap;-webkit-align-items:center;align-items:center}' +
+    '#xcap.on{display:-webkit-flex;display:flex}' +
+    '#xcap .ic{width:24px;height:24px;margin-right:6px;border-radius:50%;background:#FF2442;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}' +
+    '#xcap .ar{margin-left:4px;color:#FF2442;font-weight:400;font-size:16px;line-height:1}' +
     '#xpanel{position:fixed;left:50%;top:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:300px;max-width:calc(100% - 40px);max-height:66%;padding:6px 0 10px;border-radius:16px;background:#fff;color:#333;font:400 15px ' + XF + ';box-shadow:0 10px 36px rgba(0,0,0,.22)}' +
     '#xpanel.open{display:-webkit-flex;display:flex}' +
     '#xpanel .tt{padding:12px 18px 10px;font-size:17px;font-weight:600;color:#333;border-bottom:1px solid #f2f2f2}' +
@@ -64,8 +68,16 @@
     '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
     '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}';
   document.head.appendChild(css);
-  btn = document.createElement('button'); btn.id = 'xrank'; btn.setAttribute('aria-label', 'rank');
-  btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>';
+  btn = document.createElement('button'); btn.id = 'xcap'; btn.setAttribute('aria-label', 'rank');
+  function capLabel() { btn.innerHTML = '<span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg></span><span>' + esc(t('title')) + '</span><span class="ar">›</span>'; }
+  // level with the container's own top buttons (getWindowInfo, 9.49+), in the middle of the screen; the safe area otherwise
+  function place() {
+    var m = mt(); if (!m || typeof m.getWindowInfo !== 'function') return;
+    Promise.resolve(m.getWindowInfo()).then(function (w) {
+      var b = w && w.menuButtons, r = b && (b.share || b.me || b.back);
+      if (r && r.height > 0) { btn.style.top = r.top + 'px'; btn.style.height = r.height + 'px'; btn.style.borderRadius = (r.height / 2) + 'px'; }
+    }, function () {});
+  }
   panel = document.createElement('div'); panel.id = 'xpanel';
   panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="ft"></div>';
   document.body.appendChild(btn); document.body.appendChild(panel);
@@ -97,10 +109,14 @@
   }
   function open() {
     panel.querySelector('.tt').textContent = t('title');
-    list.innerHTML = '<div class="msg"><div class="spin"></div>' + t('wait') + '</div>'; foot.innerHTML = ''; panel.classList.add('open');
-    load().then(render, function () { list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; });
+    panel.classList.add('open');
+    if (cache && Date.now() - cacheAt < CACHE) return render(cache);      // fresh enough: straight to the board, no spinner
+    list.innerHTML = '<div class="msg"><div class="spin"></div>' + t('wait') + '</div>'; foot.innerHTML = '';
+    var t0 = Date.now(), MINSPIN = 600;      // the spinner stays at least this long, so a quick answer does not flicker
+    var after = function (f) { return function (x) { setTimeout(function () { if (panel.classList.contains('open')) f(x); }, Math.max(0, MINSPIN - (Date.now() - t0))); }; };
+    load().then(after(render), after(function () { list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; }));
   }
-  // the trophy opens and closes it, a tap anywhere else closes it (that tap does nothing in the game); the trophy itself stays
+  // the capsule opens and closes it, a tap anywhere else closes it (that tap does nothing in the game); the capsule itself stays
   function close() { panel.classList.remove('open'); }
   btn.addEventListener('click', function (e) { e.stopPropagation(); if (panel.classList.contains('open')) close(); else open(); });
   panel.addEventListener('pointerdown', function (e) { e.stopPropagation(); });      // scrolling the list does not reach the game
@@ -108,8 +124,9 @@
     if (!panel.classList.contains('open') || btn.contains(e.target) || panel.contains(e.target)) return;
     close(); e.stopPropagation(); e.preventDefault();
   }, true);
-  function show(v) { btn.style.display = v ? 'block' : 'none'; }
-  setInterval(function () { var v = ok && !!window.__3bLang; show(v); if (!v) close(); }, 300);      // only in the lobby, like the language button; it never goes away for an error
+  var lastLang = '';
+  function show(v) { if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } btn.classList.toggle('on', v); }
+  setInterval(function () { var v = ok && wonNow && !!window.__3bLang; show(v); if (!v) close(); }, 300);      // the floating island's lobby, after a win in this session; never hidden for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.
@@ -131,7 +148,8 @@
       else if (!has()) why = 'no leaderboard API (build ' + b + ')';
       else { why = 'on (build ' + b + ')'; ok = true;
         for (var i = 0; i < queued.length; i++) submit(queued[i]);
-        if (typeof window.__gcSync === 'function') window.__gcSync();      // the total so far goes up once at launch
+        syncing = true; try { if (typeof window.__gcSync === 'function') window.__gcSync(); } finally { syncing = false; }      // the total so far goes up once at launch
+        place();
         return; }
       if (tries < 40) setTimeout(detect, 500);      // up to twenty seconds
     });
