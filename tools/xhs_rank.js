@@ -86,6 +86,9 @@
   panel = document.createElement('div'); panel.id = 'xpanel';
   panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="ft"></div>';
   document.body.appendChild(btn); document.body.appendChild(panel);
+  // the language button wears Xiaohongshu's translate mark: two grey squares, 文 on the solid one, A on the outlined one
+  var lb = document.getElementById('lang');
+  if (lb) lb.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24"><rect x="1.5" y="1.5" width="13" height="13" rx="3" fill="#8C8C8C"/><text x="8" y="11.6" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text><rect x="9.5" y="9.5" width="13" height="13" rx="3" fill="#fff" stroke="#8C8C8C" stroke-width="1.6"/><text x="16" y="19.9" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8C8C8C" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';
   list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the
