@@ -55,14 +55,15 @@ boot = """<script>
   // bubbles, floating in its place; a tap opens the scores.
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
   // the bubbles' spin: a tap turns them once round in a second, fast at first and slowing gently back to where they started
-  const spin = { a: 0, tw: 0 };
+  const spin = { tw: 0 }, SPIN = .8, LAG = .07;      // each bubble turns once in SPIN seconds, each starting LAG after the one before
   // the web has no scoreboard: its ball turns and says how many games you have won on this device (botc3.js keeps the count)
   const WEBSAY = { hans: '你赢了 {w} 局。', hant: '你贏了 {w} 局。', en: '{w} wins so far.' };
   const webMark = { open: () => setTimeout(() => window.__markSay((WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins)), 1000) };
   let markLine = null;      // what the ball says (the Xiaohongshu build: your wins and rank), in a speech bubble over it for a few seconds
   window.__markSay = text => { markLine = { text, t: 0 }; };
-  window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };
-  function turn(dt) { if (!spin.tw) return; spin.tw = Math.min(1, spin.tw + dt); const u = 1 - Math.pow(1 - spin.tw, 3); spin.a = TAU * u; if (spin.tw >= 1) { spin.tw = 0; spin.a = 0; } }
+  window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };      // all four done in SPIN + 3 LAG, about a second
+  function turn(dt) { if (!spin.tw) return; spin.tw += dt; if (spin.tw >= SPIN + 3 * LAG) spin.tw = 0; }
+  const angleOf = i => { if (!spin.tw) return 0; const u = clamp((spin.tw - i * LAG) / SPIN); return TAU * (1 - Math.pow(1 - u, 3)); };      // fast, then slowing back to its place
   function drawMark(t, dt, P, s, bm) {      // small, floating where the book lay, in a ball of frosted glass: the table shows through it, blurred
     const q = P(1.1, -.62, 2.0), R = Math.max(10, s * .3), x = q[0], y = q[1] - s * .12 + Math.sin(t * 1.6) * s * .04, k = R * 1.5 / 24;
     const m = ctx.getTransform(), dx = m.a * x + m.e, dy = m.d * y + m.f, dr = m.a * R;      // in the canvas's own pixels
@@ -70,8 +71,11 @@ boot = """<script>
     if ('filter' in ctx) { const pd = dr * 1.6; ctx.filter = 'blur(' + (dr * .22).toFixed(1) + 'px)'; ctx.drawImage(ctx.canvas, dx - pd, dy - pd, pd * 2, pd * 2, dx - pd, dy - pd, pd * 2, pd * 2); ctx.filter = 'none'; }      // what is behind it, blurred
     ctx.fillStyle = 'rgba(255,255,255,.38)'; ctx.fillRect(dx - dr, dy - dr, dr * 2, dr * 2); ctx.restore();      // a milky white over it
     ctx.beginPath(); ctx.arc(x, y, R - .5, 0, TAU); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.stroke();      // its rim catching the light
-    turn(dt); const cs = Math.cos(spin.a), sn = Math.sin(spin.a);
-    for (const [cx, cy, r, c, a] of BUBBLES) { const u = (cx - 11.2) * k, v = (cy - 11.5) * k; ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
+    turn(dt);
+    BUBBLES.forEach(([cx, cy, r, c, a], i) => {      // each bubble on its own: it drifts a little in the glass, out of step with the others, and turns round the middle in its own time
+      const fx = Math.sin(t * (1.3 + i * .23) + i * 1.9) * .7, fy = Math.cos(t * (1.1 + i * .31) + i * 2.6) * .7;      // on the 24 grid
+      const g = angleOf(i), cs = Math.cos(g), sn = Math.sin(g), u = (cx - 11.2 + fx) * k, v = (cy - 11.5 + fy) * k;
+      ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); });
     markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
     if (markLine && (markLine.t += dt) < 4) sayBubble(x, y - R - s * .08, markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
   }
