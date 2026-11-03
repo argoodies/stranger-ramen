@@ -59,7 +59,7 @@ boot = """<script>
   // the web has no scoreboard: its ball turns and says how many games you have won on this device (botc3.js keeps the count)
   const WEBSAY = { hans: '你赢了 {w} 局。', hant: '你贏了 {w} 局。', en: '{w} wins so far.' };
   const webMark = { open: () => setTimeout(() => window.__markSay((WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins)), 1000) };
-  const inShell = () => !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc) || !!window.__xhsBuild;      // the app or the Xiaohongshu build: they bring their own
+  const inShell = () => !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc) || !!window.__xhsRank;      // the app or the Xiaohongshu build: they bring their own
   let markLine = null;      // what the ball says (the Xiaohongshu build: your wins and rank), in a speech bubble over it for a few seconds
   window.__markSay = text => { markLine = { text, t: 0 }; };
   window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };
