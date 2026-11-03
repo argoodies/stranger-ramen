@@ -39,7 +39,7 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     const label = () => '<svg class="ic" width="20" height="20" viewBox="0 0 24 24"><g transform="translate(.8 .5)" style="mix-blend-mode:normal">' +      // Game Center's bubbles: purple, pink, yellow, blue
       '<circle cx="9" cy="13" r="7.2" fill="#8E5BEA" fill-opacity=".92"/><circle cx="14.5" cy="8.5" r="5.6" fill="#FF3B6B" fill-opacity=".9"/>' +
       '<circle cx="8" cy="6" r="3.6" fill="#FFC21A" fill-opacity=".95"/><circle cx="16" cy="16" r="4.6" fill="#2BC4F0" fill-opacity=".9"/></g></svg>' +
-      '<span class="tx" aria-label="' + (T[typeof LANG !== 'undefined' ? LANG : 'hans'] || T.hans) + '">' + svgWords(typeof LANG !== 'undefined' ? LANG : 'hans', '#fff', 15) + '</span><svg class="ch" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5L5.5 6l-4 4.5"/></svg>';
+      '<span class="tx" aria-label="' + (T[typeof LANG !== 'undefined' ? LANG : 'hans'] || T.hans) + '">' + svgWords(typeof LANG !== 'undefined' ? LANG : 'hans', '#fff', 15) + '</span><svg class="ch" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5L5.5 6l-4 4.5"/></svg>';
     let lastLang = '';
     b.addEventListener('click', e => { e.stopPropagation(); gcPost({ t: 'board' }); });
     document.body.appendChild(b);

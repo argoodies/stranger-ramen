@@ -52,7 +52,7 @@
   // Xiaohongshu's own look: a white card, its red (#FF2442) for the button, the first three and your own highlighted row
   var XF = '-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif';
   css.textContent = '#xcap{position:fixed;left:50%;top:calc(8px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));-webkit-transform:translateX(-50%);transform:translateX(-50%);z-index:20;display:none;height:32px;padding:0 7.25px 0 8px;border:.5px solid rgba(0,0,0,.08);border-radius:16px;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(0,0,0,.12);color:#333;font:600 13px ' + XF + ';letter-spacing:.02em;white-space:nowrap;-webkit-align-items:center;align-items:center}' +
-    '#xcap.on{display:-webkit-flex;display:flex}' +
+    '#xcap.on{display:-webkit-flex;display:flex}#xcap:active{opacity:.6}' +
     '#xcap .ic{width:24px;height:24px;margin-right:6px;border-radius:50%;background:#FF2442;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}' +
     '#xcap .tx{display:block}' +      // the words are an outline (svgWords): its box is its ink, so centring the box centres the words
     '#xcap .ar{margin-left:5px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}#xcap .ar svg{display:block}' +
@@ -83,7 +83,7 @@
     var L = LABELS[lang] || LABELS.hans, k = px / 1000, P = 60;      // an even margin round the ink (em/1000): the edges' smoothing is not clipped, the centre stays put
     return '<svg width="' + ((L[3] + 2 * P) * k).toFixed(2) + '" height="' + ((L[4] + 2 * P) * k).toFixed(2) + '" viewBox="' + (L[1] - P) + ' ' + (L[2] - P) + ' ' + (L[3] + 2 * P) + ' ' + (L[4] + 2 * P) + '" style="display:block;overflow:visible"><path fill="' + color + '" d="' + L[0] + '"/></svg>';
   }
-  function capLabel() { btn.innerHTML = '<span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg></span><span class="tx" aria-label="' + esc(t('title')) + '">' + svgWords(lang(), '#333', 13) + '</span><span class="ar"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="#FF2442" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l4 4-4 4"/></svg></span>'; }      // a drawn chevron: a text \u203a sits on the font\'s baseline, not in the middle
+  function capLabel() { btn.innerHTML = '<span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg></span><span class="tx" aria-label="' + esc(t('title')) + '">' + svgWords(lang(), '#333', 13) + '</span><span class="ar"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="#333" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l4 4-4 4"/></svg></span>'; }      // a drawn chevron: a text \u203a sits on the font\'s baseline, not in the middle
   // level with the container's own top buttons (getWindowInfo, 9.49+), in the middle of the screen; the safe area otherwise
   function place() {
     var m = mt(); if (!m || typeof m.getWindowInfo !== 'function') return;
