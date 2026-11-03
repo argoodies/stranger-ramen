@@ -68,8 +68,8 @@
     '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
     '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}' +
     // the language button and its menu in the same manner as the board: a white circle, a white card, the chosen language in red
-    // no round button: Xiaohongshu shows the bare mark; a faint shadow keeps it readable on the sky
-    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important}#lang svg{display:block;margin:0 auto;-webkit-filter:drop-shadow(0 1px 3px rgba(0,0,0,.25));filter:drop-shadow(0 1px 3px rgba(0,0,0,.25))}' +
+    // no round button, no shadow, no grey edge: Xiaohongshu shows the bare mark
+    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important}#lang svg{display:block;margin:0 auto}' +
     '#langMenu{padding:6px!important;min-width:150px;border:0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 10px 36px rgba(0,0,0,.2)}' +
     '#langMenu button{border-radius:10px!important;padding:10px 14px!important;font:400 15px ' + XF + '!important;letter-spacing:0!important;color:#333!important;background:transparent!important}' +
     '#langMenu button+button{margin-top:2px}#langMenu button.on{background:#FFF0F2!important;color:#FF2442!important;font-weight:600!important}';
@@ -90,7 +90,9 @@
   // the language button is Xiaohongshu's bare translate mark (no round button): two white rounded squares overlapping corner to corner,
   // 文 on the upper left one, A on the lower right one, dark grey; a thin line of the grey keeps the squares apart
   var lb = document.getElementById('lang');
-  if (lb) lb.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24"><rect x="2" y="2" width="12.5" height="12.5" rx="2.6" fill="#fff"/><text x="8.3" y="7.85" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="400" fill="#5c5c5c" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text><rect x="9.5" y="9.5" width="12.5" height="12.5" rx="2.6" fill="#fff" stroke="#8a8a8a" stroke-width="1.4"/><text x="15.8" y="15.95" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="500" fill="#5c5c5c" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';  list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
+  if (lb) lb.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24"><defs><mask id="xlm"><rect width="24" height="24" fill="#fff"/><rect x="8.3" y="8.3" width="14.9" height="14.9" rx="3.4" fill="#000"/></mask></defs>' +
+    '<rect x="2" y="2" width="12.5" height="12.5" rx="2.6" fill="#fff" mask="url(#xlm)"/><text x="8.3" y="7.85" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="400" fill="#5c5c5c" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text>' +
+    '<rect x="9.5" y="9.5" width="12.5" height="12.5" rx="2.6" fill="#fff"/><text x="15.8" y="15.95" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="500" fill="#5c5c5c" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';      // the gap between the squares is cut out (a mask), so the sky shows through it: no grey edge  list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the
   // container loads no web images
