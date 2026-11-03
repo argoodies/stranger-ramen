@@ -47,13 +47,15 @@
 
   // ---- the button and the panel
   var css = document.createElement('style');
-  // the same look as the language menu bottom right: a translucent popover opening upward from its button
+  // the language menu's look (its translucent purple, its corners and its highlighted line), in the middle of the screen
   css.textContent = '#xrank{position:fixed;left:14px;bottom:calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:20;display:none;padding:8px 11px;line-height:0}' +
-    '#xpanel{position:fixed;left:14px;bottom:calc(62px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:250px;max-width:calc(100% - 28px);max-height:56%;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f4ecdc;font:300 15px var(--serif);letter-spacing:.08em}' +
+    '#xpanel{position:fixed;left:50%;top:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:290px;max-width:calc(100% - 40px);max-height:66%;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f4ecdc;font:300 15px var(--serif);letter-spacing:.08em}' +
     '#xpanel.open{display:-webkit-flex;display:flex}' +
     '#xpanel .tt{padding:7px 12px 9px;font-size:13px;opacity:.7;letter-spacing:.12em}' +
     '#xpanel .ls{overflow-y:auto;-webkit-overflow-scrolling:touch}' +
     '#xpanel .row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;border-radius:11px;padding:9px 12px}' +
+    '#xpanel .av{width:30px;height:30px;-webkit-flex:none;flex:none;margin-right:10px;border-radius:50%;background:#f4e8d0;border:3px solid #cebea0;box-sizing:border-box;color:#3a2a5c;font:400 14px/24px var(--serif);text-align:center;letter-spacing:0;overflow:hidden}' +
+    '#xpanel .av.g1{border-color:#e2b24a}#xpanel .av.g2{border-color:#c8ccd6}#xpanel .av.g3{border-color:#c98b5a}' +
     '#xpanel .rk{width:30px;opacity:.75}#xpanel .nm{-webkit-flex:1;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:8px}#xpanel .sc{white-space:nowrap}' +
     '#xpanel .msg{padding:12px;opacity:.75;letter-spacing:.06em}' +
     '#xpanel .me{margin-top:6px;border-radius:11px;padding:9px 12px;background:rgba(255,236,170,.2);color:#ffe9b0}' +
@@ -66,7 +68,10 @@
   document.body.appendChild(btn); document.body.appendChild(panel);
   list = panel.querySelector('.ls'); mine = panel.querySelector('.me');
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function row(rk, nm, sc) { return '<div class="row"><span class="rk">' + rk + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + ' ' + t('wins') + '</span></div>'; }
+  // no avatars come with the board (rank, score, nickname only) and the container loads no web images: a lettered token instead,
+  // the first character of the nickname, gold / silver / bronze rims for the first three
+  function first(nm) { var m = String(nm).match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\s]/); return m ? m[0].toUpperCase() : '?'; }
+  function row(rk, nm, sc) { return '<div class="row"><span class="rk">' + rk + '</span><span class="av' + (rk <= 3 ? ' g' + rk : '') + '">' + esc(first(nm)) + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + ' ' + t('wins') + '</span></div>'; }
   function render(r) {
     var L = r[0], M = r[1], h = '';
     if (L.e) {      // the list itself is refused or failed: say so, and keep the panel until it is closed
