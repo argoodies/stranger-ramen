@@ -10,20 +10,20 @@
   function has() { var m = mt(); return !!(m && typeof m.submitScore === 'function' && typeof m.getRankList === 'function' && typeof m.getMyRank === 'function'); }
   function lang() { try { return LANG; } catch (e) { return 'hans'; } }
   var T = {
-    hans: { title: '总胜场榜', me: '我的排名', wins: '胜', none: '还没有人上榜', fail: '暂时无法加载，稍后再试', wait: '加载中…', anon: '小红书用户', out: '未上榜', close: '关闭' },
-    hant: { title: '總勝場榜', me: '我的排名', wins: '勝', none: '還沒有人上榜', fail: '暫時無法載入，稍後再試', wait: '載入中…', anon: '小紅書用戶', out: '未上榜', close: '關閉' },
-    en: { title: 'Most Wins', me: 'My rank', wins: 'wins', none: 'Nobody on the board yet', fail: 'Could not load, try again later', wait: 'Loading…', anon: 'Player', out: 'Not ranked', close: 'Close' }
+    hans: { title: '总胜场榜', me: '我的排名', wins: '胜', none: '还没有人上榜', fail: '暂时无法加载，稍后再试', wait: '加载中…', anon: '小红书用户', out: '未上榜', close: '关闭', meAuth: '授权后显示你的排名', closed: '排行榜暂未开放' },
+    hant: { title: '總勝場榜', me: '我的排名', wins: '勝', none: '還沒有人上榜', fail: '暫時無法載入，稍後再試', wait: '載入中…', anon: '小紅書用戶', out: '未上榜', close: '關閉', meAuth: '授權後顯示你的排名', closed: '排行榜暫未開放' },
+    en: { title: 'Most Wins', me: 'My rank', wins: 'wins', none: 'Nobody on the board yet', fail: 'Could not load, try again later', wait: 'Loading…', anon: 'Player', out: 'Not ranked', close: 'Close', meAuth: 'Your rank shows once authorised', closed: 'The leaderboard is not open yet' }
   };
   function t(k) { return (T[lang()] || T.hans)[k]; }
   function code(e) { return e && typeof e.errCode === 'number' ? e.errCode : 0; }
-  function unauth(e) { if (window.__rankErr) window.__rankErr(e); var c = code(e); if (c === 1005 || c === 1006 || c === 10003) { off = true; show(false); return true; } return false; }
+  function unauth(e) { if (window.__rankErr) window.__rankErr(e); var c = code(e); return c === 1005 || c === 1006 || c === 10003; }      // an authorisation refusal; what to do about it is decided where it happens
 
   // ---- submitting: only a bigger total, never in a loop
   function submit(v) {
     v = Math.floor(Number(v) || 0);
     if (!ok || off || v <= sent || v <= pend || v > 1000000) return;
     pend = v;
-    Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { unauth(e); }).then(function () { pend = 0; });
+    Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { unauth(e); }).then(function () { pend = 0; });      // refused or failed: the board can still be looked at
   }
   var queued = [];
   window.__miniGC = function (m) { if (m && m.t === 'score') { if (ok) submit(m.v); else queued.push(m.v); } };
@@ -37,7 +37,12 @@
   }
   function load() {
     if (cache && Date.now() - cacheAt < CACHE) return Promise.resolve(cache);
-    return Promise.all([call('getRankList', { board: BOARD, period: 'all' }, 0), call('getMyRank', { board: BOARD, period: 'all' }, 0)]).then(function (r) { cache = r; cacheAt = Date.now(); return r; });
+    // the list and your own rank are asked for separately: a rank that is not authorised must not take the list down with it
+    var settle = function (p) { return p.then(function (v) { return { v: v }; }, function (e) { return { e: e }; }); };
+    return Promise.all([settle(call('getRankList', { board: BOARD, period: 'all' }, 0)), settle(call('getMyRank', { board: BOARD, period: 'all' }, 0))]).then(function (r) {
+      if (!r[0].e && !r[1].e) { cache = r; cacheAt = Date.now(); }
+      return r;
+    });
   }
 
   // ---- the button and the panel
@@ -62,19 +67,27 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function row(rk, nm, sc) { return '<div class="row"><span class="rk">' + rk + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + ' ' + t('wins') + '</span></div>'; }
   function render(r) {
-    var data = (r[0] && r[0].data) || [], my = r[1] || {}, h = '';
-    for (var i = 0; i < data.length; i++) h += row(data[i].rank, data[i].nickname == null ? t('anon') : data[i].nickname, data[i].score);
-    list.innerHTML = h || '<div class="msg">' + t('none') + '</div>';
-    var mr = my.status === 'EXACT' ? my.rank : my.status === 'OVER_LIMIT' ? '500+' : t('out');
+    var L = r[0], M = r[1], h = '';
+    if (L.e) {      // the list itself is refused or failed: say so, and keep the panel until it is closed
+      if (unauth(L.e)) { list.innerHTML = '<div class="msg">' + t('closed') + '</div>'; closing = true; }
+      else list.innerHTML = '<div class="msg">' + t('fail') + '</div>';
+    } else {
+      var data = (L.v && L.v.data) || [];
+      for (var i = 0; i < data.length; i++) h += row(data[i].rank, data[i].nickname == null ? t('anon') : data[i].nickname, data[i].score);
+      list.innerHTML = h || '<div class="msg">' + t('none') + '</div>';
+    }
+    if (M.e) { mine.innerHTML = unauth(M.e) ? t('meAuth') : ''; return; }      // the list stays; only your own line says why it is missing
+    var my = M.v || {}, mr = my.status === 'EXACT' ? my.rank : my.status === 'OVER_LIMIT' ? '500+' : t('out');
     mine.innerHTML = t('me') + ' · <b style="font-weight:400;color:#ffd48c">' + mr + '</b>' + (my.status === 'EXACT' ? ' · ' + my.score + ' ' + t('wins') : '');
   }
   function open() {
     panel.querySelector('.tt').textContent = t('title'); panel.querySelector('.x').setAttribute('aria-label', t('close'));
     list.innerHTML = '<div class="msg">' + t('wait') + '</div>'; mine.innerHTML = ''; panel.style.display = 'flex';
-    load().then(render, function (e) { if (!unauth(e)) list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; else panel.style.display = 'none'; });
+    load().then(render, function () { list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; });
   }
   btn.addEventListener('click', open);
-  panel.addEventListener('click', function (e) { if (e.target === panel || e.target.className === 'x') panel.style.display = 'none'; });
+  var closing = false;      // the list was refused: once its message has been read and closed, the trophy goes for this session
+  panel.addEventListener('click', function (e) { if (e.target === panel || e.target.className === 'x') { panel.style.display = 'none'; if (closing) off = true; } });
   function show(v) { btn.style.display = v ? 'block' : 'none'; }
   setInterval(function () { show(ok && !off && !!window.__3bLang && panel.style.display !== 'flex'); }, 300);      // only in the lobby, like the language button
 
