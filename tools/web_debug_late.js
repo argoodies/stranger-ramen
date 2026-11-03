@@ -8,7 +8,7 @@
     '#dbgmenu{position:fixed;right:calc(20% - 40px);top:calc(14% + 32px);z-index:60;display:none;min-width:170px;padding:6px;border-radius:12px;background:rgba(255,255,255,.96);box-shadow:0 8px 28px rgba(0,0,0,.25);font:14px -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;color:#222}' +
     '#dbgmenu.open{display:block}#dbgmenu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 12px;border-radius:8px;font:inherit;color:inherit;cursor:pointer}#dbgmenu button.on{background:#eef3ff;color:#1d5bd8;font-weight:600}#dbgmenu hr{border:0;border-top:1px solid #eee;margin:4px 6px}' +
     '#dbgmenu .tt{padding:6px 12px 4px;font-size:11px;letter-spacing:.08em;color:#999}' +
-    '#dbgtag{position:fixed;left:8px;top:8px;z-index:60;padding:3px 8px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff;font:11px -apple-system,sans-serif;pointer-events:none}';
+    '#dbgtag{position:fixed;left:8px;bottom:8px;z-index:60;padding:3px 8px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff;font:11px -apple-system,sans-serif;pointer-events:none}';
   document.head.appendChild(st);
   var sun = document.createElement('button'); sun.id = 'dbgsun'; sun.setAttribute('aria-label', 'debug');
   var menu = document.createElement('div'); menu.id = 'dbgmenu';

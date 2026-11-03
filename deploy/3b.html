@@ -2594,16 +2594,16 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     st.textContent = '#gccap{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:none;align-items:center;height:36px;padding:0 12.25px 0 9.75px;border-radius:18px;border:.5px solid rgba(255,255,255,.22);background:rgba(28,22,34,.32);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.12);font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif;letter-spacing:-.01em;color:#fff;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .15s}' +
       '#gccap.on{display:flex}#gccap:active{opacity:.55}#gccap svg{display:block}#gccap .ic{margin-right:7px}#gccap .ch{margin-left:6px}' +
       '#gccap .tx{display:inline-block;transform:translateY(-.092em)}' +      // Chinese sits low in its line box: lifted by the measured amount
-      // the language button: a white globe in a round button of the capsule's dark glass; its menu an iOS menu of glass with a blue tick
-      '#lang{width:36px!important;height:36px!important;padding:0!important;display:flex;align-items:center;justify-content:center;border:.5px solid rgba(255,255,255,.22)!important;border-radius:18px!important;background:rgba(28,22,34,.32)!important;-webkit-backdrop-filter:saturate(180%) blur(20px)!important;backdrop-filter:saturate(180%) blur(20px)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)!important;color:#fff!important}#lang[style*="block"]{display:flex!important}#lang:active{opacity:.55}' +
+      // the language button: a bare white globe; its menu an iOS menu of glass with a blue tick
+      '#lang{width:40px!important;height:40px!important;padding:0!important;display:flex;align-items:center;justify-content:center;border:0!important;border-radius:0!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important}#lang[style*="block"]{display:flex!important}#lang:active{opacity:.55}' +
       '#langMenu{gap:0!important;padding:6px 0!important;min-width:180px;border-radius:14px!important;border:.5px solid rgba(255,255,255,.55)!important;background:rgba(246,246,248,.72)!important;-webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;box-shadow:0 10px 36px rgba(0,0,0,.18)}' +
       '#langMenu button{position:relative;border-radius:0!important;padding:11px 44px 11px 18px!important;font:400 16px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif!important;letter-spacing:-.01em!important;color:rgba(0,0,0,.86)!important;background:transparent!important}' +
       '#langMenu button+button{border-top:.5px solid rgba(60,60,67,.18)}#langMenu button:active{background:rgba(0,0,0,.06)!important}' +
       '#langMenu button.on::after{content:"";position:absolute;right:18px;top:50%;width:6px;height:11px;margin-top:-7px;border:solid #007AFF;border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}';
     document.head.appendChild(st);
-    // the language button: Apple's globe (as the SF Symbol globe) in white, in the same dark glass as the Most Wins capsule; the menu's tick is system blue
+    // the language button: Apple's globe (as the SF Symbol globe) in white, bare, top left; the menu's tick is system blue
     const lb = document.getElementById('lang');
-    if (lb) lb.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><ellipse cx="12" cy="12" rx="4" ry="9.2"/><path d="M3.2 9h17.6M3.2 15h17.6"/></svg>';
+    if (lb) lb.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><ellipse cx="12" cy="12" rx="4" ry="9.2"/><path d="M3.2 9h17.6M3.2 15h17.6"/></svg>';
     const b = document.createElement('button'); b.id = 'gccap'; b.setAttribute('aria-label', 'Game Center');
     const label = () => '<svg class="ic" width="20" height="20" viewBox="0 0 24 24"><g transform="translate(.8 .5)" style="mix-blend-mode:normal">' +      // Game Center's bubbles: purple, pink, yellow, blue
       '<circle cx="9" cy="13" r="7.2" fill="#8E5BEA" fill-opacity=".92"/><circle cx="14.5" cy="8.5" r="5.6" fill="#FF3B6B" fill-opacity=".9"/>' +
@@ -2614,6 +2614,12 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     document.body.appendChild(b);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const tx = b.querySelector('.tx'); if (tx) inkCentre(tx); });      // again once the real font is in
     setInterval(() => {
+      const lbx = document.getElementById('lang'), box = lbx && lbx.parentNode;
+      if (box && box !== document.body && !box.__topLeft && box.style.position === 'fixed') {      // the app keeps the globe top left, its menu opening downward
+        box.__topLeft = true; box.style.right = box.style.bottom = 'auto';
+        box.style.left = 'calc(10px + env(safe-area-inset-left))'; box.style.top = 'calc(8px + env(safe-area-inset-top))';
+        const lm = document.getElementById('langMenu'); if (lm) { lm.style.bottom = lm.style.right = 'auto'; lm.style.top = '44px'; lm.style.left = '0'; }
+      }
       const on = !!window.__wonThisSession && !!window.__3bLang;
       b.classList.toggle('on', on);      // shown first, so the words are drawn to the capsule's real height
       if (on && lastLang !== LANG) { lastLang = LANG; b.innerHTML = label(); inkCentre(b.querySelector('.tx')); }
@@ -3210,7 +3216,7 @@ if (location.hash) {
     '#dbgmenu{position:fixed;right:calc(20% - 40px);top:calc(14% + 32px);z-index:60;display:none;min-width:170px;padding:6px;border-radius:12px;background:rgba(255,255,255,.96);box-shadow:0 8px 28px rgba(0,0,0,.25);font:14px -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;color:#222}' +
     '#dbgmenu.open{display:block}#dbgmenu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 12px;border-radius:8px;font:inherit;color:inherit;cursor:pointer}#dbgmenu button.on{background:#eef3ff;color:#1d5bd8;font-weight:600}#dbgmenu hr{border:0;border-top:1px solid #eee;margin:4px 6px}' +
     '#dbgmenu .tt{padding:6px 12px 4px;font-size:11px;letter-spacing:.08em;color:#999}' +
-    '#dbgtag{position:fixed;left:8px;top:8px;z-index:60;padding:3px 8px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff;font:11px -apple-system,sans-serif;pointer-events:none}';
+    '#dbgtag{position:fixed;left:8px;bottom:8px;z-index:60;padding:3px 8px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff;font:11px -apple-system,sans-serif;pointer-events:none}';
   document.head.appendChild(st);
   var sun = document.createElement('button'); sun.id = 'dbgsun'; sun.setAttribute('aria-label', 'debug');
   var menu = document.createElement('div'); menu.id = 'dbgmenu';
