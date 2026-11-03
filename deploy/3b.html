@@ -2566,14 +2566,14 @@ function gcRecord(won, role) {
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.wins) gcPost({ t: 'score', v: GCS.wins }); };      // once signed in: anything earned before sign-in goes up too
 // The app's leaderboard capsule: in the Tiny Clocktower app only (the web has none; the Xiaohongshu build has its own),
 // top middle of the lobby once the player has won in this session. In Apple's manner: dark frosted glass, the system font in white,
-// a filled trophy in system orange and a white chevron. A tap opens Game Center's own Most Wins board (native, see AppDelegate).
+// Game Center's bubbles for its icon and a white chevron. A tap opens Game Center's own Most Wins board (native, see AppDelegate).
 (function () {
   const inApp = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc);
   if (!inApp) return;
   const T = { hans: '总胜场榜', hant: '總勝場榜', en: 'Most Wins' };
   const make = () => {
     const st = document.createElement('style');
-    st.textContent = '#gccap{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:none;align-items:center;height:36px;padding:0 12.25px 0 11px;border-radius:18px;border:.5px solid rgba(255,255,255,.22);background:rgba(28,22,34,.32);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.12);font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif;letter-spacing:-.01em;color:#fff;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .15s}' +
+    st.textContent = '#gccap{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:none;align-items:center;height:36px;padding:0 12.25px 0 9.75px;border-radius:18px;border:.5px solid rgba(255,255,255,.22);background:rgba(28,22,34,.32);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.12);font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif;letter-spacing:-.01em;color:#fff;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .15s}' +
       '#gccap.on{display:flex}#gccap:active{opacity:.55}#gccap svg{display:block}#gccap .ic{margin-right:7px}#gccap .ch{margin-left:6px}' +
       '#gccap .tx{display:inline-block;transform:translateY(-.092em)}' +      // Chinese sits low in its line box: lifted by the measured amount
       // the language button: a white globe in a round button of the capsule's dark glass; its menu an iOS menu of glass with a blue tick
@@ -2587,7 +2587,9 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     const lb = document.getElementById('lang');
     if (lb) lb.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><ellipse cx="12" cy="12" rx="4" ry="9.2"/><path d="M3.2 9h17.6M3.2 15h17.6"/></svg>';
     const b = document.createElement('button'); b.id = 'gccap'; b.setAttribute('aria-label', 'Game Center');
-    const label = () => '<svg class="ic" width="18" height="18" viewBox="0 0 24 24"><path fill="#FF9500" d="M7 3h10v2h3.5a1 1 0 0 1 1 1c0 3.3-2.1 5.9-5 6.6A5.2 5.2 0 0 1 13 15.9V18h3a1 1 0 0 1 1 1v2H7v-2a1 1 0 0 1 1-1h3v-2.1a5.2 5.2 0 0 1-3.5-3.3c-2.9-.7-5-3.3-5-6.6a1 1 0 0 1 1-1H7zm0 4H4.6a5 5 0 0 0 2.6 3.6A7 7 0 0 1 7 9zm10 0v2a7 7 0 0 1-.2 1.6A5 5 0 0 0 19.4 7z"/></svg>' +
+    const label = () => '<svg class="ic" width="20" height="20" viewBox="0 0 24 24"><g transform="translate(.8 .5)" style="mix-blend-mode:normal">' +      // Game Center's bubbles: purple, pink, yellow, blue
+      '<circle cx="9" cy="13" r="7.2" fill="#8E5BEA" fill-opacity=".92"/><circle cx="14.5" cy="8.5" r="5.6" fill="#FF3B6B" fill-opacity=".9"/>' +
+      '<circle cx="8" cy="6" r="3.6" fill="#FFC21A" fill-opacity=".95"/><circle cx="16" cy="16" r="4.6" fill="#2BC4F0" fill-opacity=".9"/></g></svg>' +
       '<span class="tx">' + (T[typeof LANG !== 'undefined' ? LANG : 'hans'] || T.hans) + '</span><svg class="ch" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5L5.5 6l-4 4.5"/></svg>';
     let lastLang = '';
     b.addEventListener('click', e => { e.stopPropagation(); gcPost({ t: 'board' }); });
