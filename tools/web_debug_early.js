@@ -19,7 +19,7 @@
     var mine = function () { try { return Math.max(best, JSON.parse(localStorage.getItem('pocket_gc') || '{}').wins || 0); } catch (e) { return best; } };
     var board = function () {
       var rows = [], my = mine();
-      for (var i = 0; i < 30; i++) rows.push({ score: Math.max(1, 160 - i * 5 - (i % 3)), nickname: names[i % names.length], me: false });
+      for (var i = 0; i < 150; i++) rows.push({ score: Math.max(1, 300 - i * 2 - (i % 2)), nickname: names[i % names.length], me: false });      // more than the board's 100, so 'not in it' can be seen too
       if (my > 0) rows.push({ score: my, nickname: null, me: true });
       rows.sort(function (a, b) { return b.score - a.score || (a.me ? 1 : -1); });
       rows.forEach(function (r, i) { r.rank = i + 1; });

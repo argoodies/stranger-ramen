@@ -1,7 +1,7 @@
 /* The Xiaohongshu build's leaderboard (mini-tool submitScore / getRankList / getMyRank, client 9.51+, closed beta).
    Board 1, all-time: total wins, the same number the app sends to Game Center. The game posts { t: 'score', v } through
    window.__miniGC after each win and once at launch (__gcSync); a score goes up only when it has grown.
-   A trophy pill sits beside the language button in the lobby and opens the top 10 and your own rank (under them, only when you are not among them).
+   A trophy pill sits beside the language button in the lobby and opens the top 100 (ten rows at a time, scrolling) and your own rank (under them, only when you are not among them).
    Older clients, a missing API or no nickname authorisation (1005 / 1006): no button, and the game carries on as before.
    Plain ES5 so it passes the Chrome 61 gate as written; loaded by boot.js after the game scripts. */
 (function () {
@@ -59,7 +59,7 @@
     '#xpanel{position:fixed;left:50%;top:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:300px;max-width:calc(100% - 40px);max-height:66%;padding:6px 0 10px;border-radius:16px;background:#fff;color:#333;font:400 15px ' + XF + ';box-shadow:0 10px 36px rgba(0,0,0,.22)}' +
     '#xpanel.open{display:-webkit-flex;display:flex}' +
     '#xpanel .tt{padding:12px 18px 10px;font-size:17px;font-weight:600;color:#333;border-bottom:1px solid #f2f2f2}' +
-    '#xpanel .ls{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 8px 0}' +
+    '#xpanel .ls{height:414px;max-height:calc(66vh - 120px);box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 8px 0}' +
     '#xpanel .row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;border-radius:10px;padding:10px 10px}' +
     '#xpanel .rk{width:46px;color:#999;font-weight:600;font-style:italic}#xpanel .rk.t{color:#FF2442}' +
     '#xpanel .nm{-webkit-flex:1;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:8px}#xpanel .sc{white-space:nowrap;color:#999;font-size:14px}' +
@@ -99,7 +99,7 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the
   // container loads no web images
-  var TOP = 10;      // the board shows the top 10 and one more row under them: your own rank if you are further down, else an empty card
+  var TOP = 100, SEEN = 10;      // the board holds the top 100 in a box ten rows tall that scrolls; under it one more row: your own rank if you are further down, else an empty one
   function row(rk, nm, sc, me) {
     return '<div class="row' + (me ? ' me' : '') + '"><span class="rk' + (typeof rk === 'number' && rk <= 3 ? ' t' : '') + '">' + rk + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + '</span></div>';
   }
@@ -108,13 +108,13 @@
     foot.innerHTML = '';
     if (L.e) { list.innerHTML = '<div class="msg">' + (unauth(L.e) ? t('closed') : t('fail')) + '</div>'; return; }
     var data = ((L.v && L.v.data) || []).slice(0, TOP), my = M.e ? null : (M.v || {}), mine = my && my.status === 'EXACT' ? my.rank : 0, shown = false;
-    for (var i = 0; i < data.length; i++) {      // ranks are unique, so your own row in the top 10 is the one with your rank
+    for (var i = 0; i < data.length; i++) {      // ranks are unique, so your own row in the top 100 is the one with your rank
       var me = mine && data[i].rank === mine; if (me) shown = true;
       h += row(data[i].rank, me ? t('you') : (data[i].nickname == null ? t('anon') : data[i].nickname), data[i].score + ' ' + t('wins'), me);
     }
     if (!data.length) h = '<div class="msg">' + t('none') + '</div>';
     list.innerHTML = h; list.scrollTop = 0;
-    if (shown) { foot.innerHTML = '<div class="row blank"></div>'; return; }      // in the top 10: highlighted where it is, and an empty card underneath, so the board keeps the skeleton's height
+    if (shown) { foot.innerHTML = '<div class="row blank"></div>'; var el = list.querySelector('.row.me'); if (el) list.scrollTop = Math.max(0, el.offsetTop - list.offsetTop - (list.clientHeight - el.offsetHeight) / 2); return; }      // in the top 100: highlighted where it is and scrolled to the middle of the box, an empty row underneath so the board keeps its height
     var rk = '-', sc = '', note = '';      // not in it: the same row, highlighted, pinned under the list
     if (M.e) note = unauth(M.e) ? t('meAuth') : '';
     else if (my.status === 'EXACT') { rk = my.rank; sc = my.score + ' ' + t('wins'); }
