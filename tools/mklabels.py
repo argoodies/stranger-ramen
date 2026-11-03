@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The capsules' words as SVG outlines, so they sit exactly in the middle on any device: no font is drawn at run time.
-Each language's words are laid out from Noto Sans CJK Bold (SC for 简体 and English, TC for 繁體), turned into one path and
+Each language's words are laid out from Noto Sans CJK Regular (SC for 简体 and English, TC for 繁體), turned into one path and
 cropped to their ink, then written between the LABELS markers in tools/xhs_rank.js as
   { hans: [d, width, height], hant: [...], en: [...] }   (units: em / 1000, y down; the box is the ink's own box)
 A capsule draws it as <svg viewBox="0 0 w h" height="h/1000 * font-size">: centring the box centres the ink.
@@ -12,8 +12,8 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.boundsPen import BoundsPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FONT = '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc'
-WORDS = {'hans': ('总胜场榜', 2), 'hant': ('總勝場榜', 3), 'en': ('Most Wins', 2)}      # text, face in the collection (2 SC, 3 TC)
+FONT = '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc'      # the normal weight
+WORDS = {'hans': ('排行榜', 2), 'hant': ('排行榜', 3), 'en': ('Leaderboard', 2)}      # text, face in the collection (2 SC, 3 TC)
 fonts = TTCollection(FONT).fonts
 
 def outline(text, face):
