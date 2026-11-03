@@ -2877,7 +2877,7 @@ if (location.hash) {
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null, markAt = null;
   // when the last game was a win, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
-  // the Xiaohongshu leaderboard once it works, xhs_rank.js; on the web your own count), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
+  // the Xiaohongshu build, xhs_rank.js; on the web your own count), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
   // bubbles, floating in its place; a tap opens the scores.
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
   // the bubbles' spin: a tap turns them once round in a second, fast at first and slowing gently back to where they started
@@ -2885,7 +2885,6 @@ if (location.hash) {
   // the web has no scoreboard: its ball turns and says how many games you have won on this device (botc3.js keeps the count)
   const WEBSAY = { hans: '你赢了 {w} 局。', hant: '你贏了 {w} 局。', en: '{w} wins so far.' };
   const webMark = { open: () => setTimeout(() => window.__markSay((WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins)), 1000) };
-  const inShell = () => !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc) || !!window.__xhsRank;      // the app or the Xiaohongshu build: they bring their own
   let markLine = null;      // what the ball says (the Xiaohongshu build: your wins and rank), in a speech bubble over it for a few seconds
   window.__markSay = text => { markLine = { text, t: 0 }; };
   window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };
@@ -2961,7 +2960,7 @@ if (location.hash) {
         if (!me.say && !me.talk && !intro && seenBook) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); fadedDraw(ap(2), () => { glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); }); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
-    const bm = window.__lastWon && (window.__boardMark || (inShell() ? null : webMark)); markAt = null;      // the last game won: the ball; lost (or none yet): the book
+    const bm = window.__lastWon && (window.__boardMark || webMark); markAt = null;      // the app and the Xiaohongshu build bring their own      // the last game won: the ball; lost (or none yet): the book
     if (me.say || me.talk) bookAt = null; else if (bm) drawMark(t, dt, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
@@ -2997,11 +2996,9 @@ if (location.hash) {
    Board 1, all-time: total wins, the same number the app sends to Game Center. The game posts { t: 'score', v } through
    window.__miniGC after each win and once at launch (__gcSync); a score goes up only when it has grown.
    After a won game the lobby shows Game Center's bubbles in a glass ball where the book was (tools/mk3b.py); tapped, it turns and
-   says your wins and your rank among all players. Older clients, a missing API or no nickname authorisation (1005 / 1006): no ball,
-   the book stays, and the game carries on as before. It also styles the language menu in Xiaohongshu's manner.
+   says your wins and, when the leaderboard can tell (client 9.51+, authorised), your rank among all players. It also styles the language menu in Xiaohongshu's manner.
    Plain ES5 so it passes the Chrome 61 gate as written; loaded by boot.js after the game scripts. */
 (function () {
-  window.__xhsRank = true;      // the Xiaohongshu build: its ball speaks only once the leaderboard works (no web one in its place); not __xhsBuild, which boot.js uses for the client version
   var MIN = 9510, BOARD = 1, CACHE = 45000, sent = 0, pend = 0, ok = false, off = false, cache = null, cacheAt = 0;
   function mt() { return window.xhs && window.xhs.miniTool; }
   function has() { var m = mt(); return !!(m && typeof m.submitScore === 'function' && typeof m.getRankList === 'function' && typeof m.getMyRank === 'function'); }
@@ -3014,7 +3011,7 @@ if (location.hash) {
     v = Math.floor(Number(v) || 0);
     if (!ok || off || v <= sent || v <= pend || v > 1000000) return;
     pend = v;
-    Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { if (unauth(e)) shut(); }).then(function () { pend = 0; });      // refused or failed: the board can still be looked at
+    Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { if (unauth(e)) off = true; }).then(function () { pend = 0; });      // refused or failed: the board can still be looked at
   }
   // scores posted before the leaderboard is found wait in a queue; the launch sync (syncing) sends the total from earlier sessions
   var queued = [], syncing = false;
@@ -3043,25 +3040,27 @@ if (location.hash) {
   document.head.appendChild(css);
 
   // ---- what the ball says: tapped (tools/mk3b.py), it turns once and then tells you, in a speech bubble like everyone else's,
-  // how many games you have won and where that puts you among all players
+  // how many games you have won (counted on this device) and, when the leaderboard can say, where that puts you among all players.
+  // No rank to be had (an old client, not authorised, not ranked yet, no network): just the wins.
   var SAY = {
-    hans: { rank: '你赢了 {w} 局，全网排名第 {r}。', over: '你赢了 {w} 局，全网排名 500 名开外。', none: '你赢了 {w} 局，还没上榜。', fail: '暂时查不到排名，稍后再试。' },
-    hant: { rank: '你贏了 {w} 局，全網排名第 {r}。', over: '你贏了 {w} 局，全網排名 500 名開外。', none: '你贏了 {w} 局，還沒上榜。', fail: '暫時查不到排名，稍後再試。' },
-    en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', none: '{w} wins so far, not ranked yet.', fail: 'Could not get your rank, try again later.' }
+    hans: { rank: '你赢了 {w} 局，全网排名第 {r}。', over: '你赢了 {w} 局，全网排名 500 名开外。', wins: '你赢了 {w} 局。' },
+    hant: { rank: '你贏了 {w} 局，全網排名第 {r}。', over: '你贏了 {w} 局，全網排名 500 名開外。', wins: '你贏了 {w} 局。' },
+    en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', wins: '{w} wins so far.' }
   };
+  function wins(my) { var n = 0; try { n = GCS.wins || 0; } catch (e) {} return Math.max(n, sent, (my && my.score) || 0); }
   function say(k, w, r) { var S = SAY[lang()] || SAY.hans; if (window.__markSay) window.__markSay(S[k].replace('{w}', w).replace('{r}', r)); }
   function fill(my) {
-    my = my || {}; var w = Math.max(sent, (my && my.score) || 0);
-    if (my.status === 'EXACT') say('rank', w, my.rank); else if (my.status === 'OVER_LIMIT') say('over', w); else say('none', w);
+    my = my || {};
+    if (my.status === 'EXACT') say('rank', wins(my), my.rank); else if (my.status === 'OVER_LIMIT') say('over', wins(my)); else say('wins', wins(my));
   }
   var busy = false;
   function openMe() {
     if (busy) return; busy = true;      // the bubble comes when the ball has stopped turning (a second), or when the rank does if later
     var t0 = Date.now(), after = function (f) { return function (v) { setTimeout(function () { busy = false; f(v); }, Math.max(0, 1000 - (Date.now() - t0))); }; };
-    load().then(after(fill), after(function (e) { if (unauth(e)) shut(); else say('fail'); }));
+    if (!ok || off) return after(fill)(null);      // no leaderboard here: the wins alone
+    load().then(after(fill), after(function (e) { if (unauth(e)) off = true; fill(null); }));
   }
-  function shut() { off = true; window.__boardMark = null; }      // not authorised (1005 / 1006): no ball, the book comes back
-  setInterval(function () { if (ok && !off && !window.__boardMark) window.__boardMark = { open: openMe }; }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
+  window.__boardMark = { open: openMe };      // the Xiaohongshu build always has the ball after a win
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.

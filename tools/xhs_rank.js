@@ -2,11 +2,9 @@
    Board 1, all-time: total wins, the same number the app sends to Game Center. The game posts { t: 'score', v } through
    window.__miniGC after each win and once at launch (__gcSync); a score goes up only when it has grown.
    After a won game the lobby shows Game Center's bubbles in a glass ball where the book was (tools/mk3b.py); tapped, it turns and
-   says your wins and your rank among all players. Older clients, a missing API or no nickname authorisation (1005 / 1006): no ball,
-   the book stays, and the game carries on as before. It also styles the language menu in Xiaohongshu's manner.
+   says your wins and, when the leaderboard can tell (client 9.51+, authorised), your rank among all players. It also styles the language menu in Xiaohongshu's manner.
    Plain ES5 so it passes the Chrome 61 gate as written; loaded by boot.js after the game scripts. */
 (function () {
-  window.__xhsRank = true;      // the Xiaohongshu build: its ball speaks only once the leaderboard works (no web one in its place); not __xhsBuild, which boot.js uses for the client version
   var MIN = 9510, BOARD = 1, CACHE = 45000, sent = 0, pend = 0, ok = false, off = false, cache = null, cacheAt = 0;
   function mt() { return window.xhs && window.xhs.miniTool; }
   function has() { var m = mt(); return !!(m && typeof m.submitScore === 'function' && typeof m.getRankList === 'function' && typeof m.getMyRank === 'function'); }
@@ -19,7 +17,7 @@
     v = Math.floor(Number(v) || 0);
     if (!ok || off || v <= sent || v <= pend || v > 1000000) return;
     pend = v;
-    Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { if (unauth(e)) shut(); }).then(function () { pend = 0; });      // refused or failed: the board can still be looked at
+    Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { if (unauth(e)) off = true; }).then(function () { pend = 0; });      // refused or failed: the board can still be looked at
   }
   // scores posted before the leaderboard is found wait in a queue; the launch sync (syncing) sends the total from earlier sessions
   var queued = [], syncing = false;
@@ -48,25 +46,27 @@
   document.head.appendChild(css);
 
   // ---- what the ball says: tapped (tools/mk3b.py), it turns once and then tells you, in a speech bubble like everyone else's,
-  // how many games you have won and where that puts you among all players
+  // how many games you have won (counted on this device) and, when the leaderboard can say, where that puts you among all players.
+  // No rank to be had (an old client, not authorised, not ranked yet, no network): just the wins.
   var SAY = {
-    hans: { rank: '你赢了 {w} 局，全网排名第 {r}。', over: '你赢了 {w} 局，全网排名 500 名开外。', none: '你赢了 {w} 局，还没上榜。', fail: '暂时查不到排名，稍后再试。' },
-    hant: { rank: '你贏了 {w} 局，全網排名第 {r}。', over: '你贏了 {w} 局，全網排名 500 名開外。', none: '你贏了 {w} 局，還沒上榜。', fail: '暫時查不到排名，稍後再試。' },
-    en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', none: '{w} wins so far, not ranked yet.', fail: 'Could not get your rank, try again later.' }
+    hans: { rank: '你赢了 {w} 局，全网排名第 {r}。', over: '你赢了 {w} 局，全网排名 500 名开外。', wins: '你赢了 {w} 局。' },
+    hant: { rank: '你贏了 {w} 局，全網排名第 {r}。', over: '你贏了 {w} 局，全網排名 500 名開外。', wins: '你贏了 {w} 局。' },
+    en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', wins: '{w} wins so far.' }
   };
+  function wins(my) { var n = 0; try { n = GCS.wins || 0; } catch (e) {} return Math.max(n, sent, (my && my.score) || 0); }
   function say(k, w, r) { var S = SAY[lang()] || SAY.hans; if (window.__markSay) window.__markSay(S[k].replace('{w}', w).replace('{r}', r)); }
   function fill(my) {
-    my = my || {}; var w = Math.max(sent, (my && my.score) || 0);
-    if (my.status === 'EXACT') say('rank', w, my.rank); else if (my.status === 'OVER_LIMIT') say('over', w); else say('none', w);
+    my = my || {};
+    if (my.status === 'EXACT') say('rank', wins(my), my.rank); else if (my.status === 'OVER_LIMIT') say('over', wins(my)); else say('wins', wins(my));
   }
   var busy = false;
   function openMe() {
     if (busy) return; busy = true;      // the bubble comes when the ball has stopped turning (a second), or when the rank does if later
     var t0 = Date.now(), after = function (f) { return function (v) { setTimeout(function () { busy = false; f(v); }, Math.max(0, 1000 - (Date.now() - t0))); }; };
-    load().then(after(fill), after(function (e) { if (unauth(e)) shut(); else say('fail'); }));
+    if (!ok || off) return after(fill)(null);      // no leaderboard here: the wins alone
+    load().then(after(fill), after(function (e) { if (unauth(e)) off = true; fill(null); }));
   }
-  function shut() { off = true; window.__boardMark = null; }      // not authorised (1005 / 1006): no ball, the book comes back
-  setInterval(function () { if (ok && !off && !window.__boardMark) window.__boardMark = { open: openMe }; }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
+  window.__boardMark = { open: openMe };      // the Xiaohongshu build always has the ball after a win
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.
