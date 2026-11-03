@@ -27,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-final class GameViewController: UIViewController, WKScriptMessageHandler {
+final class GameViewController: UIViewController, WKScriptMessageHandler, GKGameCenterControllerDelegate {
     private var webView: WKWebView!
 
     override var prefersStatusBarHidden: Bool { true }
@@ -127,8 +127,35 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
             GKLeaderboard.submitScore(value, context: 0, player: GKLocalPlayer.local, leaderboardIDs: ["pc.total_wins"]) { [weak self] error in
                 if let error = error { self?.testNote("Game Center refused the score \(value): \(error.localizedDescription)") }
             }
+        case "board":
+            showBoard()
         default:
             break
         }
+    }
+
+    // the capsule at the top of the lobby: Apple's own Game Center screen, opened on the Most Wins leaderboard.
+    // Signed out, it asks for sign-in first (the system sheet), then opens the board.
+    private func showBoard() {
+        guard presentedViewController == nil else { return }
+        let open = { [weak self] in
+            guard let self = self, self.presentedViewController == nil else { return }
+            let vc = GKGameCenterViewController(leaderboardID: "pc.total_wins", playerScope: .global, timeScope: .allTime)
+            vc.gameCenterDelegate = self
+            self.present(vc, animated: true)
+        }
+        if GKLocalPlayer.local.isAuthenticated { return open() }
+        GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, _ in
+            guard let self = self else { return }
+            if let viewController = viewController { self.present(viewController, animated: true) }
+            else if GKLocalPlayer.local.isAuthenticated {
+                self.webView?.evaluateJavaScript("window.__gcSync && window.__gcSync()", completionHandler: nil)
+                open()
+            } else { self.testNote("Game Center: not signed in") }
+        }
+    }
+
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+        gameCenterViewController.dismiss(animated: true)
     }
 }

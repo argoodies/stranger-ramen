@@ -7,11 +7,37 @@ function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } ca
 function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
 function gcRecord(won, role) {
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
-  GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win');
+  GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win'); window.__wonThisSession = true;
   for (const n of [100, 300, 1000]) if (GCS.wins >= n) gcAch('wins_' + n);
   gcPost({ t: 'score', v: GCS.wins });      // the leaderboard ranks total wins
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.wins) gcPost({ t: 'score', v: GCS.wins }); };      // once signed in: anything earned before sign-in goes up too
+// The app's leaderboard capsule: in the Tiny Clocktower app only (the web has none; the Xiaohongshu build has its own),
+// top middle of the lobby once the player has won in this session. In Apple's manner: frosted glass, the system font, a filled
+// trophy in system orange and a grey chevron. A tap opens Game Center's own Most Wins board (native, see AppDelegate).
+(function () {
+  const inApp = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc);
+  if (!inApp) return;
+  const T = { hans: '总胜场榜', hant: '總勝場榜', en: 'Most Wins' };
+  const make = () => {
+    const st = document.createElement('style');
+    st.textContent = '#gccap{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:none;align-items:center;height:36px;padding:0 13px 0 11px;border-radius:18px;border:.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.4);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.12);font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif;letter-spacing:-.01em;color:rgba(0,0,0,.82);white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .15s}' +
+      '#gccap.on{display:flex}#gccap:active{opacity:.55}#gccap svg{display:block}#gccap .ic{margin-right:7px}#gccap .ch{margin-left:6px}';
+    document.head.appendChild(st);
+    const b = document.createElement('button'); b.id = 'gccap'; b.setAttribute('aria-label', 'Game Center');
+    const label = () => '<svg class="ic" width="17" height="17" viewBox="0 0 24 24"><path fill="#FF9500" d="M7 3h10v2h3.5a1 1 0 0 1 1 1c0 3.3-2.1 5.9-5 6.6A5.2 5.2 0 0 1 13 15.9V18h3a1 1 0 0 1 1 1v2H7v-2a1 1 0 0 1 1-1h3v-2.1a5.2 5.2 0 0 1-3.5-3.3c-2.9-.7-5-3.3-5-6.6a1 1 0 0 1 1-1H7zm0 4H4.6a5 5 0 0 0 2.6 3.6A7 7 0 0 1 7 9zm10 0v2a7 7 0 0 1-.2 1.6A5 5 0 0 0 19.4 7z"/></svg>' +
+      '<span>' + (T[typeof LANG !== 'undefined' ? LANG : 'hans'] || T.hans) + '</span><svg class="ch" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="rgba(60,60,67,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5L5.5 6l-4 4.5"/></svg>';
+    let lastLang = '';
+    b.addEventListener('click', e => { e.stopPropagation(); gcPost({ t: 'board' }); });
+    document.body.appendChild(b);
+    setInterval(() => {
+      const on = !!window.__wonThisSession && !!window.__3bLang;
+      if (on && lastLang !== LANG) { lastLang = LANG; b.innerHTML = label(); }
+      b.classList.toggle('on', on);
+    }, 300);
+  };
+  if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
+})();
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).
 
