@@ -66,7 +66,12 @@
     '#xpanel .ft{padding:4px 8px 0;border-top:1px solid #f2f2f2;margin-top:4px}#xpanel .ft:empty{display:none}' +
     '#xpanel .msg{padding:26px 12px;text-align:center;color:#999;font-size:14px}' +
     '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
-    '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}';
+    '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}' +
+    // the language button and its menu in the same manner as the board: a white circle, a white card, the chosen language in red
+    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:#fff!important;color:#333!important;box-shadow:0 4px 12px rgba(0,0,0,.15)}#lang svg{display:block;margin:0 auto}' +
+    '#langMenu{padding:6px!important;min-width:150px;border:0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 10px 36px rgba(0,0,0,.2)}' +
+    '#langMenu button{border-radius:10px!important;padding:10px 14px!important;font:400 15px ' + XF + '!important;letter-spacing:0!important;color:#333!important;background:transparent!important}' +
+    '#langMenu button+button{margin-top:2px}#langMenu button.on{background:#FFF0F2!important;color:#FF2442!important;font-weight:600!important}';
   document.head.appendChild(css);
   btn = document.createElement('button'); btn.id = 'xcap'; btn.setAttribute('aria-label', 'rank');
   function capLabel() { btn.innerHTML = '<span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg></span><span>' + esc(t('title')) + '</span><span class="ar"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="#FF2442" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l4 4-4 4"/></svg></span>'; }      // a drawn chevron: a text \u203a sits on the font\'s baseline, not in the middle

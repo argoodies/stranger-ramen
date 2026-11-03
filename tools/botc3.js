@@ -22,11 +22,17 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
   const make = () => {
     const st = document.createElement('style');
     st.textContent = '#gccap{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;display:none;align-items:center;height:36px;padding:0 13px 0 11px;border-radius:18px;border:.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.4);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.12);font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif;letter-spacing:-.01em;color:rgba(0,0,0,.82);white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .15s}' +
-      '#gccap.on{display:flex}#gccap:active{opacity:.55}#gccap svg{display:block}#gccap .ic{margin-right:7px}#gccap .ch{margin-left:6px}';
+      '#gccap.on{display:flex}#gccap:active{opacity:.55}#gccap svg{display:block}#gccap .ic{margin-right:7px}#gccap .ch{margin-left:6px}' +
+      // the language button and its menu in the same manner: a glass circle, and an iOS menu of glass with an orange tick
+      '#lang{width:40px!important;height:40px!important;padding:0!important;display:flex;align-items:center;justify-content:center;border:.5px solid rgba(255,255,255,.55)!important;border-radius:50%!important;background:rgba(255,255,255,.4)!important;-webkit-backdrop-filter:saturate(180%) blur(20px)!important;backdrop-filter:saturate(180%) blur(20px)!important;box-shadow:0 4px 18px rgba(0,0,0,.12);color:rgba(0,0,0,.78)!important}#lang[style*="block"]{display:flex!important}#lang:active{opacity:.55}' +
+      '#langMenu{gap:0!important;padding:6px 0!important;min-width:180px;border-radius:14px!important;border:.5px solid rgba(255,255,255,.55)!important;background:rgba(246,246,248,.72)!important;-webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;box-shadow:0 10px 36px rgba(0,0,0,.18)}' +
+      '#langMenu button{position:relative;border-radius:0!important;padding:11px 44px 11px 18px!important;font:400 16px -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",system-ui,sans-serif!important;letter-spacing:-.01em!important;color:rgba(0,0,0,.86)!important;background:transparent!important}' +
+      '#langMenu button+button{border-top:.5px solid rgba(60,60,67,.18)}#langMenu button:active{background:rgba(0,0,0,.06)!important}' +
+      '#langMenu button.on::after{content:"";position:absolute;right:18px;top:50%;width:6px;height:11px;margin-top:-7px;border:solid #FF9500;border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}';
     document.head.appendChild(st);
     const b = document.createElement('button'); b.id = 'gccap'; b.setAttribute('aria-label', 'Game Center');
     const label = () => '<svg class="ic" width="17" height="17" viewBox="0 0 24 24"><path fill="#FF9500" d="M7 3h10v2h3.5a1 1 0 0 1 1 1c0 3.3-2.1 5.9-5 6.6A5.2 5.2 0 0 1 13 15.9V18h3a1 1 0 0 1 1 1v2H7v-2a1 1 0 0 1 1-1h3v-2.1a5.2 5.2 0 0 1-3.5-3.3c-2.9-.7-5-3.3-5-6.6a1 1 0 0 1 1-1H7zm0 4H4.6a5 5 0 0 0 2.6 3.6A7 7 0 0 1 7 9zm10 0v2a7 7 0 0 1-.2 1.6A5 5 0 0 0 19.4 7z"/></svg>' +
-      '<span>' + (T[typeof LANG !== 'undefined' ? LANG : 'hans'] || T.hans) + '</span><svg class="ch" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="rgba(60,60,67,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5L5.5 6l-4 4.5"/></svg>';
+      '<span>' + (T[typeof LANG !== 'undefined' ? LANG : 'hans'] || T.hans) + '</span><svg class="ch" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5L5.5 6l-4 4.5"/></svg>';
     let lastLang = '';
     b.addEventListener('click', e => { e.stopPropagation(); gcPost({ t: 'board' }); });
     document.body.appendChild(b);
