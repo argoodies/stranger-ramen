@@ -5,12 +5,26 @@ function disc(ctx) {      // the role token's own disc: tan rim, cream face
   ctx.beginPath(); ctx.arc(C, C, R, 0, TAU); ctx.fillStyle = css([206, 190, 160]); ctx.fill();
   ctx.beginPath(); ctx.arc(C, C, R * .88, 0, TAU); ctx.fillStyle = css([244, 232, 208]); ctx.fill();
 }
+// hand-drawn digits: thick rounded strokes, like the role tokens' emblems; each glyph in a box 0.62 wide, 1 tall
+const GLYPH = {
+  '0': c => { c.ellipse(.31, .5, .25, .44, 0, 0, TAU); },
+  '1': c => { c.moveTo(.1, .24); c.quadraticCurveTo(.24, .16, .36, .04); c.lineTo(.36, .96); },
+  '2': c => { c.moveTo(.06, .26); c.bezierCurveTo(.1, -.02, .58, -.02, .56, .3); c.bezierCurveTo(.54, .52, .22, .7, .06, .95); c.lineTo(.58, .95); },
+  '3': c => { c.moveTo(.08, .14); c.bezierCurveTo(.24, -.03, .58, .03, .52, .27); c.bezierCurveTo(.48, .43, .32, .47, .22, .47);
+              c.moveTo(.22, .47); c.bezierCurveTo(.66, .45, .64, .99, .3, .97); c.bezierCurveTo(.17, .97, .08, .91, .05, .84); },
+  '5': c => { c.moveTo(.54, .05); c.lineTo(.15, .05); c.lineTo(.11, .45); c.bezierCurveTo(.32, .33, .6, .41, .58, .67); c.bezierCurveTo(.56, .97, .2, 1.02, .05, .86); },
+  '7': c => { c.moveTo(.05, .05); c.lineTo(.58, .05); c.bezierCurveTo(.42, .3, .3, .6, .26, .95); },
+};
 function num(ctx, n, y, size, col, maxw = R * 1.05) {
-  ctx.font = `400 ${size}px "Noto Sans CJK SC", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  const m = ctx.measureText(n), h = m.actualBoundingBoxAscent - m.actualBoundingBoxDescent;
-  let s = size; if (m.width > maxw) { s = size * maxw / m.width; ctx.font = `400 ${s}px "Noto Sans CJK SC", sans-serif`; }
-  const m2 = ctx.measureText(n), h2 = m2.actualBoundingBoxAscent;
-  ctx.fillStyle = css(col); ctx.fillText(n, C, y + h2 / 2);
+  const adv = .62, gap = .12, w = n.length * adv + (n.length - 1) * gap;
+  const h = Math.min(size * .74, maxw / w), lw = Math.max(h * .15, 24), x0 = C - w * h / 2, y0 = y - h / 2;
+  ctx.save(); ctx.strokeStyle = css(col); ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  [...n].forEach((d, i) => {
+    const tilt = [-.05, .04, -.03, .05][i % 4];      // each digit a touch off true, as if by hand
+    ctx.save(); ctx.translate(x0 + i * (adv + gap) * h + adv * h / 2, y0 + h / 2); ctx.rotate(tilt); ctx.translate(-adv * h / 2, -h / 2); ctx.scale(h, h);
+    ctx.beginPath(); GLYPH[d](ctx); ctx.restore(); ctx.stroke();
+  });
+  ctx.restore();
 }
 function leaf(ctx, x, y, ang, len, wid, col) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0, 0);
@@ -28,7 +42,7 @@ function wins(ctx, n) {
       leaf(ctx, x, y, a + Math.PI - sgn * .2, 96, 34, col);
     }
   }
-  num(ctx, n, C + 10, 330, col, R * .66);
+  num(ctx, n, C + 10, 330, col, R * .58);
 }
 function streak(ctx, n) {      // a flame in the middle of the token, the number inside it
   const col = [206, 40, 62], fh = 640, fw = 360, cx = C, by = C + fh * .42, ty = C - fh * .58;
@@ -48,7 +62,7 @@ function streak(ctx, n) {      // a flame in the middle of the token, the number
   ctx.bezierCurveTo(cx - iw * .32, iby, cx - iw * .62, iby - ih * .1, cx - iw * .62, ity + ih * .7);
   ctx.bezierCurveTo(cx - iw * .62, ity + ih * .4, cx - iw * .1, ity + ih * .25, cx, ity);
   ctx.fillStyle = css([244, 232, 208]); ctx.fill();
-  num(ctx, n, iby - ih * .34, 210, col, iw * .58);
+  num(ctx, n, iby - ih * .36, 260, col, iw * .62);
 }
 function day(ctx, n) {
   const col = [240, 168, 12], rr = R * .5;      // the sun's bright yellow

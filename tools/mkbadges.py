@@ -2,7 +2,7 @@
 """Game Center achievement images for Tiny Clocktower, 1024x1024 PNGs into assets/achievements/<id>.png, all in the role tokens' style.
   the three role achievements show that role's token, drawn by the game's own roleToken (index.html), on a transparent ground:
     exec_survive (Undying) the anchor token   self_reverse (Turn the Tables) the cross token   trick_pukka (Double Dose) the arrow token
-  every other achievement is a token of the same disc with a number (tools/badgeart.html), in the game's font:
+  every other achievement is a token of the same disc with a hand-drawn number (tools/badgeart.html):
     wins and first win: a gold laurel wreath   streaks: a red flame, hollow, the number inside   days: the sun's yellow
 usage: tools/mkbadges.py      (needs the Playwright chrome-headless-shell)"""
 import os, re, json, base64, shutil, subprocess, tempfile
