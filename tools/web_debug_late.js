@@ -14,7 +14,7 @@
   var menu = document.createElement('div'); menu.id = 'dbgmenu';
   var h = '<div class="tt">调试 · 只在网页</div>';
   ['', 'xhs', 'app'].forEach(function (m) { h += '<button data-m="' + m + '"' + (m === mode ? ' class="on"' : '') + '>' + (m === mode ? '✓ ' : '') + LABEL[m] + '</button>'; });
-  h += '<hr><button data-win="1">模拟一胜（让胶囊出现）</button>';
+  h += '<hr><button data-win="1">模拟一胜（书变成小球）</button><button data-lose="1">模拟一负（小球变回书）</button>';
   menu.innerHTML = h;
   document.body.appendChild(sun); document.body.appendChild(menu);
   if (mode) { var tag = document.createElement('div'); tag.id = 'dbgtag'; tag.textContent = 'DEBUG · ' + LABEL[mode]; document.body.appendChild(tag); }
@@ -27,10 +27,11 @@
       var u = new URL(location.href); if (m) u.searchParams.set('mode', m); else u.searchParams.delete('mode'); location.href = u.toString();
     });
   });
+  menu.querySelector('button[data-lose]').addEventListener('click', function () { window.__lastWon = false; menu.classList.remove('open'); });
   menu.querySelector('button[data-win]').addEventListener('click', function () {
-    window.__wonThisSession = true;
+    window.__wonThisSession = true; window.__lastWon = true;
     var v = 1; try { v = (GCS.wins || 0) + 1; } catch (e) {}
     if (typeof window.__miniGC === 'function') window.__miniGC({ t: 'score', v: v });      // the Xiaohongshu capsule (a score after launch is a win)
-    menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜：回到浮岛就能看到胶囊');
+    menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜');
   });
 })();

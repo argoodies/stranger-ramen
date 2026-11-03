@@ -2557,6 +2557,7 @@ for (const id of Object.keys(GCS.ach || {})) if (!GCA.includes(id)) delete GCS.a
 function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } catch (e) {} if (typeof window.__miniGC === 'function') window.__miniGC(m); }      // the Xiaohongshu build listens here for its leaderboard
 function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
 function gcRecord(won, role) {
+  window.__lastWon = !!won;      // the lobby shows the scores' ball after a win, the book after a loss (tools/mk3b.py)
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
   GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win'); window.__wonThisSession = true;
   for (const n of [100, 300, 1000]) if (GCS.wins >= n) gcAch('wins_' + n);
@@ -2875,7 +2876,7 @@ if (location.hash) {
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null, markAt = null;
-  // after a win in this visit, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
+  // when the last game was a win, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
   // the Xiaohongshu leaderboard once it works, xhs_rank.js), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
   // bubbles, floating in its place; a tap opens the scores. The web has none: the book stays.
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
@@ -2948,7 +2949,7 @@ if (location.hash) {
         if (!me.say && !me.talk && !intro && seenBook) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); fadedDraw(ap(2), () => { glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); }); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
-    const bm = window.__wonThisSession && window.__boardMark; markAt = null;
+    const bm = window.__lastWon && window.__boardMark; markAt = null;      // the last game won: the ball; lost (or none yet): the book
     if (me.say || me.talk) bookAt = null; else if (bm) drawMark(t, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
@@ -3185,7 +3186,7 @@ if (location.hash) {
   var menu = document.createElement('div'); menu.id = 'dbgmenu';
   var h = '<div class="tt">调试 · 只在网页</div>';
   ['', 'xhs', 'app'].forEach(function (m) { h += '<button data-m="' + m + '"' + (m === mode ? ' class="on"' : '') + '>' + (m === mode ? '✓ ' : '') + LABEL[m] + '</button>'; });
-  h += '<hr><button data-win="1">模拟一胜（让胶囊出现）</button>';
+  h += '<hr><button data-win="1">模拟一胜（书变成小球）</button><button data-lose="1">模拟一负（小球变回书）</button>';
   menu.innerHTML = h;
   document.body.appendChild(sun); document.body.appendChild(menu);
   if (mode) { var tag = document.createElement('div'); tag.id = 'dbgtag'; tag.textContent = 'DEBUG · ' + LABEL[mode]; document.body.appendChild(tag); }
@@ -3198,11 +3199,12 @@ if (location.hash) {
       var u = new URL(location.href); if (m) u.searchParams.set('mode', m); else u.searchParams.delete('mode'); location.href = u.toString();
     });
   });
+  menu.querySelector('button[data-lose]').addEventListener('click', function () { window.__lastWon = false; menu.classList.remove('open'); });
   menu.querySelector('button[data-win]').addEventListener('click', function () {
-    window.__wonThisSession = true;
+    window.__wonThisSession = true; window.__lastWon = true;
     var v = 1; try { v = (GCS.wins || 0) + 1; } catch (e) {}
     if (typeof window.__miniGC === 'function') window.__miniGC({ t: 'score', v: v });      // the Xiaohongshu capsule (a score after launch is a win)
-    menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜：回到浮岛就能看到胶囊');
+    menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜');
   });
 })();
 </script>

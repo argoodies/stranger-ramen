@@ -6,6 +6,7 @@ for (const id of Object.keys(GCS.ach || {})) if (!GCA.includes(id)) delete GCS.a
 function gcPost(m) { try { window.webkit.messageHandlers.gc.postMessage(m); } catch (e) {} if (typeof window.__miniGC === 'function') window.__miniGC(m); }      // the Xiaohongshu build listens here for its leaderboard
 function gcAch(id) { GCS.ach[id] = 1; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} gcPost({ t: 'ach', id: 'pc.' + id }); }
 function gcRecord(won, role) {
+  window.__lastWon = !!won;      // the lobby shows the scores' ball after a win, the book after a loss (tools/mk3b.py)
   if (!won) { GCS.streak = 0; try { localStorage.setItem(GCK, JSON.stringify(GCS)); } catch (e) {} return; }
   GCS.wins++; GCS.streak++; GCS.best = Math.max(GCS.best, GCS.streak); gcAch('first_win'); window.__wonThisSession = true;
   for (const n of [100, 300, 1000]) if (GCS.wins >= n) gcAch('wins_' + n);

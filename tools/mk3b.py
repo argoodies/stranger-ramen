@@ -50,7 +50,7 @@ boot = """<script>
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null, markAt = null;
-  // after a win in this visit, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
+  // when the last game was a win, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
   // the Xiaohongshu leaderboard once it works, xhs_rank.js), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
   // bubbles, floating in its place; a tap opens the scores. The web has none: the book stays.
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
@@ -123,7 +123,7 @@ boot = """<script>
         if (!me.say && !me.talk && !intro && seenBook) { const yy = p[1] - K * 1.2 * 1.75 - Math.abs(Math.sin(t * 3)) * s * .14, r = s * .13; glow(p[0], yy, r * 4, [255, 236, 170], .7); poly([[p[0], yy - r * 1.3], [p[0] + r, yy], [p[0], yy + r * 1.3], [p[0] - r, yy]], [255, 236, 170]); } },      // a bright diamond bobbing over his head: talk to him
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); fadedDraw(ap(2), () => { glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); }); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
-    const bm = window.__wonThisSession && window.__boardMark; markAt = null;
+    const bm = window.__lastWon && window.__boardMark; markAt = null;      // the last game won: the ball; lost (or none yet): the book
     if (me.say || me.talk) bookAt = null; else if (bm) drawMark(t, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
