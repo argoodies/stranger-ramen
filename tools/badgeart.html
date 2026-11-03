@@ -30,17 +30,28 @@ function leaf(ctx, x, y, ang, len, wid, col) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0, 0);
   ctx.quadraticCurveTo(len * .5, -wid, len, 0); ctx.quadraticCurveTo(len * .5, wid, 0, 0); ctx.fillStyle = css(col); ctx.fill(); ctx.restore();
 }
-function wins(ctx, n) {      // a laurel wreath in the tokens' manner: five big leaves a side on a thick stem, the two branches apart at the foot
-  const col = [184, 132, 36], cy = C + 20, rr = R * .62;
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = css(col); ctx.fillStyle = css(col);
-  for (const sgn of [-1, 1]) {
-    const a0 = Math.PI / 2 - sgn * .66, a1 = Math.PI / 2 - sgn * 2.45;      // the foot of each branch stops well short of the middle
-    ctx.lineWidth = 34; ctx.beginPath(); ctx.arc(C, cy, rr, a0, a1, sgn > 0); ctx.stroke();
-    for (let k = 0; k < 5; k++) { const u = k / 4, a = a0 + (a1 - a0) * (.08 + .86 * u), x = C + Math.cos(a) * rr, y = cy + Math.sin(a) * rr, along = a - sgn * Math.PI / 2;
-      leaf(ctx, x, y, along + sgn * .75, 150 - 30 * u, 62 - 10 * u, col); }
-    const ta = a1, tx = C + Math.cos(ta) * rr, ty = cy + Math.sin(ta) * rr; leaf(ctx, tx, ty, ta - sgn * Math.PI / 2, 105, 46, col);
-  }
-  num(ctx, n, C + 4, 330, col, R * .56);
+const G1 = [184, 132, 36], G2 = [150, 104, 24], CRM = [244, 232, 208], RED = [206, 40, 62], BLU = [60, 130, 230];
+function leaf2(ctx, x, y, ang, len, wid, mode) {      // a leaf; 'two': its lower half a darker gold; 'vein': a cream midrib
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(len * .5, -wid, len, 0); ctx.quadraticCurveTo(len * .5, wid, 0, 0); ctx.fillStyle = css(G1); ctx.fill();
+  if (mode === 'two') { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len, 0); ctx.quadraticCurveTo(len * .5, wid, 0, 0); ctx.fillStyle = css(G2); ctx.fill(); }
+  if (mode === 'vein') { ctx.beginPath(); ctx.moveTo(len * .18, 0); ctx.lineTo(len * .72, 0); ctx.strokeStyle = css(CRM); ctx.lineWidth = wid * .22; ctx.lineCap = 'round'; ctx.stroke(); }
+  ctx.restore();
+}
+function branch(ctx, sgn, o) {      // one side of the wreath on an arc round (C, cy)
+  const { cy, rr, a0s, a1s, k, lw, mode, both, berries } = o, a0 = Math.PI / 2 - sgn * a0s, a1 = Math.PI / 2 - sgn * a1s;
+  ctx.strokeStyle = css(G1); ctx.lineCap = 'round'; ctx.lineWidth = lw; ctx.beginPath(); ctx.arc(C, cy, rr, a0, a1, sgn > 0); ctx.stroke();
+  for (let i = 0; i < k; i++) { const u = i / (k - 1), a = a0 + (a1 - a0) * (.08 + .86 * u), x = C + Math.cos(a) * rr, y = cy + Math.sin(a) * rr, along = a - sgn * Math.PI / 2;
+    const L = (o.L || 150) - 30 * u, Wd = (o.W || 62) - 10 * u;
+    if (both) { if (i % 2) leaf2(ctx, x, y, along + sgn * .75, L, Wd, mode); else leaf2(ctx, x, y, along - sgn * .65, L * .9, Wd * .9, mode); }
+    else leaf2(ctx, x, y, along + sgn * .75, L, Wd, mode);
+    if (berries && i % 2 === 0 && i < k - 1) { const b = a + (a1 - a0) * .1, bx = C + Math.cos(b) * (rr - 46), by = cy + Math.sin(b) * (rr - 46); ctx.beginPath(); ctx.arc(bx, by, 20, 0, TAU); ctx.fillStyle = css(i % 4 ? BLU : RED); ctx.fill(); } }
+  const ta = a1, tx = C + Math.cos(ta) * rr, ty = cy + Math.sin(ta) * rr; leaf2(ctx, tx, ty, ta - sgn * Math.PI / 2, (o.L || 150) * .7, (o.W || 62) * .74, mode);
+}
+function wins(ctx, n) {      // a laurel wreath in the tokens' manner: leaves on both sides of each stem, the two branches apart at the foot
+  const o = { cy: C + 20, rr: R * .62, a0s: .66, a1s: 2.45, k: 7, lw: 30, both: true, L: 132, W: 54 };
+  for (const sgn of [-1, 1]) branch(ctx, sgn, o);
+  num(ctx, n, C + 4, 330, G1, R * .56);
 }
 function streak(ctx, n) {      // a flame in the middle of the token, the number inside it
   const col = [206, 40, 62], fh = 640, fw = 360, cx = C, by = C + fh * .42, ty = C - fh * .58;
