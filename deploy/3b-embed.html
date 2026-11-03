@@ -2838,15 +2838,18 @@ if (location.hash) {
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null, markAt = null;
   // after a win in this visit, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
-  // the Xiaohongshu leaderboard once it works, xhs_rank.js), the book beside the Storyteller turns into Game Center's bubbles floating in
-  // the air; a tap opens the scores. The web has none: the book stays.
+  // the Xiaohongshu leaderboard once it works, xhs_rank.js), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
+  // bubbles, floating in its place; a tap opens the scores. The web has none: the book stays.
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
-  function drawMark(t, P, s, bm) {
-    const q = P(1.1, -.62, 2.0), x = q[0], k = s * .9 / 24, bob = Math.sin(t * 1.6) * s * .06, y = q[1] - s * .38 + bob;      // floating a little above where the book lay
-    ell(x, q[1] + s * .05, s * .34 - bob * .8, s * .1 - bob * .25, [40, 60, 70], .18);      // its shadow on the table, smaller as it rises
-    glow(x, y, s * .9, [255, 255, 255], .35);
-    for (const [cx, cy, r, c, a] of BUBBLES) { ctx.beginPath(); ctx.arc(x + (cx - 12) * k, y + (cy - 11.5) * k, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
-    markAt = [x, y, s * .7, bm]; bookAt = null;
+  function drawMark(t, P, s, bm) {      // small, floating where the book lay, in a ball of frosted glass: the table shows through it, blurred
+    const q = P(1.1, -.62, 2.0), R = Math.max(10, s * .3), x = q[0], y = q[1] - s * .12 + Math.sin(t * 1.6) * s * .04, k = R * 1.5 / 24;
+    const m = ctx.getTransform(), dx = m.a * x + m.e, dy = m.d * y + m.f, dr = m.a * R;      // in the canvas's own pixels
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.beginPath(); ctx.arc(dx, dy, dr, 0, TAU); ctx.clip();
+    if ('filter' in ctx) { const pd = dr * 1.6; ctx.filter = 'blur(' + (dr * .22).toFixed(1) + 'px)'; ctx.drawImage(ctx.canvas, dx - pd, dy - pd, pd * 2, pd * 2, dx - pd, dy - pd, pd * 2, pd * 2); ctx.filter = 'none'; }      // what is behind it, blurred
+    ctx.fillStyle = 'rgba(255,255,255,.38)'; ctx.fillRect(dx - dr, dy - dr, dr * 2, dr * 2); ctx.restore();      // a milky white over it
+    ctx.beginPath(); ctx.arc(x, y, R - .5, 0, TAU); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.stroke();      // its rim catching the light
+    for (const [cx, cy, r, c, a] of BUBBLES) { ctx.beginPath(); ctx.arc(x + (cx - 11.2) * k, y + (cy - 11.5) * k, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
+    markAt = [x, y, Math.max(24, R * 2), bm]; bookAt = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
@@ -2908,7 +2911,7 @@ if (location.hash) {
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); fadedDraw(ap(2), () => { glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); }); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
     const bm = window.__wonThisSession && window.__boardMark; markAt = null;
-    if (!me.say && !me.talk) fadedDraw(ap(3), () => bm ? drawMark(t, P, s, bm) : drawBook(t, P, s)); else bookAt = null;      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
+    if (me.say || me.talk) bookAt = null; else if (bm) drawMark(t, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
     if (me.line && (me.line.t += dt) < 2.4) { const p = P(me.x, me.y); sayBubble(p[0], p[1] - K * 1.6, me.line.text, clamp(W * .036, 12.5, 15), clamp(me.line.t * 4) * clamp((2.4 - me.line.t) * 3), W * .62); } else me.line = null;      // what you just said (a new language)
