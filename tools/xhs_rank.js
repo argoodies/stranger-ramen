@@ -69,6 +69,7 @@
     '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
     '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}' +
     '#xpanel .sk i{display:block;height:12px;border-radius:6px;background:#f0f0f0;background:-webkit-linear-gradient(left,#f2f2f2 25%,#e6e6e6 50%,#f2f2f2 75%);background:linear-gradient(90deg,#f2f2f2 25%,#e6e6e6 50%,#f2f2f2 75%);background-size:200% 100%;-webkit-animation:xsh 1.3s linear infinite;animation:xsh 1.3s linear infinite}' +
+    '#xpanel .row.blank{height:41px;box-sizing:border-box}' +
     '#xpanel .sk .rk i{width:16px}#xpanel .sk .sc i{width:38px}#xpanel .row.sk{height:41px;box-sizing:border-box}' +      // the height of a real row
     '@-webkit-keyframes xsh{from{background-position:150% 0}to{background-position:-50% 0}}@keyframes xsh{from{background-position:150% 0}to{background-position:-50% 0}}' +
     // the language menu in the same manner as the board: a white card, the chosen language in red (the button is the shared 文A mark, tools/mk3b.py)
@@ -98,7 +99,7 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the
   // container loads no web images
-  var TOP = 10;      // the board shows the top 10 and one more row under them: your own rank if you are further down, else the 11th
+  var TOP = 10;      // the board shows the top 10 and one more row under them: your own rank if you are further down, else an empty card
   function row(rk, nm, sc, me) {
     return '<div class="row' + (me ? ' me' : '') + '"><span class="rk' + (typeof rk === 'number' && rk <= 3 ? ' t' : '') + '">' + rk + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + '</span></div>';
   }
@@ -106,14 +107,14 @@
     var L = r[0], M = r[1], h = '';
     foot.innerHTML = '';
     if (L.e) { list.innerHTML = '<div class="msg">' + (unauth(L.e) ? t('closed') : t('fail')) + '</div>'; return; }
-    var all = (L.v && L.v.data) || [], data = all.slice(0, TOP), my = M.e ? null : (M.v || {}), mine = my && my.status === 'EXACT' ? my.rank : 0, shown = false;
+    var data = ((L.v && L.v.data) || []).slice(0, TOP), my = M.e ? null : (M.v || {}), mine = my && my.status === 'EXACT' ? my.rank : 0, shown = false;
     for (var i = 0; i < data.length; i++) {      // ranks are unique, so your own row in the top 10 is the one with your rank
       var me = mine && data[i].rank === mine; if (me) shown = true;
       h += row(data[i].rank, me ? t('you') : (data[i].nickname == null ? t('anon') : data[i].nickname), data[i].score + ' ' + t('wins'), me);
     }
     if (!data.length) h = '<div class="msg">' + t('none') + '</div>';
     list.innerHTML = h; list.scrollTop = 0;
-    if (shown) { var n = all[TOP]; if (n) foot.innerHTML = row(n.rank, n.nickname == null ? t('anon') : n.nickname, n.score + ' ' + t('wins'), false); return; }      // in the top 10: highlighted where it is, and the 11th underneath, so the board keeps the skeleton's height
+    if (shown) { foot.innerHTML = '<div class="row blank"></div>'; return; }      // in the top 10: highlighted where it is, and an empty card underneath, so the board keeps the skeleton's height
     var rk = '-', sc = '', note = '';      // not in it: the same row, highlighted, pinned under the list
     if (M.e) note = unauth(M.e) ? t('meAuth') : '';
     else if (my.status === 'EXACT') { rk = my.rank; sc = my.score + ' ' + t('wins'); }
