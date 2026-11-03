@@ -2541,7 +2541,7 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     document.head.appendChild(st);
   };
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
-  window.__boardMark = { open: () => gcPost({ t: 'center' }) };      // the bubbles in the lobby after a win (tools/mk3b.py): Game Center itself
+  window.__boardMark = { open: () => setTimeout(() => gcPost({ t: 'center' }), 1000) };      // once the ball's turn is over      // the bubbles in the lobby after a win (tools/mk3b.py): Game Center itself
 })();
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).
@@ -2842,14 +2842,18 @@ if (location.hash) {
   // the Xiaohongshu leaderboard once it works, xhs_rank.js), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
   // bubbles, floating in its place; a tap opens the scores. The web has none: the book stays.
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid
-  function drawMark(t, P, s, bm) {      // small, floating where the book lay, in a ball of frosted glass: the table shows through it, blurred
+  // the bubbles' spin: a tap turns them once round in a second, fast at first and slowing gently back to where they started
+  const spin = { a: 0, tw: 0 };
+  window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };
+  function turn(dt) { if (!spin.tw) return; spin.tw = Math.min(1, spin.tw + dt); const u = 1 - Math.pow(1 - spin.tw, 3); spin.a = TAU * u; if (spin.tw >= 1) { spin.tw = 0; spin.a = 0; } }
+  function drawMark(t, dt, P, s, bm) {      // small, floating where the book lay, in a ball of frosted glass: the table shows through it, blurred
     const q = P(1.1, -.62, 2.0), R = Math.max(10, s * .3), x = q[0], y = q[1] - s * .12 + Math.sin(t * 1.6) * s * .04, k = R * 1.5 / 24;
     const m = ctx.getTransform(), dx = m.a * x + m.e, dy = m.d * y + m.f, dr = m.a * R;      // in the canvas's own pixels
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.beginPath(); ctx.arc(dx, dy, dr, 0, TAU); ctx.clip();
     if ('filter' in ctx) { const pd = dr * 1.6; ctx.filter = 'blur(' + (dr * .22).toFixed(1) + 'px)'; ctx.drawImage(ctx.canvas, dx - pd, dy - pd, pd * 2, pd * 2, dx - pd, dy - pd, pd * 2, pd * 2); ctx.filter = 'none'; }      // what is behind it, blurred
     ctx.fillStyle = 'rgba(255,255,255,.38)'; ctx.fillRect(dx - dr, dy - dr, dr * 2, dr * 2); ctx.restore();      // a milky white over it
     ctx.beginPath(); ctx.arc(x, y, R - .5, 0, TAU); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.stroke();      // its rim catching the light
-    const sp = bm.busy ? t * 7 : 0, cs = Math.cos(sp), sn = Math.sin(sp);      // loading (bm.busy): the bubbles spin round in their glass
+    turn(dt); const cs = Math.cos(spin.a), sn = Math.sin(spin.a);
     for (const [cx, cy, r, c, a] of BUBBLES) { const u = (cx - 11.2) * k, v = (cy - 11.5) * k; ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); }
     markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;      // a finger-sized place to tap, bigger than the ball
   }
@@ -2913,7 +2917,7 @@ if (location.hash) {
       drawMe = () => { const p = P(me.x, me.y), y = p[1] - (moving ? Math.abs(Math.sin(me.hop * 9)) * s * .12 : 0); fadedDraw(ap(2), () => { glow(p[0], y - K * .6, K * 1.2, [255, 240, 200], .3); fig(p[0], y, K, BLOOK[0]); }); };
     if (me.x + me.y < 0) { drawMe(); drawSt(); } else { drawSt(); drawMe(); }      // whoever is nearer is drawn last
     const bm = window.__lastWon && window.__boardMark; markAt = null;      // the last game won: the ball; lost (or none yet): the book
-    if (me.say || me.talk) bookAt = null; else if (bm) drawMark(t, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
+    if (me.say || me.talk) bookAt = null; else if (bm) drawMark(t, dt, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
     if (me.line && (me.line.t += dt) < 2.4) { const p = P(me.x, me.y); sayBubble(p[0], p[1] - K * 1.6, me.line.text, clamp(W * .036, 12.5, 15), clamp(me.line.t * 4) * clamp((2.4 - me.line.t) * 3), W * .62); } else me.line = null;      // what you just said (a new language)
@@ -2928,7 +2932,7 @@ if (location.hash) {
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
-    if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
+    if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); window.__spinMark(); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table

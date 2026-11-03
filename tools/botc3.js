@@ -28,7 +28,7 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     document.head.appendChild(st);
   };
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
-  window.__boardMark = { open: () => gcPost({ t: 'center' }) };      // the bubbles in the lobby after a win (tools/mk3b.py): Game Center itself
+  window.__boardMark = { open: () => setTimeout(() => gcPost({ t: 'center' }), 1000) };      // once the ball's turn is over      // the bubbles in the lobby after a win (tools/mk3b.py): Game Center itself
 })();
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).

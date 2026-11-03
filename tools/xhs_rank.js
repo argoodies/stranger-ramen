@@ -168,12 +168,12 @@
     card.innerHTML = AV + '<span><div class="nm">' + esc(name) + '</div><div class="st">' + wins + ' ' + t('wins') + ' · <b>' + esc(rk) + '</b></div></span>'; place();
   }
   var busy = false;
-  function show2(f) { return function (v) { busy = false; if (window.__boardMark) window.__boardMark.busy = false; card.classList.add('open'); f(v); }; }
+  function show2(f) { return function (v) { busy = false; card.classList.add('open'); f(v); }; }
   function openMe(x, y) {
     at = [x, y];
-    if (cache && Date.now() - cacheAt < CACHE) { card.classList.add('open'); return fill(cache); }
-    if (busy) return; busy = true; window.__boardMark.busy = true;      // loading: no card yet, the ball spins (tools/mk3b.py) until it comes
-    var t0 = Date.now(), after = function (f) { return function (v) { setTimeout(function () { if (busy) f(v); }, Math.max(0, 600 - (Date.now() - t0))); }; };
+    if (busy) return; busy = true;      // the ball turns once, for a second (tools/mk3b.py); the card comes when it has stopped, or when the scores do if later
+    var t0 = Date.now(), after = function (f) { return function (v) { setTimeout(function () { if (busy) f(v); }, Math.max(0, 1000 - (Date.now() - t0))); }; };
+    if (cache && Date.now() - cacheAt < CACHE) return after(show2(fill))(cache);
     load().then(after(show2(fill)), after(show2(function () { card.innerHTML = AV + '<span class="st">' + t('fail') + '</span>'; place(); })));
   }
   function closeMe() { card.classList.remove('open'); }
@@ -185,7 +185,7 @@
   var lastLang = '';
   // shown first, so the words are drawn to the capsule's real height
   function show(v) { btn.classList.toggle('on', v); if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } }
-  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: function (x, y) { if (card.classList.contains('open')) closeMe(); else openMe(x, y); } }; if (!window.__3bLang) { close(); closeMe(); busy = false; if (window.__boardMark) window.__boardMark.busy = false; } }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
+  setInterval(function () { show(false); if (ok && !window.__boardMark) window.__boardMark = { open: function (x, y) { if (card.classList.contains('open')) closeMe(); else openMe(x, y); } }; if (!window.__3bLang) { close(); closeMe(); busy = false; } }, 300);      // no capsule: once the leaderboard works, the bubbles that replace the book after a win (tools/mk3b.py) open it      // the floating island's lobby, after a win in this session; never hidden for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.
