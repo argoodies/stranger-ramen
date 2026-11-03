@@ -13,11 +13,12 @@ Chrome 61 baseline, so the page is rewritten, not just zipped:
   * rank.js (tools/xhs_rank.js) adds the total-wins leaderboard on clients 9.51+ (mini-tool submitScore / getRankList /
     getMyRank); without it, or without nickname authorisation, nothing shows;
   * index.html sits at the zip root with only .html and .js beside it.
-usage: tools/mkxhs.py [out.zip]      (needs node/npx for esbuild and acorn; default out: dist/xhs/sanrenran.zip)"""
+usage: tools/mkxhs.py [out.zip] [--debug]      (needs node/npx for esbuild and acorn; default out: dist/xhs/sanrenran.zip)"""
 import os, re, sys, json, shutil, subprocess, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'deploy', '3b.html')
+DEBUG = '--debug' in sys.argv; sys.argv = [x for x in sys.argv if x != '--debug']      # --debug: the leaderboard says on screen why it is or is not shown
 OUT_ZIP = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, 'dist', 'xhs', 'sanrenran.zip')
 STAGE = os.path.join(os.path.dirname(OUT_ZIP), 'pkg')
 ESBUILD, ACORN = 'esbuild@0.25.10', 'acorn@8.15.0'
@@ -112,7 +113,8 @@ for k, js in enumerate(scripts):
     raw = os.path.join(STAGE, f'.raw{k + 1}.js'); open(raw, 'w', encoding='utf-8').write(js)
     r = subprocess.run(['npx', '--yes', ESBUILD, raw, '--target=es2017,chrome61', '--charset=utf8', '--legal-comments=none', '--minify-whitespace', f'--outfile={os.path.join(STAGE, f"app{k + 1}.js")}'], capture_output=True, text=True)
     must(r.returncode == 0, f'esbuild app{k + 1}: {r.stderr[-800:]}'); os.remove(raw)
-shutil.copy(os.path.join(ROOT, 'tools', 'xhs_rank.js'), os.path.join(STAGE, 'rank.js'))      # the leaderboard, written in ES5
+rank = open(os.path.join(ROOT, 'tools', 'xhs_rank.js'), encoding='utf-8').read()      # the leaderboard, written in ES5
+open(os.path.join(STAGE, 'rank.js'), 'w', encoding='utf-8').write(('window.__xhsRankDebug = true;\n' if DEBUG else '') + rank)
 for f in ['boot.js', 'app1.js', 'app2.js', 'app3.js', 'rank.js']:      # the Chrome 61 gate: every script must parse as ES2017
     r = subprocess.run(['npx', '--yes', '-p', ACORN, 'acorn', '--ecma2017', '--silent', os.path.join(STAGE, f)], capture_output=True, text=True)
     must(r.returncode == 0, f'{f} is not ES2017: {r.stderr[-600:] or r.stdout[-600:]}')

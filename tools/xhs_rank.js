@@ -16,7 +16,7 @@
   };
   function t(k) { return (T[lang()] || T.hans)[k]; }
   function code(e) { return e && typeof e.errCode === 'number' ? e.errCode : 0; }
-  function unauth(e) { var c = code(e); if (c === 1005 || c === 1006 || c === 10003) { off = true; show(false); return true; } return false; }
+  function unauth(e) { if (window.__rankErr) window.__rankErr(e); var c = code(e); if (c === 1005 || c === 1006 || c === 10003) { off = true; show(false); return true; } return false; }
 
   // ---- submitting: only a bigger total, never in a loop
   function submit(v) {
@@ -78,11 +78,39 @@
   function show(v) { btn.style.display = v ? 'block' : 'none'; }
   setInterval(function () { show(ok && !off && !!window.__3bLang && panel.style.display !== 'flex'); }, 300);      // only in the lobby, like the language button
 
-  // ---- switched on only for a client that has it
-  Promise.resolve(window.__xhsBuild || 0).then(function (b) {
-    if (Math.floor(b / 1000) < MIN || !has()) return;
-    ok = true;
-    for (var i = 0; i < queued.length; i++) submit(queued[i]);
-    if (typeof window.__gcSync === 'function') window.__gcSync();      // the total so far goes up once at launch
-  });
+  // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
+  // and the launch options may come late, so look again every half second for a while instead of deciding once.
+  var why = 'starting', tries = 0, lastErr = '';
+  function build() {
+    var x = window.xhs, lo = x && x.launchOptions, v = Number(lo && lo.miniToolEnv && lo.miniToolEnv.buildVersion) || 0;
+    if (v) return Promise.resolve(v);
+    var m = mt(); if (!m || typeof m.getLaunchOptions !== 'function') return Promise.resolve(Promise.resolve(window.__xhsBuild || 0));
+    return Promise.resolve(m.getLaunchOptions()).then(function (o) { return Number(o && o.miniToolEnv && o.miniToolEnv.buildVersion) || 0; }, function () { return 0; });
+  }
+  function detect() {
+    if (ok || off) return;
+    tries++;
+    build().then(function (b) {
+      if (ok || off) return;
+      if (!window.xhs) why = 'no window.xhs';
+      else if (!b) why = 'no build version';
+      else if (Math.floor(b / 1000) < MIN) { why = 'client ' + b + ' < 9.51'; return; }      // an old client will not change: stop looking
+      else if (!has()) why = 'no leaderboard API (build ' + b + ')';
+      else { why = 'on (build ' + b + ')'; ok = true;
+        for (var i = 0; i < queued.length; i++) submit(queued[i]);
+        if (typeof window.__gcSync === 'function') window.__gcSync();      // the total so far goes up once at launch
+        return; }
+      if (tries < 40) setTimeout(detect, 500);      // up to twenty seconds
+    });
+  }
+  detect();
+
+  // ---- diagnostic build only (mkxhs --debug): a small line at the foot says why the trophy is or is not shown
+  if (window.__xhsRankDebug) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;left:8px;right:8px;bottom:calc(64px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:30;font:11px monospace;color:#fff;background:rgba(0,0,0,.55);padding:4px 6px;border-radius:6px;pointer-events:none;word-break:break-all';
+    document.body.appendChild(d);
+    setInterval(function () { d.textContent = 'rank: ' + (off ? 'off (unauthorised) ' : '') + why + ' · lobby ' + !!window.__3bLang + ' · sent ' + sent + (lastErr ? ' · err ' + lastErr : '') + ' · tries ' + tries; }, 500);
+  }
+  window.__rankErr = function (e) { lastErr = (e && (e.errCode || '') + ' ' + (e.errMsg || '')) || String(e); };
 })();
