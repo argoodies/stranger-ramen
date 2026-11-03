@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Build deploy/3b.html: the three-player game from the clock tower, on its own.
+"""Build deploy/3b.html (web, with a debug switch behind the sun) and deploy/3b-embed.html (the app and the Xiaohongshu package):
+the three-player game from the clock tower, on its own.
 
 It is index.html with tools/botc3.js (the three-player game, which the main game no longer has) and a small script added at the end that skips the title and the town,
 opens on a quiet lobby at the tower's table (you and the Storyteller; tap to stroll, tap him to
@@ -140,5 +141,12 @@ src = src.replace(MEL, "const t = nextBar + i * 0.6 - AC.currentTime; if (window
 i = src.rfind('</body>')
 out = src[:i] + boot + src[i:] if i >= 0 else src + boot
 import re as _re; out = _re.sub(r'<title>[^<]*</title>', '<title>三人染</title>', out, count=1)      # its own name, not the main game's
-open(os.path.join(ROOT, 'deploy', '3b.html'), 'w', encoding='utf-8').write(out)
-print('deploy/3b.html', len(out), 'bytes')
+# two outputs: deploy/3b-embed.html for the app and the Xiaohongshu package (no debug), and deploy/3b.html for the web, which also
+# gets the debug switch behind the sun (tools/web_debug_*.js; the Xiaohongshu leaderboard, tools/xhs_rank.js, only runs in its mode)
+open(os.path.join(ROOT, 'deploy', '3b-embed.html'), 'w', encoding='utf-8').write(out)
+rd = lambda f: open(os.path.join(ROOT, 'tools', f), encoding='utf-8').read()
+assert out.count('<head>') == 1 and out.count('</body>') == 1
+web = out.replace('<head>', '<head>\n<script>' + rd('web_debug_early.js') + '</script>', 1)
+web = web.replace('</body>', '<script>if (window.__debugMode === "xhs") {\n' + rd('xhs_rank.js') + '\n}\n' + rd('web_debug_late.js') + '</script>\n</body>', 1)
+open(os.path.join(ROOT, 'deploy', '3b.html'), 'w', encoding='utf-8').write(web)
+print('deploy/3b.html', len(web), 'bytes (web, with the debug switch); deploy/3b-embed.html', len(out), 'bytes (app and Xiaohongshu)')

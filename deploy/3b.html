@@ -1,6 +1,52 @@
 <!doctype html>
 <html lang="zh">
 <head>
+<script>/* Web-only debug (tools/mk3b.py puts this into deploy/3b.html only; the app and the Xiaohongshu package are built from
+   deploy/3b-embed.html, which has none of it). Runs before the game: ?mode=app pretends to be the app's Game Center bridge,
+   ?mode=xhs pretends to be the Xiaohongshu container with a leaderboard, so the web can show either look.
+   The sun opens the switch (tools/web_debug_late.js). */
+(function () {
+  var mode = (location.search.match(/[?&]mode=(\w+)/) || [])[1] || '';
+  if (mode !== 'app' && mode !== 'xhs') mode = '';
+  window.__debugMode = mode;
+  window.__debugToast = function (text) {
+    var d = document.createElement('div');
+    d.textContent = text;
+    d.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:99;max-width:84%;padding:9px 14px;border-radius:10px;background:rgba(0,0,0,.78);color:#fff;font:13px -apple-system,sans-serif;text-align:center;pointer-events:none';
+    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600);
+  };
+  if (mode === 'app') {      // the app's bridge: messages go to the console; the capsule's tap says what the app would do
+    window.webkit = { messageHandlers: { gc: { postMessage: function (m) {
+      console.log('[debug · app] Game Center', m);
+      if (m && m.t === 'board') window.__debugToast('（调试）App 会在这里打开 Game Center「总胜场」排行榜');
+    } } } };
+  }
+  if (mode === 'xhs') {      // the Xiaohongshu container: a made-up board around your own total on this browser
+    var names = ['小鱼干', '钟楼守夜人', null, 'Mira', '三人染爱好者', '夜猫子', '今天也赢了', '说书人的学徒', '阿锚', 'Pukka 粉', '红茶', '一分钟玩家'];
+    var best = 0;
+    var mine = function () { try { return Math.max(best, JSON.parse(localStorage.getItem('pocket_gc') || '{}').wins || 0); } catch (e) { return best; } };
+    var board = function () {
+      var rows = [], my = mine();
+      for (var i = 0; i < 30; i++) rows.push({ score: Math.max(1, 160 - i * 5 - (i % 3)), nickname: names[i % names.length], me: false });
+      if (my > 0) rows.push({ score: my, nickname: null, me: true });
+      rows.sort(function (a, b) { return b.score - a.score || (a.me ? 1 : -1); });
+      rows.forEach(function (r, i) { r.rank = i + 1; });
+      return rows;
+    };
+    var later = function (v) { return new Promise(function (res) { setTimeout(function () { res(v); }, 350); }); };
+    window.xhs = {
+      launchOptions: { miniToolEnv: { buildVersion: 9530000 } },
+      miniTool: {
+        getLaunchOptions: function () { return Promise.resolve(window.xhs.launchOptions); },
+        getWindowInfo: function () { return Promise.resolve({ windowWidth: innerWidth, windowHeight: innerHeight, safeArea: { top: 0 }, menuButtons: { back: null, me: null, share: { left: innerWidth - 90, top: 10, right: innerWidth - 10, bottom: 42, width: 80, height: 32 } } }); },
+        submitScore: function (o) { best = Math.max(best, o.score); console.log('[debug · xhs] submitScore', o); return later({ score: best }); },
+        getRankList: function () { return later({ data: board().slice(0, 100).map(function (r) { return { rank: r.rank, score: r.score, nickname: r.me ? '我（调试）' : r.nickname }; }) }); },
+        getMyRank: function () { var me = board().filter(function (r) { return r.me; })[0]; return later(me ? { status: me.rank <= 500 ? 'EXACT' : 'OVER_LIMIT', rank: me.rank, score: me.score } : { status: 'NOT_PARTICIPATING', rank: null, score: null }); }
+      }
+    };
+  }
+})();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2925,6 +2971,225 @@ if (location.hash) {
   if (!location.hash) go();      // at once, before the first frame: straight onto the table in the air, no fade, no title, no town
   requestAnimationFrame(frame);      // only now do the frames begin
   window.__3b = { me, get lobby() { return lobby; }, get tr() { return tr; }, get book() { return bookAt; }, get intro() { return intro; } };      // for tests
+})();
+</script>
+<script>if (window.__debugMode === "xhs") {
+/* The Xiaohongshu build's leaderboard (mini-tool submitScore / getRankList / getMyRank, client 9.51+, closed beta).
+   Board 1, all-time: total wins, the same number the app sends to Game Center. The game posts { t: 'score', v } through
+   window.__miniGC after each win and once at launch (__gcSync); a score goes up only when it has grown.
+   A trophy pill sits beside the language button in the lobby and opens the top 100 and your own rank.
+   Older clients, a missing API or no nickname authorisation (1005 / 1006): no button, and the game carries on as before.
+   Plain ES5 so it passes the Chrome 61 gate as written; loaded by boot.js after the game scripts. */
+(function () {
+  var MIN = 9510, BOARD = 1, CACHE = 45000, sent = 0, pend = 0, ok = false, off = false, cache = null, cacheAt = 0, btn, panel, list;
+  function mt() { return window.xhs && window.xhs.miniTool; }
+  function has() { var m = mt(); return !!(m && typeof m.submitScore === 'function' && typeof m.getRankList === 'function' && typeof m.getMyRank === 'function'); }
+  function lang() { try { return LANG; } catch (e) { return 'hans'; } }
+  var T = {
+    hans: { title: '总胜场榜', me: '我的排名', wins: '胜', none: '还没有人上榜', fail: '暂时无法加载，稍后再试', wait: '加载中…', anon: '小红书用户', out: '未上榜', close: '关闭', meAuth: '授权后显示你的排名', closed: '排行榜暂未开放', you: '我' },
+    hant: { title: '總勝場榜', me: '我的排名', wins: '勝', none: '還沒有人上榜', fail: '暫時無法載入，稍後再試', wait: '載入中…', anon: '小紅書用戶', out: '未上榜', close: '關閉', meAuth: '授權後顯示你的排名', closed: '排行榜暫未開放', you: '我' },
+    en: { title: 'Most Wins', me: 'My rank', wins: 'wins', none: 'Nobody on the board yet', fail: 'Could not load, try again later', wait: 'Loading…', anon: 'Player', out: 'Not ranked', close: 'Close', meAuth: 'Your rank shows once authorised', closed: 'The leaderboard is not open yet', you: 'Me' }
+  };
+  function t(k) { return (T[lang()] || T.hans)[k]; }
+  function code(e) { return e && typeof e.errCode === 'number' ? e.errCode : 0; }
+  function unauth(e) { if (window.__rankErr) window.__rankErr(e); var c = code(e); return c === 1005 || c === 1006 || c === 10003; }      // an authorisation refusal; what to do about it is decided where it happens
+
+  // ---- submitting: only a bigger total, never in a loop
+  function submit(v) {
+    v = Math.floor(Number(v) || 0);
+    if (!ok || off || v <= sent || v <= pend || v > 1000000) return;
+    pend = v;
+    Promise.resolve(mt().submitScore({ board: BOARD, score: v })).then(function (r) { sent = Math.max(sent, (r && r.score) || v); cache = null; }, function (e) { unauth(e); }).then(function () { pend = 0; });      // refused or failed: the board can still be looked at
+  }
+  // the capsule shows only after a win in this session: every score the game posts is a win, except the ones the launch sync
+  // sends (syncing), which carry the total from earlier sessions
+  var queued = [], syncing = false, wonNow = false;
+  window.__miniGC = function (m) { if (!m || m.t !== 'score') return; if (!syncing) wonNow = true; if (ok) submit(m.v); else queued.push(m.v); };
+
+  // ---- reading: cached, with a short back-off while the board warms up (2002)
+  function call(fn, args, tries) {
+    return Promise.resolve(mt()[fn](args)).catch(function (e) {
+      if (code(e) === 2002 && tries < 4) return new Promise(function (res) { setTimeout(res, 500 * Math.pow(2, tries)); }).then(function () { return call(fn, args, tries + 1); });
+      throw e;
+    });
+  }
+  function load() {
+    if (cache && Date.now() - cacheAt < CACHE) return Promise.resolve(cache);
+    // the list and your own rank are asked for separately: a rank that is not authorised must not take the list down with it
+    var settle = function (p) { return p.then(function (v) { return { v: v }; }, function (e) { return { e: e }; }); };
+    return Promise.all([settle(call('getRankList', { board: BOARD, period: 'all' }, 0)), settle(call('getMyRank', { board: BOARD, period: 'all' }, 0))]).then(function (r) {
+      if (!r[0].e && !r[1].e) { cache = r; cacheAt = Date.now(); }
+      return r;
+    });
+  }
+
+  // ---- the button and the panel
+  var css = document.createElement('style');
+  // Xiaohongshu's own look: a white card, its red (#FF2442) for the button, the first three and your own highlighted row
+  var XF = '-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif';
+  css.textContent = '#xcap{position:fixed;left:50%;top:calc(8px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));-webkit-transform:translateX(-50%);transform:translateX(-50%);z-index:20;display:none;height:32px;padding:0 12px 0 4px;border:.5px solid rgba(0,0,0,.08);border-radius:16px;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(0,0,0,.12);color:#333;font:600 13px ' + XF + ';letter-spacing:.02em;white-space:nowrap;-webkit-align-items:center;align-items:center}' +
+    '#xcap.on{display:-webkit-flex;display:flex}' +
+    '#xcap .ic{width:24px;height:24px;margin-right:6px;border-radius:50%;background:#FF2442;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}' +
+    '#xcap .ar{margin-left:5px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}#xcap .ar svg{display:block}' +
+    '#xpanel{position:fixed;left:50%;top:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:300px;max-width:calc(100% - 40px);max-height:66%;padding:6px 0 10px;border-radius:16px;background:#fff;color:#333;font:400 15px ' + XF + ';box-shadow:0 10px 36px rgba(0,0,0,.22)}' +
+    '#xpanel.open{display:-webkit-flex;display:flex}' +
+    '#xpanel .tt{padding:12px 18px 10px;font-size:17px;font-weight:600;color:#333;border-bottom:1px solid #f2f2f2}' +
+    '#xpanel .ls{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 8px 0}' +
+    '#xpanel .row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;border-radius:10px;padding:10px 10px}' +
+    '#xpanel .rk{width:46px;color:#999;font-weight:600;font-style:italic}#xpanel .rk.t{color:#FF2442}' +
+    '#xpanel .nm{-webkit-flex:1;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:8px}#xpanel .sc{white-space:nowrap;color:#999;font-size:14px}' +
+    '#xpanel .row.me{background:#FFF0F2}#xpanel .row.me .rk,#xpanel .row.me .nm,#xpanel .row.me .sc{color:#FF2442}#xpanel .row.me .nm{font-weight:600}' +
+    '#xpanel .ft{padding:4px 8px 0;border-top:1px solid #f2f2f2;margin-top:4px}#xpanel .ft:empty{display:none}' +
+    '#xpanel .msg{padding:26px 12px;text-align:center;color:#999;font-size:14px}' +
+    '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
+    '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}' +
+    // the language button and its menu in the same manner as the board: a white circle, a white card, the chosen language in red
+    // a black see-through circle holding the mark; no shadow, no grey edge
+    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(0,0,0,.35)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#fff!important}#lang svg{display:block;margin:0 auto}' +
+    '#langMenu{padding:6px!important;min-width:150px;border:0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 10px 36px rgba(0,0,0,.2)}' +
+    '#langMenu button{border-radius:10px!important;padding:10px 14px!important;font:400 15px ' + XF + '!important;letter-spacing:0!important;color:#333!important;background:transparent!important}' +
+    '#langMenu button+button{margin-top:2px}#langMenu button.on{background:#FFF0F2!important;color:#FF2442!important;font-weight:600!important}';
+  document.head.appendChild(css);
+  btn = document.createElement('button'); btn.id = 'xcap'; btn.setAttribute('aria-label', 'rank');
+  function capLabel() { btn.innerHTML = '<span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg></span><span>' + esc(t('title')) + '</span><span class="ar"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="#FF2442" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l4 4-4 4"/></svg></span>'; }      // a drawn chevron: a text \u203a sits on the font\'s baseline, not in the middle
+  // level with the container's own top buttons (getWindowInfo, 9.49+), in the middle of the screen; the safe area otherwise
+  function place() {
+    var m = mt(); if (!m || typeof m.getWindowInfo !== 'function') return;
+    Promise.resolve(m.getWindowInfo()).then(function (w) {
+      var b = w && w.menuButtons, r = b && (b.share || b.me || b.back);
+      if (r && r.height > 0) { btn.style.top = r.top + 'px'; btn.style.height = r.height + 'px'; btn.style.borderRadius = (r.height / 2) + 'px'; }
+    }, function () {});
+  }
+  panel = document.createElement('div'); panel.id = 'xpanel';
+  panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="ft"></div>';
+  document.body.appendChild(btn); document.body.appendChild(panel);
+  // the language button: Xiaohongshu's translate mark in a black see-through circle, two white rounded squares overlapping corner to corner,
+  // 文 on the upper left one, A on the lower right one, in see-through black; a cut-out gap keeps the squares apart
+  var lb = document.getElementById('lang');
+  if (lb) lb.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24"><defs><mask id="xlm"><rect width="24" height="24" fill="#fff"/><rect x="9.8" y="9.8" width="14.2" height="14.2" rx="3.6" fill="#000"/></mask></defs>' +
+    '<rect x="1" y="1" width="12" height="12" rx="2.8" fill="#fff" mask="url(#xlm)"/><text x="7.1" y="6.65" text-anchor="middle" dominant-baseline="central" font-size="7.6" font-weight="400" fill="rgba(0,0,0,.55)" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text>' +
+    '<rect x="11" y="11" width="12" height="12" rx="2.8" fill="#fff"/><text x="17.05" y="17.25" text-anchor="middle" dominant-baseline="central" font-size="7.8" font-weight="500" fill="rgba(0,0,0,.55)" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';      // the gap between the squares is cut out (a mask): the circle shows through it
+  list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the
+  // container loads no web images
+  function row(rk, nm, sc, me) {
+    return '<div class="row' + (me ? ' me' : '') + '"><span class="rk' + (typeof rk === 'number' && rk <= 3 ? ' t' : '') + '">' + rk + '</span><span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + '</span></div>';
+  }
+  function render(r) {
+    var L = r[0], M = r[1], h = '';
+    foot.innerHTML = '';
+    if (L.e) { list.innerHTML = '<div class="msg">' + (unauth(L.e) ? t('closed') : t('fail')) + '</div>'; return; }
+    var data = (L.v && L.v.data) || [], my = M.e ? null : (M.v || {}), mine = my && my.status === 'EXACT' ? my.rank : 0, shown = false;
+    for (var i = 0; i < data.length; i++) {      // ranks are unique, so your own row in the top 100 is the one with your rank
+      var me = mine && data[i].rank === mine; if (me) shown = true;
+      h += row(data[i].rank, me ? t('you') : (data[i].nickname == null ? t('anon') : data[i].nickname), data[i].score + ' ' + t('wins'), me);
+    }
+    if (!data.length) h = '<div class="msg">' + t('none') + '</div>';
+    list.innerHTML = h; list.scrollTop = 0;
+    if (shown) { var el = list.querySelector('.row.me'); if (el) list.scrollTop = Math.max(0, el.offsetTop - list.clientHeight / 2); return; }      // in the list: brought into view
+    var rk = '-', sc = '', note = '';      // not in it: the same row, highlighted, pinned under the list
+    if (M.e) note = unauth(M.e) ? t('meAuth') : '';
+    else if (my.status === 'EXACT') { rk = my.rank; sc = my.score + ' ' + t('wins'); }
+    else if (my.status === 'OVER_LIMIT') rk = '500+';
+    else note = t('out');
+    foot.innerHTML = row(rk, note || t('you'), note ? '' : sc, true);
+  }
+  function open() {
+    panel.querySelector('.tt').textContent = t('title');
+    panel.classList.add('open');
+    if (cache && Date.now() - cacheAt < CACHE) return render(cache);      // fresh enough: straight to the board, no spinner
+    list.innerHTML = '<div class="msg"><div class="spin"></div>' + t('wait') + '</div>'; foot.innerHTML = '';
+    var t0 = Date.now(), MINSPIN = 600;      // the spinner stays at least this long, so a quick answer does not flicker
+    var after = function (f) { return function (x) { setTimeout(function () { if (panel.classList.contains('open')) f(x); }, Math.max(0, MINSPIN - (Date.now() - t0))); }; };
+    load().then(after(render), after(function () { list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; }));
+  }
+  // the capsule opens and closes it, a tap anywhere else closes it (that tap does nothing in the game); the capsule itself stays
+  function close() { panel.classList.remove('open'); }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); if (panel.classList.contains('open')) close(); else open(); });
+  panel.addEventListener('pointerdown', function (e) { e.stopPropagation(); });      // scrolling the list does not reach the game
+  document.addEventListener('pointerdown', function (e) {      // that first tap only closes it and does nothing in the game
+    if (!panel.classList.contains('open') || btn.contains(e.target) || panel.contains(e.target)) return;
+    close(); e.stopPropagation(); e.preventDefault();
+  }, true);
+  var lastLang = '';
+  function show(v) { if (v && lastLang !== lang()) { lastLang = lang(); capLabel(); } btn.classList.toggle('on', v); }
+  setInterval(function () { var v = ok && wonNow && !!window.__3bLang; show(v); if (!v) close(); }, 300);      // the floating island's lobby, after a win in this session; never hidden for an error
+
+  // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
+  // and the launch options may come late, so look again every half second for a while instead of deciding once.
+  var why = 'starting', tries = 0, lastErr = '';
+  function build() {
+    var x = window.xhs, lo = x && x.launchOptions, v = Number(lo && lo.miniToolEnv && lo.miniToolEnv.buildVersion) || 0;
+    if (v) return Promise.resolve(v);
+    var m = mt(); if (!m || typeof m.getLaunchOptions !== 'function') return Promise.resolve(Promise.resolve(window.__xhsBuild || 0));
+    return Promise.resolve(m.getLaunchOptions()).then(function (o) { return Number(o && o.miniToolEnv && o.miniToolEnv.buildVersion) || 0; }, function () { return 0; });
+  }
+  function detect() {
+    if (ok || off) return;
+    tries++;
+    build().then(function (b) {
+      if (ok || off) return;
+      if (!window.xhs) why = 'no window.xhs';
+      else if (!b) why = 'no build version';
+      else if (Math.floor(b / 1000) < MIN) { why = 'client ' + b + ' < 9.51'; return; }      // an old client will not change: stop looking
+      else if (!has()) why = 'no leaderboard API (build ' + b + ')';
+      else { why = 'on (build ' + b + ')'; ok = true;
+        for (var i = 0; i < queued.length; i++) submit(queued[i]);
+        syncing = true; try { if (typeof window.__gcSync === 'function') window.__gcSync(); } finally { syncing = false; }      // the total so far goes up once at launch
+        place();
+        return; }
+      if (tries < 40) setTimeout(detect, 500);      // up to twenty seconds
+    });
+  }
+  detect();
+
+  // ---- diagnostic build only (mkxhs --debug): a small line at the foot says why the trophy is or is not shown
+  if (window.__xhsRankDebug) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;left:8px;right:8px;bottom:calc(64px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:30;font:11px monospace;color:#fff;background:rgba(0,0,0,.55);padding:4px 6px;border-radius:6px;pointer-events:none;word-break:break-all';
+    document.body.appendChild(d);
+    setInterval(function () { d.textContent = 'rank: ' + (off ? 'off (unauthorised) ' : '') + why + ' · lobby ' + !!window.__3bLang + ' · sent ' + sent + (lastErr ? ' · err ' + lastErr : '') + ' · tries ' + tries; }, 500);
+  }
+  window.__rankErr = function (e) { lastErr = (e && (e.errCode || '') + ' ' + (e.errMsg || '')) || String(e); };
+})();
+
+}
+/* Web-only debug, after the game (see tools/web_debug_early.js): a tap on the sun opens a small menu to switch between the
+   web, the Xiaohongshu look and the app look (the page reloads with ?mode=), and to fake a win so the capsules show. */
+(function () {
+  var mode = window.__debugMode || '';
+  var LABEL = { '': '网页（默认）', xhs: '小红书模式', app: 'App 模式' };
+  var st = document.createElement('style');
+  st.textContent = '#dbgsun{position:fixed;left:calc(80% - 30px);top:calc(14% - 30px);width:60px;height:60px;border-radius:50%;z-index:19;background:transparent;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}' +
+    '#dbgmenu{position:fixed;right:calc(20% - 40px);top:calc(14% + 32px);z-index:60;display:none;min-width:170px;padding:6px;border-radius:12px;background:rgba(255,255,255,.96);box-shadow:0 8px 28px rgba(0,0,0,.25);font:14px -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;color:#222}' +
+    '#dbgmenu.open{display:block}#dbgmenu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 12px;border-radius:8px;font:inherit;color:inherit;cursor:pointer}#dbgmenu button.on{background:#eef3ff;color:#1d5bd8;font-weight:600}#dbgmenu hr{border:0;border-top:1px solid #eee;margin:4px 6px}' +
+    '#dbgmenu .tt{padding:6px 12px 4px;font-size:11px;letter-spacing:.08em;color:#999}' +
+    '#dbgtag{position:fixed;left:8px;top:8px;z-index:60;padding:3px 8px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff;font:11px -apple-system,sans-serif;pointer-events:none}';
+  document.head.appendChild(st);
+  var sun = document.createElement('button'); sun.id = 'dbgsun'; sun.setAttribute('aria-label', 'debug');
+  var menu = document.createElement('div'); menu.id = 'dbgmenu';
+  var h = '<div class="tt">调试 · 只在网页</div>';
+  ['', 'xhs', 'app'].forEach(function (m) { h += '<button data-m="' + m + '"' + (m === mode ? ' class="on"' : '') + '>' + (m === mode ? '✓ ' : '') + LABEL[m] + '</button>'; });
+  h += '<hr><button data-win="1">模拟一胜（让胶囊出现）</button>';
+  menu.innerHTML = h;
+  document.body.appendChild(sun); document.body.appendChild(menu);
+  if (mode) { var tag = document.createElement('div'); tag.id = 'dbgtag'; tag.textContent = 'DEBUG · ' + LABEL[mode]; document.body.appendChild(tag); }
+  sun.addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
+  menu.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  document.addEventListener('pointerdown', function (e) { if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== sun) menu.classList.remove('open'); }, true);
+  menu.querySelectorAll('button[data-m]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var m = b.getAttribute('data-m'); if (m === mode) { menu.classList.remove('open'); return; }
+      var u = new URL(location.href); if (m) u.searchParams.set('mode', m); else u.searchParams.delete('mode'); location.href = u.toString();
+    });
+  });
+  menu.querySelector('button[data-win]').addEventListener('click', function () {
+    window.__wonThisSession = true;      // the app capsule
+    var v = 1; try { v = (GCS.wins || 0) + 1; } catch (e) {}
+    if (typeof window.__miniGC === 'function') window.__miniGC({ t: 'score', v: v });      // the Xiaohongshu capsule (a score after launch is a win)
+    menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜：回到浮岛就能看到胶囊');
+  });
 })();
 </script>
 </body>

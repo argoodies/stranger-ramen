@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Xiaohongshu (小红书) mini-tool zip of the three-player game from deploy/3b.html.
+"""Build the Xiaohongshu (小红书) mini-tool zip of the three-player game from deploy/3b-embed.html (deploy/3b.html minus its web debug).
 
 The mini-tool container (see .claude/skills/minitool-zip-builder) runs an offline H5 page under a strict CSP and a
 Chrome 61 baseline, so the page is rewritten, not just zipped:
@@ -18,7 +18,7 @@ usage: tools/mkxhs.py [out.zip] [--debug]      (needs node/npx for esbuild and a
 import os, re, sys, json, shutil, subprocess, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, 'deploy', '3b.html')
+SRC = os.path.join(ROOT, 'deploy', '3b-embed.html')      # the build without the web's debug switch
 DEBUG = '--debug' in sys.argv; sys.argv = [x for x in sys.argv if x != '--debug']      # --debug: the leaderboard says on screen why it is or is not shown
 OUT_ZIP = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, 'dist', 'xhs', 'sanrenran.zip')
 STAGE = os.path.join(os.path.dirname(OUT_ZIP), 'pkg')
@@ -32,8 +32,8 @@ html = open(SRC, encoding='utf-8').read()
 
 # ---- scripts out of the page
 blocks = list(re.finditer(r'<script>(.*?)</script>', html, re.S))
-must(len(blocks) == 3, f'expected 3 inline scripts in 3b.html, found {len(blocks)}')
-must('<script src' not in html and 'onclick=' not in html, 'unexpected script references in 3b.html')
+must(len(blocks) == 3, f'expected 3 inline scripts in 3b-embed.html, found {len(blocks)}')
+must('<script src' not in html and 'onclick=' not in html, 'unexpected script references in 3b-embed.html')
 scripts = [m.group(1) for m in blocks]
 for k, js in enumerate(scripts):      # storage through the boot shim
     n = js.count('localStorage.')

@@ -1,6 +1,6 @@
 name: Pocket Clocktower → TestFlight
 
-# Wraps the three-player game (deploy/3b.html, built by tools/mk3b.py) in the same WKWebView shell and uploads it
+# Wraps the three-player game (deploy/3b-embed.html, built by tools/mk3b.py) in the same WKWebView shell and uploads it
 # to App Store Connect (app "Pocket Clocktower", bundle io.github.argoodies). Manual trigger only.
 on:
   workflow_dispatch:
@@ -38,7 +38,7 @@ jobs:
           set -eo pipefail
           brew install xcodegen
           mkdir -p ios-pocket/web
-          cp deploy/3b.html ios-pocket/web/index.html
+          cp deploy/3b-embed.html ios-pocket/web/index.html      # the build without the web's debug switch
           cd ios-pocket && xcodegen generate
           ls -la
 
