@@ -68,7 +68,7 @@
     '#xpanel .spin{width:24px;height:24px;margin:0 auto 10px;border-radius:50%;border:3px solid #ffe0e5;border-top-color:#FF2442;-webkit-animation:xspin .8s linear infinite;animation:xspin .8s linear infinite}' +
     '@-webkit-keyframes xspin{to{-webkit-transform:rotate(360deg)}}@keyframes xspin{to{transform:rotate(360deg)}}' +
     // the language button and its menu in the same manner as the board: a white circle, a white card, the chosen language in red
-    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:#fff!important;color:#333!important;box-shadow:0 4px 12px rgba(0,0,0,.15)}#lang svg{display:block;margin:0 auto}' +
+    '#lang{width:40px!important;height:40px!important;padding:0!important;border:0!important;border-radius:50%!important;background:#8a8a8a!important;color:#fff!important;box-shadow:0 4px 12px rgba(0,0,0,.15)}#lang svg{display:block;margin:0 auto}' +
     '#langMenu{padding:6px!important;min-width:150px;border:0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 10px 36px rgba(0,0,0,.2)}' +
     '#langMenu button{border-radius:10px!important;padding:10px 14px!important;font:400 15px ' + XF + '!important;letter-spacing:0!important;color:#333!important;background:transparent!important}' +
     '#langMenu button+button{margin-top:2px}#langMenu button.on{background:#FFF0F2!important;color:#FF2442!important;font-weight:600!important}';
@@ -86,10 +86,10 @@
   panel = document.createElement('div'); panel.id = 'xpanel';
   panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="ft"></div>';
   document.body.appendChild(btn); document.body.appendChild(panel);
-  // the language button wears Xiaohongshu's translate mark: two grey squares, 文 on the solid one, A on the outlined one
+  // the language button wears Xiaohongshu's translate mark: a grey ground, two white rounded squares overlapping corner to corner,
+  // 文 on the upper left one, A on the lower right one, dark grey; a thin line of the grey keeps the squares apart
   var lb = document.getElementById('lang');
-  if (lb) lb.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24"><rect x="1.5" y="1.5" width="13" height="13" rx="3" fill="#8C8C8C"/><text x="8" y="11.6" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text><rect x="9.5" y="9.5" width="13" height="13" rx="3" fill="#fff" stroke="#8C8C8C" stroke-width="1.6"/><text x="16" y="19.9" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8C8C8C" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';
-  list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
+  if (lb) lb.innerHTML = '<svg width="27" height="27" viewBox="0 0 24 24"><rect x="2" y="2" width="12.5" height="12.5" rx="2.6" fill="#fff"/><text x="8.25" y="11.9" text-anchor="middle" font-size="9.5" font-weight="400" fill="#5c5c5c" font-family="-apple-system,PingFang SC,Noto Sans CJK SC,sans-serif">\u6587</text><rect x="9.5" y="9.5" width="12.5" height="12.5" rx="2.6" fill="#fff" stroke="#8a8a8a" stroke-width="1.4"/><text x="15.75" y="19.6" text-anchor="middle" font-size="9.5" font-weight="500" fill="#5c5c5c" font-family="-apple-system,Helvetica,Arial,sans-serif">A</text></svg>';  list = panel.querySelector('.ls'); var foot = panel.querySelector('.ft');
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // no avatars: the board gives rank, score and nickname only, there is no API for the player's own profile, and the
   // container loads no web images
