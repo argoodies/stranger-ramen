@@ -2422,9 +2422,8 @@ for (const ev of ['contextmenu', 'selectstart', 'gesturestart', 'dblclick']) doc
 $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
 // a tap on any other button (a capsule, a pill) closes it too; taps on the picture close it in their own handlers and do nothing else
 document.addEventListener('pointerdown', e => { const m = $('langMenu'); if (m.classList.contains('open') && !m.contains(e.target) && !$('lang').contains(e.target) && e.target !== cv && e.target !== $('title')) m.classList.remove('open'); }, true);
-// choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered; the menu stays open
-// (the tick moves) until a tap anywhere else
-$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); chime(74, 0, .12, .8); }));
+// choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered; the menu closes
+$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); chime(74, 0, .12, .8); }));
 setLang(langPref);
 const ZOOM_ICO = ['<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10h6M14 10V4M10 14H4M10 14v6M14 10l7-7M10 14l-7 7"/></svg>'];
 $('zoom').addEventListener('click', () => { zoomTarget = zoomTarget > 0.5 ? 0 : 1; $('zoom').innerHTML = ZOOM_ICO[zoomTarget]; });
@@ -2841,6 +2840,11 @@ if (location.hash) {
     '#lang svg{display:block;margin:0 auto}#lang:active{opacity:.6}#lang::before{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(0,0,0,.35);z-index:-1}';
   const L3 = { hans: ['我们开始吧。'], hant: ['我們開始吧。'], en: ["Let's begin."] }, say3 = () => (L3[LANG] || L3.hans)[0];
   const me = { x: 3 * Math.cos(Math.PI / 4), y: 3 * Math.sin(Math.PI / 4), tx: 0, ty: 0, hop: 0, talk: false, say: null }; me.tx = me.x; me.ty = me.y;
+  // a new language: the menu closes and you say so yourself, in the new language
+  const SWITCHED = { hans: { hans: '已切换为简体中文', hant: '已切换为繁体中文', en: '已切换为英语', auto: '已切换为跟随系统' },
+    hant: { hans: '已切換為簡體中文', hant: '已切換為繁體中文', en: '已切換為英語', auto: '已切換為跟隨系統' },
+    en: { hans: 'Switched to Simplified Chinese', hant: 'Switched to Traditional Chinese', en: 'Switched to English', auto: 'Now following the system' } };
+  document.getElementById('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { if (lobby && !tr) me.line = { text: (SWITCHED[LANG] || SWITCHED.en)[b.dataset.l], t: 0 }; }));
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
@@ -2917,6 +2921,7 @@ if (location.hash) {
     if (!me.say && !me.talk) fadedDraw(ap(3), () => drawBook(t, P, s)); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
+    if (me.line && (me.line.t += dt) < 2.4) { const p = P(me.x, me.y); sayBubble(p[0], p[1] - K * 1.6, me.line.text, clamp(W * .036, 12.5, 15), clamp(me.line.t * 4) * clamp((2.4 - me.line.t) * 3), W * .62); } else me.line = null;      // what you just said (a new language)
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
   drawTowerRoom = T => { const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;

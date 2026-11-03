@@ -31,6 +31,11 @@ boot = """<script>
     '#lang svg{display:block;margin:0 auto}#lang:active{opacity:.6}#lang::before{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(0,0,0,.35);z-index:-1}';
   const L3 = { hans: ['我们开始吧。'], hant: ['我們開始吧。'], en: ["Let's begin."] }, say3 = () => (L3[LANG] || L3.hans)[0];
   const me = { x: 3 * Math.cos(Math.PI / 4), y: 3 * Math.sin(Math.PI / 4), tx: 0, ty: 0, hop: 0, talk: false, say: null }; me.tx = me.x; me.ty = me.y;
+  // a new language: the menu closes and you say so yourself, in the new language
+  const SWITCHED = { hans: { hans: '已切换为简体中文', hant: '已切换为繁体中文', en: '已切换为英语', auto: '已切换为跟随系统' },
+    hant: { hans: '已切換為簡體中文', hant: '已切換為繁體中文', en: '已切換為英語', auto: '已切換為跟隨系統' },
+    en: { hans: 'Switched to Simplified Chinese', hant: 'Switched to Traditional Chinese', en: 'Switched to English', auto: 'Now following the system' } };
+  document.getElementById('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { if (lobby && !tr) me.line = { text: (SWITCHED[LANG] || SWITCHED.en)[b.dataset.l], t: 0 }; }));
   let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
@@ -107,6 +112,7 @@ boot = """<script>
     if (!me.say && !me.talk) fadedDraw(ap(3), () => drawBook(t, P, s)); else bookAt = null;      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
+    if (me.line && (me.line.t += dt) < 2.4) { const p = P(me.x, me.y); sayBubble(p[0], p[1] - K * 1.6, me.line.text, clamp(W * .036, 12.5, 15), clamp(me.line.t * 4) * clamp((2.4 - me.line.t) * 3), W * .62); } else me.line = null;      // what you just said (a new language)
   }
   updateTower = () => {};      // no tower room, no keeper, no view from the top
   drawTowerRoom = T => { const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
