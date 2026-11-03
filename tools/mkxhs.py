@@ -12,7 +12,8 @@ Chrome 61 baseline, so the page is rewritten, not just zipped:
     --safe-area-inset-* variables with env() behind them;
   * rank.js (tools/xhs_rank.js) adds the total-wins leaderboard on clients 9.51+ (mini-tool submitScore / getRankList /
     getMyRank); without it, or without nickname authorisation, nothing shows;
-  * index.html sits at the zip root with only .html and .js beside it.
+  * mini_tool.json (the high-consumption flag, false: plain Canvas 2D) sits beside it;
+  * index.html sits at the zip root with only .html, .js and that one .json beside it.
 usage: tools/mkxhs.py [out.zip] [--debug]      (needs node/npx for esbuild and acorn; default out: dist/xhs/sanrenran.zip)"""
 import os, re, sys, json, shutil, subprocess, zipfile
 
@@ -122,8 +123,15 @@ for f in ['boot.js', 'app1.js', 'app2.js', 'app3.js', 'rank.js']:      # the Chr
     for bad in ['eval(', 'new Function', 'WebAssembly', 'fetch(', 'XMLHttpRequest', 'new Worker', 'window.open', 'localStorage.getItem(\'', 'import(']:
         must(bad not in body or (f == 'boot.js' and bad.startswith('localStorage')), f'{f}: forbidden {bad}')
 
+# mini_tool.json (minitool-zip-builder 1.9): the high-consumption flag. The game is plain Canvas 2D: no Worker, no
+# OffscreenCanvas, no WebAssembly, no game engine (the forbidden-API gate above already refuses new Worker and WebAssembly),
+# so it is false. Look again if any of those ever comes in.
+r = subprocess.run(['node', os.path.join(ROOT, '.claude', 'skills', 'minitool-zip-builder', 'scripts', 'write_manifest.mjs'), STAGE, 'false'], capture_output=True, text=True)
+must(r.returncode == 0, 'write_manifest: ' + (r.stderr or r.stdout)[-400:])
+must(json.load(open(os.path.join(STAGE, 'mini_tool.json'))) == {'is_high_consumption_scene': False}, 'mini_tool.json is not the one-field false')
+
 os.makedirs(os.path.dirname(OUT_ZIP), exist_ok=True)
 if os.path.exists(OUT_ZIP): os.remove(OUT_ZIP)
 with zipfile.ZipFile(OUT_ZIP, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:      # the files themselves at the root, not the folder
-    for f in ['index.html', 'boot.js', 'app1.js', 'app2.js', 'app3.js', 'rank.js']: z.write(os.path.join(STAGE, f), f)
+    for f in ['index.html', 'boot.js', 'app1.js', 'app2.js', 'app3.js', 'rank.js', 'mini_tool.json']: z.write(os.path.join(STAGE, f), f)
 print(OUT_ZIP, os.path.getsize(OUT_ZIP), 'bytes')
