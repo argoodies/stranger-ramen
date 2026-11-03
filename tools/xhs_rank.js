@@ -5,6 +5,7 @@
    Older clients, a missing API or no nickname authorisation (1005 / 1006): no button, and the game carries on as before.
    Plain ES5 so it passes the Chrome 61 gate as written; loaded by boot.js after the game scripts. */
 (function () {
+  window.__xhsBuild = true;      // the Xiaohongshu build: its ball speaks only once the leaderboard works (no web one in its place)
   var MIN = 9510, BOARD = 1, CACHE = 45000, sent = 0, pend = 0, ok = false, off = false, cache = null, cacheAt = 0, btn, panel, list;
   function mt() { return window.xhs && window.xhs.miniTool; }
   function has() { var m = mt(); return !!(m && typeof m.submitScore === 'function' && typeof m.getRankList === 'function' && typeof m.getMyRank === 'function'); }

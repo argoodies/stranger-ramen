@@ -27,11 +27,7 @@
       var u = new URL(location.href); if (m) u.searchParams.set('mode', m); else u.searchParams.delete('mode'); location.href = u.toString();
     });
   });
-  menu.querySelector('button[data-lose]').addEventListener('click', function () { window.__lastWon = false; menu.classList.remove('open'); });
-  menu.querySelector('button[data-win]').addEventListener('click', function () {
-    window.__wonThisSession = true; window.__lastWon = true;
-    var v = 1; try { v = (GCS.wins || 0) + 1; } catch (e) {}
-    if (typeof window.__miniGC === 'function') window.__miniGC({ t: 'score', v: v });      // the Xiaohongshu capsule (a score after launch is a win)
-    menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜');
-  });
+  // a faked game, recorded as a real one (botc3.js gcRecord): the count on this browser goes up, the ball or the book shows, the score goes out
+  menu.querySelector('button[data-lose]').addEventListener('click', function () { gcRecord(false, 'sailor'); menu.classList.remove('open'); });
+  menu.querySelector('button[data-win]').addEventListener('click', function () { gcRecord(true, 'sailor'); menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜'); });
 })();
