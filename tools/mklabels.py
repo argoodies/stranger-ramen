@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The capsules' words as SVG outlines, so they sit exactly in the middle on any device: no font is drawn at run time.
 Each language's words are laid out from Noto Sans CJK Bold (SC for 简体 and English, TC for 繁體), turned into one path and
-cropped to their ink, then written between the LABELS markers in tools/botc3.js and tools/xhs_rank.js as
+cropped to their ink, then written between the LABELS markers in tools/xhs_rank.js as
   { hans: [d, width, height], hant: [...], en: [...] }   (units: em / 1000, y down; the box is the ink's own box)
 A capsule draws it as <svg viewBox="0 0 w h" height="h/1000 * font-size">: centring the box centres the ink.
 usage: tools/mklabels.py"""
@@ -39,7 +39,7 @@ for lang, (text, face) in WORDS.items():
     print(lang, text, 'ink box', round(x1 - x0), 'x', round(y1 - y0), 'em/1000;', len(d), 'chars of path')
 
 blob = '/*LABELS*/' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + '/*/LABELS*/'
-for f in ('tools/botc3.js', 'tools/xhs_rank.js'):
+for f in ('tools/xhs_rank.js',):
     p = os.path.join(ROOT, f); s = open(p, encoding='utf-8').read()
     s2, n = re.subn(r'/\*LABELS\*/.*?/\*/LABELS\*/', lambda m: blob, s, flags=re.S)
     if n != 1: raise SystemExit(f'{f}: no LABELS marker')

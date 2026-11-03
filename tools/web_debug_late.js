@@ -28,7 +28,7 @@
     });
   });
   menu.querySelector('button[data-win]').addEventListener('click', function () {
-    window.__wonThisSession = true;      // the app capsule
+    window.__wonThisSession = true;
     var v = 1; try { v = (GCS.wins || 0) + 1; } catch (e) {}
     if (typeof window.__miniGC === 'function') window.__miniGC({ t: 'score', v: v });      // the Xiaohongshu capsule (a score after launch is a win)
     menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜：回到浮岛就能看到胶囊');

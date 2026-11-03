@@ -7,11 +7,8 @@
   if (mode !== 'app' && mode !== 'xhs') mode = '';
   window.__debugMode = mode;
   window.__debugToast = function (text) { console.log('[debug]', text); };      // no toasts in the project: the console only
-  if (mode === 'app') {      // the app's bridge: messages go to the console; the capsule's tap says what the app would do
-    window.webkit = { messageHandlers: { gc: { postMessage: function (m) {
-      console.log('[debug · app] Game Center', m);
-      if (m && m.t === 'board') window.__debugToast('（调试）App 会在这里打开 Game Center「总胜场」排行榜');
-    } } } };
+  if (mode === 'app') {      // the app's bridge: messages go to the console; achievements and scores are only logged
+    window.webkit = { messageHandlers: { gc: { postMessage: function (m) { console.log('[debug · app] Game Center', m); } } } };
   }
   if (mode === 'xhs') {      // the Xiaohongshu container: a made-up board around your own total on this browser
     var names = ['小鱼干', '钟楼守夜人', null, 'Mira', '三人染爱好者', '夜猫子', '今天也赢了', '说书人的学徒', '阿锚', 'Pukka 粉', '红茶', '一分钟玩家'];
