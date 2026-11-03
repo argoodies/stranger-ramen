@@ -2461,8 +2461,11 @@ for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) cv.addEventList
 document.addEventListener('touchstart', e => { if (!(e.target.closest && e.target.closest('button, input'))) e.preventDefault(); }, { passive: false });
 for (const ev of ['contextmenu', 'selectstart', 'gesturestart', 'dblclick']) document.addEventListener(ev, e => e.preventDefault());
 $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').classList.toggle('open'); });
-// choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered
-$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); chime(74, 0, .12, .8); }));
+// a tap on any other button (a capsule, a pill) closes it too; taps on the picture close it in their own handlers and do nothing else
+document.addEventListener('pointerdown', e => { const m = $('langMenu'); if (m.classList.contains('open') && !m.contains(e.target) && !$('lang').contains(e.target) && e.target !== cv && e.target !== $('title')) m.classList.remove('open'); }, true);
+// choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered; the menu stays open
+// (the tick moves) until a tap anywhere else
+$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); chime(74, 0, .12, .8); }));
 setLang(langPref);
 const ZOOM_ICO = ['<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10h6M14 10V4M10 14H4M10 14v6M14 10l7-7M10 14l-7 7"/></svg>'];
 $('zoom').addEventListener('click', () => { zoomTarget = zoomTarget > 0.5 ? 0 : 1; $('zoom').innerHTML = ZOOM_ICO[zoomTarget]; });
