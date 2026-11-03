@@ -47,21 +47,22 @@
 
   // ---- the button and the panel
   var css = document.createElement('style');
-  css.textContent = '#xrank{position:fixed;left:14px;bottom:calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:7;display:none;padding:8px 11px;line-height:0}' +
-    '#xpanel{position:fixed;top:0;right:0;bottom:0;left:0;z-index:20;display:none;background:rgba(14,10,34,.55);-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}' +
-    '#xpanel .card{width:86%;max-width:360px;max-height:76%;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;background:rgba(36,28,70,.96);border:1px solid rgba(255,255,255,.18);border-radius:18px;color:#f4ecdc;font:300 15px var(--serif);overflow:hidden}' +
-    '#xpanel .hd{display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;-webkit-align-items:center;align-items:center;padding:14px 16px 10px;font-weight:400;font-size:17px;letter-spacing:.08em}' +
-    '#xpanel .x{background:none;border:0;color:#f4ecdc;font-size:22px;line-height:1;padding:0 4px}' +
-    '#xpanel .ls{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px}' +
-    '#xpanel .row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;padding:9px 6px;border-top:1px solid rgba(255,255,255,.08)}' +
-    '#xpanel .rk{width:38px;color:#ffd48c;font-weight:400}#xpanel .nm{-webkit-flex:1;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:8px}#xpanel .sc{color:#ffd48c}' +
-    '#xpanel .msg{padding:22px 6px;text-align:center;opacity:.75}' +
-    '#xpanel .me{padding:12px 18px 14px;border-top:1px solid rgba(255,255,255,.18);background:rgba(255,212,140,.08)}';
+  // the same look as the language menu bottom right: a translucent popover opening upward from its button
+  css.textContent = '#xrank{position:fixed;left:14px;bottom:calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:20;display:none;padding:8px 11px;line-height:0}' +
+    '#xpanel{position:fixed;left:14px;bottom:calc(62px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));z-index:20;display:none;-webkit-flex-direction:column;flex-direction:column;width:250px;max-width:calc(100% - 28px);max-height:56%;padding:8px;border-radius:16px;background:rgba(30,24,60,.82);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f4ecdc;font:300 15px var(--serif);letter-spacing:.08em}' +
+    '#xpanel.open{display:-webkit-flex;display:flex}' +
+    '#xpanel .tt{padding:7px 12px 9px;font-size:13px;opacity:.7;letter-spacing:.12em}' +
+    '#xpanel .ls{overflow-y:auto;-webkit-overflow-scrolling:touch}' +
+    '#xpanel .row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;border-radius:11px;padding:9px 12px}' +
+    '#xpanel .rk{width:30px;opacity:.75}#xpanel .nm{-webkit-flex:1;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:8px}#xpanel .sc{white-space:nowrap}' +
+    '#xpanel .msg{padding:12px;opacity:.75;letter-spacing:.06em}' +
+    '#xpanel .me{margin-top:6px;border-radius:11px;padding:9px 12px;background:rgba(255,236,170,.2);color:#ffe9b0}' +
+    '#xpanel .me:empty{display:none}';
   document.head.appendChild(css);
   btn = document.createElement('button'); btn.className = 'pill'; btn.id = 'xrank'; btn.setAttribute('aria-label', 'rank');
   btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>';
   panel = document.createElement('div'); panel.id = 'xpanel';
-  panel.innerHTML = '<div class="card"><div class="hd"><span class="tt"></span><button class="x">×</button></div><div class="ls"></div><div class="me"></div></div>';
+  panel.innerHTML = '<div class="tt"></div><div class="ls"></div><div class="me"></div>';
   document.body.appendChild(btn); document.body.appendChild(panel);
   list = panel.querySelector('.ls'); mine = panel.querySelector('.me');
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -69,7 +70,7 @@
   function render(r) {
     var L = r[0], M = r[1], h = '';
     if (L.e) {      // the list itself is refused or failed: say so, and keep the panel until it is closed
-      if (unauth(L.e)) { list.innerHTML = '<div class="msg">' + t('closed') + '</div>'; closing = true; }
+      if (unauth(L.e)) list.innerHTML = '<div class="msg">' + t('closed') + '</div>';
       else list.innerHTML = '<div class="msg">' + t('fail') + '</div>';
     } else {
       var data = (L.v && L.v.data) || [];
@@ -81,15 +82,20 @@
     mine.innerHTML = t('me') + ' · <b style="font-weight:400;color:#ffd48c">' + mr + '</b>' + (my.status === 'EXACT' ? ' · ' + my.score + ' ' + t('wins') : '');
   }
   function open() {
-    panel.querySelector('.tt').textContent = t('title'); panel.querySelector('.x').setAttribute('aria-label', t('close'));
-    list.innerHTML = '<div class="msg">' + t('wait') + '</div>'; mine.innerHTML = ''; panel.style.display = 'flex';
+    panel.querySelector('.tt').textContent = t('title');
+    list.innerHTML = '<div class="msg">' + t('wait') + '</div>'; mine.innerHTML = ''; panel.classList.add('open');
     load().then(render, function () { list.innerHTML = '<div class="msg">' + t('fail') + '</div>'; });
   }
-  btn.addEventListener('click', open);
-  var closing = false;      // the list was refused: once its message has been read and closed, the trophy goes for this session
-  panel.addEventListener('click', function (e) { if (e.target === panel || e.target.className === 'x') { panel.style.display = 'none'; if (closing) off = true; } });
+  // like the language menu: the trophy opens and closes it, a tap anywhere else closes it; the trophy itself stays
+  function close() { panel.classList.remove('open'); }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); if (panel.classList.contains('open')) close(); else open(); });
+  panel.addEventListener('pointerdown', function (e) { e.stopPropagation(); });      // scrolling the list does not reach the game
+  document.addEventListener('pointerdown', function (e) {      // as with the language menu, that first tap only closes it and does nothing in the game
+    if (!panel.classList.contains('open') || btn.contains(e.target) || panel.contains(e.target)) return;
+    close(); e.stopPropagation(); e.preventDefault();
+  }, true);
   function show(v) { btn.style.display = v ? 'block' : 'none'; }
-  setInterval(function () { show(ok && !off && !!window.__3bLang && panel.style.display !== 'flex'); }, 300);      // only in the lobby, like the language button
+  setInterval(function () { var v = ok && !!window.__3bLang; show(v); if (!v) close(); }, 300);      // only in the lobby, like the language button; it never goes away for an error
 
   // ---- switched on only for a client that has it. The container may inject window.xhs a little after the page starts,
   // and the launch options may come late, so look again every half second for a while instead of deciding once.
