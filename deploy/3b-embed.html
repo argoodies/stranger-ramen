@@ -2859,10 +2859,10 @@ if (location.hash) {
   const tableView = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };      // the lobby's and the game's own view of the table
   window.__confettiGo = () => {
     const parts = [], bursts = [];
-    for (let b = 0; b < 3; b++) {      // three bursts from the top middle of the picture, one after another
+    for (let b = 0; b < 1; b++) {      // one burst at the top middle of the picture
       const bx = W * .5 + (Math.random() - .5) * W * .06, by = H * .12 + (Math.random() - .5) * H * .02, at = b * .28, c = CONF[(b * 2) % CONF.length];
       bursts.push({ x: bx, y: by, at, c });
-      for (let k = 0; k < 46; k++) { const a = Math.random() * TAU, v = (.35 + Math.random() * .65) * Math.min(W, H) * 1.6;
+      for (let k = 0; k < 140; k++) { const a = Math.random() * TAU, v = (.35 + Math.random() * .65) * Math.min(W, H) * 1.6;
         parts.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .85, at, c: pick(CONF), w: 3 + Math.random() * 4, h: 6 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, ph: Math.random() * TAU, fall: .035 + Math.random() * .085, land: (() => { const q = Math.random() * TAU, rr = 1.15 + Math.sqrt(Math.random()) * 1.05; return [Math.cos(q) * rr, Math.sin(q) * rr]; })() }); }      // each falls at its own pace onto its own spot on the light inner ring, off the Storyteller's dais      // each falls at its own pace, so they spread down the picture
     }
     confetti = { t: 0, parts, bursts }; landed = [];      // silent: the win music is playing
@@ -2891,12 +2891,6 @@ if (location.hash) {
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.ph * 1.3));      // turning over: it narrows and widens
       ctx.fillStyle = css(p.c); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore(); }
   };
-  function drawBursts() {      // the flash and ring of each burst, high over everything
-    if (!confetti) return;
-    for (const b of confetti.bursts) { const u = (confetti.t - b.at) / .35; if (u < 0 || u > 1) continue;
-      glow(b.x, b.y, Math.min(W, H) * .18 * (.4 + u), b.c, .55 * (1 - u));
-      for (let k = 0; k < 14; k++) { const a = k * TAU / 14, rr = Math.min(W, H) * .16 * (1 - Math.pow(1 - u, 4)); ctx.beginPath(); ctx.arc(b.x + Math.cos(a) * rr, b.y + Math.sin(a) * rr, 2.6 * (1 - u) + .6, 0, TAU); ctx.fillStyle = css(b.c, 1 - u); ctx.fill(); } }
-  }
   // when the last game was a win, where the platform has a scoreboard (window.__boardMark = { open }: the app's, with your Game Center rank, set in botc3.js;
   // the Xiaohongshu build, xhs_rank.js; on the web your own count), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
   // bubbles, floating in its place; a tap opens the scores.
@@ -2913,7 +2907,8 @@ if (location.hash) {
   const TURNS = [2, 1, 2, 1];      // two of the four go round twice
   const angleOf = i => { if (!spin.tw) return 0; const u = clamp((spin.tw - i * LAG) / SPIN); return TAU * TURNS[i] * (1 - Math.pow(1 - u, 3)); };      // fast, then slowing back to its place
   function drawMark(t, dt, P, s, bm) {      // small, floating where the book lay, in a ball of frosted glass: the table shows through it, blurred
-    const q = P(1.1, -.62, 2.0), R = Math.max(10, s * .3), x = q[0], y = q[1] - s * .12 + Math.sin(t * 1.6) * s * .04, k = R * 1.5 / 24;
+    const a0 = ctx.globalAlpha; ctx.globalAlpha = a0 * ap(3);      // it comes in with the opening, when the book does
+    const q = P(1.1, -.62, 2.0), R = Math.max(10, s * .3), x = q[0], y = q[1] - s * .12 + Math.sin(t * 1.6) * s * .03, k = R * 1.5 / 24;      // bobbing with the book's own beat
     const m = ctx.getTransform(), dx = m.a * x + m.e, dy = m.d * y + m.f, dr = m.a * R;      // in the canvas's own pixels
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.beginPath(); ctx.arc(dx, dy, dr, 0, TAU); ctx.clip();
     if ('filter' in ctx) { const pd = dr * 1.6; ctx.filter = 'blur(' + (dr * .22).toFixed(1) + 'px)'; ctx.drawImage(ctx.canvas, dx - pd, dy - pd, pd * 2, pd * 2, dx - pd, dy - pd, pd * 2, pd * 2); ctx.filter = 'none'; }      // what is behind it, blurred
@@ -2925,7 +2920,7 @@ if (location.hash) {
       const g = angleOf(i), cs = Math.cos(g), sn = Math.sin(g), u = (cx - 11.2 + fx) * k, v = (cy - 11.5 + fy) * k;
       const grow = 1 + .1 * Math.sin(t * (.7 + i * .17) + i * 3.1) + .06 * Math.sin(t * (1.9 + i * .29) + i * 1.3);      // swelling and shrinking slowly, unevenly, each to its own rhythm
       ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k * grow, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); });
-    markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
+    ctx.globalAlpha = a0; markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
     if (markLine && (markLine.t += dt) < 4) sayBubble(x, y - R - s * .08, markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
@@ -2989,7 +2984,7 @@ if (location.hash) {
     { const ents = [[0, drawSt], [me.x + me.y, drawMe]].sort((a, b) => a[0] - b[0]); let lo = -Infinity;      // whoever is nearer is drawn last, and the confetti in between
       for (const [k, f] of ents) { window.__confLayer(lo, k); f(); lo = k; } window.__confLayer(lo, Infinity); }
     const bm = window.__lastWon && (window.__boardMark || webMark); markAt = null;      // the app and the Xiaohongshu build bring their own      // the last game won: the ball; lost (or none yet): the book
-    if (me.say || me.talk) bookAt = null; else if (bm) drawMark(t, dt, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
+    if (bm) drawMark(t, dt, P, s, bm); else fadedDraw(ap(3), () => drawBook(t, P, s));      // the book, or after a win the scores' ball in its place (drawn straight onto the picture: its glass blurs what is behind it)      // the book, or after a win the scores' bubbles in its place      // 小染书, beside the Storyteller while you stroll
     if (intro && bookAt) { intro.t += dt; tokenBubble(bookAt[0], bookAt[6] - s * .26 - s * .06, clamp(intro.t * 4)); }      // anchored where the capsule rests, so the bubble stays still while the capsule bobs      // 小染书 itself tells you the roles, all in one bubble, its tail on the capsule
     if (me.say) { const p = P(0, 0, .3); sayBubble(p[0], p[1] - K * 1.6 * 1.2, say3(), clamp(W * .036, 12.5, 15), clamp(me.say.t * 4), W * .62); }
     if (me.line && (me.line.t += dt) < 2.4) { const p = P(me.x, me.y); sayBubble(p[0], p[1] - K * 1.6, me.line.text, clamp(W * .036, 12.5, 15), clamp(me.line.t * 4) * clamp((2.4 - me.line.t) * 3), W * .62); } else me.line = null;      // what you just said (a new language)
@@ -2999,16 +2994,15 @@ if (location.hash) {
     stepConfetti(dt);
     window.__3bLang = lobby && !tr;      // the language button, top right, while the lobby is up
     if (lobby) drawLobby(T, dt); else drawBotc(T, dt);
-    drawBursts();      // the bursts over everything; the pieces are drawn in depth with the people
     if (tr) { tr.t += dt; ctx.fillStyle = css([6, 4, 16], clamp(tr.t / .7)); ctx.fillRect(0, 0, W, H);      // down to black, then the other scene
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
-        if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
+        if (to === 'game') { confetti = null; landed = []; lobby = false;      /* into the game's scene: the confetti is not there */ me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
     if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); window.__spinMark(); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
-    const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; confetti = null; landed = []; return; }      // the Storyteller answers from where you stand: no walking over
+    const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
   leaveTower = () => { if (!tr) tr = { t: 0, to: 'lobby' }; };      // a game over: fade back to the lobby
   const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter']) { const el = $(id); if (el) el.style.display = 'none'; }
