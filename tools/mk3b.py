@@ -121,7 +121,7 @@ boot = """<script>
       const grow = 1 + .1 * Math.sin(t * (.7 + i * .17) + i * 3.1) + .06 * Math.sin(t * (1.9 + i * .29) + i * 1.3);      // swelling and shrinking slowly, unevenly, each to its own rhythm
       ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k * grow, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); });
     ctx.globalAlpha = a0; markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
-    if (markLine && (markLine.t += dt) < 4) sayBubble(x, q[1] - s * .12 - R - s * .08, typeof markLine.text === 'function' ? markLine.text() : markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
+    if (markLine && (markLine.t += dt) < 4) sayBubble(x, q[1] - s * .12 - R - s * .08, typeof markLine.text === 'function' ? markLine.text() : markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .82); else markLine = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
