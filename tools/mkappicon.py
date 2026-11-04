@@ -39,7 +39,7 @@ function sky(top, bot) { const g = ctx.createRadialGradient(C, C * .95, 30, C, C
 // the confetti drifting down from a burst behind the tokens, drawn as the game draws it (any angle, turned over by cos): each piece has
 // fallen its own way below where the pop left it, so the cloud thins downward and the lower ones flutter (turned over more).
 // Every other piece goes to the other side, so there is as much on the left as on the right; the top is stretched (tk) to reach as far as the sides.
-function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) { const placed = [], KNOT = [[160, 344], [212, 352], [266, 340], [314, 356], [238, 398], [292, 410], [200, 444]]; let knot = 0;
+function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) { const placed = [], KNOT = [[-318, 392], [212, 352], [266, 340], [-252, 432], [238, 398], [292, 410], [-236, 366]]; let knot = 0;
   for (let i = 0; i < n; i++) { const a = rnd() * TAU, u = Math.pow(rnd(), .5), f = Math.pow(rnd(), 1.6) * fallMax;
     let dx = Math.cos(a) * rx * u + Math.sin(f * .02 + i) * 18; dx = (i %% 2 ? 1 : -1) * Math.abs(dx);
     let ddy = dy + Math.sin(a) * ry * u + f; if (ddy < 0) ddy *= tk;
@@ -48,7 +48,7 @@ function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) { con
     if (ddy > 455 && dx > 60 && dx < 160) { ddy -= 36; dx += 62; }      // the purple one lowest down: up a little, and aside so it does not land on the red one above it
     if (dx > 0 && ddy < 0 && Math.hypot(dx, ddy) > reachTR) { const kk = reachTR / Math.hypot(dx, ddy); dx *= kk; ddy *= kk; }      // the top right no further out than the top left reaches
     const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * (f / fallMax) * rnd());
-    if (dx > 150 && dx < 310 && ddy > 285 && ddy < 370) { [dx, ddy] = KNOT[knot++ %% KNOT.length]; }      // the knot of pieces just under the Pukka, laid out into the open space below it
+    if (dx > 150 && dx < 310 && ddy > 285 && ddy < 370) { [dx, ddy] = KNOT[knot++ %% KNOT.length]; }      // the knot of pieces just under the Pukka, laid out into the open space below it, three of them under the Sailor
     if (ddy > 350 && dx > 0 && dx < 220 && c === CONF[0]) {      // the red ones low on the right do not pile on each other: a later one is nudged clear
       const rr = Math.max(w, h) * .5; for (const q of placed) if (q.c === c) { const vx = dx - q.x, vy = ddy - q.y, d = Math.hypot(vx, vy) || 1, need = (rr + q.r) * 1.05; if (d < need) { dx += vx / d * (need - d); ddy += vy / d * (need - d); } }
       placed.push({ x: dx, y: ddy, r: rr, c }); }
