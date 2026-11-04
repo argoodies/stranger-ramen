@@ -33,8 +33,8 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
   // the ball in the lobby after a win (tools/mk3b.py): it turns, and says your wins and, from Game Center, your place among all players
   // (the native side answers through window.__gcRank: { rank, score } or null). No answer within four seconds: the wins alone.
-  const SAY = { hans: ['你赢了 {w} 局，全球排名第 {r}。', '你赢了 {w} 局。', '你赢了 {w} 局，全球排名第 {r}（更新中）。', '你赢了 {w} 局，全球排名第 {r}（已同步）。'], hant: ['你贏了 {w} 局，全球排名第 {r}。', '你贏了 {w} 局。', '你贏了 {w} 局，全球排名第 {r}（更新中）。', '你贏了 {w} 局，全球排名第 {r}（已同步）。'],
-    en: ['{w} wins so far, No. {r} worldwide.', '{w} wins so far.', '{w} wins so far, No. {r} worldwide (updating).', '{w} wins so far, No. {r} worldwide (synced).'] };
+  const SAY = { hans: ['你赢了 {w} 局，全球排名第 {r}。', '你赢了 {w} 局。', '你赢了 {w} 局，全球排名第 {r}（更新中）。', '你赢了 {w} 局（已同步），全球排名第 {r}。'], hant: ['你贏了 {w} 局，全球排名第 {r}。', '你贏了 {w} 局。', '你贏了 {w} 局，全球排名第 {r}（更新中）。', '你贏了 {w} 局（已同步），全球排名第 {r}。'],
+    en: ['{w} wins so far, No. {r} worldwide.', '{w} wins so far.', '{w} wins so far, No. {r} worldwide (updating).', '{w} wins so far (synced), No. {r} worldwide.'] };
   let asking = false;
   window.__boardMark = { open: () => {
     if (asking) return; asking = true;
