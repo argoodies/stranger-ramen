@@ -2543,7 +2543,7 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
   // the ball in the lobby after a win (tools/mk3b.py): it turns, and says your wins and, from Game Center, your place among all players
   // (the native side answers through window.__gcRank: { rank, score } or null). No answer within four seconds: the wins alone.
-  const SAY = { hans: ['你赢了 {w} 局，全网排名第 {r}。', '你赢了 {w} 局。'], hant: ['你贏了 {w} 局，全網排名第 {r}。', '你贏了 {w} 局。'], en: ['{w} wins so far, No. {r} worldwide.', '{w} wins so far.'] };
+  const SAY = { hans: ['你赢了 {w} 局，全球排名第 {r}。', '你赢了 {w} 局。'], hant: ['你贏了 {w} 局，全球排名第 {r}。', '你贏了 {w} 局。'], en: ['{w} wins so far, No. {r} worldwide.', '{w} wins so far.'] };
   let asking = false;
   window.__boardMark = { open: () => {
     if (asking) return; asking = true;
