@@ -107,7 +107,7 @@ async function playBotc() {
     if (g.alive[pi]) {
       const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], () => S().pickPukka)
         : pick([0, 1, 2].filter(k => k !== pi && g.alive[k]));      // a computer Pukka never poisons himself
-      lastPick[pi] = tgt; if (pi === 0 && tgt === 0 && (!g.auto || g.testBadges)) gcAch('self_poison');      // 自毒: the Pukka poisons himself
+      lastPick[pi] = tgt; if (pi === 0 && tgt === 0 && (!g.auto || g.testBadges)) gcAch('self_poison');      // 自噬其毒: the Pukka poisons himself
       if (g.drunk !== pi && g.poisoned !== pi) {
         const prev = g.poisoned;
         // poisoning himself still lands, but a Pukka poisoned that night cannot make the last victim die

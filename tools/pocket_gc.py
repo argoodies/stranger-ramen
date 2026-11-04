@@ -24,7 +24,7 @@ A = [('pc.first_win', 50, True, ('First Win', '首胜', '首勝'), ('Win a game.
  ('pc.self_reverse', 50, True, ('Turn the Tables', '亲手逆转', '親手逆轉'), ('Be executed, and set off your own reversal of the result.', '被处决，并亲手触发胜负反转。', '被處決，並親手觸發勝負反轉。')),
  ('pc.all_tokens', 50, True, ('Irresistible', '魅魔体质', '魅魔體質'), ("Be executed carrying both other players' tokens.", '被处决时，身上带着另外两人的标记。', '被處決時，身上帶著另外兩人的標記。')),
  ('pc.trick_pukka', 50, True, ('Double Dose', '双份毒药', '雙份毒藥'), ('Have two players poisoned by you.', '两名玩家都中了你的毒。', '兩名玩家都中了你的毒。')),
- ('pc.self_poison', 50, True, ('Self-Poisoned', '自毒', '自毒'), ('Poison yourself at night.', '夜里给自己下毒。', '夜裡給自己下毒。'))]
+ ('pc.self_poison', 50, True, ('Self-Poisoned', '自噬其毒', '自噬其毒'), ('Poison yourself at night.', '夜里给自己下毒。', '夜裡給自己下毒。'))]
 st, d = J('GET', f'/v1/gameCenterDetails/{GC}/gameCenterAchievements?limit=100')
 have = {a['attributes']['vendorIdentifier']: a['id'] for a in d.get('data', [])}
 for vid, pts, show, names, how in A:
