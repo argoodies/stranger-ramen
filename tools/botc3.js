@@ -226,13 +226,14 @@ function drawBotc(t, dt) {
   const top = [92, 168, 162], under = [70, 96, 130];
   v.disc(0, 0, -3.6, 1.1, 1.1, under); v.disc(0, 0, -2.5, 2.3, .9, under); v.disc(0, 0, -1.6, 3.4, 1.0, mix(under, top, .3)); v.disc(0, 0, -.6, 4.3, .6, top); v.disc(0, 0, 0, 2.3, 0, [120, 190, 180]);
   for (let i = 0; i < 12; i++) { const q = TAU * i / 12; line([P(3.95 * Math.cos(q), 3.95 * Math.sin(q)), P(4.18 * Math.cos(q), 4.18 * Math.sin(q))], tint(mix(top, [255, 255, 255], .6)), s * .07); }
-  if (window.__drawLanded) window.__drawLanded(P);      // confetti from a win, lying on the table (tools/mk3b.py)
   const K = s * 1.25, seat = i => { const q = (45 + 120 * i) * Math.PI / 180; return [3.0 * Math.cos(q), 3.0 * Math.sin(q)]; };
   const w = g.wait, canPick = k => w && w.type === 'pick' && w.ok(k), pulse = .5 + .5 * Math.sin(t * 5);
   const items = [0, 1, 2].map(i => ({ k: seat(i)[0] + seat(i)[1], i })); items.push({ k: 0, i: 'st' }); const toks = [];
   if (g.reveal) g.revealT += dt;
   for (const k of [0, 1, 2, 'st']) delete BHIT[k];
-  items.sort((a, b) => a.k - b.k).forEach(({ i }) => {
+  let confLo = -Infinity;      // confetti from a win (tools/mk3b.py), drawn in depth between the people
+  items.sort((a, b) => a.k - b.k).forEach(({ i, k }) => {
+    if (window.__confLayer) window.__confLayer(confLo, k); confLo = k;
     if (i === 'st') {
       v.disc(0, 0, 0, .95, .3, [240, 220, 190]); const p = P(0, 0, .3);
       if (canPick('st')) { ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .9, s * .45, 0, 0, TAU); ctx.strokeStyle = css([255, 236, 170], .5 + .4 * pulse); ctx.lineWidth = 2.5; ctx.stroke(); }
@@ -251,6 +252,7 @@ function drawBotc(t, dt) {
     toks.push(i);
     BHIT[i] = [p[0], p[1] - K * .8, K * .8];
   });
+  if (window.__confLayer) window.__confLayer(confLo, Infinity);
   if (g.dark > .02) { ctx.fillStyle = css([10, 10, 40], .3 * g.dark); ctx.fillRect(0, 0, W, H); drawOrb(mx, my, 22, g.dark); }      // the night falls over everything but the moon
   // tokens over heads: your own role all game long; at the end everyone's role, shrouds for the dead, and 醉 / 毒 reminders
   const R = clamp(s * .62, 17, 30);
