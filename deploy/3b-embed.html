@@ -2549,7 +2549,7 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     if (asking) return; asking = true;
     const t0 = performance.now(); let done = false;
     const answer = r => { if (done) return; done = true; window.__gcRank = null;
-      setTimeout(() => { asking = false; const w = Math.max(GCS.wins, (r && r.score) || 0);
+      setTimeout(() => { asking = false; const w = GCS.wins;      // the wins counted on this device; the rank is Game Center's, as it has it
         window.__markSay(() => { const S = SAY[LANG] || SAY.hans; return (r && r.rank > 0 ? S[0].replace('{w}', w).replace('{r}', r.rank) : S[1].replace('{w}', w)).replace(/^1 wins/, '1 win'); }); }, Math.max(0, 1000 - (performance.now() - t0))); };      // after the ball's turn
     window.__gcRank = answer; gcPost({ t: 'rank' }); setTimeout(() => answer(null), 4000);
   } };
