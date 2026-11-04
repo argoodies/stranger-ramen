@@ -2546,16 +2546,16 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
   // the ball in the lobby after a win (tools/mk3b.py): it turns, and says your wins and, from Game Center, your place among all players
   // (the native side answers through window.__gcRank: { rank, score } or null). No answer within four seconds: the wins alone.
-  const SAY = { hans: ['你赢了 {w} 局，全球排名第 {r}。', '你赢了 {w} 局。', '你赢了 {w} 局，全球排名第 {r}，排名更新中。'], hant: ['你贏了 {w} 局，全球排名第 {r}。', '你贏了 {w} 局。', '你贏了 {w} 局，全球排名第 {r}，排名更新中。'],
-    en: ['{w} wins so far, No. {r} worldwide.', '{w} wins so far.', '{w} wins so far, No. {r} worldwide (updating).'] };
+  const SAY = { hans: ['你赢了 {w} 局，全球排名第 {r}。', '你赢了 {w} 局。', '你赢了 {w} 局，全球排名第 {r}，排名更新中。', '你赢了 {w} 局，全球排名第 {r}，当前已同步。'], hant: ['你贏了 {w} 局，全球排名第 {r}。', '你贏了 {w} 局。', '你贏了 {w} 局，全球排名第 {r}，排名更新中。', '你贏了 {w} 局，全球排名第 {r}，當前已同步。'],
+    en: ['{w} wins so far, No. {r} worldwide.', '{w} wins so far.', '{w} wins so far, No. {r} worldwide (updating).', '{w} wins so far, No. {r} worldwide (synced).'] };
   let asking = false;
   window.__boardMark = { open: () => {
     if (asking) return; asking = true;
     const t0 = performance.now(); let done = false;
     const answer = r => { if (done) return; done = true; window.__gcRank = null;
       setTimeout(() => { asking = false;
-        if (r && r.score > GCS.wins) window.__gcAdopt(r.score);      // Game Center is ahead: this device catches up
-        const w = GCS.wins, k = !(r && r.rank > 0) ? 1 : r.score < w ? 2 : 0;      // no rank: the wins alone; Game Center behind this device: its rank, said to be updating
+        const synced = !!(r && r.score > GCS.wins); if (synced) window.__gcAdopt(r.score);      // Game Center is ahead: this device catches up, and says so
+        const w = GCS.wins, k = !(r && r.rank > 0) ? 1 : synced ? 3 : r.score < w ? 2 : 0;      // no rank: the wins alone; Game Center behind this device: its rank, said to be updating
         window.__markSay(() => { const S = SAY[LANG] || SAY.hans; return S[k].replace('{w}', w).replace('{r}', r && r.rank).replace(/^1 wins/, '1 win'); }); }, Math.max(0, 1000 - (performance.now() - t0))); };      // after the ball's turn
     window.__gcRank = answer; gcPost({ t: 'rank' }); setTimeout(() => answer(null), 4000);
   } };
