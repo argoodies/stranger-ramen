@@ -36,13 +36,17 @@ function burst(cx, cy, n, r0, r1, sz) { for (let i = 0; i < n; i++) { const q = 
 function sky(top, bot) { const g = ctx.createRadialGradient(C, C * .95, 30, C, C, N * .78); g.addColorStop(0, css(top)); g.addColorStop(1, css(bot)); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); }
 // A2: a triangle — the Heretic on top, the other two below, the burst from their middle
 // the confetti drifting down from a burst behind the tokens, drawn as the game draws it (any angle, turned over by cos): each piece has
-// fallen its own way below where the pop left it, so the cloud thins downward; the lower ones flutter (turned over more)
-function drift(rx, ry, n, dy, k, fallMax) { for (let i = 0; i < n; i++) { const a = rnd() * TAU, u = Math.pow(rnd(), .5), f = Math.pow(rnd(), 1.6) * fallMax;
-  const x = C + Math.cos(a) * rx * u + Math.sin(f * .02 + i) * 18, y = C + dy + Math.sin(a) * ry * u + f, c = CONF[(rnd() * CONF.length) | 0], down = f / fallMax;
-  const w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * down * rnd());
-  ctx.save(); ctx.translate(x, y); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
-make('A2', () => { ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
-  drift(440, 330, 260, -60, 4.4, 160);
+// fallen its own way below where the pop left it, so the cloud thins downward and the lower ones flutter (turned over more).
+// Every other piece goes to the other side, so there is as much on the left as on the right; the top is stretched (tk) to reach as far as the sides.
+function drift(rx, ry, n, dy, k, fallMax, tk) {
+  for (let i = 0; i < n; i++) { const a = rnd() * TAU, u = Math.pow(rnd(), .5), f = Math.pow(rnd(), 1.6) * fallMax;
+    let dx = Math.cos(a) * rx * u + Math.sin(f * .02 + i) * 18; dx = (i %% 2 ? 1 : -1) * Math.abs(dx);
+    let ddy = dy + Math.sin(a) * ry * u + f; if (ddy < 0) ddy *= tk;
+    const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * (f / fallMax) * rnd());
+    ctx.save(); ctx.translate(C + dx, C + ddy); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
+make('A2', () => { seed = 2026;      // the draw MELO picked (2026-11-04, "c1")
+  ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
+  drift(440, 330, 260, -60, 5.6, 160, 1.25);
   token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
