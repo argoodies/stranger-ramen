@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The Tiny Clocktower app icon (2026-11-04): the three role tokens in a triangle, the Heretic on top, drawn by the game's own roleToken,
-in front of a burst of confetti and faint light rays on the night-purple sky. Writes ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
+in front of confetti drifting down from a burst, on a deep purple with a warm light behind them. Writes ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
 usage: tools/mkappicon.py      (needs the Playwright chrome-headless-shell)"""
 import os, re, json, base64, subprocess, io
 from PIL import Image
@@ -35,8 +35,14 @@ function make(name, f) { const c = document.createElement('canvas'); c.width = c
 function burst(cx, cy, n, r0, r1, sz) { for (let i = 0; i < n; i++) { const q = rnd() * TAU, u = Math.pow(rnd(), .8), rr = r0 + u * (r1 - r0); piece(cx + Math.cos(q) * rr, cy + Math.sin(q) * rr * .92, sz * (1.1 - u * .5) * (.55 + rnd() * .45), sz * (1.1 - u * .5) * (1.1 + rnd() * .9), q + (rnd() - .5) * 1.2, CONF[(rnd() * CONF.length) | 0], .55 + .45 * (1 - u)); } }
 function sky(top, bot) { const g = ctx.createRadialGradient(C, C * .95, 30, C, C, N * .78); g.addColorStop(0, css(top)); g.addColorStop(1, css(bot)); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); }
 // A2: a triangle — the Heretic on top, the other two below, the burst from their middle
-make('A2', () => { sky([98, 62, 158], [20, 10, 44]); stars(55, .6); rays(C, C, 20, N, [255, 230, 170], .025); glow(C, C, N * .38, [255, 214, 150], .22);      // the rays and the glow kept faint: nothing outshines the tokens
-  burst(C, C, 160, 120, 500, 32);
+// the confetti drifting down from a burst behind the tokens, drawn as the game draws it (any angle, turned over by cos): each piece has
+// fallen its own way below where the pop left it, so the cloud thins downward; the lower ones flutter (turned over more)
+function drift(rx, ry, n, dy, k, fallMax) { for (let i = 0; i < n; i++) { const a = rnd() * TAU, u = Math.pow(rnd(), .5), f = Math.pow(rnd(), 1.6) * fallMax;
+  const x = C + Math.cos(a) * rx * u + Math.sin(f * .02 + i) * 18, y = C + dy + Math.sin(a) * ry * u + f, c = CONF[(rnd() * CONF.length) | 0], down = f / fallMax;
+  const w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * down * rnd());
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
+make('A2', () => { ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
+  drift(440, 330, 260, -60, 4.4, 160);
   token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
