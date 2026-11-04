@@ -50,7 +50,7 @@ function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) {
 make('A2', () => { seed = 2026;      // the draw MELO picked (2026-11-04, "c1", then "h7")
   ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
   drift(440, 330, 260, -60, 5.6, 230, 1.3, 465, 1.06);      // "h7": the big pieces drifting a little further down
-  { const keep = seed; seed = 61; for (const [x, y] of [[722, 178], [770, 232], [716, 262], [758, 318], [705, 335], [792, 162]]) {      // a few more in the gap between the top-right corner and the lower-right token, which was bare
+  { const keep = seed; seed = 61; for (const [x, y] of [[722, 178], [770, 232], [716, 262], [758, 318], [705, 335], [792, 162], [806, 262], [884, 318], [900, 392]]) {      // a few more where the right side was bare: between the top-right corner and the lower-right token, and out to the right of the Heretic (as full as its left)
       const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * 5.6, h = (6 + rnd() * 6) * 5.6;
       ctx.save(); ctx.translate(x + (rnd() - .5) * 20, y + (rnd() - .5) * 20); ctx.rotate(rnd() * TAU); ctx.scale(1, Math.cos(rnd() * TAU)); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); }
     seed = keep; }
