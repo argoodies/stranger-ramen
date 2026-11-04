@@ -2895,26 +2895,26 @@ if (location.hash) {
   const CONF = [[226, 64, 78], [255, 196, 64], [86, 156, 236], [150, 104, 210], [250, 246, 238], [96, 196, 160]];
   let confetti = null, landed = [];      // landed: pieces lying on the table, [gx, gy, angle, colour, w, h], until the next game begins
   const tableView = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };      // the lobby's and the game's own view of the table
-  window.__drawLanded = P => { for (const [gx, gy, a, c, w, h] of landed) { const q = P(gx, gy); ctx.save(); ctx.translate(q[0], q[1]); ctx.scale(1, .5); ctx.rotate(a); ctx.fillStyle = css(tint(mix(c, [60, 90, 90], .12))); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } };      // lying flat: squashed like the table top
+  window.__drawLanded = P => { for (const [gx, gy, a, c, w, h] of landed) { const q = P(gx, gy); ctx.save(); ctx.translate(q[0], q[1]); ctx.scale(1, .5); ctx.rotate(a); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } };      // lying flat: squashed like the table top, as bright as in the air
   window.__confettiGo = () => {
     const parts = [], bursts = [];
     for (let b = 0; b < 3; b++) {      // three bursts from the top middle of the picture, one after another
       const bx = W * .5 + (Math.random() - .5) * W * .06, by = H * .12 + (Math.random() - .5) * H * .02, at = b * .28, c = CONF[(b * 2) % CONF.length];
       bursts.push({ x: bx, y: by, at, c });
-      for (let k = 0; k < 46; k++) { const a = Math.random() * TAU, v = (.35 + Math.random() * .65) * Math.min(W, H) * .5;
-        parts.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v - Math.min(W, H) * .12, at, c: pick(CONF), w: 3 + Math.random() * 4, h: 6 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, ph: Math.random() * TAU, fall: .07 + Math.random() * .17, land: (() => { const q = Math.random() * TAU, rr = 1.5 + Math.sqrt(Math.random()) * 2.4; return [Math.cos(q) * rr, Math.sin(q) * rr]; })() }); }      // each falls at its own pace onto its own spot on the table, off the Storyteller's dais      // each falls at its own pace, so they spread down the picture
+      for (let k = 0; k < 46; k++) { const a = Math.random() * TAU, v = (.35 + Math.random() * .65) * Math.min(W, H) * 1.6;
+        parts.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v - Math.min(W, H) * .12, at, c: pick(CONF), w: 3 + Math.random() * 4, h: 6 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, ph: Math.random() * TAU, fall: .07 + Math.random() * .17, land: (() => { const q = Math.random() * TAU, rr = 1.15 + Math.sqrt(Math.random()) * 1.05; return [Math.cos(q) * rr, Math.sin(q) * rr]; })() }); }      // each falls at its own pace onto its own spot on the light inner ring, off the Storyteller's dais      // each falls at its own pace, so they spread down the picture
     }
     confetti = { t: 0, parts, bursts }; landed = [];      // silent: the win music is playing
   };
   function drawConfetti(dt) {
     if (!confetti) return;
     const C = confetti; C.t += dt; if (C.parts.every(p => p.done || p.gone)) { confetti = null; return; }
-    for (const b of C.bursts) { const u = (C.t - b.at) / .7; if (u < 0 || u > 1) continue;      // the flash and ring of each burst
+    for (const b of C.bursts) { const u = (C.t - b.at) / .35; if (u < 0 || u > 1) continue;      // the flash and ring of each burst
       glow(b.x, b.y, Math.min(W, H) * .18 * (.4 + u), b.c, .55 * (1 - u));
-      for (let k = 0; k < 14; k++) { const a = k * TAU / 14, rr = Math.min(W, H) * .16 * (1 - Math.pow(1 - u, 2)); ctx.beginPath(); ctx.arc(b.x + Math.cos(a) * rr, b.y + Math.sin(a) * rr, 2.6 * (1 - u) + .6, 0, TAU); ctx.fillStyle = css(b.c, 1 - u); ctx.fill(); } }
+      for (let k = 0; k < 14; k++) { const a = k * TAU / 14, rr = Math.min(W, H) * .16 * (1 - Math.pow(1 - u, 4)); ctx.beginPath(); ctx.arc(b.x + Math.cos(a) * rr, b.y + Math.sin(a) * rr, 2.6 * (1 - u) + .6, 0, TAU); ctx.fillStyle = css(b.c, 1 - u); ctx.fill(); } }
     const g = Math.min(W, H) * .9, tv = tableView();
     for (const p of C.parts) { if (C.t < p.at || p.done || p.gone) continue;
-      const drag = Math.pow(.15, dt); p.vx *= drag; p.vy = Math.min(p.vy * drag + g * dt, Math.min(W, H) * p.fall);      // air: a quick burst out, then a slow fall
+      const drag = Math.pow(C.t - p.at < .25 ? .0004 : .2, dt); p.vx *= drag;      // a sharp pop, stopped short by the air p.vy = Math.min(p.vy * drag + g * dt, Math.min(W, H) * p.fall);      // air: a quick burst out, then a slow fall
       const to = tv.P(p.land[0], p.land[1]);
       p.ph += dt * 3; p.x += (p.vx + Math.sin(p.ph) * 18) * dt; p.y += p.vy * dt; p.r += p.vr * dt;      // swaying as it falls
       if (C.t - p.at > .6) p.x += (to[0] - p.x) * Math.min(1, dt * .9);      // drifting over towards its spot
@@ -3027,13 +3027,13 @@ if (location.hash) {
     drawConfetti(dt);      // over everything, into the fade back to the lobby
     if (tr) { tr.t += dt; ctx.fillStyle = css([6, 4, 16], clamp(tr.t / .7)); ctx.fillRect(0, 0, W, H);      // down to black, then the other scene
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
-        if (to === 'game') { landed = []; lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
+        if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
     if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); window.__spinMark(); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
-    const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; return; }      // the Storyteller answers from where you stand: no walking over
+    const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; confetti = null; landed = []; return; }      // the Storyteller answers from where you stand: no walking over
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
   leaveTower = () => { if (!tr) tr = { t: 0, to: 'lobby' }; };      // a game over: fade back to the lobby
   const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter']) { const el = $(id); if (el) el.style.display = 'none'; }
