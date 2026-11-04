@@ -2949,7 +2949,7 @@ if (location.hash) {
   // the web has no scoreboard: its ball turns and says how many games you have won on this device (botc3.js keeps the count)
   const WEBSAY = { hans: '你赢了 {w} 局。', hant: '你贏了 {w} 局。', en: '{w} wins so far.' };
   const webMark = { open: () => setTimeout(() => window.__markSay(() => (WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins).replace(/^1 wins/, '1 win')), 1000) };
-  let markLine = null;      // what the ball says (the Xiaohongshu build: your wins and rank), in a speech bubble over it for a few seconds
+  let markLine = null;      // what the ball says (your wins and rank), in a speech bubble over it that stays, like 小染书's, until a tap anywhere
   window.__markSay = text => { markLine = { text, t: 0 }; };      // text: a string, or () => the words in the language of the moment
   window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };      // all four done in SPIN + 3 LAG, about a second
   function turn(dt) { if (!spin.tw) return; spin.tw += dt; if (spin.tw >= SPIN + 3 * LAG) spin.tw = 0; }
@@ -2970,7 +2970,7 @@ if (location.hash) {
       const grow = 1 + .1 * Math.sin(t * (.7 + i * .17) + i * 3.1) + .06 * Math.sin(t * (1.9 + i * .29) + i * 1.3);      // swelling and shrinking slowly, unevenly, each to its own rhythm
       ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k * grow, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); });
     ctx.globalAlpha = a0; markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
-    if (markLine && (markLine.t += dt) < 4) sayBubble(x, q[1] - s * .12 - R - s * .08, typeof markLine.text === 'function' ? markLine.text() : markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .82); else markLine = null;      // a finger-sized place to tap, bigger than the ball
+    if (markLine) { markLine.t += dt; sayBubble(x, q[1] - s * .12 - R - s * .08, typeof markLine.text === 'function' ? markLine.text() : markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4), W * .82); }      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
@@ -3048,7 +3048,8 @@ if (location.hash) {
         if (to === 'game') { confetti = null; landed = []; lobby = false;      /* into the game's scene: the confetti is not there */ me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
         else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
-    if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
+    if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }
+    if (markLine) { if (markLine.t > .25) { markLine = null; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // the ball's bubble the same: a tap anywhere and it is done, and that tap does nothing else      // a tap and it is done; now the Storyteller sparkles instead
     if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); window.__spinMark(); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
     const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; markLine = null; me.line = null; intro = null; return; }      /* the Storyteller's word to begin outranks every other bubble: the ball's, yours, 小染书's */      // the Storyteller answers from where you stand: no walking over
