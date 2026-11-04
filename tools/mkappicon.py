@@ -39,15 +39,20 @@ function sky(top, bot) { const g = ctx.createRadialGradient(C, C * .95, 30, C, C
 // the confetti drifting down from a burst behind the tokens, drawn as the game draws it (any angle, turned over by cos): each piece has
 // fallen its own way below where the pop left it, so the cloud thins downward and the lower ones flutter (turned over more).
 // Every other piece goes to the other side, so there is as much on the left as on the right; the top is stretched (tk) to reach as far as the sides.
-function drift(rx, ry, n, dy, k, fallMax, tk) {
+function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity) {
   for (let i = 0; i < n; i++) { const a = rnd() * TAU, u = Math.pow(rnd(), .5), f = Math.pow(rnd(), 1.6) * fallMax;
     let dx = Math.cos(a) * rx * u + Math.sin(f * .02 + i) * 18; dx = (i %% 2 ? 1 : -1) * Math.abs(dx);
     let ddy = dy + Math.sin(a) * ry * u + f; if (ddy < 0) ddy *= tk;
+    if (dx > 0 && ddy < 0 && Math.hypot(dx, ddy) > reachTR) { const kk = reachTR / Math.hypot(dx, ddy); dx *= kk; ddy *= kk; }      // the top right no further out than the top left reaches
     const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * (f / fallMax) * rnd());
     ctx.save(); ctx.translate(C + dx, C + ddy); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
 make('A2', () => { seed = 2026;      // the draw MELO picked (2026-11-04, "c1", then "h7")
   ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
-  drift(440, 330, 260, -60, 5.6, 230, 1.3);      // "h7": the big pieces drifting a little further down
+  drift(440, 330, 260, -60, 5.6, 230, 1.3, 465);      // "h7": the big pieces drifting a little further down
+  { const keep = seed; seed = 61; for (const [x, y] of [[722, 178], [770, 232], [716, 262], [758, 318], [705, 335], [792, 162]]) {      // a few more in the gap between the top-right corner and the lower-right token, which was bare
+      const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * 5.6, h = (6 + rnd() * 6) * 5.6;
+      ctx.save(); ctx.translate(x + (rnd() - .5) * 20, y + (rnd() - .5) * 20); ctx.rotate(rnd() * TAU); ctx.scale(1, Math.cos(rnd() * TAU)); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); }
+    seed = keep; }
   token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
