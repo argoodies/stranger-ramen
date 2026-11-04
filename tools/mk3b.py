@@ -11,8 +11,8 @@ import os
 import re
 def check_comments(code, where):      # a '//' comment runs to the end of its line: code put after one on the same line is silently lost (it has broken the game several times)
     for n, line in enumerate(code.split('\n'), 1):
-        m = re.search(r'\s{2,}//', line)
-        if m and re.search(r'(\bif \(|\breturn\b|\bconst |\blet |\bfor \(|[a-zA-Z_]\w*\([^)]*\);\s*\S)', line[m.end():]):
+        m = re.search(r'\S\s{2,}//', line)      # a comment after code on the same line (a whole-line comment is prose)
+        if m and re.search(r'(\bif \(|\breturn\b|\bconst |\blet |\bfor \(|[a-zA-Z_]\w*\([^)]*\);\s*\S|\b[a-zA-Z_][\w.]*(?:\[[^\]]*\])?\s*(?:[-+*/]?=)\s*[^=;\n]+;)', line[m.end():]):      # also an assignment: x = ...; / x += ...;
             raise SystemExit(f'{where}:{n}: code after a // comment would be lost:\n  {line.strip()[:200]}')
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
@@ -61,7 +61,7 @@ boot = """<script>
       const bx = W * .5 + (Math.random() - .5) * W * .06, by = H * .12 + (Math.random() - .5) * H * .02, at = b * .28, c = CONF[(b * 2) % CONF.length];
       bursts.push({ x: bx, y: by, at, c });
       for (let k = 0; k < 46; k++) { const a = Math.random() * TAU, v = (.35 + Math.random() * .65) * Math.min(W, H) * 1.6;
-        parts.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v - Math.min(W, H) * .12, at, c: pick(CONF), w: 3 + Math.random() * 4, h: 6 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, ph: Math.random() * TAU, fall: .07 + Math.random() * .17, land: (() => { const q = Math.random() * TAU, rr = 1.15 + Math.sqrt(Math.random()) * 1.05; return [Math.cos(q) * rr, Math.sin(q) * rr]; })() }); }      // each falls at its own pace onto its own spot on the light inner ring, off the Storyteller's dais      // each falls at its own pace, so they spread down the picture
+        parts.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .85, at, c: pick(CONF), w: 3 + Math.random() * 4, h: 6 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, ph: Math.random() * TAU, fall: .07 + Math.random() * .17, land: (() => { const q = Math.random() * TAU, rr = 1.15 + Math.sqrt(Math.random()) * 1.05; return [Math.cos(q) * rr, Math.sin(q) * rr]; })() }); }      // each falls at its own pace onto its own spot on the light inner ring, off the Storyteller's dais      // each falls at its own pace, so they spread down the picture
     }
     confetti = { t: 0, parts, bursts }; landed = [];      // silent: the win music is playing
   };
@@ -73,7 +73,8 @@ boot = """<script>
       for (let k = 0; k < 14; k++) { const a = k * TAU / 14, rr = Math.min(W, H) * .16 * (1 - Math.pow(1 - u, 4)); ctx.beginPath(); ctx.arc(b.x + Math.cos(a) * rr, b.y + Math.sin(a) * rr, 2.6 * (1 - u) + .6, 0, TAU); ctx.fillStyle = css(b.c, 1 - u); ctx.fill(); } }
     const g = Math.min(W, H) * .9, tv = tableView();
     for (const p of C.parts) { if (C.t < p.at || p.done || p.gone) continue;
-      const drag = Math.pow(C.t - p.at < .25 ? .0004 : .2, dt); p.vx *= drag;      // a sharp pop, stopped short by the air p.vy = Math.min(p.vy * drag + g * dt, Math.min(W, H) * p.fall);      // air: a quick burst out, then a slow fall
+      const drag = Math.pow(C.t - p.at < .25 ? .0004 : .2, dt); p.vx *= drag;      // a sharp pop, stopped short by the air
+      p.vy = Math.min(p.vy * drag + g * dt, Math.min(W, H) * p.fall);      // then a slow fall
       const to = tv.P(p.land[0], p.land[1]);
       p.ph += dt * 3; p.x += (p.vx + Math.sin(p.ph) * 18) * dt; p.y += p.vy * dt; p.r += p.vr * dt;      // swaying as it falls
       if (C.t - p.at > .6) p.x += (to[0] - p.x) * Math.min(1, dt * .9);      // drifting over towards its spot
@@ -211,6 +212,7 @@ assert src.count(LANG_SHOW) == 1, 'language-button rule not found in index.html'
 src = src.replace(LANG_SHOW, LANG_SHOW + ' || !!window.__3bLang', 1)      # /3b: the language button also shows in its lobby
 botc3 = open(os.path.join(ROOT, 'tools', 'botc3.js'), encoding='utf-8').read()      # the three-player game itself: no longer in index.html
 check_comments(boot, 'mk3b boot script')
+check_comments(botc3, 'tools/botc3.js')
 boot = '<script>\n' + botc3 + '\n</script>\n' + boot
 KICK = "\nrequestAnimationFrame(frame);\n</script>"
 assert src.count(KICK) == 1, 'frame kick-off not found in index.html'
