@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""The Tiny Clocktower app icon (2026-11-04): the three role tokens in a triangle, the Heretic on top, drawn by the game's own roleToken,
-in front of confetti drifting down from a burst, on a deep purple with a warm light behind them. Writes ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
+"""The Tiny Clocktower app icon (2026-11-04): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken,
+without shadow or glow), on a deep purple with a warm light behind them, and 24 straight streamers in the confetti colours bursting out
+all round, starting 200-260 out from the middle (staggered) so they do not meet behind the tokens. Writes
+ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
 usage: tools/mkappicon.py      (needs the Playwright chrome-headless-shell)"""
 import os, re, json, base64, subprocess, io
 from PIL import Image
-ROOT = '/root/clocktower-ramen'
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HS = '/root/.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell'
 src = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
 need = [r'const TAU = .*?\n', r'const clamp = .*?\n', r'const lerp = .*?\n', r'const mix = .*?\n', r'const css = .*?\n',
@@ -53,14 +55,17 @@ function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) { con
       const rr = Math.max(w, h) * .5; for (const q of placed) if (q.c === c) { const vx = dx - q.x, vy = ddy - q.y, d = Math.hypot(vx, vy) || 1, need = (rr + q.r) * 1.05; if (d < need) { dx += vx / d * (need - d); ddy += vy / d * (need - d); } }
       placed.push({ x: dx, y: ddy, r: rr, c }); }
     ctx.save(); ctx.translate(C + dx, C + ddy); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
-make('A2', () => { seed = 2026;      // the draw MELO picked (2026-11-04, "c1", then "h7")
-  ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
-  drift(440, 330, 260, -60, 5.6, 230, 1.3, 465, 1.06);      // "h7": the big pieces drifting a little further down
-  { const keep = seed; seed = 61; for (const [x, y] of [[722, 178], [770, 232], [716, 262], [758, 318], [705, 335], [792, 162], [806, 262], [884, 318], [900, 392]]) {      // a few more where the right side was bare: between the top-right corner and the lower-right token, and out to the right of the Heretic (as full as its left)
-      const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * 5.6, h = (6 + rnd() * 6) * 5.6;
-      ctx.save(); ctx.translate(x + (rnd() - .5) * 20, y + (rnd() - .5) * 20); ctx.rotate(rnd() * TAU); ctx.scale(1, Math.cos(rnd() * TAU)); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); }
-    seed = keep; }
-  token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); });
+
+// streamers shot straight out from behind the tokens, gravity already bending them down toward their ends (a parabola), a faint ripple in the ribbon
+function ribbons(n, wd, L0, L1, grav, flare, alt, sd) { seed = sd;      // thin streamers bursting out: each widens a little as it flies (flare), long and short in turn (alt), fading in from behind the tokens
+  const q0 = rnd() * TAU;
+  for (let i = 0; i < n; i++) { const q = q0 + i * TAU / n + (rnd() - .5) * TAU / n * .5, L = (L0 + rnd() * (L1 - L0)) * (alt && i %% 2 ? alt : 1), c = CONF[i %% CONF.length], r0 = 200 + (Math.sin(i * 12.9898 + 7) * 43758.5453 %% 1 + 1) %% 1 * 60;      // each starts 200-260 out, staggered, so they do not meet in the middle
+    const P = [], Q = []; for (let t = 0; t <= 1.0001; t += .04) { const r = r0 + t * Math.max(40, L + 80 - r0), w = wd * (1 + flare * t) / 2, sx = C + Math.cos(q) * r, sy = C + Math.sin(q) * r + grav * t * t, nx = -Math.sin(q), ny = Math.cos(q);
+      P.push([sx + nx * w, sy + ny * w]); Q.push([sx - nx * w, sy - ny * w]); }
+    ctx.fillStyle = css(c); ctx.beginPath(); P.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); for (let j = Q.length - 1; j >= 0; j--) ctx.lineTo(Q[j][0], Q[j][1]); ctx.closePath(); ctx.fill(); } }
+const BG = () => { ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3); };
+const TOKS = () => { token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); };
+make('A2', () => { BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS(); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
 open('/tmp/mkappicon.html', 'w', encoding='utf-8').write(page)
