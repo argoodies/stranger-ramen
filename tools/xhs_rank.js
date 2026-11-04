@@ -49,15 +49,18 @@
   // how many games you have won (counted on this device) and, when the leaderboard can say, where that puts you among all players.
   // No rank to be had (an old client, not authorised, not ranked yet, no network): just the wins.
   var SAY = {
-    hans: { rank: '你赢了 {w} 局，全网排名第 {r}。', over: '你赢了 {w} 局，全网排名 500 名开外。', wins: '你赢了 {w} 局。' },
-    hant: { rank: '你贏了 {w} 局，全網排名第 {r}。', over: '你贏了 {w} 局，全網排名 500 名開外。', wins: '你贏了 {w} 局。' },
-    en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', wins: '{w} wins so far.' }
+    hans: { rank: '你赢了 {w} 局，全网排名第 {r}。', over: '你赢了 {w} 局，全网排名 500 名开外。', wins: '你赢了 {w} 局。', updating: '你赢了 {w} 局，排名更新中。' },
+    hant: { rank: '你贏了 {w} 局，全網排名第 {r}。', over: '你贏了 {w} 局，全網排名 500 名開外。', wins: '你贏了 {w} 局。', updating: '你贏了 {w} 局，排名更新中。' },
+    en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', wins: '{w} wins so far.', updating: '{w} wins so far, rank updating.' }
   };
   function wins() { var n = 0; try { n = GCS.wins || 0; } catch (e) {} return n; }      // the wins counted on this device; the rank is the leaderboard's, as it has it
   function say(k, w, r) { if (window.__markSay) window.__markSay(function () { var S = SAY[lang()] || SAY.hans; return S[k].replace('{w}', w).replace('{r}', r).replace(/^1 wins/, '1 win'); }); }      // worked out each frame: a change of language shows at once
   function fill(my) {
     my = my || {};
-    if (my.status === 'EXACT') say('rank', wins(), my.rank); else if (my.status === 'OVER_LIMIT') say('over', wins()); else say('wins', wins());
+    var far = typeof my.score === 'number' ? my.score : null;      // the leaderboard's count (none past 500th)
+    if (far !== null && far > wins() && window.__gcAdopt) window.__gcAdopt(far);      // the leaderboard is ahead: this device catches up
+    var behind = far !== null && far < wins();      // the leaderboard is behind this device: its rank is still the old one
+    if (my.status === 'EXACT') say(behind ? 'updating' : 'rank', wins(), my.rank); else if (my.status === 'OVER_LIMIT') say('over', wins()); else say('wins', wins());
   }
   var busy = false;
   function openMe() {
