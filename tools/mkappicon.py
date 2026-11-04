@@ -26,8 +26,9 @@ function ball(cx, cy, R, glass) {      // the Game Center bubbles, in a glass ba
   const k = R * (glass ? 1.45 : 2) / 24; for (const [x, y, r, c] of BUB) { ctx.beginPath(); ctx.arc(cx + (x - 11.2) * k, cy + (y - 11.5) * k, r * k, 0, TAU); ctx.fillStyle = css(c, .93); ctx.fill(); }
   if (glass) { ctx.beginPath(); ctx.ellipse(cx - R * .38, cy - R * .5, R * .22, R * .1, -.6, 0, TAU); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fill(); }
 }
-function token(x, y, r, role, tilt = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); ctx.translate(-x, -y);
-  ctx.beginPath(); ctx.arc(x, y + r * .1, r * 1.02, 0, TAU); ctx.fillStyle = 'rgba(10,6,30,.35)'; ctx.fill(); roleToken(x, y, r, role); ctx.restore(); }
+function token(x, y, r, role, tilt = 0) {      // the token alone: no shadow under it and no glow round it (roleToken draws both in the game; here only its disc is kept)
+  const S = Math.ceil(r * 4), off = document.createElement('canvas'); off.width = off.height = S; const keep = ctx; ctx = off.getContext('2d'); roleToken(S / 2, S / 2, r, role); ctx = keep;
+  ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.clip(); ctx.translate(x, y); ctx.rotate(tilt); ctx.drawImage(off, -S / 2, -S / 2); ctx.restore(); }
 const out = {};
 function make(name, f) { const c = document.createElement('canvas'); c.width = c.height = N; ctx = c.getContext('2d'); seed = 7; f(); out[name] = c.toDataURL(); }
 
