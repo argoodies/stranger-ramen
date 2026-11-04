@@ -2,7 +2,7 @@
 """The Tiny Clocktower app icon (2026-11-04): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken,
 without shadow or glow), on a deep purple with a warm light behind them, and 24 straight streamers in the confetti colours bursting out
 all round, starting 200-260 out from the middle (staggered) so they do not meet behind the tokens; the burst sits 35 above the
-middle and the one going straight up is 15% shorter. Writes
+middle, the one going straight up is 15% shorter, the ones behind the lower tokens reach past them, and all are 30% longer. Writes
 ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
 usage: tools/mkappicon.py      (needs the Playwright chrome-headless-shell)"""
 import os, re, json, base64, subprocess, io
@@ -61,8 +61,9 @@ function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) { con
 function ribbons(n, wd, L0, L1, grav, flare, alt, sd) { seed = sd;      // thin streamers bursting out: each widens a little as it flies (flare), long and short in turn (alt), fading in from behind the tokens
   const q0 = rnd() * TAU;
   for (let i = 0; i < n; i++) { const q = q0 + i * TAU / n + (rnd() - .5) * TAU / n * .5, L = (L0 + rnd() * (L1 - L0)) * (alt && i %% 2 ? alt : 1), c = CONF[i %% CONF.length], r0 = 200 + (Math.sin(i * 12.9898 + 7) * 43758.5453 %% 1 + 1) %% 1 * 60;      // each starts 200-260 out, staggered, so they do not meet in the middle
-    // the one going straight up is 15%% shorter, and the whole burst sits 35 above the middle
-    const P = [], Q = []; for (let t = 0; t <= 1.0001; t += .04) { const r = r0 + t * Math.max(40, L + 80 - r0) * (-Math.sin(q) > .97 ? .85 : 1), w = wd * (1 + flare * t) / 2, sx = C + Math.cos(q) * r, sy = C - 35 + Math.sin(q) * r + grav * t * t, nx = -Math.sin(q), ny = Math.cos(q);
+    // the one going straight up is 15%% shorter, and the whole burst sits 35 above the middle; one that runs behind the Sailor or the
+    // Pukka reaches 15 past that token's edge, so it shows; then every one 30%% longer
+    const P = [], Q = []; for (let t = 0; t <= 1.0001; t += .04) { const behind = [[-200, 150 + 35, 175], [200, 150 + 35, 175]].reduce((m, [tx, ty, tr]) => { const along = Math.cos(q) * tx + Math.sin(q) * ty, off = Math.abs(-Math.sin(q) * tx + Math.cos(q) * ty); return off < tr * .9 ? Math.max(m, along + Math.sqrt(tr * tr - off * off) + 15) : m; }, 0), outer = Math.max(Math.max(40, L + 80 - r0) * (-Math.sin(q) > .97 ? .85 : 1) + r0, behind), outer2 = r0 + (outer - r0) * 1.3, r = r0 + t * (outer2 - r0), w = wd * (1 + flare * t) / 2, sx = C + Math.cos(q) * r, sy = C - 35 + Math.sin(q) * r + grav * t * t, nx = -Math.sin(q), ny = Math.cos(q);
       P.push([sx + nx * w, sy + ny * w]); Q.push([sx - nx * w, sy - ny * w]); }
     ctx.fillStyle = css(c); ctx.beginPath(); P.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); for (let j = Q.length - 1; j >= 0; j--) ctx.lineTo(Q[j][0], Q[j][1]); ctx.closePath(); ctx.fill(); } }
 const BG = () => { ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3); };
