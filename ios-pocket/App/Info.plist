@@ -4,8 +4,8 @@
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>CFBundleLocalizations</key><array><string>zh-Hans</string><string>zh-Hant</string><string>en</string></array>
-  <key>CFBundleDisplayName</key><string>Tiny Clocktower</string>
-  <key>CFBundleName</key><string>Tiny Clocktower</string>
+  <key>CFBundleDisplayName</key><string>Moment Story</string>
+  <key>CFBundleName</key><string>Moment Story</string>
   <key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
   <key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
