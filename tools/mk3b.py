@@ -202,7 +202,7 @@ boot = """<script>
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // a tap and it is done; now the Storyteller sparkles instead
     if (markAt && Math.hypot(x - markAt[0], y - markAt[1]) < markAt[2]) { chime(74, 0, .12, 1); chime(79, .1, .1, 1); window.__spinMark(); markAt[3].open(markAt[0], markAt[1] - markAt[4]); return; }      // (x, top of the ball): where a bubble can point      // the bubbles: the scores
     if (bookAt && x > bookAt[2] && x < bookAt[3] && y > bookAt[4] && y < bookAt[5]) { intro = { i: 0, t: 0 }; chime(74, 0, .12, 1); chime(79, .1, .1, 1); return; }      // 小染书: it tells you about the roles
-    const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; markLine = null; return; }      /* the ball's bubble goes: the Storyteller speaks now */      // the Storyteller answers from where you stand: no walking over
+    const st = lv.st; if (st && Math.hypot(x - st[0], y - st[1]) < st[2]) { me.tx = me.x; me.ty = me.y; me.talk = true; markLine = null; me.line = null; intro = null; return; }      /* the Storyteller's word to begin outranks every other bubble: the ball's, yours, 小染书's */      // the Storyteller answers from where you stand: no walking over
     const [gx, gy] = lv.inv(x, y), [rx, ry] = ring(gx, gy); me.tx = rx; me.ty = ry; chime(69, 0, .07, .8); };      // a stroll about the table
   leaveTower = () => { if (!tr) tr = { t: 0, to: 'lobby' }; };      // a game over: fade back to the lobby
   const go = () => { $('title').style.display = 'none'; for (const id of ['zoom', 'leave', 'enter']) { const el = $(id); if (el) el.style.display = 'none'; }
