@@ -44,9 +44,9 @@ function drift(rx, ry, n, dy, k, fallMax, tk) {
     let ddy = dy + Math.sin(a) * ry * u + f; if (ddy < 0) ddy *= tk;
     const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * (f / fallMax) * rnd());
     ctx.save(); ctx.translate(C + dx, C + ddy); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
-make('A2', () => { seed = 2026;      // the draw MELO picked (2026-11-04, "c1")
+make('A2', () => { seed = 2026;      // the draw MELO picked (2026-11-04, "c1", then "h7")
   ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
-  drift(440, 330, 260, -60, 5.6, 160, 1.25);
+  drift(440, 330, 260, -60, 5.6, 230, 1.3);      // "h7": the big pieces drifting a little further down
   token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
