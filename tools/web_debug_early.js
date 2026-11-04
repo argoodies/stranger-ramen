@@ -8,7 +8,9 @@
   window.__debugMode = mode;
   window.__debugToast = function (text) { console.log('[debug]', text); };      // no toasts in the project: the console only
   if (mode === 'app') {      // the app's bridge: messages go to the console; achievements and scores are only logged
-    window.webkit = { messageHandlers: { gc: { postMessage: function (m) { console.log('[debug · app] Game Center', m); } } } };
+    window.webkit = { messageHandlers: { gc: { postMessage: function (m) { console.log('[debug · app] Game Center', m);
+      if (m && m.t === 'rank') setTimeout(function () { if (window.__gcRank) window.__gcRank({ rank: 87, score: (window.GCS || {}).wins || 0 }); }, 400);      // a made-up place on the board
+    } } } };
   }
   if (mode === 'xhs') {      // the Xiaohongshu container: a made-up board around your own total on this browser
     var names = ['小鱼干', '钟楼守夜人', null, 'Mira', '三人染爱好者', '夜猫子', '今天也赢了', '说书人的学徒', '阿锚', 'Pukka 粉', '红茶', '一分钟玩家'];

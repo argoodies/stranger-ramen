@@ -14,7 +14,7 @@ function gcRecord(won, role) {
 }
 window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ach', id: 'pc.' + id }); if (GCS.wins) gcPost({ t: 'score', v: GCS.wins }); };      // once signed in: anything earned before sign-in goes up too
 // The app's language menu in Apple's manner: an iOS menu of glass with a blue tick (the button itself is the shared 文A mark, tools/mk3b.py).
-// After a win the lobby shows Game Center's bubbles where the book was (tools/mk3b.py); a tap opens Game Center.
+// After a win the lobby shows Game Center's bubbles where the book was (tools/mk3b.py); a tap says your wins and rank.
 (function () {
   const inApp = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc);
   if (!inApp) return;
@@ -28,7 +28,18 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     document.head.appendChild(st);
   };
   if (document.body) make(); else document.addEventListener('DOMContentLoaded', make);
-  window.__boardMark = { open: () => setTimeout(() => gcPost({ t: 'center' }), 1000) };      // once the ball's turn is over      // the bubbles in the lobby after a win (tools/mk3b.py): Game Center itself
+  // the ball in the lobby after a win (tools/mk3b.py): it turns, and says your wins and, from Game Center, your place among all players
+  // (the native side answers through window.__gcRank: { rank, score } or null). No answer within four seconds: the wins alone.
+  const SAY = { hans: ['你赢了 {w} 局，全网排名第 {r}。', '你赢了 {w} 局。'], hant: ['你贏了 {w} 局，全網排名第 {r}。', '你贏了 {w} 局。'], en: ['{w} wins so far, No. {r} worldwide.', '{w} wins so far.'] };
+  let asking = false;
+  window.__boardMark = { open: () => {
+    if (asking) return; asking = true;
+    const t0 = performance.now(); let done = false;
+    const answer = r => { if (done) return; done = true; window.__gcRank = null;
+      setTimeout(() => { asking = false; const S = SAY[LANG] || SAY.hans, w = Math.max(GCS.wins, (r && r.score) || 0);
+        window.__markSay(r && r.rank > 0 ? S[0].replace('{w}', w).replace('{r}', r.rank) : S[1].replace('{w}', w)); }, Math.max(0, 1000 - (performance.now() - t0))); };      // after the ball's turn
+    window.__gcRank = answer; gcPost({ t: 'rank' }); setTimeout(() => answer(null), 4000);
+  } };
 })();
 // The clock tower's three-player game (水手 / 普卡 / 异端分子), taken out of the main game: only /3b uses it.
 // tools/mk3b.py puts this file into deploy/3b.html as a script of its own, after the main game's script (roleToken, sounds, drawing helpers and STR come from there).

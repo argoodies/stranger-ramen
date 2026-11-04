@@ -50,7 +50,7 @@ boot = """<script>
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null, markAt = null;
-  // when the last game was a win, where the platform has a scoreboard (window.__boardMark = { open }: the app's Game Center, set in botc3.js;
+  // when the last game was a win, where the platform has a scoreboard (window.__boardMark = { open }: the app's, with your Game Center rank, set in botc3.js;
   // the Xiaohongshu build, xhs_rank.js; on the web your own count), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
   // bubbles, floating in its place; a tap opens the scores.
   const BUBBLES = [[9, 13, 7.2, [142, 91, 234], .92], [14.5, 8.5, 5.6, [255, 59, 107], .9], [8, 6, 3.6, [255, 194, 26], .95], [16, 16, 4.6, [43, 196, 240], .9]];      // Game Center's mark, on a 24 grid

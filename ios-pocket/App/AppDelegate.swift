@@ -27,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-final class GameViewController: UIViewController, WKScriptMessageHandler, GKGameCenterControllerDelegate {
+final class GameViewController: UIViewController, WKScriptMessageHandler {
     private var webView: WKWebView!
 
     override var prefersStatusBarHidden: Bool { true }
@@ -98,7 +98,7 @@ final class GameViewController: UIViewController, WKScriptMessageHandler, GKGame
         }
     }
 
-    // messages from the game: an achievement and the total wins
+    // messages from the game: an achievement, the total wins, and a request for your rank
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "gc", let body = message.body as? [String: Any], let type = body["t"] as? String else { return }
         switch type {
@@ -112,35 +112,29 @@ final class GameViewController: UIViewController, WKScriptMessageHandler, GKGame
         case "score":
             guard GKLocalPlayer.local.isAuthenticated, let value = (body["v"] as? NSNumber)?.intValue else { return }
             GKLeaderboard.submitScore(value, context: 0, player: GKLocalPlayer.local, leaderboardIDs: ["pc.total_wins"], completionHandler: { _ in })
-        case "center":
-            showGameCenter()
+        case "rank":
+            loadRank()
         default:
             break
         }
     }
 
-    // the Game Center bubbles in the lobby (after a win): Apple's own Game Center screen, on its front page.
-    // Signed out, it asks for sign-in first (the system sheet), then opens.
-    private func showGameCenter() {
-        guard presentedViewController == nil else { return }
-        let open = { [weak self] in
-            guard let self = self, self.presentedViewController == nil else { return }
-            let vc = GKGameCenterViewController(state: .dashboard)
-            vc.gameCenterDelegate = self
-            self.present(vc, animated: true)
-        }
-        if GKLocalPlayer.local.isAuthenticated { return open() }
-        GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, _ in
-            guard let self = self else { return }
-            if let viewController = viewController { self.present(viewController, animated: true) }
-            else if GKLocalPlayer.local.isAuthenticated {
-                self.webView?.evaluateJavaScript("window.__gcSync && window.__gcSync()", completionHandler: nil)
-                open()
+    // the ball in the lobby (after a win) asks for your place on the Most Wins board, to say it in a bubble: no Game Center screen.
+    // Signed out, offline or never ranked: null, and the ball says your wins alone.
+    private func loadRank() {
+        guard GKLocalPlayer.local.isAuthenticated else { return replyRank(nil) }
+        GKLeaderboard.loadLeaderboards(IDs: ["pc.total_wins"]) { [weak self] boards, _ in
+            guard let board = boards?.first else { self?.replyRank(nil); return }
+            board.loadEntries(for: [GKLocalPlayer.local], timeScope: .allTime) { local, _, _ in
+                self?.replyRank(local)
             }
         }
     }
 
-    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
-        gameCenterViewController.dismiss(animated: true)
+    private func replyRank(_ entry: GKLeaderboard.Entry?) {
+        let arg = entry.map { "{rank:\($0.rank),score:\($0.score)}" } ?? "null"
+        DispatchQueue.main.async { [weak self] in
+            self?.webView?.evaluateJavaScript("window.__gcRank && window.__gcRank(\(arg))", completionHandler: nil)
+        }
     }
 }
