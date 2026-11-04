@@ -226,6 +226,7 @@ function drawBotc(t, dt) {
   const top = [92, 168, 162], under = [70, 96, 130];
   v.disc(0, 0, -3.6, 1.1, 1.1, under); v.disc(0, 0, -2.5, 2.3, .9, under); v.disc(0, 0, -1.6, 3.4, 1.0, mix(under, top, .3)); v.disc(0, 0, -.6, 4.3, .6, top); v.disc(0, 0, 0, 2.3, 0, [120, 190, 180]);
   for (let i = 0; i < 12; i++) { const q = TAU * i / 12; line([P(3.95 * Math.cos(q), 3.95 * Math.sin(q)), P(4.18 * Math.cos(q), 4.18 * Math.sin(q))], tint(mix(top, [255, 255, 255], .6)), s * .07); }
+  if (window.__drawLanded) window.__drawLanded(P);      // confetti from a win, lying on the table (tools/mk3b.py)
   const K = s * 1.25, seat = i => { const q = (45 + 120 * i) * Math.PI / 180; return [3.0 * Math.cos(q), 3.0 * Math.sin(q)]; };
   const w = g.wait, canPick = k => w && w.type === 'pick' && w.ok(k), pulse = .5 + .5 * Math.sin(t * 5);
   const items = [0, 1, 2].map(i => ({ k: seat(i)[0] + seat(i)[1], i })); items.push({ k: 0, i: 'st' }); const toks = [];
