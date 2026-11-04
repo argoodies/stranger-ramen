@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The Tiny Clocktower app icon (2026-11-04): the three role tokens in a triangle, the Heretic on top, drawn by the game's own roleToken,
-in front of a burst of confetti and light rays on the night-purple sky. Writes ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
+in front of a burst of confetti and faint light rays on the night-purple sky. Writes ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
 usage: tools/mkappicon.py      (needs the Playwright chrome-headless-shell)"""
 import os, re, json, base64, subprocess, io
 from PIL import Image
@@ -35,7 +35,7 @@ function make(name, f) { const c = document.createElement('canvas'); c.width = c
 function burst(cx, cy, n, r0, r1, sz) { for (let i = 0; i < n; i++) { const q = rnd() * TAU, u = Math.pow(rnd(), .8), rr = r0 + u * (r1 - r0); piece(cx + Math.cos(q) * rr, cy + Math.sin(q) * rr * .92, sz * (1.1 - u * .5) * (.55 + rnd() * .45), sz * (1.1 - u * .5) * (1.1 + rnd() * .9), q + (rnd() - .5) * 1.2, CONF[(rnd() * CONF.length) | 0], .55 + .45 * (1 - u)); } }
 function sky(top, bot) { const g = ctx.createRadialGradient(C, C * .95, 30, C, C, N * .78); g.addColorStop(0, css(top)); g.addColorStop(1, css(bot)); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); }
 // A2: a triangle — the Heretic on top, the other two below, the burst from their middle
-make('A2', () => { sky([104, 64, 166], [20, 10, 44]); stars(50, .6); rays(C, C, 20, N, [255, 230, 170], .07); glow(C, C, N * .42, [255, 214, 150], .6);
+make('A2', () => { sky([98, 62, 158], [20, 10, 44]); stars(55, .6); rays(C, C, 20, N, [255, 230, 170], .025); glow(C, C, N * .38, [255, 214, 150], .22);      // the rays and the glow kept faint: nothing outshines the tokens
   burst(C, C, 160, 120, 500, 32);
   token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
