@@ -2589,8 +2589,8 @@ window.__gcSync = () => { for (const id of Object.keys(GCS.ach)) gcPost({ t: 'ac
     if (asking) return; asking = true;
     const t0 = performance.now(); let done = false;
     const answer = r => { if (done) return; done = true; window.__gcRank = null;
-      setTimeout(() => { asking = false; const S = SAY[LANG] || SAY.hans, w = Math.max(GCS.wins, (r && r.score) || 0);
-        window.__markSay(r && r.rank > 0 ? S[0].replace('{w}', w).replace('{r}', r.rank) : S[1].replace('{w}', w)); }, Math.max(0, 1000 - (performance.now() - t0))); };      // after the ball's turn
+      setTimeout(() => { asking = false; const w = Math.max(GCS.wins, (r && r.score) || 0);
+        window.__markSay(() => { const S = SAY[LANG] || SAY.hans; return (r && r.rank > 0 ? S[0].replace('{w}', w).replace('{r}', r.rank) : S[1].replace('{w}', w)).replace(/^1 wins/, '1 win'); }); }, Math.max(0, 1000 - (performance.now() - t0))); };      // after the ball's turn
     window.__gcRank = answer; gcPost({ t: 'rank' }); setTimeout(() => answer(null), 4000);
   } };
 })();
@@ -2634,25 +2634,25 @@ async function playBotc() {
   const clean = () => { if (!g.alive[pi] && g.poisoned >= 0) { if (g.drunk !== pi) g.gonePoison = g.poisoned; /* a Pukka who dies drunk leaves no token behind: his tokens were already off the table */ g.poisoned = -1; } if (!g.alive[si] && g.drunk >= 0) { g.goneDrunk = g.drunk; g.drunk = -1; } };
   const recap = [], nm = i => stN(i) + '（' + RN[roles[i]] + '）'; g.recap = recap;
   const claim = [null, null, null], lastPick = [null, null, null], bluff = Math.random() < .5 ? 'sailor' : 'heretic';
-  await bsay(ST, S().welcome);
+  await bsay(ST, () => S().welcome);
   g.showMine = true; if (!g.auto) { chime(74, 0, .16, 1.4); chime(81, .1, .14, 1.4); }
 
   let raw = null;
   while (run === g.run) {
     // ---- night
     g.night++; g.isNight = true; g.votes = null; g.drunk = -1; let died = -1, rec = '第 ' + g.night + ' 夜。'; const aud = { p0: g.poisoned, sailorPoisoned: g.alive[si] && poisonedNow(si) };
-    await bsay(ST, S().night);
+    await bsay(ST, () => S().night);
     if (g.alive[si]) {
       const works = !poisonedNow(si);
-      const tgt = si === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickSailor)
+      const tgt = si === 0 ? await bpick(k => k !== ST && g.alive[k], () => S().pickSailor)
         : (Math.random() < .25 ? si : pick([0, 1, 2].filter(k => k !== si && g.alive[k])));
       lastPick[si] = tgt; if (si === 0 && tgt === 0 && (!g.auto || g.testBadges)) gcAch('drink_alone');      // 一人饮酒: the Sailor picks himself
       if (works) g.drunk = tgt === si ? si : (Math.random() < .5 ? tgt : si);
       rec += works ? nm(si) + '选了' + (tgt === si ? '自己' : nm(tgt)) + '，醉的是' + nm(g.drunk) + '。' : nm(si) + '中着毒，能力没有生效。';
-      if (si === 0) await bsay(ST, S().ok);
+      if (si === 0) await bsay(ST, () => S().ok);
     }
     if (g.alive[pi]) {
-      const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], S().pickPukka)
+      const tgt = pi === 0 ? await bpick(k => k !== ST && g.alive[k], () => S().pickPukka)
         : pick([0, 1, 2].filter(k => k !== pi && g.alive[k]));      // a computer Pukka never poisons himself
       lastPick[pi] = tgt; if (pi === 0 && tgt === 0 && (!g.auto || g.testBadges)) gcAch('self_poison');      // 自毒: the Pukka poisons himself
       if (g.drunk !== pi && g.poisoned !== pi) {
@@ -2664,29 +2664,29 @@ async function playBotc() {
         aud.self = tgt === pi; aud.prevAlive = prev >= 0 && prev !== pi;
       }
       else rec += nm(pi) + (g.drunk === pi ? '醉了' : '中着自己的毒') + '，没能下毒，也没有人毒发身亡。';
-      if (pi === 0) await bsay(ST, S().ok);
+      if (pi === 0) await bsay(ST, () => S().ok);
     }
 
     recap.push(rec); g.snaps.push({ night: true, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); aud.pukkaDrunk = g.alive[pi] && g.drunk === pi; aud.both = g.alive[si] && g.poisoned === si && g.drunk >= 0; aud.p1 = g.poisoned; aud.died = died; aud.drunk = g.drunk; (g.audit = g.audit || []).push(aud);
     // a death in the night ends a three-player game on the spot: the Storyteller announces it and the result while it is still night
-    if (died >= 0) { await bsay(ST, S().nightDied(died)); raw = win() || 'evil'; break; }
+    if (died >= 0) { await bsay(ST, () => S().nightDied(died)); raw = win() || 'evil'; break; }
     g.isNight = false;
-    await bsay(ST, S().dawnQuiet);
+    await bsay(ST, () => S().dawnQuiet);
     if ((raw = win())) break;
     if (g.night >= 7) { raw = 'good'; g.forceGood = true; break; }      // the seventh day dawns: good has outlasted evil and wins outright, whatever the Heretic
     // ---- day: the other two say who they are (the Pukka lies)
     for (const v of [1, 2]) if (g.alive[v]) {
       const r = roles[v] === 'pukka' ? bluff : roles[v]; claim[v] = r;
       const t = roles[v] === 'pukka' ? pick([0, 1, 2].filter(k => k !== v)) : lastPick[v];
-      await bsay(v, r === 'sailor' ? S().sailorSay(v, t) : S().hereticSay);
+      await bsay(v, () => r === 'sailor' ? S().sailorSay(v, t) : S().hereticSay);
     }
     const other = v => 3 - v, hereticOn = g.drunk !== hi && !poisonedNow(hi);
     const suspect = v => claim[other(v)] === roles[v] ? other(v) : (v + g.night) % 2 ? 0 : other(v);
     const wants = (v, nom) => roles[v] === 'sailor' ? nom === suspect(v) : roles[v] === 'heretic' ? nom !== suspect(v) : (hereticOn ? nom === v : nom !== v);
     // ---- nomination and vote
     // only you may nominate, and you must: tapping empty space does nothing until you pick a player
-    let nom = await bpick(k => k !== ST && g.alive[k], S().nomPrompt); const nominator = 0;
-    await bsay(0, S().myNom(nom));      // you say it out loud
+    let nom = await bpick(k => k !== ST && g.alive[k], () => S().nomPrompt); const nominator = 0;
+    await bsay(0, () => S().myNom(nom));      // you say it out loud
     if (nom != null) {
       // the count goes round clockwise, starting with the player after the nominee and ending with the nominee;
       // each player's answer shows as it is given. Whoever nominated votes for it automatically, but still says so in turn.
@@ -2694,20 +2694,20 @@ async function playBotc() {
       for (const v of [(nom + 1) % 3, (nom + 2) % 3, nom]) if (g.alive[v]) {
         g.voteOrder.push(v);
         if (v === nominator) votes[v] = true;
-        else if (v === 0) votes[v] = (await bpick(k => k === nom, S().votePrompt, 'no')) === nom;
+        else if (v === 0) votes[v] = (await bpick(k => k === nom, () => S().votePrompt, 'no')) === nom;
         else votes[v] = wants(v, nom);
-        await bsay(v, v === 0 ? (votes[v] ? S().myVote : S().myNoVote) : (votes[v] ? S().iVote : S().iDont));
+        await bsay(v, () => v === 0 ? (votes[v] ? S().myVote : S().myNoVote) : (votes[v] ? S().iVote : S().iDont));
       }
       const yes = votes.filter(x => x === true).length, need = Math.ceil(live() / 2);
       const snap = { night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }; g.snaps.push(snap);
       const head = '第 ' + g.night + ' 天。' + nm(nominator) + '提名' + (nom === nominator ? '自己' : nm(nom)) + '，' + yes + ' 票';
       if (yes >= need) {
-        if (roles[nom] === 'sailor' && sailorSafe()) { if (nom === 0 && (!g.auto || g.testBadges)) gcAch('exec_survive');      /* 不死之身: you were executed and did not die */ recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, S().voteSafe(yes, nom)); }
-        else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, S().voteExec(yes, nom)); }
-      } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, S().voteFail(yes, need)); }
+        if (roles[nom] === 'sailor' && sailorSafe()) { if (nom === 0 && (!g.auto || g.testBadges)) gcAch('exec_survive');      /* 不死之身: you were executed and did not die */ recap.push(head + '通过，可清醒的水手死不了。'); await bsay(ST, () => S().voteSafe(yes, nom)); }
+        else { g.alive[nom] = false; g.deathBy[nom] = 'exec'; snap.alive = g.alive.slice(); snap.exec = nom; recap.push(head + '通过，' + nm(nom) + '被处决。'); clean(); await bsay(ST, () => S().voteExec(yes, nom)); }
+      } else { recap.push(head + '，不够 ' + need + ' 票，没有处决。'); await bsay(ST, () => S().voteFail(yes, need)); }
       g.votes = null;
       if ((raw = win())) break;
-    } else { g.snaps.push({ night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); recap.push('第 ' + g.night + ' 天。没有人被提名。'); await bsay(ST, S().noNom); }
+    } else { g.snaps.push({ night: false, n: g.night, alive: g.alive.slice(), drunk: g.drunk, poisoned: g.poisoned }); recap.push('第 ' + g.night + ' 天。没有人被提名。'); await bsay(ST, () => S().noNom); }
   }
   if (run !== g.run) return null;
   // ---- the end: apply the Heretic
@@ -2725,7 +2725,7 @@ async function playBotc() {
   if (!g.auto) gcRecord(mine === fin, roles[0]);
   g.over = true; if (!g.auto) resultMusic(mine === fin);
   if (!g.auto && mine === fin && window.__confettiGo) window.__confettiGo();      // your side has won: fireworks and confetti (tools/mk3b.py)
-  await bsay(ST, g.forceGood ? S().goodForced : fin === 'good' ? S().goodWins : S().evilWins);
+  await bsay(ST, () => g.forceGood ? S().goodForced : fin === 'good' ? S().goodWins : S().evilWins);
   await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
   if (!g.auto && run === g.run && mode === 'tower') leaveTower();
   return g.result;
@@ -2829,7 +2829,7 @@ function drawBotc(t, dt) {
   if (b && BHIT[b.who]) {
     // a speech bubble right beside whoever is talking
     const h = BHIT[b.who], fs = clamp(W * .04, 13.5, 17), maxw = Math.min(W - 60, 300); ctx.font = FONT(fs, true);
-    const lines = wrapText(b.text, maxw);
+    const lines = wrapText(typeof b.text === 'function' ? b.text() : b.text, maxw);      // worked out every frame: a new language shows at once
     const lh = fs * 1.45, cw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 26, bh = lines.length * lh + 16;
     const top = b.who === 'st' ? h[1] - K * 1.12 : h[1] - K * .95, bx = clamp(h[0] - cw / 2, 8, W - cw - 8), by = top - bh - 9;
     ctx.fillStyle = css([250, 246, 238], .97); rrect(bx, by, cw, bh, 13); ctx.fill();
@@ -2942,9 +2942,9 @@ if (location.hash) {
   const spin = { tw: 0 }, SPIN = .8, LAG = .07;      // each bubble turns once in SPIN seconds, each starting LAG after the one before
   // the web has no scoreboard: its ball turns and says how many games you have won on this device (botc3.js keeps the count)
   const WEBSAY = { hans: '你赢了 {w} 局。', hant: '你贏了 {w} 局。', en: '{w} wins so far.' };
-  const webMark = { open: () => setTimeout(() => window.__markSay((WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins)), 1000) };
+  const webMark = { open: () => setTimeout(() => window.__markSay(() => (WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins).replace(/^1 wins/, '1 win')), 1000) };
   let markLine = null;      // what the ball says (the Xiaohongshu build: your wins and rank), in a speech bubble over it for a few seconds
-  window.__markSay = text => { markLine = { text, t: 0 }; };
+  window.__markSay = text => { markLine = { text, t: 0 }; };      // text: a string, or () => the words in the language of the moment
   window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };      // all four done in SPIN + 3 LAG, about a second
   function turn(dt) { if (!spin.tw) return; spin.tw += dt; if (spin.tw >= SPIN + 3 * LAG) spin.tw = 0; }
   const TURNS = [2, 1, 2, 1];      // two of the four go round twice
@@ -2964,7 +2964,7 @@ if (location.hash) {
       const grow = 1 + .1 * Math.sin(t * (.7 + i * .17) + i * 3.1) + .06 * Math.sin(t * (1.9 + i * .29) + i * 1.3);      // swelling and shrinking slowly, unevenly, each to its own rhythm
       ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k * grow, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); });
     ctx.globalAlpha = a0; markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
-    if (markLine && (markLine.t += dt) < 4) sayBubble(x, y - R - s * .08, markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
+    if (markLine && (markLine.t += dt) < 4) sayBubble(x, y - R - s * .08, typeof markLine.text === 'function' ? markLine.text() : markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done
@@ -3115,7 +3115,7 @@ if (location.hash) {
     en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', wins: '{w} wins so far.' }
   };
   function wins(my) { var n = 0; try { n = GCS.wins || 0; } catch (e) {} return Math.max(n, sent, (my && my.score) || 0); }
-  function say(k, w, r) { var S = SAY[lang()] || SAY.hans; if (window.__markSay) window.__markSay(S[k].replace('{w}', w).replace('{r}', r)); }
+  function say(k, w, r) { if (window.__markSay) window.__markSay(function () { var S = SAY[lang()] || SAY.hans; return S[k].replace('{w}', w).replace('{r}', r).replace(/^1 wins/, '1 win'); }); }      // worked out each frame: a change of language shows at once
   function fill(my) {
     my = my || {};
     if (my.status === 'EXACT') say('rank', wins(my), my.rank); else if (my.status === 'OVER_LIMIT') say('over', wins(my)); else say('wins', wins(my));

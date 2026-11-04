@@ -99,9 +99,9 @@ boot = """<script>
   const spin = { tw: 0 }, SPIN = .8, LAG = .07;      // each bubble turns once in SPIN seconds, each starting LAG after the one before
   // the web has no scoreboard: its ball turns and says how many games you have won on this device (botc3.js keeps the count)
   const WEBSAY = { hans: '你赢了 {w} 局。', hant: '你贏了 {w} 局。', en: '{w} wins so far.' };
-  const webMark = { open: () => setTimeout(() => window.__markSay((WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins)), 1000) };
+  const webMark = { open: () => setTimeout(() => window.__markSay(() => (WEBSAY[LANG] || WEBSAY.hans).replace('{w}', GCS.wins).replace(/^1 wins/, '1 win')), 1000) };
   let markLine = null;      // what the ball says (the Xiaohongshu build: your wins and rank), in a speech bubble over it for a few seconds
-  window.__markSay = text => { markLine = { text, t: 0 }; };
+  window.__markSay = text => { markLine = { text, t: 0 }; };      // text: a string, or () => the words in the language of the moment
   window.__spinMark = () => { if (!spin.tw) spin.tw = 1e-6; };      // all four done in SPIN + 3 LAG, about a second
   function turn(dt) { if (!spin.tw) return; spin.tw += dt; if (spin.tw >= SPIN + 3 * LAG) spin.tw = 0; }
   const TURNS = [2, 1, 2, 1];      // two of the four go round twice
@@ -121,7 +121,7 @@ boot = """<script>
       const grow = 1 + .1 * Math.sin(t * (.7 + i * .17) + i * 3.1) + .06 * Math.sin(t * (1.9 + i * .29) + i * 1.3);      // swelling and shrinking slowly, unevenly, each to its own rhythm
       ctx.beginPath(); ctx.arc(x + u * cs - v * sn, y + u * sn + v * cs, r * k * grow, 0, TAU); ctx.fillStyle = css(c, a); ctx.fill(); });
     ctx.globalAlpha = a0; markAt = [x, y, Math.max(24, R * 2), bm, R]; bookAt = null;
-    if (markLine && (markLine.t += dt) < 4) sayBubble(x, y - R - s * .08, markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
+    if (markLine && (markLine.t += dt) < 4) sayBubble(x, y - R - s * .08, typeof markLine.text === 'function' ? markLine.text() : markLine.text, clamp(W * .036, 12.5, 15), clamp(markLine.t * 4) * clamp((4 - markLine.t) * 3), W * .62); else markLine = null;      // a finger-sized place to tap, bigger than the ball
   }
   let seenBook = false;
   let appear = { t: 0, said: 0 }, tableCv = null;      // the first entry: the table, the Storyteller, you, 小染书 and its sparkle fade in one after another, each with a sound; null once done

@@ -54,7 +54,7 @@
     en: { rank: '{w} wins so far, No. {r} worldwide.', over: '{w} wins so far, outside the top 500.', wins: '{w} wins so far.' }
   };
   function wins(my) { var n = 0; try { n = GCS.wins || 0; } catch (e) {} return Math.max(n, sent, (my && my.score) || 0); }
-  function say(k, w, r) { var S = SAY[lang()] || SAY.hans; if (window.__markSay) window.__markSay(S[k].replace('{w}', w).replace('{r}', r)); }
+  function say(k, w, r) { if (window.__markSay) window.__markSay(function () { var S = SAY[lang()] || SAY.hans; return S[k].replace('{w}', w).replace('{r}', r).replace(/^1 wins/, '1 win'); }); }      // worked out each frame: a change of language shows at once
   function fill(my) {
     my = my || {};
     if (my.status === 'EXACT') say('rank', wins(my), my.rank); else if (my.status === 'OVER_LIMIT') say('over', wins(my)); else say('wins', wins(my));
