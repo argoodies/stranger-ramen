@@ -171,6 +171,7 @@ async function playBotc() {
   if (!g.auto && g.forceGood && mine === 'good') gcAch('day_7');      // 漫长的一周: the game ran to the seventh day and you, on the good side, won the forced settlement
   if (!g.auto) gcRecord(mine === fin, roles[0]);
   g.over = true; if (!g.auto) resultMusic(mine === fin);
+  if (!g.auto && mine === fin && window.__confettiGo) window.__confettiGo();      // your side has won: fireworks and confetti (tools/mk3b.py)
   await bsay(ST, g.forceGood ? S().goodForced : fin === 'good' ? S().goodWins : S().evilWins);
   await new Promise(res => { if (g.auto) return res(); g.bubble = null; g.wait = { type: 'say', res }; });
   if (!g.auto && run === g.run && mode === 'tower') leaveTower();

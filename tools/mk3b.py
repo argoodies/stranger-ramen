@@ -50,6 +50,33 @@ boot = """<script>
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You can’t die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null, markAt = null;
+  // ---- your side has won: as the Storyteller says so, fireworks burst at the top of the picture and confetti drifts down over the table
+  const CONF = [[226, 64, 78], [255, 196, 64], [86, 156, 236], [150, 104, 210], [250, 246, 238], [96, 196, 160]];
+  let confetti = null;
+  window.__confettiGo = () => {
+    const parts = [], bursts = [];
+    for (let b = 0; b < 3; b++) {      // three bursts from the top middle of the picture, one after another
+      const bx = W * .5 + (Math.random() - .5) * W * .06, by = H * .12 + (Math.random() - .5) * H * .02, at = b * .28, c = CONF[(b * 2) % CONF.length];
+      bursts.push({ x: bx, y: by, at, c });
+      for (let k = 0; k < 46; k++) { const a = Math.random() * TAU, v = (.35 + Math.random() * .65) * Math.min(W, H) * .5;
+        parts.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v - Math.min(W, H) * .12, at, c: pick(CONF), w: 3 + Math.random() * 4, h: 6 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, ph: Math.random() * TAU, fall: .07 + Math.random() * .17 }); }      // each falls at its own pace, so they spread down the picture
+    }
+    confetti = { t: 0, parts, bursts };      // silent: the win music is playing
+  };
+  function drawConfetti(dt) {
+    if (!confetti) return;
+    const C = confetti; C.t += dt; if (C.t > 7) { confetti = null; return; }
+    for (const b of C.bursts) { const u = (C.t - b.at) / .7; if (u < 0 || u > 1) continue;      // the flash and ring of each burst
+      glow(b.x, b.y, Math.min(W, H) * .18 * (.4 + u), b.c, .55 * (1 - u));
+      for (let k = 0; k < 14; k++) { const a = k * TAU / 14, rr = Math.min(W, H) * .16 * (1 - Math.pow(1 - u, 2)); ctx.beginPath(); ctx.arc(b.x + Math.cos(a) * rr, b.y + Math.sin(a) * rr, 2.6 * (1 - u) + .6, 0, TAU); ctx.fillStyle = css(b.c, 1 - u); ctx.fill(); } }
+    const g = Math.min(W, H) * .9, fade = clamp((7 - C.t) / 1.5);
+    for (const p of C.parts) { if (C.t < p.at) continue;
+      const drag = Math.pow(.15, dt); p.vx *= drag; p.vy = Math.min(p.vy * drag + g * dt, Math.min(W, H) * p.fall);      // air: a quick burst out, then a slow fall
+      p.ph += dt * 3; p.x += (p.vx + Math.sin(p.ph) * 18) * dt; p.y += p.vy * dt; p.r += p.vr * dt;      // swaying as it falls
+      if (p.y > H + 20) continue;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.ph * 1.3));      // turning over: it narrows and widens
+      ctx.fillStyle = css(p.c, fade); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore(); }
+  }
   // when the last game was a win, where the platform has a scoreboard (window.__boardMark = { open }: the app's, with your Game Center rank, set in botc3.js;
   // the Xiaohongshu build, xhs_rank.js; on the web your own count), the book beside the Storyteller gives way to a small ball of frosted glass holding Game Center's
   // bubbles, floating in its place; a tap opens the scores.
@@ -150,6 +177,7 @@ boot = """<script>
   drawTowerRoom = T => { const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
     window.__3bLang = lobby && !tr;      // the language button, top right, while the lobby is up
     if (lobby) drawLobby(T, dt); else drawBotc(T, dt);
+    drawConfetti(dt);      // over everything, into the fade back to the lobby
     if (tr) { tr.t += dt; ctx.fillStyle = css([6, 4, 16], clamp(tr.t / .7)); ctx.fillRect(0, 0, W, H);      // down to black, then the other scene
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
         if (to === 'game') { lobby = false; me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
