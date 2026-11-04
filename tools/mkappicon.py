@@ -39,15 +39,18 @@ function sky(top, bot) { const g = ctx.createRadialGradient(C, C * .95, 30, C, C
 // the confetti drifting down from a burst behind the tokens, drawn as the game draws it (any angle, turned over by cos): each piece has
 // fallen its own way below where the pop left it, so the cloud thins downward and the lower ones flutter (turned over more).
 // Every other piece goes to the other side, so there is as much on the left as on the right; the top is stretched (tk) to reach as far as the sides.
-function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) {
+function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) { const placed = [];
   for (let i = 0; i < n; i++) { const a = rnd() * TAU, u = Math.pow(rnd(), .5), f = Math.pow(rnd(), 1.6) * fallMax;
     let dx = Math.cos(a) * rx * u + Math.sin(f * .02 + i) * 18; dx = (i %% 2 ? 1 : -1) * Math.abs(dx);
     let ddy = dy + Math.sin(a) * ry * u + f; if (ddy < 0) ddy *= tk;
     if (dx > 0 && ddy > 0) { dx *= kBR; ddy *= kBR; }      // the bottom right spread out as far as the bottom left
     if (ddy > 0 && Math.abs(dx) < 150 && Math.hypot(dx, ddy) > 485) { const kk = 450 / Math.hypot(dx, ddy); dx *= kk; ddy *= kk; }      // nothing hanging off the very bottom
-    if (ddy > 455 && dx > 60 && dx < 160) { ddy -= 30; dx += 62; }      // the purple one lowest down: up a little, and aside so it does not land on the red one above it
+    if (ddy > 455 && dx > 60 && dx < 160) { ddy -= 36; dx += 62; }      // the purple one lowest down: up a little, and aside so it does not land on the red one above it
     if (dx > 0 && ddy < 0 && Math.hypot(dx, ddy) > reachTR) { const kk = reachTR / Math.hypot(dx, ddy); dx *= kk; ddy *= kk; }      // the top right no further out than the top left reaches
     const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * (f / fallMax) * rnd());
+    if (ddy > 350 && dx > 0 && dx < 220 && c === CONF[0]) {      // the red ones low on the right do not pile on each other: a later one is nudged clear
+      const rr = Math.max(w, h) * .5; for (const q of placed) if (q.c === c) { const vx = dx - q.x, vy = ddy - q.y, d = Math.hypot(vx, vy) || 1, need = (rr + q.r) * 1.05; if (d < need) { dx += vx / d * (need - d); ddy += vy / d * (need - d); } }
+      placed.push({ x: dx, y: ddy, r: rr, c }); }
     ctx.save(); ctx.translate(C + dx, C + ddy); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
 make('A2', () => { seed = 2026;      // the draw MELO picked (2026-11-04, "c1", then "h7")
   ctx.fillStyle = css([40, 22, 80]); ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3);      // a deep, even purple, warm light behind the tokens only
