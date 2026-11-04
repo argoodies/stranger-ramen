@@ -44,6 +44,7 @@ function drift(rx, ry, n, dy, k, fallMax, tk, reachTR = Infinity, kBR = 1) {
     let dx = Math.cos(a) * rx * u + Math.sin(f * .02 + i) * 18; dx = (i %% 2 ? 1 : -1) * Math.abs(dx);
     let ddy = dy + Math.sin(a) * ry * u + f; if (ddy < 0) ddy *= tk;
     if (dx > 0 && ddy > 0) { dx *= kBR; ddy *= kBR; }      // the bottom right spread out as far as the bottom left
+    if (ddy > 0 && Math.abs(dx) < 150 && Math.hypot(dx, ddy) > 485) { const kk = 450 / Math.hypot(dx, ddy); dx *= kk; ddy *= kk; }      // nothing hanging off the very bottom
     if (dx > 0 && ddy < 0 && Math.hypot(dx, ddy) > reachTR) { const kk = reachTR / Math.hypot(dx, ddy); dx *= kk; ddy *= kk; }      // the top right no further out than the top left reaches
     const c = CONF[(rnd() * CONF.length) | 0], w = (3 + rnd() * 4) * k, h = (6 + rnd() * 6) * k, flip = Math.cos(rnd() * TAU) * (1 - .45 * (f / fallMax) * rnd());
     ctx.save(); ctx.translate(C + dx, C + ddy); ctx.rotate(rnd() * TAU); ctx.scale(1, flip); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); } }
