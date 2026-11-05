@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""App Store listing for Tiny Clocktower (app 6829382085), English only: version string, store text, URLs, category,
+"""App Store listing for MomentPuzzle (app 6829382085), English only: version string, store text, URLs, category,
 review contact and screenshots (iphone_N / ipad_N from a folder).
 usage: tiny_store.py <versionString> <screenshotDir> [buildNumber]"""
 import sys, json, os, hashlib, urllib.request, time
 sys.path.insert(0, '/root'); from asc_api import req
 APP = '6829382085'; VER, SHOTS = sys.argv[1], sys.argv[2]; BN = sys.argv[3] if len(sys.argv) > 3 else None
 SITE = 'https://moment-puzzle.fly.dev'      # the app's own little site (tiny-site/), apart from the game's
-SUB = 'A pocket-sized clocktower game'
+SUB = '3‑Player Deduction'
 DESC = """Three seats, one Storyteller, and a secret in every hand.
 
-Tiny Clocktower is a pocket-sized game of hidden roles for one player. You and two computer players sit around a small floating table. Each of you is dealt a role in secret, and only the Storyteller knows the truth.
+MomentPuzzle is a pocket-sized game of hidden roles for one player. You and two computer players sit around a small floating table. Each of you is dealt a role in secret, and only the Storyteller knows the truth.
 
 THE ROLES
 • Good: each night, choose a player — either you or they are drunk until dusk. You can't die.
@@ -28,7 +28,7 @@ When the game ends, every token turns over, with the drunk and poisoned markers,
 • No ads, no accounts, no data collected
 • English, 简体中文 and 繁體中文"""
 KW = 'social deduction,hidden role,bluff,storyteller,mystery,logic,deduction,detective,secret,party'
-PROMO = 'You, two rivals and a Storyteller: one secret each. Who is lying?'
+PROMO = 'The tiny teller for one‑minute tales.'
 def J(m, p, b=None, ok=(200, 201, 204)):
     st, tx = req(m, p, b); d = json.loads(tx) if tx.strip().startswith('{') else {}
     if st not in ok: print('!!', m, p, st, json.dumps(d.get('errors', d))[:600]); raise SystemExit(1)
@@ -36,7 +36,7 @@ def J(m, p, b=None, ok=(200, 201, 204)):
 vs = J('GET', f'/v1/apps/{APP}/appStoreVersions?limit=10')['data']
 v = next((x for x in vs if x['attributes']['appVersionState'] in ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED')), None)
 VID = v['id']
-J('PATCH', f'/v1/appStoreVersions/{VID}', {'data': {'type': 'appStoreVersions', 'id': VID, 'attributes': {'versionString': VER, 'copyright': '2026 ARGoodies'}}}); print('version', VER, VID)
+J('PATCH', f'/v1/appStoreVersions/{VID}', {'data': {'type': 'appStoreVersions', 'id': VID, 'attributes': {'versionString': VER, 'copyright': '2026 MomentPuzzle'}}}); print('version', VER, VID)
 if BN:
     b = J('GET', f'/v1/builds?filter[app]={APP}&filter[version]={BN}&fields[builds]=version,processingState')['data']
     assert b and b[0]['attributes']['processingState'] == 'VALID', b
