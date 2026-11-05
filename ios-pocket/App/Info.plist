@@ -4,8 +4,8 @@
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>CFBundleLocalizations</key><array><string>zh-Hans</string><string>zh-Hant</string><string>en</string></array>
-  <key>CFBundleDisplayName</key><string>Story Mini</string>
-  <key>CFBundleName</key><string>Story Mini</string>
+  <key>CFBundleDisplayName</key><string>MiniTeller</string>
+  <key>CFBundleName</key><string>MiniTeller</string>
   <key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
   <key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
