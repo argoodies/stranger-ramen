@@ -4,7 +4,7 @@ description: >-
   小红书小工具构建开发指南：把 H5 页面打包成符合容器规范的离线 zip。
   新建或改写小工具 / H5 页面、打包小工具 zip、处理端能力限制与容器 CSP 约束时使用。
 metadata:
-  version: "1.8.0"
+  version: "1.9.0-beta.20261023.1"
 ---
 
 # 小工具 ZIP 构建指南
@@ -33,7 +33,7 @@ metadata:
 9. **跨端适配** — 先读 [cross-platform-h5.md](references/cross-platform-h5.md)：触摸、滚动、安全区、PC vs 真机差异
 10. **性能设计** — 先读 [performance-budget.md](references/performance-budget.md)：控制源码 / 静态数据 / Base64 / 媒体体积；使用 WebGL 时必须控制 GPU 资源，并提供运行时降级
 11. **正确性自查** — 静态核对页面能正常运行、无违规能力（被禁 API 无调用 / 残留、脚本加载顺序、引用资源都在 zip 内、改写时未误改业务逻辑），见 [zip-artifact-spec.md](references/zip-artifact-spec.md) 自检清单
-12. **审计并打包** — 按 [performance-budget.md](references/performance-budget.md) 的环境分支选择 Node、Python 或人工审计；修复全部错误，逐条核对各 reference 末尾的自检清单后生成待上传 zip。审计脚本是辅助工具，不得因运行时缺失跳过门禁
+12. **审计并打包** — 先按 [mini-tool-manifest.md](references/mini-tool-manifest.md) 对最终产物完成高消耗能力识别、清理旧标记并生成 `mini_tool.json`；实际使用 Unity、Cocos 等游戏引擎、Worker、离屏渲染或 WebAssembly（含动画效果）时，必须将 `is_high_consumption_scene` 标记为布尔值 `true`，并按标记规则向用户提示命中的能力及默认 Android 13 及以上运行要求，交付时再次说明。代码再次变化后必须重新识别。随后按 [performance-budget.md](references/performance-budget.md) 的环境分支选择 Node、Python 或人工审计；修复全部错误，逐条核对各 reference 末尾的自检清单后生成待上传 zip。审计脚本是辅助工具，不得因运行时缺失跳过门禁
 13. **创服平台与真机验证提醒** — 交付时提醒用户：将本次生成的 zip 上传至创服平台，先在平台模拟器完成完整功能验证，再分别使用 Android 真机和 iOS 真机扫码验证相同产物。除非用户明确授权且当前环境具备对应能力，否则不得主动尝试登录创服平台、上传产物或启动真机验证；将这三项标记为待用户验证，不阻塞 zip 交付
 
 > **浏览器直运行不可信**：仅将代码在普通浏览器中直接运行所得结果不可置信，不得作为小工具功能、兼容性或交付验收的依据。交付时再次提醒用户完成创服平台模拟器、Android 真机扫码与 iOS 真机扫码验证。
@@ -52,3 +52,4 @@ metadata:
 | [css-compatibility.md](references/css-compatibility.md) | 写 CSS / 选择构建产物时：Chrome 61 基线、能力检测、现代 CSS 增强与局部回退 |
 | [cross-platform-h5.md](references/cross-platform-h5.md) | 适配多端时：触摸、滚动、安全区、PC 模拟器与真机差异 |
 | [performance-budget.md](references/performance-budget.md) | 开发和交付前：包体、静态数据、Base64、媒体、长列表与 WebGL 资源控制和降级 |
+| [mini-tool-manifest.md](references/mini-tool-manifest.md) | 最终代码完成后、打包前：实际能力识别、唯一布尔字段及未知状态处理 |

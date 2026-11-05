@@ -42,11 +42,13 @@ tool.zip
 | 路径 | 要求 | 说明 |
 | --- | --- | --- |
 | `index.html` | **必须在 zip 根目录** | 唯一入口；不可改名、不可放进子目录 |
+| `mini_tool.json` | 识别完成时位于根目录 | 按 [标记规则](mini-tool-manifest.md) 生成；未知时清除旧标记并省略 |
 | 其余文件 / 文件夹 | 自由 | JS / CSS / 图片 / 音频等，平铺或分目录皆可，相对路径引用 |
 
 ### 禁止出现在 zip 内
 
 - `node_modules`、`.git`、`.DS_Store`
+- `.high_consumption`：Android 在 hash 包目录生成的本地派生标记，不属于 ZIP 产物
 - `*.map`、构建配置文件（`vite.config.*`、`webpack.config.*` 等）
 - 把整个项目多包一层目录，导致 `index.html` 不在根（错误：`app/index.html`；正确：根目录就有 `index.html`）
 
