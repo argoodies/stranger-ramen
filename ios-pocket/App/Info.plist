@@ -4,8 +4,8 @@
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>CFBundleLocalizations</key><array><string>zh-Hans</string><string>zh-Hant</string><string>en</string></array>
-  <key>CFBundleDisplayName</key><string>MinuteTeller</string>
-  <key>CFBundleName</key><string>MinuteTeller</string>
+  <key>CFBundleDisplayName</key><string>MiniTelling</string>
+  <key>CFBundleName</key><string>MiniTelling</string>
   <key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
   <key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
