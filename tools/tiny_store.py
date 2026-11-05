@@ -5,7 +5,7 @@ usage: tiny_store.py <versionString> <screenshotDir> [buildNumber]"""
 import sys, json, os, hashlib, urllib.request, time
 sys.path.insert(0, '/root'); from asc_api import req
 APP = '6829382085'; VER, SHOTS = sys.argv[1], sys.argv[2]; BN = sys.argv[3] if len(sys.argv) > 3 else None
-SITE = 'https://tiny-clocktower.fly.dev'      # the app's own little site (tiny-site/), apart from the game's
+SITE = 'https://moment-puzzle.fly.dev'      # the app's own little site (tiny-site/), apart from the game's
 SUB = 'A pocket-sized clocktower game'
 DESC = """Three seats, one Storyteller, and a secret in every hand.
 

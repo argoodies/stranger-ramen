@@ -1,4 +1,4 @@
-app = "tiny-clocktower"
+app = "moment-puzzle"
 primary_region = "lax"
 
 [http_service]
