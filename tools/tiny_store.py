@@ -35,6 +35,7 @@ def J(m, p, b=None, ok=(200, 201, 204)):
     return d
 vs = J('GET', f'/v1/apps/{APP}/appStoreVersions?limit=10')['data']
 v = next((x for x in vs if x['attributes']['appVersionState'] in ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED')), None)
+if not v: raise SystemExit('no editable version: ' + ', '.join(f"{x['attributes']['versionString']} {x['attributes']['appVersionState']}" for x in vs))
 VID = v['id']
 J('PATCH', f'/v1/appStoreVersions/{VID}', {'data': {'type': 'appStoreVersions', 'id': VID, 'attributes': {'versionString': VER, 'copyright': '2026 MomentPuzzle'}}}); print('version', VER, VID)
 if BN:
