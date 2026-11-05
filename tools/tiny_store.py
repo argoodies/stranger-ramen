@@ -28,7 +28,7 @@ When the game ends, every token turns over, with the drunk and poisoned markers,
 • No ads, no accounts, no data collected
 • English, 简体中文 and 繁體中文"""
 KW = 'social deduction,hidden role,bluff,storyteller,mystery,logic,deduction,detective,secret,party'
-PROMO = 'The tiny teller for one‑minute tales.'
+PROMO = 'A moment to play, a puzzle to solve: three seats, one secret each. Who is lying?'
 def J(m, p, b=None, ok=(200, 201, 204)):
     st, tx = req(m, p, b); d = json.loads(tx) if tx.strip().startswith('{') else {}
     if st not in ok: print('!!', m, p, st, json.dumps(d.get('errors', d))[:600]); raise SystemExit(1)
