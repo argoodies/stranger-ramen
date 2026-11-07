@@ -55,8 +55,10 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
     override func viewDidLoad() {
         super.viewDidLoad()
         // the game's daytime sky behind the web view, so nothing dark shows while the page loads
+        // (from then on the page reports its sky as it changes — see the "sky" message — so this tracks dusk and night too)
         let rgb: [[CGFloat]] = [[226, 150, 130], [214, 166, 156], [204, 150, 148]]
         sky.colors = rgb.map { UIColor(red: $0[0] / 255, green: $0[1] / 255, blue: $0[2] / 255, alpha: 1).cgColor }
+        sky.locations = [0, 0.5, 1]
         sky.frame = view.bounds
         view.layer.insertSublayer(sky, at: 0)
 
@@ -117,6 +119,12 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
             GKLeaderboard.submitScore(value, context: 0, player: GKLocalPlayer.local, leaderboardIDs: ["pc.total_wins"], completionHandler: { _ in })
         case "rank":
             loadRank()
+        case "sky":
+            // the game's current sky (top, middle, bottom), so whatever a rotation uncovers behind the web view matches it
+            guard let c = body["c"] as? [[NSNumber]], c.count == 3, c.allSatisfy({ $0.count == 3 }) else { return }
+            CATransaction.begin(); CATransaction.setDisableActions(true)
+            sky.colors = c.map { UIColor(red: CGFloat($0[0].doubleValue) / 255, green: CGFloat($0[1].doubleValue) / 255, blue: CGFloat($0[2].doubleValue) / 255, alpha: 1).cgColor }
+            CATransaction.commit()
         default:
             break
         }

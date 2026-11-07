@@ -50,6 +50,15 @@ boot = """<script>
       abil: { sailor: 'Each night, choose an alive player: either you or they are drunk until dusk. You cannot die.', heretic: 'Whoever wins, loses & whoever loses, wins, even if you are dead.', pukka: 'Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.' } } };
   const rb = () => RB[LANG] || RB.hans;
   let bookAt = null, markAt = null;
+  // in the iOS app, tell the native layer behind the page what sky is showing (it backs the web view during a rotation);
+  // only when the colours change, and at most every 150 ms; on the web and in Xiaohongshu there is no one to tell
+  { const native = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gc;
+    if (native) { const draw = drawSky; let sent = '', at = 0;
+      drawSky = function (top, mid, bot, t, starA) {
+        draw(top, mid, bot, t, starA);
+        const c = [top, mid, bot].map(x => x.map(Math.round)), key = c.map(x => x.map(v => v >> 2).join(',')).join('|'), now = performance.now();
+        if (key !== sent && now - at > 150) { sent = key; at = now; native.postMessage({ t: 'sky', c }); }
+      }; } }
   // ---- your side has won: as the Storyteller says so, fireworks burst at the top of the picture and confetti drifts down over the table
   const CONF = [[226, 64, 78], [255, 196, 64], [86, 156, 236], [150, 104, 210], [250, 246, 238], [96, 196, 160]];
   let confetti = null, landed = [];      // landed: pieces lying on the table, [gx, gy, angle, colour, w, h], until the next game begins
