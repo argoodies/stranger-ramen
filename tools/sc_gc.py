@@ -9,9 +9,7 @@ L = ['zh-Hant', 'zh-Hans', 'en-US']
 # vendor id 'sc.<name>' (the game reports it with scAch('<name>') in index.html), points, names (hant, hans, en), how (hant, hans, en)
 A = [('own_ramen', 20, ('給自己做拉麵', '给自己做拉面', 'A Bowl for Me'), ('第一次給自己做一碗拉麵。', '第一次给自己做一碗拉面。', 'Make yourself a bowl of ramen for the first time.')),
      ('iced_coffee', 20, ('自取咖啡', '自取咖啡', 'Coffee to Go'), ('在酒館拿走桌上的冰咖啡。', '在酒馆拿走桌上的冰咖啡。', 'Take the iced coffee from the table in the bar.')),
-     ('prophecy_speed', 20, ('速度預言', '速度预言', 'Prophecy of Speed'), ('得到速度預言。', '得到速度预言。', 'Receive the Prophecy of Speed.')),
-     ('prophecy_freeze', 20, ('冰凍預言', '冰冻预言', 'Prophecy of Frost'), ('得到冰凍預言。', '得到冰冻预言。', 'Receive the Prophecy of Frost.')),
-     ('whirlwind_story', 20, ('迷亂的漩渦一周目', '迷乱的漩涡一周目', 'The Whirlwind, First Run'), ('第一次看完「迷亂的漩渦」。', '第一次看完「迷乱的漩涡」。', 'Watch "The Whirlwind" story to the end for the first time.'))]
+     ('whirlwind_story', 20, ('迷亂的漩渦一周目', '迷乱的漩涡一周目', 'The Whirlwind, First Run'), ('第一次完成「迷亂的漩渦」。', '第一次完成「迷乱的漩涡」。', 'Complete "The Whirlwind" for the first time.'))]
 def J(m, p, b=None, ok=(200, 201, 204)):
     st, tx = req(m, p, b); d = json.loads(tx) if tx.strip().startswith('{') else {}
     if st not in ok: print('!!', m, p, st, tx[:400].replace('\n', ' '))
@@ -23,6 +21,8 @@ if not GC:
 print('detail', GC)
 st, d = J('GET', f'/v1/gameCenterDetails/{GC}/gameCenterAchievements?limit=100')
 have = {a['attributes']['vendorIdentifier']: a['id'] for a in d.get('data', [])}
+for vid in [v for v in have if v not in {'sc.' + a[0] for a in A}]:      # dropped ones (the two prophecies, 2026-11-07)
+    st, _ = J('DELETE', f'/v1/gameCenterAchievements/{have.pop(vid)}'); print('deleted', vid, st)
 for name, pts, names, how in A:
     vid = 'sc.' + name
     if vid not in have:
@@ -37,6 +37,7 @@ for name, pts, names, how in A:
             st, r = J('POST', '/v1/gameCenterAchievementLocalizations', {'data': {'type': 'gameCenterAchievementLocalizations', 'attributes': {'locale': loc, 'name': names[i], 'beforeEarnedDescription': how[i], 'afterEarnedDescription': how[i]}, 'relationships': {'gameCenterAchievement': {'data': {'type': 'gameCenterAchievements', 'id': aid}}}}})
             if st >= 300: continue
             locs[loc] = r['data']['id']
+        else: J('PATCH', f'/v1/gameCenterAchievementLocalizations/{locs[loc]}', {'data': {'type': 'gameCenterAchievementLocalizations', 'id': locs[loc], 'attributes': {'name': names[i], 'beforeEarnedDescription': how[i], 'afterEarnedDescription': how[i]}}})
         # the badge, in every language
         f = os.path.join(DIR, name + '.png'); data = open(f, 'rb').read(); LID = locs[loc]
         st, old = J('GET', f'/v1/gameCenterAchievementLocalizations/{LID}/gameCenterAchievementImage')

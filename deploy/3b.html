@@ -947,7 +947,7 @@ const saveNow = () => { try { localStorage.setItem('ctramen', JSON.stringify(sav
 // Game Center achievements (the iOS app only; on the web the message has nowhere to go): each is kept on the device and reported again after sign-in
 const SCK = 'sc_ach'; let SCA = {}; try { SCA = JSON.parse(localStorage.getItem(SCK) || '{}') || {}; } catch (e) {}
 function scAch(id) { if (!SCA[id]) { SCA[id] = 1; try { localStorage.setItem(SCK, JSON.stringify(SCA)); } catch (e) {} } try { window.webkit.messageHandlers.gc.postMessage({ t: 'ach', id: 'sc.' + id }); } catch (e) {} }
-window.__scSync = () => { for (const id of Object.keys(SCA)) scAch(id); };
+window.__scSync = () => { for (const id of Object.keys(SCA)) if (!id.startsWith('prophecy')) scAch(id); };      // the two prophecy achievements were dropped (2026-11-07)
 function unlockBadge(id) { return false; }      // the achievement board is gone: nothing is awarded any more
 function knock() { if (!AC) return; const t = AC.currentTime; tone(150, t, .1, .32, 'triangle'); tone(92, t, .16, .22); tone(620, t, .03, .06); }
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
@@ -1141,7 +1141,7 @@ function updateStall(dt) {
     let step = 5.2 * buffK() * dt;
     while (o.path && o.path.length && step > 0) { const [px, py] = o.path[0], d = Math.hypot(px - o.x, py - o.y); if (d <= step) { o.x = px; o.y = py; o.path.shift(); step -= d; } else { o.x += (px - o.x) / d * step; o.y += (py - o.y) / d * step; step = 0; } }
     if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; }
-    if (s.pend && !(o.path && o.path.length)) { const p = s.pend; s.pend = null; if (p === 'oracle') { if (s.oracle) { save.buffs[s.oracle] = true; scAch('prophecy_' + s.oracle); saveNow(); s.oracle = false; s.ownSay = S().gotProphecy; s.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } else if (p === 'dump') dump(); else if (p === 'bar') barTap(); else if (p.startsWith('serve')) serve(+p[5]); else if (p === 'board' && !s.hold) { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); } } }
+    if (s.pend && !(o.path && o.path.length)) { const p = s.pend; s.pend = null; if (p === 'oracle') { if (s.oracle) { save.buffs[s.oracle] = true; saveNow(); s.oracle = false; s.ownSay = S().gotProphecy; s.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } else if (p === 'dump') dump(); else if (p === 'bar') barTap(); else if (p.startsWith('serve')) serve(+p[5]); else if (p === 'board' && !s.hold) { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); } } }
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
