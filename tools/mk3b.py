@@ -36,7 +36,7 @@ boot = """<script>
     hant: { hans: '已切換為簡體中文', hant: '已切換為繁體中文', en: '已切換為英語', auto: '已切換為跟隨系統' },
     en: { hans: 'Switched to Simplified Chinese', hant: 'Switched to Traditional Chinese', en: 'Switched to English', auto: 'Now following the system' } };
   document.getElementById('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { if (lobby && !tr) me.line = { text: (SWITCHED[LANG] || SWITCHED.en)[b.dataset.l], t: 0 }; }));
-  let lobby = true, tr = null, last = performance.now(), lv = null;      // tr: a fade to black, then a change of scene
+  let lobby = true, tr = null, last = performance.now(), lv = null, lobbyNight = false;      // lobbyNight: the last game ended at night, so the lobby stays dark until the next one      // tr: a fade to black, then a change of scene
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
   // ---- 小染书: a red capsule beside the Storyteller in the lobby; tapped, it tells you about the three roles itself in one bubble, a token for each name
@@ -178,7 +178,7 @@ boot = """<script>
     let yy = by + pad; for (const r of rows) { ctx.save(); ctx.globalAlpha *= al; roleToken(bx + pad + R, yy + r.h / 2, R, r.id); ctx.restore();
       const ty0 = yy + r.h / 2 - r.lines.length * lh / 2; r.lines.forEach((l, k) => text(l, bx + pad + R * 2 + gap, ty0 + lh * (k + .5), fs, [50, 36, 70], al, 'left', true)); yy += r.h + rowGap; } }
   function drawLobby(t, dt) {
-    BG.dark = lerp(BG.dark, 0, 1 - Math.pow(.002, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
+    BG.dark = lerp(BG.dark, lobbyNight ? 1 : 0, 1 - Math.pow(.002, dt)); const g = BG; TINT = [30, 30, 90]; TK = lerp(.04, .34, g.dark); SHADOW = [58, 40, 96];
     moonAt = [W * .8, H * .14]; drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark); moonAt = null;
     const mx = W * .8, my = H * .14, sc = mix(ORBD, ORBN, g.dark); glow(mx, my, 130, sc, lerp(.45, .1, g.dark)); drawOrb(mx, my, 22, g.dark); drawGeese3(t, g.dark);
     if (appear) { appear.t += dt; while (appear.said < APPEAR.length && appear.t >= APPEAR[appear.said][0]) APPEAR[appear.said++][1](); if (appear.t >= APPEAR_END) appear = null; }
@@ -215,7 +215,7 @@ boot = """<script>
     if (tr) { tr.t += dt; ctx.fillStyle = css([6, 4, 16], clamp(tr.t / .7)); ctx.fillRect(0, 0, W, H);      // down to black, then the other scene
       if (tr.t >= .75) { const to = tr.to; tr = null; fade = 1.2;
         if (to === 'game') { confetti = null; landed = []; lobby = false;      /* into the game's scene: the confetti is not there */ me.say = null; BG.dark = 1; bell(146.8, .12); playBotc(); BG.isNight = true; }      // the night, and everyone at the table: the game begins
-        else { lobby = true; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
+        else { lobby = true; lobbyNight = !!BG.isNight; BG.bubble = null; BG.wait = null; BG.isNight = false; BG.dark = 1; me.x = me.tx = 3 * Math.cos(Math.PI / 4); me.y = me.ty = 3 * Math.sin(Math.PI / 4); } } } };      // back to the quiet table, at your seat
   towerTap = (x, y) => { if (tr || (appear && appear.t < APPEAR_TAP)) return; if (!lobby) return botcTap(x, y); if (me.say || me.talk || !lv) return;      // nothing to tap until everything has appeared; in the game, taps are the game's
     if (intro) { if (intro.t > .25) { intro = null; seenBook = true; chime(pick([69, 74, 76]), 0, .07, .6); } return; }
     if (markLine) { if (markLine.t > .25) { markLine = null; chime(pick([69, 74, 76]), 0, .07, .6); } return; }      // the ball's bubble the same: a tap anywhere and it is done, and that tap does nothing else      // a tap and it is done; now the Storyteller sparkles instead
