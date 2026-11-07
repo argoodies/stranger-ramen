@@ -2844,6 +2844,7 @@ if (location.hash) {
     en: { hans: 'Switched to Simplified Chinese', hant: 'Switched to Traditional Chinese', en: 'Switched to English', auto: 'Now following the system' } };
   document.getElementById('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { if (lobby && !tr) me.line = { text: (SWITCHED[LANG] || SWITCHED.en)[b.dataset.l], t: 0 }; }));
   let lobby = true, tr = null, last = performance.now(), lv = null, lobbyNight = false;      // lobbyNight: the last game ended at night, so the lobby stays dark until the next one      // tr: a fade to black, then a change of scene
+  window.__lobbyNight = v => { if (v != null) lobbyNight = !!v; return lobbyNight; };      // the web debug menu flips it
   const view = () => { const s = Math.min(W / 11.2, (H - 250) / 8.6); return new View(W / 2, H * .6, s); };
   const ring = (x, y) => { const r = Math.hypot(x, y) || 1, rr = clamp(r, 1.35, 3.85); return [x / r * rr, y / r * rr]; };      // off the Storyteller's dais, inside the rim
   // ---- 小染书: a red capsule beside the Storyteller in the lobby; tapped, it tells you about the three roles itself in one bubble, a token for each name

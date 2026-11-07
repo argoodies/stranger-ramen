@@ -15,6 +15,7 @@
   var h = '<div class="tt">调试 · 只在网页</div>';
   ['', 'xhs', 'app'].forEach(function (m) { h += '<button data-m="' + m + '"' + (m === mode ? ' class="on"' : '') + '>' + (m === mode ? '✓ ' : '') + LABEL[m] + '</button>'; });
   h += '<hr><button data-win="1">模拟一胜（书变成小球）</button><button data-lose="1">模拟一负（小球变回书）</button>';
+  h += '<hr><button data-conf="1">放礼花</button><button data-night="1">切到黑夜 / 白天</button>';
   menu.innerHTML = h;
   document.body.appendChild(sun); document.body.appendChild(menu);
   if (mode) { var tag = document.createElement('div'); tag.id = 'dbgtag'; tag.textContent = 'DEBUG · ' + LABEL[mode]; document.body.appendChild(tag); }
@@ -29,5 +30,9 @@
   });
   // a faked game, recorded as a real one (botc3.js gcRecord): the count on this browser goes up, the ball or the book shows, the score goes out
   menu.querySelector('button[data-lose]').addEventListener('click', function () { gcRecord(false, 'sailor'); menu.classList.remove('open'); });
+  // fireworks over the table, as after a win
+  menu.querySelector('button[data-conf]').addEventListener('click', function () { if (window.__confettiGo) window.__confettiGo(); menu.classList.remove('open'); });
+  // the lobby's day and night, as if the last game had ended by day or at night (eases over like the real thing)
+  menu.querySelector('button[data-night]').addEventListener('click', function () { if (!window.__lobbyNight) return; var n = !window.__lobbyNight(); window.__lobbyNight(n); menu.classList.remove('open'); window.__debugToast('（调试）' + (n ? '已切到黑夜' : '已切到白天')); });
   menu.querySelector('button[data-win]').addEventListener('click', function () { gcRecord(true, 'sailor'); menu.classList.remove('open'); window.__debugToast('（调试）已模拟一胜'); });
 })();
