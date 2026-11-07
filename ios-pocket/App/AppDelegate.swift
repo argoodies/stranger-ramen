@@ -32,7 +32,10 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
 
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .portrait }
+    // portrait and landscape, like the web and Xiaohongshu versions; iPad also allows upside down
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        UIDevice.current.userInterfaceIdiom == .pad ? .all : .allButUpsideDown
+    }
 
     func hush() {
         webView?.evaluateJavaScript("window.__hush && window.__hush()", completionHandler: nil)
