@@ -1,8 +1,8 @@
-"""Store text for 星穹十字物语 / Starcross Tales: name, subtitle, description and keywords. usage: asc_copy.py <versionId>"""
+"""Store text for 星穹十字小镇 / Starcross Town: name, subtitle, description and keywords. usage: asc_copy.py <versionId>"""
 import sys, json
 sys.path.insert(0, '/root'); from asc_api import req
 APP = '6782641107'; V = sys.argv[1]
-HANS = """《星穹十字物语》：星空下，一座悬浮的小岛，一座钟楼，和一间小小的拉面店。
+HANS = """《星穹十字小镇》：星空下，一座悬浮的小岛，一座钟楼，和一间小小的拉面店。
 
 散步：想走就走，到悬浮的小岛上逛逛。和岛上的人打声招呼，看白天变成黑夜，到图书馆里瞧一瞧。
 
@@ -15,7 +15,7 @@ HANS = """《星穹十字物语》：星空下，一座悬浮的小岛，一座�
 教堂：过桥到小岛上的教堂，点燃火把，和恶魔打一场。点敌人出手，还能弹刀反击；一路得到的道具和预言放进背包，比如能挡下致命一击的守护十字。打赢后打开宝箱，会有人来找你。第一章共七场战斗。
 
 手绘等距视角场景，柔和的生成式音乐。"""
-HANT = """《星穹十字物語》：星空下，一座懸浮的小島，一座鐘樓，和一間小小的拉麵店。
+HANT = """《星穹十字小鎮》：星空下，一座懸浮的小島，一座鐘樓，和一間小小的拉麵店。
 
 散步：想走就走，到懸浮的小島上逛逛。和島上的人打聲招呼，看白天變成黑夜，到圖書館裡瞧一瞧。
 
@@ -28,7 +28,7 @@ HANT = """《星穹十字物語》：星空下，一座懸浮的小島，一座�
 教堂：過橋到小島上的教堂，點燃火把，和惡魔打一場。點敵人出手，還能彈刀反擊；一路得到的道具和預言放進背包，比如能擋下致命一擊的守護十字。打贏後打開寶箱，會有人來找你。第一章共七場戰鬥。
 
 手繪等距視角場景，柔和的生成式音樂。"""
-EN = """Starcross Tales: under the stars, a little floating island, a clock tower and a tiny ramen shop.
+EN = """Starcross Town: under the stars, a little floating island, a clock tower and a tiny ramen shop.
 
 Wander: leave whenever you like and stroll around the island. Say hello to the islanders, watch day turn to night, peek into the library.
 
@@ -41,9 +41,9 @@ Climb: step into the clock tower and its keeper will take you up to the top. Loo
 Church: cross the bridge to the church on its little island, light the torch and fight the demons. Tap a foe to strike, and parry to hit back harder. Items and prophecies you find go into your backpack, like the Guardian Cross that can turn aside a deadly blow. Win, open the chest, and someone comes to find you. Chapter One has seven fights.
 
 Hand-drawn isometric scenes and soft generative music."""
-T = {'zh-Hans': ('星穹十字物语', '星空下的悬浮小镇', HANS, '休闲,放松,散步,等距,星空,钟楼,十字,风景,拉面,料理,酒馆,教堂'),
-     'zh-Hant': ('星穹十字物語', '星空下的懸浮小鎮', HANT, '休閒,放鬆,散步,等距,星空,鐘樓,十字,風景,拉麵,料理,酒館,教堂'),
-     'en-US': ('Starcross Tales', 'Floating town under the stars', EN, 'cozy,relax,wander,isometric,stars,clock tower,cross,scenery,ramen,cooking,tavern,church')}
+T = {'zh-Hans': ('星穹十字小镇', '星空下的悬浮小镇', HANS, '休闲,放松,散步,等距,星空,钟楼,十字,风景,拉面,料理,酒馆,教堂'),
+     'zh-Hant': ('星穹十字小鎮', '星空下的懸浮小鎮', HANT, '休閒,放鬆,散步,等距,星空,鐘樓,十字,風景,拉麵,料理,酒館,教堂'),
+     'en-US': ('Starcross Town', 'Floating town under the stars', EN, 'cozy,relax,wander,isometric,stars,clock tower,cross,scenery,ramen,cooking,tavern,church')}
 def J(m, p, b=None):
     st, tx = req(m, p, b)
     if st >= 300: print('!!', m, p, st, tx[:400].replace('\n', ' '))

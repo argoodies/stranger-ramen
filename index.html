@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>星穹十字物语</title>
+<title>星穹十字小镇</title>
 <style>
 :root{--serif:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif}
 html,body{margin:0;height:100%;background:#0e0c24;overflow:hidden;touch-action:none;font-family:var(--serif);font-weight:300;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -128,7 +128,7 @@ function text(t, x, y, px, c = [255, 255, 255], a = 1, align = 'center', bold = 
 // Simplified Chinese, Traditional Chinese and English; 'auto' follows the system language.
 const STR = {
   hans: (() => { const st = ['你', '左边那位', '右边那位'], who = (v, t) => t === v ? '自己' : t === 0 ? '你' : '他'; return {
-    title: '星穹十字物语', auto: '跟随系统',
+    title: '星穹十字小镇', auto: '跟随系统',
     hello: {
       ida: ['今天天气真好。', '钟楼的钟好像又慢了五分钟。', '听说你家的面不错。', '我可是好人，真的。', '香菜多放点才好吃。', '晚上别乱走，小心着凉。', '今晚的月亮真圆。', '散步呢？一起走走。'],
       ft: ['水晶球说，教堂里面有恶魔。', '我昨晚查了两个人……算了，不说了。', '等等？图书馆里面难道也有恶魔？'],
@@ -158,7 +158,7 @@ const STR = {
     noNom: '今天没有人被提名。', goodWins: '善良阵营获胜。', goodForced: '第七个白天到了，强制结算：善良阵营获胜。', evilWins: '邪恶阵营获胜。', bye: '欢迎下次再玩。',
   }; })(),
   hant: (() => { const st = ['你', '左邊那位', '右邊那位'], who = (v, t) => t === v ? '自己' : t === 0 ? '你' : '他'; return {
-    title: '星穹十字物語', auto: '跟隨系統',
+    title: '星穹十字小鎮', auto: '跟隨系統',
     hello: {
       ida: ['今天天氣真好。', '鐘樓的鐘好像又慢了五分鐘。', '聽說你家的麵不錯。', '我可是好人，真的。', '香菜多放點才好吃。', '晚上別亂走，小心著涼。', '今晚的月亮真圓。', '散步呢？一起走走。'],
       ft: ['水晶球說，教堂裡面有惡魔。', '我昨晚查了兩個人……算了，不說了。', '等等？圖書館裡面難道也有惡魔？'],
@@ -188,7 +188,7 @@ const STR = {
     noNom: '今天沒有人被提名。', goodWins: '善良陣營獲勝。', goodForced: '第七個白天到了，強制結算：善良陣營獲勝。', evilWins: '邪惡陣營獲勝。', bye: '歡迎下次再玩。',
   }; })(),
   en: (() => { const st = ['you', 'the player on the left', 'the player on the right'], cap = x => x[0].toUpperCase() + x.slice(1), who = (v, t) => t === v ? 'myself' : t === 0 ? 'you' : 'them'; return {
-    title: 'Starcross Tales', auto: 'System',
+    title: 'Starcross Town', auto: 'System',
     hello: {
       ida: ['Lovely weather today.', 'The clocktower clock seems five minutes slow again.', 'I hear your noodles are good.', "I'm good. Honestly.", 'Extra cilantro makes it better.', "Don't wander at night. You'll catch a cold.", 'The moon is so round tonight.', 'Out for a walk? Join me.'],
       ft: ['My crystal ball says there is a demon in the church.', 'I checked two players last night… never mind.', 'Wait… could there be a demon in the library too?'],
