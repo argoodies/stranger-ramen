@@ -1,5 +1,6 @@
 import UIKit
 import WebKit
+import GameKit
 
 // Thin native shell: the whole game is the bundled web/index.html, shown full screen in a WKWebView.
 @main
@@ -26,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-final class GameViewController: UIViewController {
+final class GameViewController: UIViewController, WKScriptMessageHandler {
     private var webView: WKWebView!
 
     override var prefersStatusBarHidden: Bool { true }
@@ -53,6 +54,7 @@ final class GameViewController: UIViewController {
         let js = "var s=document.createElement('style');s.textContent='\(css)';document.documentElement.appendChild(s);"
         config.userContentController.addUserScript(
             WKUserScript(source: js, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        config.userContentController.add(self, name: "gc")
 
         webView = WKWebView(frame: view.bounds, configuration: config)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -69,5 +71,28 @@ final class GameViewController: UIViewController {
             fatalError("web/index.html missing from the app bundle")
         }
         webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        signIn()
+    }
+
+    // Game Center: sign in once at launch, then send up whatever was earned before sign-in
+    private func signIn() {
+        GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, _ in
+            guard let self = self else { return }
+            if let viewController = viewController {
+                self.present(viewController, animated: true)
+            } else if GKLocalPlayer.local.isAuthenticated {
+                self.webView?.evaluateJavaScript("window.__scSync && window.__scSync()", completionHandler: nil)
+            }
+        }
+    }
+
+    // the game reports an achievement: {t: 'ach', id: 'sc.<name>'}
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "ach",
+              let id = body["id"] as? String, GKLocalPlayer.local.isAuthenticated else { return }
+        let achievement = GKAchievement(identifier: id)
+        achievement.percentComplete = 100
+        achievement.showsCompletionBanner = true
+        GKAchievement.report([achievement], withCompletionHandler: nil)
     }
 }
