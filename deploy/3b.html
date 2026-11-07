@@ -2915,14 +2915,22 @@ if (location.hash) {
         const vx = (tv.P(land[0], land[1])[0] - bx) / REACH;      // aimed: the pop leaves it right over its spot, so it only has to fall (no pull along the way)
         parts.push({ x: bx, y: by, vx, vy: Math.sin(a) * v * .85, at, c: pick(CONF), w: 3 + Math.random() * 4, h: 6 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, ph: Math.random() * TAU, fall: .035 + Math.random() * .085, land }); }
     }
-    confetti = { t: 0, parts, bursts }; landed = [];      // silent: the win music is playing
+    confetti = { t: 0, parts, bursts, view: (() => { const tv = tableView(); return { cx: tv.cx, cy: tv.cy, s: tv.s }; })() }; landed = [];      // silent: the win music is playing
   };
+  // pieces in the air are kept in screen pixels; when the screen turns or resizes, the table is laid out afresh,
+  // so carry every falling piece over to the new layout (same spot relative to the table, same scale)
+  function fitConfetti(C, tv) {
+    const o = C.view; C.view = { cx: tv.cx, cy: tv.cy, s: tv.s };
+    if (!o || (o.cx === tv.cx && o.cy === tv.cy && o.s === tv.s)) return;
+    const k = tv.s / o.s;
+    for (const p of C.parts) { p.x = tv.cx + (p.x - o.cx) * k; p.y = tv.cy + (p.y - o.cy) * k; p.vx *= k; p.vy *= k; }
+  }
   // drawn in depth with the people: each piece belongs to the spot on the table it is falling to (depth gx + gy, the same measure the
   // scene sorts its people by), so a piece behind someone goes behind them, in the air and on the table
   function stepConfetti(dt) {
     if (!confetti) return;
     const C = confetti; C.t += dt;
-    const g = Math.min(W, H) * .45, tv = tableView();
+    const g = Math.min(W, H) * .45, tv = tableView(); fitConfetti(C, tv);
     for (const p of C.parts) { if (C.t < p.at || p.done || p.gone) continue;
       const drag = Math.pow(C.t - p.at < .25 ? .0004 : .2, dt); p.vx *= drag;      // a sharp pop, stopped short by the air
       p.vy = Math.min(p.vy * drag + g * dt, Math.min(W, H) * p.fall);      // then a slow fall
@@ -2936,6 +2944,7 @@ if (location.hash) {
     const tv = tableView(), inLayer = (gx, gy) => gx + gy >= lo && gx + gy < hi;
     for (const [gx, gy, a, c, w, h] of landed) { if (!inLayer(gx, gy)) continue; const q = tv.P(gx, gy); ctx.save(); ctx.translate(q[0], q[1]); ctx.scale(1, .5); ctx.rotate(a); ctx.fillStyle = css(c); ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore(); }      // lying flat: squashed like the table top, as bright as in the air
     if (!confetti) return;
+    fitConfetti(confetti, tv);
     for (const p of confetti.parts) { if (confetti.t < p.at || p.done || p.gone || !inLayer(p.land[0], p.land[1])) continue;
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.ph * 1.3));      // turning over: it narrows and widens
       ctx.fillStyle = css(p.c); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore(); }
