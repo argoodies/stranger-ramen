@@ -858,7 +858,7 @@ function drawWorld(t, dt) {
   if (titleK > .001 && !hideChef) {      // the title's own framing, eased away as the game starts (the island spans about -8.7 s to 9.2 s across and -12.8 s to 6.8 s up and down from its centre)
     const TF = titleFrame(), s2 = lerp(s, TF.s, titleK), oX = W / 2, oY = TF.oY;      // the island under the title (see titleFrame)
     v.s = s = s2; v.cx = lerp(W / 2 - (camX - camY) * s * C30, oX - (camX - camY - 3) * s * C30, titleK); v.cy = lerp(H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut), oY - (camX + camY) * s * .5, titleK) + storyPan; }
-  if (hideChef) { v.cx = W / 2 - .9 * s; v.cy = H * .7; }      // the view from the top of the tower: the whole town small and low in the frame, most of the picture sky
+  if (hideChef) { v.cx = W / 2; v.cy = H * .7; }      // the view from the top of the tower: the whole town small and low in the frame, most of the picture sky
   // ground
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
@@ -1688,9 +1688,11 @@ function thinText(str, x, y, px, c = [255, 255, 255], a = 1, wide = 1) {
   ctx.font = `200 ${px}px ${THINF}`; const chars = [...str], gap = px * (LANG === 'en' ? .14 : .5) * wide, ws = chars.map(ch => ctx.measureText(ch).width); let cx = x - (ws.reduce((p, w) => p + w, 0) + gap * (chars.length - 1)) / 2;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = css(c, a); chars.forEach((ch, k) => { ctx.fillText(ch, cx, y); cx += ws[k] + gap; });
 }
-function mvBack(glass) {      // the backpack's backdrop: the dusk gradient, see-through with a milky sheen
-  TK = 0; const g = ctx.createLinearGradient(0, 0, 0, H), o = glass ? .86 : .96; g.addColorStop(0, css([40, 44, 92], o)); g.addColorStop(.55, css([124, 98, 144], o)); g.addColorStop(1, css([232, 156, 138], o)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  if (glass) { ctx.fillStyle = css([255, 255, 255], .08); ctx.fillRect(0, 0, W, H); }
+function mvBack(glass) {      // the backpack's backdrop (glass): the night sky's colours, see-through, darker than the dusk gradient used elsewhere so the pack doesn't look washed out
+  TK = 0; const g = ctx.createLinearGradient(0, 0, 0, H), o = glass ? .88 : .96;
+  if (glass) { g.addColorStop(0, css([10, 12, 36], o)); g.addColorStop(.55, css([26, 24, 66], o)); g.addColorStop(1, css([52, 38, 88], o)); }
+  else { g.addColorStop(0, css([40, 44, 92], o)); g.addColorStop(.55, css([124, 98, 144], o)); g.addColorStop(1, css([232, 156, 138], o)); }
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 }
 // ---- the backpack: opened from the button that shows while you are on the church's island
 const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc', coffee: 'drink' }, DRINKS = ['coffee'], BUFFS = ['speed', 'freeze'], LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
