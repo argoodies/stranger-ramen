@@ -12,7 +12,7 @@ HANS = """《拉面怪奇物语》：星空下，一座悬浮的小岛，一座�
 
 登塔：走进钟楼，守塔人会带你登上塔顶看风景。脚下的小岛照常热闹；要是赶上夜里，还能看见一颗流星划过天空。钟声敲过两下，再慢慢走下来。
 
-教堂：过桥到小岛上的教堂，点燃火把，和恶魔打一场。点敌人出手，还能弹刀反击；一路得到的道具和预言放进背包，比如能挡下致命一击的守护十字。打赢后打开宝箱，会有人来找你。第一章共七场战斗。
+教堂：过桥到小岛上的教堂，点燃火把，和恶魔打一场。点敌人出手，还能弹刀反击；一路得到的道具和预言放进背包，比如有三成机会替你挡下恶魔一击的守护十字。打赢后打开宝箱，会有人来找你。第一章共七场战斗。
 
 手绘等距视角场景，柔和的生成式音乐。"""
 HANT = """《拉麵怪奇物語》：星空下，一座懸浮的小島，一座鐘樓，和一間小小的拉麵店。
@@ -25,7 +25,7 @@ HANT = """《拉麵怪奇物語》：星空下，一座懸浮的小島，一座�
 
 登塔：走進鐘樓，守塔人會帶你登上塔頂看風景。腳下的小島照常熱鬧；要是趕上夜裡，還能看見一顆流星劃過天空。鐘聲敲過兩下，再慢慢走下來。
 
-教堂：過橋到小島上的教堂，點燃火把，和惡魔打一場。點敵人出手，還能彈刀反擊；一路得到的道具和預言放進背包，比如能擋下致命一擊的守護十字。打贏後打開寶箱，會有人來找你。第一章共七場戰鬥。
+教堂：過橋到小島上的教堂，點燃火把，和惡魔打一場。點敵人出手，還能彈刀反擊；一路得到的道具和預言放進背包，比如有三成機會替你擋下惡魔一擊的守護十字。打贏後打開寶箱，會有人來找你。第一章共七場戰鬥。
 
 手繪等距視角場景，柔和的生成式音樂。"""
 EN = """Ramen Puzzle: under the stars, a little floating island, a clock tower and a tiny ramen shop.
@@ -38,7 +38,7 @@ Tavern: coffee by day, ale by night. There is a cat; stroke it and it meows.
 
 Climb: step into the clock tower and its keeper will take you up to the top. Look out over the island while life goes on below, and if it is night, watch a shooting star cross the sky. Two strokes of the bell, then wander back down.
 
-Church: cross the bridge to the church on its little island, light the torch and fight the demons. Tap a foe to strike, and parry to hit back harder. Items and prophecies you find go into your backpack, like the Guardian Cross that can turn aside a deadly blow. Win, open the chest, and someone comes to find you. Chapter One has seven fights.
+Church: cross the bridge to the church on its little island, light the torch and fight the demons. Tap a foe to strike, and parry to hit back harder. Items and prophecies you find go into your backpack, like the Guardian Cross that has a three-in-ten chance to turn aside a demon's blow. Win, open the chest, and someone comes to find you. Chapter One has seven fights.
 
 Hand-drawn isometric scenes and soft generative music."""
 T = {'zh-Hans': ('拉面怪奇物语', '星空下的悬浮小镇', HANS, '休闲,放松,散步,等距,星空,钟楼,十字,风景,拉面,料理,酒馆,教堂'),

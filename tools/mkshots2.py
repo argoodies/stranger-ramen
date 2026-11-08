@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """App Store screenshots (2026-10-24 set), five scenes staged on a copy of the game; index.html itself is not touched.
-  1 the ramen shop: the chef lifts a finished bowl while the next noodles turn in the pot
+  1 the ramen shop: the chef lifts a finished bowl of beef noodles while the next noodles turn in the pot; the drunk at the counter orders in a few words
   2 the bar at night: a drink just set down by the chef, not yet drunk; the cat on the left says meow
   3 the library at night: the chef stands in the moonlight from the window, by the shelves, saying nothing
   4 the island at night, zoomed out, the chef before the clock tower; no "tap" hint
@@ -17,9 +17,10 @@ OUT = '/dev/shm/botc/shots4'
 LOC = {'hans': 'zh-Hans', 'hant': 'zh-Hant', 'en': 'en-US'}
 COMMON = "window.requestAnimationFrame = (f) => setTimeout(() => f(performance.now()), 16); window.__noGeese = true;"
 SCENES_ALL = {
- 1: """setTimeout(() => { enterStall(); fade = 0; const want = { chili: true, cilantro: true, beef: true };
-      stall.seats = [null, { look: { kind: 'ft', hat: [70, 100, 220], name: '占卜师' }, want, text: orderText(want), state: 'wait', t: 9, wait: 0, say: '', dish: null }, null]; stall.spawn = 999;
-      stall.bowl = Object.assign(emptyBowl(), { noodle: true, soup: true, chili: true, cilantro: true, beef: true }); stall.bowlAnim = {};
+ 1: """setTimeout(() => { enterStall(); fade = 0; const want = { chili: false, cilantro: false, beef: true };      // the drunk orders a plain beef noodle, the shortest way he can say it
+      let text = orderText(want); for (let k = 0; k < 80; k++) { const t2 = orderText(want); if (t2.length < text.length) text = t2; }
+      stall.seats = [null, { look: { kind: 'drunk', body: [226, 212, 186], hat: [44, 40, 56], name: '酒鬼' }, want, text, state: 'wait', t: 9, wait: 0, say: '', dish: null }, null]; stall.spawn = 999;
+      stall.bowl = Object.assign(emptyBowl(), { noodle: true, soup: true, beef: true }); stall.bowlAnim = {};
       Object.assign(stall.owner, { x: 2.44, y: 1.25, tx: 2.44, ty: 1.25, ptx: null, path: null }); setHold('bowl'); stall.pot = 'cooking'; stall.potT = .9; cookT = () => 99; }, 300);""",
  2: """setTimeout(() => { G.n = 1; G.t = HALF + 20; enterBar(); fade = 0; Object.assign(bar, { who: 'sailor', x: 2.5, y: 3.5, path: [] }); Object.assign(bar.cat, { x: .55, y: 2.3, tx: .55, ty: 2.3, sit: 999, face: 1 });
       setTimeout(() => { const k = BARHIT.keeper; if (k) cafeTap(k[0], k[1]); }, 300);
@@ -34,8 +35,8 @@ SCENES_ALL = {
       { const st = document.createElement('style'); st.textContent = '#zoom,#lang,#enter,#leave{display:none!important}'; document.head.appendChild(st); } }, 300);""",
 }
 # 2026-11-08 set, in store order: the quiet town as the game opens (its title over the island at night) first, the tower-top shooting star dropped
-SCENES_ALL[0] = """setTimeout(() => { G.n = 1; G.t = HALF + 20; { const st = document.createElement('style'); st.textContent = '#lang{display:none!important}'; document.head.appendChild(st); } }, 300);"""
-ORDER = [0, 1, 2, 3, 4, 5, 7]      # scene numbers in the order they appear in the store; the files are numbered 1.. in this order
+SCENES_ALL[0] = """setTimeout(() => { G.n = 1; G.t = HALF + 20; logoSteam = () => {}; { const st = document.createElement('style'); st.textContent = '#lang{display:none!important}'; document.head.appendChild(st); } }, 300);"""
+ORDER = [0, 1, 2, 3, 5]      # scene numbers in the order they appear in the store (the zoomed-out island and the close-up town dropped too; the title without its steam); the files are numbered 1.. in this order
 SCENES_ALL = {i + 1: SCENES_ALL[k] for i, k in enumerate(ORDER)}
 ONLY = [int(x) for x in os.environ.get("ONLY", "").split(",") if x]
 SCENES = {k: v for k, v in SCENES_ALL.items() if not ONLY or k in ONLY}

@@ -26,6 +26,14 @@ if not sub:
 st, r = call('POST', '/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {'reviewSubmission': {'data': {'type': 'reviewSubmissions', 'id': sub['id']}}, 'appStoreVersion': {'data': {'type': 'appStoreVersions', 'id': VID}}}}})
 print('add item', st, json.dumps(r.get('errors', ''), ensure_ascii=False)[:1500])
 if st not in (200, 201): raise SystemExit(1)
+if '--gc' in sys.argv:      # Game Center achievements waiting for their first review go in with the version
+    st, ach = call('GET', '/v1/gameCenterDetails/49a83640-1d05-4916-8bec-f92f52f61945/gameCenterAchievements?limit=50')
+    for x in ach.get('data', []):
+        st, vv = call('GET', f"/v2/gameCenterAchievements/{x['id']}/versions")
+        for av in vv.get('data', []):
+            if av['attributes']['state'] != 'PREPARE_FOR_SUBMISSION': continue
+            st, r = call('POST', '/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {'reviewSubmission': {'data': {'type': 'reviewSubmissions', 'id': sub['id']}}, 'gameCenterAchievementVersion': {'data': {'type': 'gameCenterAchievementVersions', 'id': av['id']}}}}})
+            print('add achievement', x['attributes']['vendorIdentifier'], st, json.dumps(r.get('errors', ''), ensure_ascii=False)[:600])
 st, r = call('PATCH', f"/v1/reviewSubmissions/{sub['id']}", {'data': {'type': 'reviewSubmissions', 'id': sub['id'], 'attributes': {'submitted': True}}})
 print('submit', st, r.get('data', {}).get('attributes', {}).get('state'), json.dumps(r.get('errors', ''), ensure_ascii=False)[:1500])
 st, v = call('GET', f'/v1/appStoreVersions/{VID}?fields[appStoreVersions]=versionString,appStoreState,appVersionState')
