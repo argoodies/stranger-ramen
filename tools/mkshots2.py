@@ -33,6 +33,10 @@ SCENES_ALL = {
       Object.assign(tw.view, { kind: 'meteor', night: true, t: TSTAR + .47 }); updateTower = () => {};
       { const st = document.createElement('style'); st.textContent = '#zoom,#lang,#enter,#leave{display:none!important}'; document.head.appendChild(st); } }, 300);""",
 }
+# 2026-11-08 set, in store order: the quiet town as the game opens (its title over the island at night) first, the tower-top shooting star dropped
+SCENES_ALL[0] = """setTimeout(() => { G.n = 1; G.t = HALF + 20; { const st = document.createElement('style'); st.textContent = '#lang{display:none!important}'; document.head.appendChild(st); } }, 300);"""
+ORDER = [0, 1, 2, 3, 4, 5, 7]      # scene numbers in the order they appear in the store; the files are numbered 1.. in this order
+SCENES_ALL = {i + 1: SCENES_ALL[k] for i, k in enumerate(ORDER)}
 ONLY = [int(x) for x in os.environ.get("ONLY", "").split(",") if x]
 SCENES = {k: v for k, v in SCENES_ALL.items() if not ONLY or k in ONLY}
 def page(n, lang):
@@ -47,9 +51,9 @@ for lg in langs:
     for n in SCENES:
         p = page(n, lg)
         if dev in ('iphone', 'both'):
-            subprocess.run([HS, '--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--window-size=430,932', '--force-device-scale-factor=3', '--virtual-time-budget=5000', f'--screenshot={d}/iphone_{n}.png', f'file://{p}?lang={lg}'], capture_output=True, timeout=200)
+            subprocess.run([HS, '--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--window-size=430,932', '--force-device-scale-factor=3', '--virtual-time-budget=7000', f'--screenshot={d}/iphone_{n}.png', f'file://{p}?lang={lg}'], capture_output=True, timeout=200)
             im = Image.open(f'{d}/iphone_{n}.png').convert('RGB'); assert im.size == (1290, 2796), im.size; im.save(f'{d}/iphone_{n}.png')
         if dev in ('ipad', 'both'):
-            subprocess.run([HS, '--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--window-size=1024,1366', '--force-device-scale-factor=1', '--virtual-time-budget=5000', f'--screenshot={d}/ipad_s{n}.png', f'file://{p}?lang={lg}'], capture_output=True, timeout=200)
+            subprocess.run([HS, '--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--window-size=1024,1366', '--force-device-scale-factor=1', '--virtual-time-budget=7000', f'--screenshot={d}/ipad_s{n}.png', f'file://{p}?lang={lg}'], capture_output=True, timeout=200)
             im = Image.open(f'{d}/ipad_s{n}.png').convert('RGB'); assert im.size == (1024, 1366), im.size; im.resize((2048, 2732), Image.LANCZOS).save(f'{d}/ipad_{n}.png'); os.remove(f'{d}/ipad_s{n}.png')
         print(lg, n, 'ok')
