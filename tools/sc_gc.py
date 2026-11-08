@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Game Center achievements for 星穹十字小镇 (app 6782641107), in three languages, with their images from assets/sc_achievements/<name>.png
+"""Game Center achievements for 拉面怪奇物语 (app 6782641107), in three languages, with their images from assets/sc_achievements/<name>.png
 (rendered by the game's own drawing code). Safe to run again: existing achievements are kept, images are replaced.
 usage: tools/sc_gc.py"""
 import sys, os, json, urllib.request
