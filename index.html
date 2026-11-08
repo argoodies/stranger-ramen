@@ -1660,7 +1660,7 @@ function drawItem(id, x, y, r) {
     if (cof) { line([[x + k * .1, top - k * .05], [x + k * .26, top - k * .55]], [96, 170, 120], Math.max(1, k * .09)); line([[l0[0] - k * .04, top], [r0[0] + k * .04, top]], [255, 255, 255], Math.max(1.2, k * .1), .95); }      // a flat lid, just a line, and a straw through it
     return; }
 
-  if (id === 'ring') drawRing(x, y + r * .1, r * .62); else if (id === 'guard') drawGuard(x, y, r);
+  if (id === 'ring') drawRing(x, y + r * .1, r * .62); else if (id === 'guard') drawGuard(x + r * .012, y + r * .136, r);      // shifted so the cross's centre of mass, not its drawing origin, sits on the slot's centre
   else if (id === 'twin') { drawKnife(x - r * .3, y, r * .85, 1, [226, 232, 244]); ctx.save(); ctx.translate(x + r * .3, y); ctx.scale(-1, 1); drawKnife(0, 0, r * .85, 1, [206, 212, 230]); ctx.restore(); }
   else if (id === 'doom') { glow(x, y + r * .3, r * 1.3, [150, 120, 255], .7); ctx.beginPath(); ctx.arc(x, y - r * .45, r * .7, .25, Math.PI - .25); ctx.strokeStyle = css([226, 200, 130]); ctx.lineWidth = Math.max(1.5, r * .1); ctx.stroke();
     poly([[x, y - r * .05], [x + r * .36, y + r * .35], [x, y + r * .85], [x - r * .36, y + r * .35]], [60, 40, 110]); poly([[x + r * .1, y + r * .1], [x - r * .12, y + r * .42], [x + r * .02, y + r * .42], [x - r * .1, y + r * .72], [x + r * .14, y + r * .34], [x, y + r * .34]], [255, 240, 150]); }
