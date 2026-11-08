@@ -1,0 +1,2 @@
+The 拉面怪奇物语 app icon (2026-11-08): the ramen shop (the game's drawHouse at night) on the game's whole night sky (drawSky fitted to a square), placed as in the 0.1.0 icon, with the lamp's warm light on the left.
+node house.mjs; node sky.mjs (both write to /dev/shm/sicon3), then compose as in the commit that added this; the result is assets/logo/app_icon_shop_gamesky.png.
