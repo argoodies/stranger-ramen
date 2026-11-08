@@ -541,9 +541,10 @@ function bfs(from, to, avoid) {
   }
   return null;
 }
-function nearestWalkable(x, y, offPath, island) {      // offPath: only grass, never the paved path (where the townsfolk like to stroll); island: only the main island, never the dark walkways out to the coffee house and the church
+const ONDOOR = (i, j) => [DOOR, TDOOR, LDOOR, CDOOR, BDOOR].some(d => d[0] === i && d[1] === j);      // a doorstep counts as path: the shop's sits at the end of the paved row
+function nearestWalkable(x, y, offPath, island) {      // offPath: only grass, never the paved path (where the townsfolk like to stroll) nor a doorstep; island: only the main island, never the dark walkways out to the coffee house and the church
   let best = null, bd = 1e9;
-  for (let i = -5; i < 11; i++) for (let j = -5; j < (offPath ? 5 : 6); j++) if (walkable(i, j) && !(offPath && PATH.has(key(i, j))) && !(island && (i >= 5 || j >= 5))) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
+  for (let i = -5; i < 11; i++) for (let j = -5; j < (offPath ? 5 : 6); j++) if (walkable(i, j) && !(offPath && (PATH.has(key(i, j)) || ONDOOR(i, j))) && !(island && (i >= 5 || j >= 5))) { const d = (i + .5 - x) ** 2 + (j + .5 - y) ** 2; if (d < bd) { bd = d; best = [i, j]; } }
   return best;
 }
 const player = { x: -0.5, y: 3.5, path: [], enter: false, step: 0 };
