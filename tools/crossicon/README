@@ -1,0 +1,3 @@
+The Starcross Town app icon (2026-11-08): the blue crystal Guardian Cross on the game's night sky with one twinkling star.
+node cross.mjs (the cross, by the game's drawGuard) ; node sky.mjs (the game's drawSky fitted to a square) ; python3 compose.py .92 icon.png
+The scripts work in /dev/shm/sicon3; the result is kept in assets/logo/app_icon_cross.png.
