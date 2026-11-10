@@ -283,13 +283,21 @@ class View {
     for (let i = 0; i <= 10; i++) { const q = Math.PI * i / 10; pts.push([w / 2 * Math.cos(q), h + w / 2 * Math.sin(q)]); }
     poly(pts.map(p => this.F(pl, o, p[0], p[1])), c, a);
   }
-  clock(pl, o, r, ah, am) {
-    const sq = (pts, c, w) => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[1][0], pts[1][1]); ctx.strokeStyle = css(c, 1); ctx.lineWidth = w; ctx.lineCap = 'butt'; ctx.stroke(); ctx.lineCap = 'round'; }, ring = rr => { const p = []; for (let i = 0; i < 40; i++) { const q = TAU * i / 40; p.push(this.F(pl, o, rr * Math.cos(q), rr * Math.sin(q))); } return p; };
-    poly(ring(r * .98), tint(mix(PAL.stone, [120, 96, 96], .28))); poly(ring(r * .9), tint([250, 240, 218]));      // a stone bezel a shade darker than the tower, set into the wall, around a cream face
-    for (let i = 0; i < 12; i++) { const q = TAU * i / 12, k = i % 3 ? .68 : .64; sq([this.F(pl, o, r * k * Math.sin(q), r * k * Math.cos(q)), this.F(pl, o, r * .78 * Math.sin(q), r * .78 * Math.cos(q))], tint([96, 74, 92]), this.s * (i % 3 ? .03 : .042)); }      // the quarters a little longer and bolder
-    sq([this.F(pl, o, -r * .1 * Math.sin(ah), -r * .1 * Math.cos(ah)), this.F(pl, o, r * .46 * Math.sin(ah), r * .46 * Math.cos(ah))], [78, 58, 84], this.s * 0.08);
-    sq([this.F(pl, o, -r * .12 * Math.sin(am), -r * .12 * Math.cos(am)), this.F(pl, o, r * .7 * Math.sin(am), r * .7 * Math.cos(am))], [78, 58, 84], this.s * 0.054);      // each hand runs a little past the centre, as on its pivot
-    const c0 = this.F(pl, o, 0, 0); circ(c0[0], c0[1], this.s * .05, [78, 58, 84]);
+  clock(pl, o, r, ah, am) {      // a shallow round hollow carved into the stone, ringed by a lip of paler stone; the face sits at its back
+    const D = .08, FI = (u, w) => pl === 'L' ? this.P(o[0] + u, o[1] - D, o[2] + w) : this.P(o[0] - D, o[1] - u, o[2] + w), Fo = (u, w) => this.F(pl, o, u, w);
+    const ringAt = (f, rr) => { const q = []; for (let i = 0; i < 48; i++) { const a = TAU * i / 48; q.push(f(rr * Math.cos(a), rr * Math.sin(a))); } return q; };
+    const path = pts => { ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); };
+    const sq = (pts, c, w) => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[1][0], pts[1][1]); ctx.strokeStyle = css(c, 1); ctx.lineWidth = w; ctx.lineCap = 'butt'; ctx.stroke(); ctx.lineCap = 'round'; };
+    const R = r * .92, hole = ringAt(Fo, R), ink = tint([96, 74, 92]), hand = [78, 58, 84];
+    path(ringAt(Fo, R * 1.08)); ctx.fillStyle = css(tint(mix(PAL.stone, [255, 255, 255], .3))); ctx.fill();      // the lip
+    path(hole); ctx.fillStyle = css(tint(mix(PAL.stone, SHADOW, pl === 'L' ? .45 : .62))); ctx.fill();      // the hollow's inside wall, shaded like the side it is cut into
+    ctx.save(); path(hole); ctx.clip();
+    path(ringAt(FI, R)); ctx.fillStyle = css(tint([250, 240, 218])); ctx.fill();
+    for (let i = 0; i < 12; i++) { const q = TAU * i / 12, k = i % 3 ? .72 : .66; sq([FI(R * k * Math.sin(q), R * k * Math.cos(q)), FI(R * .84 * Math.sin(q), R * .84 * Math.cos(q))], ink, this.s * (i % 3 ? .03 : .042)); }      // the quarters a little longer and bolder
+    sq([FI(-R * .1 * Math.sin(ah), -R * .1 * Math.cos(ah)), FI(R * .5 * Math.sin(ah), R * .5 * Math.cos(ah))], hand, this.s * .08);
+    sq([FI(-R * .12 * Math.sin(am), -R * .12 * Math.cos(am)), FI(R * .76 * Math.sin(am), R * .76 * Math.cos(am))], hand, this.s * .054);      // each hand runs a little past the centre, as on its pivot
+    const c0 = FI(0, 0); circ(c0[0], c0[1], this.s * .05, hand);
+    ctx.restore();
   }
 }
 
