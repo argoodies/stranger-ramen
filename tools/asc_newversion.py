@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- A soft rose glow now rises from the bottom of the daytime sky; the night stays as it was",
-       'zh-Hant': "· 白天的天空底部泛起一抹玫瑰紅霞，夜空保持原樣",
-       'zh-Hans': "· 白天的天空底部泛起一抹玫瑰红霞，夜空保持原样"}
+NEW = {'en-US': "- The clock faces now sit in shallow hollows carved into the tower's stone, ringed by a paler lip\n- The keeper takes you up to the top of the tower only at night",
+       'zh-Hant': "· 鐘樓錶盤改為嵌在石牆淺凹槽裡，外圍一圈淺色石沿\n· 塔頂的風景只在夜裡開放",
+       'zh-Hans': "· 钟楼表盘改为嵌在石墙浅凹槽里，外围一圈浅色石沿\n· 塔顶的风景只在夜里开放"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
