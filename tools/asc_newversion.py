@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- Back to Ramen Puzzle, with the ramen shop icon under the game's own starry sky\n- Game Center achievements: A Bowl for Me, Coffee to Go, The Whirlwind, First Run\n- You can now see the Guardian Cross when it blocks a blow\n- From the top of the clock tower, the tower sits in the middle of the view\n- A darker, night-coloured backpack\n- Townsfolk no longer appear on the path or at a door",
-       'zh-Hant': "· 遊戲改回拉麵怪奇物語，換上星空下的拉麵小屋圖示\n· 新增 Game Center 成就：給自己做拉麵、自取咖啡、迷亂的漩渦一周目\n· 守護十字擋下攻擊時看得清楚\n· 鐘樓頂的風景，鐘樓在畫面正中\n· 背包換成深色夜空\n· 小鎮居民不會出現在路上或門口",
-       'zh-Hans': "· 游戏改回拉面怪奇物语，换上星空下的拉面小屋图标\n· 新增 Game Center 成就：给自己做拉面、自取咖啡、迷乱的漩涡一周目\n· 守护十字挡下攻击时看得清楚\n· 钟楼顶的风景，钟楼在画面正中\n· 背包换成深色夜空\n· 小镇居民不会出现在路上或门口"}
+NEW = {'en-US': "- A soft rose glow now rises from the bottom of the daytime sky; the night stays as it was",
+       'zh-Hant': "· 白天的天空底部泛起一抹玫瑰紅霞，夜空保持原樣",
+       'zh-Hans': "· 白天的天空底部泛起一抹玫瑰红霞，夜空保持原样"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
