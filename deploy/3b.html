@@ -867,7 +867,7 @@ function drawWorld(t, dt) {
   if (titleK > .001 && !hideChef) {      // the title's own framing, eased away as the game starts (the island spans about -8.7 s to 9.2 s across and -12.8 s to 6.8 s up and down from its centre)
     const TF = titleFrame(), s2 = lerp(s, TF.s, titleK), oX = W / 2, oY = TF.oY;      // the island under the title (see titleFrame)
     v.s = s = s2; v.cx = lerp(W / 2 - (camX - camY) * s * C30, oX - (camX - camY - 3) * s * C30, titleK); v.cy = lerp(H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut), oY - (camX + camY) * s * .5, titleK) + storyPan; }
-  if (hideChef) { v.cx = W / 2; v.cy = H * .7; }      // the view from the top of the tower: the whole town small and low in the frame, most of the picture sky
+  if (hideChef) { const TF = titleFrame(); v.s = s = TF.s; v.cx = TF.oX - (camX - camY - 3) * s * C30; v.cy = TF.oY - (camX + camY) * s * .5; }      // the view from the top of the tower: framed as the title screen, the island at the title's size and place
   // ground
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
