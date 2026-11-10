@@ -594,7 +594,7 @@ let titleBox = null;      // where the title's letters sit (and how far they hav
 // the sun by day, by night a round moon the same size in the colour of autumn wood
 const ORBD = [255, 216, 150], ORBN = [236, 196, 132];
 function drawOrb(x, y, r, n) { circ(x, y, r, mix(ORBD, ORBN, n)); }
-function drawSky(top, mid, bot, t, starA = 1, rose = 0) {      // rose: how much of the daytime's rose glow rises from the bottom (1 by day, 0 by night)
+function drawSky(top, mid, bot, t, starA = 1, rose = 0) {      // rose: how much of the daytime's rose glow rises from the bottom (the three-player game only)
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, css(top)); g.addColorStop(.5, css(mid)); g.addColorStop(1, css(bot));
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   if (rose > 0) { const r = ctx.createLinearGradient(0, H * .72, 0, H); r.addColorStop(0, 'rgba(204,122,136,0)'); r.addColorStop(1, `rgba(204,122,136,${rose})`); ctx.fillStyle = r; ctx.fillRect(0, H * .72, W, H * .28); }      // only the bottom quarter or so, under the stars
@@ -604,7 +604,7 @@ function drawSky(top, mid, bot, t, starA = 1, rose = 0) {      // rose: how much
   for (const [x, y, r, ph] of starCache) { let m = moonAt ? clamp((Math.hypot(x - moonAt[0], y - moonAt[1]) - 100) / 110) : 1; if (mode === 'title' && titleBox) { const b = titleBox, dx = Math.max(0, Math.abs(x - b.cx) - b.hw) / (b.fs * 1.5), dy = Math.max(0, Math.abs(y - b.y) - b.fs * 1.1) / (b.fs * 1.5); m *= 1 - b.u * .9 * (1 - clamp(Math.hypot(dx, dy))); } m *= 1 - .85 * Math.pow(clamp(y / (H * .58)), 1.3); if (m > 0) circ(x, y, r, [255, 250, 230], m * starA * (0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + ph)))); }      // no stars show in the moon's glow; behind the title they are only faint; and they fade toward the bottom of the sky
 }
 const SKYD = [[226, 150, 130], [214, 166, 156], [204, 150, 148]], SKYN = [[8, 10, 34], [20, 20, 62], [42, 32, 84]];
-function skyNow(t, dark = 0, stars = 1) { const n = G.n, d = [20, 16, 44]; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars, (1 - n) * (1 - dark)); }
+function skyNow(t, dark = 0, stars = 1) { const n = G.n, d = [20, 16, 44]; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); }      // the town's sky: plain, no rose glow (that is the three-player table's alone)
 function tree(v, i, j) {
   const x = i + .5, y = j + .5;
   v.box(x - .08, y - .08, 0, .16, .16, .45, [150, 110, 90]);
