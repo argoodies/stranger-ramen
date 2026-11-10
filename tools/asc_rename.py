@@ -1,4 +1,4 @@
-"""Rename the English listing to Ramen Puzzle and point every URL at ramen-puzzle.fly.dev on the editable version.
+"""Rename the English listing to Ramen Oddities and point every URL at ramen-puzzle.fly.dev on the editable version.
 usage: asc_rename.py <versionId>   (the version must be editable: cancel the review submission first)"""
 import sys, json
 sys.path.insert(0, '/root'); from asc_api import req
@@ -10,7 +10,8 @@ for l in locs['data']:
     a = l['attributes']; new = {}
     for k in ('description', 'whatsNew', 'promotionalText', 'keywords'):
         v = a.get(k) or ''
-        if 'Clocktower Ramen' in v: new[k] = v.replace('Clocktower Ramen', 'Ramen Puzzle')
+        for old in ('Clocktower Ramen', 'Ramen Puzzle'):
+            if old in v: v = new[k] = v.replace(old, 'Ramen Oddities')
     new['supportUrl'] = BASE + '/support'; new['marketingUrl'] = BASE + '/support'
     st, d = call('PATCH', f"/v1/appStoreVersionLocalizations/{l['id']}", {'data': {'type': 'appStoreVersionLocalizations', 'id': l['id'], 'attributes': new}})
     print('version loc', a['locale'], st, sorted(new), json.dumps(d.get('errors', ''), ensure_ascii=False)[:300])
@@ -19,7 +20,7 @@ ed = next(i for i in infos['data'] if i['attributes'].get('state') != 'READY_FOR
 st, il = call('GET', f"/v1/appInfos/{ed['id']}/appInfoLocalizations")
 for l in il['data']:
     a = l['attributes']; new = {'privacyPolicyUrl': BASE + '/privacy'}
-    if a['locale'] == 'en-US': new['name'] = 'Ramen Puzzle'
+    if a['locale'] == 'en-US': new['name'] = 'Ramen Oddities'
     st, d = call('PATCH', f"/v1/appInfoLocalizations/{l['id']}", {'data': {'type': 'appInfoLocalizations', 'id': l['id'], 'attributes': new}})
     print('info loc', a['locale'], st, new, json.dumps(d.get('errors', ''), ensure_ascii=False)[:400])
 st, il = call('GET', f"/v1/appInfos/{ed['id']}/appInfoLocalizations")

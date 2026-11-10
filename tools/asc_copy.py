@@ -1,4 +1,4 @@
-"""Store text for 拉面怪奇物语 / Ramen Puzzle: name, subtitle, description and keywords. usage: asc_copy.py <versionId>"""
+"""Store text for 拉面怪奇物语 / Ramen Oddities: name, subtitle, description and keywords. usage: asc_copy.py <versionId>"""
 import sys, json
 sys.path.insert(0, '/root'); from asc_api import req
 APP = '6782641107'; V = sys.argv[1]
@@ -28,7 +28,7 @@ HANT = """《拉麵怪奇物語》：星空下，一座懸浮的小島，一座�
 教堂：過橋到小島上的教堂，點燃火把，和惡魔打一場。點敵人出手，還能彈刀反擊；一路得到的道具和預言放進背包，比如有三成機會替你擋下惡魔一擊的守護十字。打贏後打開寶箱，會有人來找你。第一章共七場戰鬥。
 
 手繪等距視角場景，柔和的生成式音樂。"""
-EN = """Ramen Puzzle: under the stars, a little floating island, a clock tower and a tiny ramen shop.
+EN = """Ramen Oddities: under the stars, a little floating island, a clock tower and a tiny ramen shop.
 
 Wander: leave whenever you like and stroll around the island. Say hello to the islanders, watch day turn to night, peek into the library.
 
@@ -43,7 +43,7 @@ Church: cross the bridge to the church on its little island, light the torch and
 Hand-drawn isometric scenes and soft generative music."""
 T = {'zh-Hans': ('拉面怪奇物语', '星空下的悬浮小镇', HANS, '休闲,放松,散步,等距,星空,钟楼,十字,风景,拉面,料理,酒馆,教堂'),
      'zh-Hant': ('拉麵怪奇物語', '星空下的懸浮小鎮', HANT, '休閒,放鬆,散步,等距,星空,鐘樓,十字,風景,拉麵,料理,酒館,教堂'),
-     'en-US': ('Ramen Puzzle', 'Floating town under the stars', EN, 'cozy,relax,wander,isometric,stars,clock tower,cross,scenery,ramen,cooking,tavern,church')}
+     'en-US': ('Ramen Oddities', 'Floating town under the stars', EN, 'cozy,relax,wander,isometric,stars,clock tower,cross,scenery,ramen,cooking,tavern,church')}
 def J(m, p, b=None):
     st, tx = req(m, p, b)
     if st >= 300: print('!!', m, p, st, tx[:400].replace('\n', ' '))
