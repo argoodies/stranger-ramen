@@ -1885,19 +1885,27 @@ const RAIN_SLANT = .28;      // every streak, far, in the town and near, leans t
 const rainLook = d => ({ len: lerp(10, H * .07, d), al: lerp(.17, .27, d), wd: lerp(.6, 1.05, d), sp: lerp(.16, .3, d) });      // one rain, seen at any depth d from far (0) to right in front of us (1): longer, brighter, wider and quicker the nearer it is, with no step between
 const RAIN = []; for (let k = 0; k < 1400; k++) { const h = n => Math.abs(Math.sin(k * n) * 43758.5453 % 1), a = -60 + 120 * h(12.9898), d = -46 + 120 * h(78.233); RAIN.push({ gx: (a + d) / 2, gy: (d - a) / 2, d, ph: h(39.425) * 7, sp: .85 + .3 * h(91.731) }); }      // the one rain: drops spread evenly over a wide ground plane, under the island and far out around it, from well behind it to as near as the camera (d = x + y: how near)
 const RAIN_FAR = -9, RAIN_NEAR = 12;      // landing nearer than the island's back and farther than its front: drawn with the island's things, depth-sorted; behind it, before the island; in front of it, over everything
+function rainSurf(x, y, z) {      // the flat top a raindrop's ring lies on, as drawn [x0, y0, x1, y1, height]: the ring is clipped to it, so it never spreads past a platform's edge; none on the little stepping stones
+  if (z != null) return [6, 2.85, 7.3, 4.15, z];      // the coffee house's flat roof
+  if (x >= -5 && x < 5 && y >= -5 && y < 5) return [-5, -5, 5, 5, 0];      // the island
+  if (Math.floor(x) === 5 && Math.floor(y) === 3) return [5, 3, 6, 4, 0];      // the walkway to the coffee house
+  if (x >= 7) return [6.5, -2, 8.5, .75, CDZ];      // the church's slab
+  return null; }
+function rainRing(v, q, rr, al, sf) { if (!sf) return; const [x0, y0, x1, y1, z] = sf; ctx.save(); ctx.beginPath(); [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].forEach(([x, y], n) => { const p = v.P(x, y, z); n ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }); ctx.closePath(); ctx.clip();
+  ctx.beginPath(); ctx.ellipse(q[0], q[1], rr, rr * .45, 0, 0, TAU); ctx.strokeStyle = css([236, 244, 255], al); ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
 function rainDrop(v, t, r, K) {      // one drop, aimed at its spot on the ground: it comes down along the rain's lean from above the screen to where it lands; the nearer that spot, the longer, wider and brighter it looks. On open ground it opens a ring; off the island it just falls on into the dark
   const ZF = 9, onIsland = walkable(Math.floor(r.gx), Math.floor(r.gy)), land = onIsland ? v.P(wx(r.gx, r.gy), r.gy, wz(r.gx, r.gy)) : v.P(r.gx, r.gy), hf = ZF * v.s, top = land[1] - hf;      // every drop falls the same height (ZF) onto its spot, so with the spots spread evenly the rain is even all over the screen
   if (land[1] < -40 || top > H + 40 || land[0] + hf * RAIN_SLANT < -60 || land[0] > W + 60) return;
   const near = clamp((land[1] / H + .1) / 1.4), R = rainLook(near), FALL = .86, ph = (t * .95 * r.sp + r.ph) % 1;      // each drop keeps its own steady pace in the world: the camera drawing back makes the rain look smaller, never quicker (a pace worked out from the zoom used to send it racing as the view widened)
   if (ph < FALL) { const yb = lerp(top, land[1], ph / FALL), xb = land[0] + (land[1] - yb) * RAIN_SLANT; if (xb < -60 || xb > W + 60) return; const ya = yb - R.len, xa = xb + R.len * RAIN_SLANT, g = ctx.createLinearGradient(xa, ya, xb, yb); g.addColorStop(0, css([236, 242, 255], 0)); g.addColorStop(1, css([236, 242, 255], R.al)); ctx.strokeStyle = g; ctx.lineWidth = R.wd; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(xb, yb); ctx.stroke(); }
-  else if (onIsland) { const w = (ph - FALL) / (1 - FALL), rr = K * (.06 + .3 * w); ctx.beginPath(); ctx.ellipse(land[0], land[1], rr, rr * .45, 0, 0, TAU); ctx.strokeStyle = css([236, 244, 255], .6 * (1 - w)); ctx.lineWidth = 1; ctx.stroke(); } }
+  else if (onIsland) { const w = (ph - FALL) / (1 - FALL); rainRing(v, land, K * (.06 + .3 * w), .6 * (1 - w), rainSurf(r.gx, r.gy)); } }
 const RIPPLES = []; { let k = 0; const add = (x0, y0, w, h, n, z) => { for (let i = 0; i < n; i++, k++) { const h1 = Math.abs(Math.sin(k * 12.9898) * 43758.5453 % 1), h2 = Math.abs(Math.sin(k * 78.233) * 12543.13 % 1), h3 = Math.abs(Math.sin(k * 39.425) * 24634.63 % 1); RIPPLES.push({ x: x0 + .12 + (w - .24) * h1, y: y0 + .12 + (h - .24) * h2, z, ph: h3 * 9, sp: .8 + .4 * h1 * h2 }); } };
   for (let i = -5; i < 5; i++) for (let j = -5; j < 5; j++) if (walkable(i, j)) add(i, j, 1, 1, 1, null);      // one ripple to each cell of open ground on the island
   add(CDOOR[0], CDOOR[1], 1, 1, 3, null); add(BDOOR[0], BDOOR[1], 1, 1, 1, null);      // and the ground in front of the church's door, and the walkway to the coffee house
   add(6, 2.85, 1.3, 1.3, 3, 1.51); }      // and the coffee house's flat roof
 function ripple(v, t, K, r) {      // a ring opening where a drop has just landed, now and then, at its own pace
   const ph = (t * .55 * r.sp + r.ph) % 1; if (ph > .4) return; const w = ph / .4, q = r.z == null ? v.P(wx(r.x, r.y), r.y, wz(r.x, r.y)) : v.P(r.x, r.y, r.z), rr = K * (.06 + .3 * w);
-  ctx.beginPath(); ctx.ellipse(q[0], q[1], rr, rr * .45, 0, 0, TAU); ctx.strokeStyle = css([236, 244, 255], .6 * (1 - w)); ctx.lineWidth = 1; ctx.stroke(); }
+  rainRing(v, q, rr, .6 * (1 - w), rainSurf(r.x, r.y, r.z)); }
 function rainField(v, t, K, part, objs) {      // the rain, drawn in its three places by where each drop lands: 'far' (behind the island), 'mid' (in among the island's things, via objs) or 'near' (in front of it)
   for (const r of RAIN) { if (part === 'far' ? r.d >= RAIN_FAR : part === 'near' ? r.d <= RAIN_NEAR : (r.d < RAIN_FAR || r.d > RAIN_NEAR)) continue;
     if (part === 'mid') objs.push({ k: r.d + .45, d: () => rainDrop(v, t, r, K) }); else rainDrop(v, t, r, K); } }
