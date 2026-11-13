@@ -1816,8 +1816,8 @@ function churchPractice() {      // chapter one done, the church is a practice h
   const [x, y] = clearOfBody([[2.75, my], [2.75, my - 1.3], [2.75, my + 1.3], [2.75, my - 2.5], [2.75, my + 2.5]], 'girl');
   c.npcs = [{ who: 'flower', x, y, a: 1, mark: true }]; Object.assign(c, { practice: true, done: true, torchOn: true, torchF: 1, lit: 1, chest: null, tier: 1, fight: false, exitOpen: true });
 }
-function churchEnded() {      // the run is won and she has said so: she and the chest are gone; the body lies there, the torch burns, the lights stay up. Come back in, and she is waiting before the cross
-  const c = church; for (const n of c.npcs.concat(c.chest || [])) c.fx.push({ k: 'poof', x: n.x, y: n.y, t: 0, T: .55, c: [255, 244, 214] }); Object.assign(c, { npcs: [], chest: null, fly: null, ended: true, exitOpen: true }); noise(.4, .25, 900, 200); }
+function churchEnded() {      // the run is won and she has said so: the chest is gone, she stays where she stands (talk to her again and she says it again); the body lies there, the torch burns, the lights stay up. Come back in, and she is waiting before the cross
+  const c = church; if (c.chest) c.fx.push({ k: 'poof', x: c.chest.x, y: c.chest.y, t: 0, T: .55, c: [255, 244, 214] }); Object.assign(c, { chest: null, fly: null, ended: true, exitOpen: true }); noise(.4, .25, 900, 200); }
 function churchAgain() {      // "welcome back": the girl and the body are gone, the torch goes out, and lighting it starts again from round one
   const c = church; for (const n of c.npcs.concat(c.chest || [])) c.fx.push({ k: 'poof', x: n.x, y: n.y, t: 0, T: .55, c: [255, 244, 214] }); for (const f of c.foes) c.fx.push({ k: 'poof', x: f.x, y: f.y, t: 0, T: .55, c: [200, 226, 236] });
   Object.assign(c, { practice: false, ended: false, foes: [], npcs: [], chest: null, fly: null, say: null, done: false, torchOn: false, tier: 1, hp: 6, ringUsed: false, stains: [], freeze: 0, bonus: false }); churchBanner(S().lightTorch, 5); noise(.4, .25, 900, 200);
@@ -2065,6 +2065,7 @@ function churchHit(e) {      // one attack: the knife you carry, or a bare fist.
   if (wearing('twin') && e.hp > 0) p.second = { e, t: .16, parry };
 }
 function churchTalk(n) { const c = church, last = c.tier >= TIERS; if (c.say && c.say.n === n) return; n.mark = false; c.exitOpen = true;
+  if (c.ended) { c.say = { n, text: S().congrats(save.runs || 1), t: 3.4 }; chime(78, 0, .12); return; }      // the ending: she stays, and says her congratulations again
   if (c.practice) { c.say = { n, text: S().again((save.runs || 0) + 1), t: 2.4, again: true }; chime(78, 0, .12); return; }      // the practice hall: she offers the chapter again
   c.say = { n, text: last ? S().congrats(save.runs || 1) : S().thanks, t: last ? 3.4 : 2.4, bye: !last, end: last }; chime(n.who === 'saint' ? 74 : 78, 0, .12); }      // whoever appears has one thing to say; when it is said, the church goes quiet and dark again
 function churchOpen() {      // the chest before the cross: one thing you do not have yet, picked at random
@@ -2188,7 +2189,7 @@ function devMenu() {      // developer mode: a short list of tools, each opening
     ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ'].slice(0, TIERS).forEach((rn, k) => { const cur = !c.practice && !c.ended && k + 1 === c.tier; g.appendChild(btn(rn, `padding:14px 0;border-radius:10px;border:1px solid rgba(255,255,255,${cur ? .7 : .2});background:rgba(255,255,255,${cur ? .22 : .08});color:#fff;font:300 22px ${THINF}`, () => { close(); if (c.practice || c.ended) churchAgain(); else if (c.done) churchRest(); c.tier = k + 1; churchBanner(L.lightTorch, 3); chime(81, 0, .1); })); });
     { const sty = on => `padding:14px 0;border-radius:10px;border:1px solid rgba(255,255,255,${on ? .7 : .2});background:rgba(255,255,255,${on ? .22 : .08});color:#fff;font:300 22px ${THINF}`, nr = (save.runs || 0) + (c.ended || c.practice ? 0 : 1),      // the run you are in: won and not yet begun again, it is still the last one; in a round, it is the next
         reset = () => { churchClear(); Object.assign(c, { fight: false, story: null, chapter: null, fly: null, say: null, stains: [], hp: 6, bannerT: 0, ended: false }); chime(81, 0, .1); chime(88, .1, .1); };
-      const ne = nr, e = btn('E' + ne, sty(c.ended), () => { close(); if (!save.ch1) save.ch1 = { x: 5.5, y: CW / 2 }; save.runs = ne; saveNow(); reset(); churchPractice(); Object.assign(c, { npcs: [], practice: false, ended: true }); });      // E<n>, the ending of run n, the run you are in: it is counted as won; the girl has said her congratulations and gone
+      const ne = nr, e = btn('E' + ne, sty(c.ended), () => { close(); if (!save.ch1) save.ch1 = { x: 5.5, y: CW / 2 }; save.runs = ne; saveNow(); reset(); churchPractice(); c.npcs.forEach(n => n.mark = false); Object.assign(c, { practice: false, ended: true }); });      // E<n>, the ending of run n, the run you are in: it is counted as won; the girl has said her congratulations and stays
       g.appendChild(e);
       const r = btn('R', sty(c.practice), () => { if (!c.ended) return; close(); reset(); churchPractice(); });      // R, coming back in: only from the ending (E); the girl waits before the cross to offer the next run
       if (!c.ended) { r.disabled = true; if (!c.practice) r.style.opacity = .35; r.style.cursor = 'default'; }
