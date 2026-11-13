@@ -9,7 +9,8 @@ L = ['zh-Hant', 'zh-Hans', 'en-US']
 # vendor id 'sc.<name>' (the game reports it with scAch('<name>') in index.html), points, names (hant, hans, en), how (hant, hans, en)
 A = [('own_ramen', 20, ('給自己做拉麵', '给自己做拉面', 'A Bowl for Me'), ('第一次給自己做一碗拉麵。', '第一次给自己做一碗拉面。', 'Make yourself a bowl of ramen for the first time.')),
      ('iced_coffee', 20, ('自取咖啡', '自取咖啡', 'Coffee to Go'), ('在酒館拿走桌上的冰咖啡。', '在酒馆拿走桌上的冰咖啡。', 'Take the iced coffee from the table in the bar.')),
-     ('whirlwind_story', 20, ('迷亂的漩渦一周目', '迷乱的漩涡一周目', 'The Whirlwind, First Run'), ('第一次完成「迷亂的漩渦」。', '第一次完成「迷乱的漩涡」。', 'Complete "The Whirlwind" for the first time.'))]
+     ('whirlwind_story', 20, ('迷亂的漩渦一周目', '迷乱的漩涡一周目', 'The Whirlwind, First Run'), ('第一次完成「迷亂的漩渦」。', '第一次完成「迷乱的漩涡」。', 'Complete "The Whirlwind" for the first time.')),
+     ('whirlwind_story2', 20, ('迷亂的漩渦二周目', '迷乱的漩涡二周目', 'The Whirlwind, Second Run'), ('第二次完成「迷亂的漩渦」。', '第二次完成「迷乱的漩涡」。', 'Complete "The Whirlwind" a second time.'))]
 def J(m, p, b=None, ok=(200, 201, 204)):
     st, tx = req(m, p, b); d = json.loads(tx) if tx.strip().startswith('{') else {}
     if st not in ok: print('!!', m, p, st, tx[:400].replace('\n', ' '))
