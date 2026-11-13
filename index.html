@@ -2172,7 +2172,7 @@ const HEAL_T = 1;
 function playDrink() {      // iced coffee mends half your hearts
   const c = church, id = save.equip.drink; if (!id || !have(id)) return;
   if (id === 'coffee') { if (c.hp >= 6) { hudDrinkWob = performance.now(); return; } c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }      // already whole: the cup just trembles
-  c.fx.push({ k: 'drink', id, x: c.p.x, y: c.p.y, t: 0, T: .9 }); c.heal = 0; c.healAt = hudDrink && hudDrink.slice(); useUp('drink'); churchBanner(S().useSay[id], 2.4);
+  c.heal = 0; c.healAt = hudDrink && hudDrink.slice(); useUp('drink'); churchBanner(S().useSay[id], 2.4);
 }
 function devMenu() {      // developer mode: a short list of tools, each opening a page of its own — jump to a round, or be given any item (it flies in as from a chest)
   if (document.getElementById('dbg')) return;
