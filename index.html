@@ -1757,7 +1757,24 @@ const TORCH = [8, CW / 2];      // the torch in the middle of the floor: lightin
 let beamCv = null;      // a scratch canvas for the church windows' beams
 const CANDLES = [[CX0 + 1.1, CY0 + 1.1], [CX0 + 1.1, CY1 - 1.1], [CX1 - 1.1, CY0 + 1.1], [CX1 - 1.1, CY1 - 1.1]];      // the four tall candlesticks, a pace in from each corner: nobody walks through them, anybody can walk round behind
 function churchBump(o) { const c = church, more = (c.chest ? [[c.chest.x, c.chest.y]] : []).concat((c.npcs || []).filter(n => n.a > .3).map(n => [n.x, n.y])); for (const [x, y] of [TORCH, ...CANDLES, ...more]) {      // the chest and whoever has come to say thanks are solid too
- const dx = o.x - x, dy = o.y - y, d = Math.hypot(dx, dy); if (d < .42) { const k = d > .001 ? .42 / d : 0, q = Math.atan2(dy, dx) + (y < CW / 2 ? 1 : -1) * (dx >= 0 ? 1 : -1) * .05; o.x = x + (k ? Math.cos(q) * .42 : .42); o.y = y + (k ? Math.sin(q) * .42 : 0); } } }      // pushed back out, and a little round it on the side away from the wall, so walking straight at one slides past
+ const dx = o.x - x, dy = o.y - y, d = Math.hypot(dx, dy); if (d < .42) { const k = d > .001 ? .42 / d : 0, q = Math.atan2(dy, dx) + (y < CW / 2 ? 1 : -1) * (dx >= 0 ? 1 : -1) * .05; o.x = x + (k ? Math.cos(q) * .42 : .42); o.y = y + (k ? Math.sin(q) * .42 : 0); } }      // pushed back out, and a little round it on the side away from the wall, so walking straight at one slides past
+  for (const f of c.foes) if (f.corpse && f !== o) for (const [ax, ay, bx, by, R] of corpseShape(f)) {      // the great whirlwind's body and its crown lie where they fell: solid, and nothing moves them
+    const ex = bx - ax, ey = by - ay, l2 = ex * ex + ey * ey, w = l2 ? clamp(((o.x - ax) * ex + (o.y - ay) * ey) / l2) : 0, px = ax + ex * w, py = ay + ey * w, dx = o.x - px, dy = o.y - py, d = Math.hypot(dx, dy);
+    if (d < R) { let nx = d > .001 ? dx / d : ey / Math.sqrt(l2 || 1), ny = d > .001 ? dy / d : -ex / Math.sqrt(l2 || 1); o.x = px + nx * R; o.y = py + ny * R;
+    } } }
+function segDist(px, py, ax, ay, bx, by) { const ex = bx - ax, ey = by - ay, l2 = ex * ex + ey * ey, w = l2 ? clamp(((px - ax) * ex + (py - ay) * ey) / l2) : 0; return Math.hypot(px - ax - ex * w, py - ay - ey * w); }
+function corpseDetour(x, y, gx, gy) {      // heading for (gx, gy) with the great whirlwind's body in the way: the next corner to make for, on the shortest way round it
+  for (const f of church.foes) if (f.corpse) for (const [ax, ay, bx, by, R] of corpseShape(f)) {
+    const clear = (x0, y0, x1, y1) => { for (let k = 0; k <= 16; k++) { const u = k / 16; if (segDist(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, ax, ay, bx, by) < R - .03) return false; } return true; };
+    if (clear(x, y, gx, gy)) continue;
+    const L = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L, uy = (by - ay) / L, m = R + .2;
+    const N = [[x, y], [ax - ux * m - uy * m, ay - uy * m + ux * m], [ax - ux * m + uy * m, ay - uy * m - ux * m], [bx + ux * m - uy * m, by + uy * m + ux * m], [bx + ux * m + uy * m, by + uy * m - ux * m], [gx, gy]];      // you, the four corners of a box round it, where you are going
+    const D = N.map(() => 1e9), prev = N.map(() => -1), done = N.map(() => false); D[0] = 0;
+    for (let it = 0; it < N.length; it++) { let a = -1; for (let k = 0; k < N.length; k++) if (!done[k] && (a < 0 || D[k] < D[a])) a = k; if (a < 0 || D[a] >= 1e9) break; done[a] = true;
+      for (let k = 0; k < N.length; k++) if (!done[k] && clear(N[a][0], N[a][1], N[k][0], N[k][1])) { const nd = D[a] + Math.hypot(N[a][0] - N[k][0], N[a][1] - N[k][1]); if (nd < D[k]) { D[k] = nd; prev[k] = a; } } }
+    if (prev[5] < 0) continue; let k = 5; while (prev[k] > 0) k = prev[k]; return k === 5 ? null : N[k]; }
+  return null; }
+function corpseShape(f) { const d = 1.05; return [[f.x, f.y, f.x - d, f.y + d, .4]]; }      // as it lies on the floor: one capsule from its feet out along the screen to the right, over the body and on to the crown that rolled off beyond it
 const zoneOf = () => [3, CX1];          // the foes keep off the steps of the cross
 const POI = { body: [62, 46, 88] }, IMP = { kind: 'demon', body: [222, 52, 66], head: [246, 170, 150] };
 const church = { p: {}, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [] };
@@ -2085,8 +2102,8 @@ function updateChurch(dt) {
   else {
     if (p.target && p.target.hp <= 0) p.target = null;
     if (p.arrived && !p.target && !p.exit) { p.tx = p.x; p.ty = p.y; }      // once there, the chef stays wherever he is pushed or pulled: he never walks back to the spot
-    const e = p.target, gx = e ? e.x : p.tx, gy = e ? e.y : p.ty, dx = gx - p.x, dy = gy - p.y, d = Math.hypot(dx, dy), reach = e ? .78 : .02;
-    p.vx = p.vy = 0; p.moving = d > reach; if (!e && !p.exit && d < .2) p.arrived = true;      // close enough counts as there, even with a whirlwind tugging at you
+    const e = p.target, dt0 = corpseDetour(p.x, p.y, e ? e.x : p.tx, e ? e.y : p.ty), gx = dt0 ? dt0[0] : e ? e.x : p.tx, gy = dt0 ? dt0[1] : e ? e.y : p.ty, dx = gx - p.x, dy = gy - p.y, d = Math.hypot(dx, dy), reach = e && !dt0 ? .78 : .02;
+    p.vx = p.vy = 0; p.moving = d > reach; if (!e && !dt0 && !p.exit && d < .2) p.arrived = true;      // close enough counts as there, even with a whirlwind tugging at you
     if (p.moving) { const sp = p.exit ? 7 : 3.9 * buffK(), st = Math.min(d - reach, sp * dt); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += dx / d * st; p.y += dy / d * st; p.face = dy - dx; p.hopT = (p.hopT || 0) + dt; }
     p.x = clamp(p.x, churchXmin(), churchXmax()); p.y = clamp(p.y, CY0, CY1); churchBump(p);
     for (const f of c.foes) { if (f.hp <= 0 || f.app > 0 || f.spin > 0 || f.inv) continue; const dx = p.x - f.x, dy = p.y - f.y, dd = Math.hypot(dx, dy), R = .62; if (dd < R) { const k = dd > .001 ? R / dd : 0; p.x = f.x + (k ? dx * k : R); p.y = f.y + (k ? dy * k : 0); } }      // the chef cannot walk through a foe: he is pushed back out round it
