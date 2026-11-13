@@ -2166,7 +2166,7 @@ function updateChurch(dt) {
   c.lit = c.done ? Math.min(1, c.lit + dt / 2.2) : Math.max(0, c.lit - dt / 1.2); if (!c.fight && c.stains.length) { c.stainA = (c.stainA == null ? 1 : c.stainA) - dt / .9; if (c.stainA <= 0) { c.stains = []; c.stainA = null; } } else if (c.fight) c.stainA = null; c.torchF = clamp(c.torchF + (c.torchOn ? dt * 3 : -dt * 2)); for (const n of c.npcs.concat(c.chest || [])) if (n.a < 1) n.a = Math.min(1, n.a + dt / 2.6);      // once the fight is over, the blood fades from the floor
 }
 function useUp(k) { const id = save.equip[k]; save.cards[id] = Math.max(0, cardN(id) - 1); save[id] = cardN(id) > 0; save.equip[k] = null; saveNow(); }      // one used; any others wait in the backpack, for the next fight
-const HEAL_T = 2, RING_T = 1;      // the ring is done in a second; the new hearts take two to redden
+const HEAL_T = 1, RING_T = 1;      // the ring widens and fades in a second, and by then the new hearts are red again
 function playDrink() {      // iced coffee mends half your hearts
   const c = church, id = save.equip.drink; if (!id || !have(id)) return;
   if (id === 'coffee') { if (c.hp >= 6) { hudDrinkWob = performance.now(); return; } c.healFrom = c.hp; c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }      // already whole: the cup just trembles
