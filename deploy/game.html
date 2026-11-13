@@ -963,7 +963,7 @@ const same = (b, w) => cnt(b, 'chili') === lvl(w.chili) && cnt(b, 'cilantro') ==
 function waiting() { return stall.seats.map((c, i) => c && c.state === 'wait' ? i : -1).filter(i => i >= 0).sort((a, b) => stall.seats[b].wait - stall.seats[a].wait); }
 // Everything in the shop is "pick it up, then put it down": stall.hold is what is in your hand
 // (null | 'noodle' | 'soup' | 'chili' | 'cilantro' | 'beef' | 'bowl').
-const ING = ['soup', 'chili', 'cilantro', 'beef'], MORE = ['chili', 'cilantro', 'beef'];      // MORE: picked up once, then sprinkled into the bowl as many times as you like
+const ING = ['soup', 'chili', 'cilantro', 'beef'], MORE = ['chili', 'cilantro', 'beef'];      // MORE: can go into the bowl more than once, picked up from the jar each time
 function setHold(h) { stall.hold = h; stall.strainer = h === 'noodle'; }
 function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
@@ -995,7 +995,7 @@ function intoBowl() {
   if (h === 'chili' && b.chiliN >= 3) unlockBadge('spicy');
   if (b.chili && b.cilantro && b.beef) unlockBadge('full');
   if (HIT.own && HIT.bowl) s.fly.push({ a: [HIT.own[0], HIT.own[1]], b: [HIT.bowl[0], HIT.bowl[1]], t: 0, c: FLYC[h] });
-  if (!MORE.includes(h)) setHold(null);      // beef, chili and cilantro stay in your hand for another sprinkle; tap their jar to put them back
+  setHold(null);      // whatever went in leaves your hand, toppings too: a second helping means picking it up from its jar again
   return true;
 }
 // carry the bowl in your hands to a customer
@@ -2523,7 +2523,6 @@ if (location.hash) {
       log.push(hk()); tap('pot'); log.push('hold=' + st.hold + ' ' + hk()); tap('bowl'); log.push('noodle=' + st.bowl.noodle + ' hold=' + st.hold + ' ' + hk());
       tap('soup'); log.push('hold=' + st.hold + ' soup=' + st.bowl.soup + ' ' + hk()); tap('bowl'); log.push('soup=' + st.bowl.soup + ' ' + hk());
       for (const k of ['chili', 'cilantro', 'beef']) for (let n = 0; n < (k === 'beef' ? +!!want[k] : lvl(want[k])); n++) { if (st.hold !== k) tap(k); const hd = st.hold; tap('bowl'); log.push(k + ':' + hd + '->' + cnt(st.bowl, k)); }
-      if (MORE.includes(st.hold)) tap(st.hold);      // put the last topping back
       { const before = JSON.stringify(st.bowl); let n = 0; for (let q = 0; q < 3; q++) { tap('chili'); if (st.hold === 'chili') { tap('bowl'); if (st.hold === null) n++; } } tap('cilantro'); const hc = st.hold; tap('bowl'); tap('beef'); const hb = st.hold; tap('soup'); const hs = st.hold; log.push('chiliAgain x' + n + ' chili=' + st.bowl.chili + ' cilantroAgainHold=' + hc + ' beefAgainHold=' + hb + ' soupAgainHold=' + hs); st.bowl = JSON.parse(before); setHold(null); }
       log.push(hk()); tap('seat' + i); log.push('serveNoBowlInHand=' + st.seats[i].state); tap('bowl'); log.push('hold=' + st.hold + ' ' + hk()); tap('spot' + i); log.push('served=' + st.seats[i].state + ':' + st.seats[i].say + ' hold=' + st.hold);
       tap('pot'); st.potT = 9; updateStall(0.01); tap('pot'); tap('bin'); log.push('binNoodle hold=' + st.hold + ' noodle=' + st.bowl.noodle);
