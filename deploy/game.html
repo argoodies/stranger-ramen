@@ -2188,7 +2188,8 @@ function devMenu() {      // developer mode: a short list of tools, each opening
       g.appendChild(e);
       const r = btn('R', sty(c.practice), () => { if (!c.ended) return; close(); reset(); churchPractice(); });      // R, coming back in: only from the ending (E); the girl waits before the cross to offer the next run
       if (!c.ended) { r.disabled = true; if (!c.practice) r.style.opacity = .35; r.style.cursor = 'default'; }
-      g.appendChild(r); } };
+      g.appendChild(r);
+      if (c.ended || c.practice) for (const b of g.children) if (b !== r) { b.disabled = true; b.onclick = null; b.style.cursor = 'default'; if (!b.style.border.includes('.7')) b.style.opacity = .35; } } };      // in the ending only R can be taken; once back in (R), nothing here: she is the way on
   const clockPage = () => { box.innerHTML = ''; head(L.devTime, home); const g = grid(4, '1fr'), now = Math.floor(gameHour());      // every hour on the hour: time runs forward to it
     for (let h = 0; h < 24; h++) { const cur = h === now; g.appendChild(btn(String(h).padStart(2, '0') + ':00', `padding:9px 0;border-radius:9px;border:1px solid rgba(255,255,255,${cur ? .7 : .2});background:rgba(255,255,255,${cur ? .22 : .08});color:#fff;font:300 14px ${THINF}`, () => { close(); devHour(h); })); } };
   const cutPage = () => { box.innerHTML = ''; head(L.devCut, home);      // the cutscenes, to watch again: the view from the tower, then the whirlwind's story
