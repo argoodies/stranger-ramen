@@ -1998,7 +1998,7 @@ function clearOfBody(spots, kind, also) {      // the first of these spots where
   return spots.find(([x, y]) => { const r = rect(kind, x, y); return !bodies.some(o => hit(r, o)) && !(also && hit(r, rect('chest', also[0], also[1]), -.1)); }) || spots[0]; }
 function churchCleared() {      // the fight is over: the lights come up and a chest stands before the cross; one of the good folk, picked at random, takes shape once it has been opened
   const c = church; if (c.done) return;
-  if (c.tier === TIERS && save.ch1) {      // chapter one again: no story this time; the body stays where it fell now, the lights come up and the girl is back before the cross
+  if (c.tier === TIERS && save.ch1 && c.storyDone) {      // chapter one again, after its story has played once more: the body stays where it fell this time, the lights come up and the girl is back before the cross
     c.done = true; c.fight = false; c.bannerT = 0; c.exitOpen = true; churchClear(); const g = c.foes.find(f => f.corpse); if (g) { save.ch1 = { x: g.x, y: g.y }; saveNow(); }
     scAch('whirlwind_story2'); const my = CW / 2, [x, y] = clearOfBody([[2.75, my], [2.75, my - 1.3], [2.75, my + 1.3], [2.75, my - 2.5], [2.75, my + 2.5]], 'girl'); c.npcs = [{ who: 'flower', x, y, a: 0, mark: true }]; c.practice = true;
     churchBanner(S().ach2, 3.5); bell(196, .14); bell(293.7, .08); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); return; }
