@@ -2168,7 +2168,7 @@ function useUp(k) { const id = save.equip[k]; save.cards[id] = Math.max(0, cardN
 const HEAL_T = 2;
 function healAura(x, y, K, u, t, front) {      // the drink taking: for two seconds two ribbons of light spiral up round the chef, a gentle whirl of his own. front: the part in front of him (drawn after him), else the part behind
   const A = clamp(u / .12) * clamp((1 - u) / .25), G = [255, 220, 140], W = [255, 246, 214];
-  for (let j = 0; j < 2; j++) for (let i = 0; i < 16; i++) { const v = i / 16, ang = t * 6 + v * 7 + j * Math.PI, z = Math.sin(ang) > 0; if (z !== !!front) continue; const h = (v + u * .9) % 1, px = x + Math.cos(ang) * K * (.5 - .15 * h), py = y - K * 1.4 * h + Math.sin(ang) * K * .16; ctx.beginPath(); ctx.arc(px, py, K * .045 * (1 - h * .5), 0, TAU); ctx.fillStyle = css(j ? W : G, A * (1 - h * .6)); ctx.fill(); }
+  for (let j = 0; j < 2; j++) for (let i = 0; i < 16; i++) { const v = i / 16, ang = t * 3 + v * 7 + j * Math.PI, z = Math.sin(ang) > 0; if (z !== !!front) continue; const h = (v + u * .55) % 1, px = x + Math.cos(ang) * K * (.5 - .15 * h), py = y - K * 1.4 * h + Math.sin(ang) * K * .16; ctx.beginPath(); ctx.arc(px, py, K * .045 * (1 - h * .5), 0, TAU); ctx.fillStyle = css(j ? W : G, A * (1 - h * .6)); ctx.fill(); }
   if (!front) glow(x, y - K * .6, K * 1.1, G, .3 * A); }
 function playDrink() {      // iced coffee mends half your hearts
   const c = church, id = save.equip.drink; if (!id || !have(id)) return;
