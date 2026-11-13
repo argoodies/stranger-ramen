@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- A new English name: Ramen Oddities, with new title lettering\n- The clock faces now sit in shallow hollows carved into the tower's stone, ringed by a paler lip\n- The view from the top of the tower is framed like the title screen, by day as well as by night",
-       'zh-Hant': "· 鐘樓錶盤改為嵌在石牆淺凹槽裡，外圍一圈淺色石沿\n· 塔頂的風景改用與開場畫面相同的構圖，白天和夜晚都能上去看",
-       'zh-Hans': "· 钟楼表盘改为嵌在石墙浅凹槽里，外围一圈浅色石沿\n· 塔顶的风景改用与开场画面相同的构图，白天和夜晚都能上去看"}
+NEW = {'en-US': "- Chili, cilantro and beef now leave your hand once they go in: for another helping, pick it up from its jar again\n- Something has changed in the church. Go and see",
+       'zh-Hant': "· 辣椒、香菜和牛肉放進碗裡後手就空了，要多放一份，就再去罐子裡拿一次\n· 教堂裡有了一些變化，等你去發現",
+       'zh-Hans': "· 辣椒、香菜和牛肉放进碗里后手就空了，要多放一份，就再去罐子里拿一次\n· 教堂里有了一些变化，等你去发现"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
