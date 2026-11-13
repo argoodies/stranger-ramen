@@ -1627,13 +1627,14 @@ function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn 
   if (wearing('twin') && !hide2) { const gx = x - K * .3; line([[gx, hy], [gx - K * .04, hy - K * .14]], [110, 80, 70], Math.max(2, K * .07)); poly([[gx, hy - K * .14], [gx - K * .17, hy - K * .16], [gx - K * .2, hy - K * .5], [gx - K * .06, hy - K * .52]], [206, 212, 230]); }
 }
 function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight: the hearts (a seventh, golden, when you came in fed), the charm worn, and a card if one is held
-  for (let i = 0; i < max; i++) { const gold = i === 6; drawHeart(W / 2 + (i - (max - 1) / 2) * 22, 74, 7.5, i < hp ? (gold ? [255, 204, 110] : [236, 96, 110]) : [70, 58, 100], i < hp ? 1 : .8); }
+  for (let i = 0; i < max; i++) { const gold = i === 6; const hc = gold ? [255, 204, 110] : [236, 96, 110], hw = church.heal != null && church.healFrom != null && i >= church.healFrom && i < hp ? 1 - clamp((church.heal - .15) / (HEAL_T - .15)) : 0; if (hw > 0) glow(W / 2 + (i - (max - 1) / 2) * 22, 74, 13, [255, 236, 170], .6 * hw); drawHeart(W / 2 + (i - (max - 1) / 2) * 22, 74, 7.5, i < hp ? mix(hc, [255, 244, 200], hw) : [70, 58, 100], i < hp ? 1 : .8); }      // hearts just won back start as light, then slowly redden
   let x = W / 2 + ((max - 1) / 2 + 1) * 22 + 4;
   const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && ringUsed) ctx.globalAlpha = .3; drawItem(id, x, 73, id === 'ring' ? 9.5 : 8); ctx.restore(); x += 26; }
   const c = church; hudDrink = null; const pulse = .5 + .2 * Math.sin(performance.now() / 300);
   const did = save.equip.drink; if (did && have(did)) { const wt = (performance.now() - hudDrinkWob) / 1000, dx = W / 2 - ((max - 1) / 2 + 1) * 22 - 4 + (wt < .4 ? Math.sin(wt * 60) * 3 * (1 - wt / .4) : 0); glow(dx, 73, 16, [255, 230, 170], pulse);
     if (hp === 1 && c.fight) { const t = performance.now() / 1000, beat = .5 + .5 * Math.sin(t * 7), ring = (t * 1.4) % 1; glow(dx, 73, 30 + 8 * beat, [255, 214, 120], .55 + .35 * beat); ctx.beginPath(); ctx.arc(dx, 73, 13 + 12 * ring, 0, TAU); ctx.strokeStyle = css([255, 226, 150], .85 * (1 - ring)); ctx.lineWidth = 2; ctx.stroke(); }      // one heart left: the drink calls out, a quick warm beat and a ring spreading from it
     drawItem(did, dx, 73, 9); hudDrink = [dx, 73]; }      // a drink to take, to the left of the hearts: tap it
+  if (c.heal != null && c.healAt && c.heal < RING_T) { const u = c.heal / RING_T, v = 1 - (1 - u) * (1 - u); ctx.beginPath(); ctx.arc(c.healAt[0], c.healAt[1], 10 + 26 * v, 0, TAU); ctx.strokeStyle = css([255, 210, 100], 1 - u); ctx.lineWidth = 3 * (1 - u) + 1; ctx.stroke(); }      // the tapped cup sends out one yellow ring
   if (c.inv > 0) { ctx.beginPath(); ctx.arc(x, 73, 11, -Math.PI / 2, -Math.PI / 2 + TAU * c.inv / 5); ctx.strokeStyle = css([255, 214, 120], .95); ctx.lineWidth = 2.5; ctx.stroke(); }      // the drink's five seconds, running down
 }
 const BUFFCOL = { speed: [255, 255, 255], freeze: [120, 180, 255] };
@@ -1804,7 +1805,7 @@ function churchBanner(txt, sec = 3) { church.banner = txt; church.bannerT = sec;
 function enterChurch() {
   mode = 'church'; $('zoom').style.display = 'none'; $('bag').style.display = 'none'; $('bback').style.display = 'none'; fade = 1; bag.open = false;      // no button leads out: you walk down the steps at the door, any time there is no fight on
   const c = church, p = c.p;
-  Object.assign(c, { freeze: 0, inv: 0, bonus: false, wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
+  Object.assign(c, { freeze: 0, inv: 0, bonus: false, wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, heal: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
   Object.assign(p, { x: CX1 - 1.2, y: CW / 2, exit: false, second: null, pend: null, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y; c.exitOpen = true;      // the steps out are there when you come in
   c.practice = false; c.ended = false; if (!save.ch1 && SCA.whirlwind_story) { save.ch1 = { x: 5.5, y: CW / 2 }; saveNow(); } if (save.ch1 && save.runs == null) { save.runs = SCA.whirlwind_story2 ? 2 : 1; saveNow(); }      // finished before the body was remembered: it lies in the middle of the floor
   if (save.ch1) churchPractice(); else churchBanner(S().lightTorch, 5); bell(196, .12);
@@ -2080,7 +2081,7 @@ function updateChurch(dt) {
   if (c.chapter) { for (const f of c.foes) if (f.corpse) f.deadT = (f.deadT || 0) + dt; if ((c.chapter.t += dt) >= CHAPTER_T) { const dev = c.chapter.dev; c.chapter = null; if (!dev) churchCleared(); } return; }      // the card shows, fades, and then the lights come up and the chest appears      // the great whirlwind finishes falling while the story waits
   p.cd -= dt; p.sw -= dt; p.sw2 = (p.sw2 || 0) - dt; c.hurt -= dt; if (c.inv > 0) c.inv -= dt;
   if (p.second && (p.second.t -= dt) <= 0) { const q = p.second; p.second = null; if (c.fight && c.down <= 0 && q.e.hp > 0 && !q.e.inv && !(q.e.spin > 0)) { p.sw2 = .2; noise(.1, .4, 3000, 900); churchStrike(q.e, q.parry); } }      // the second of the twin blades
-  c.flash -= dt; if (c.bannerT > 0) c.bannerT -= dt; if (c.freeze > 0) { c.freeze -= dt; if (c.freeze <= 0) sfx(330, .4, .08, 'sine'); }
+  c.flash -= dt; if (c.bannerT > 0) c.bannerT -= dt; if (c.heal != null && (c.heal += dt) >= HEAL_T) c.heal = null; if (c.freeze > 0) { c.freeze -= dt; if (c.freeze <= 0) sfx(330, .4, .08, 'sine'); }
   if (c.down > 0) { c.down -= dt; if (c.down <= 0) return leaveChurch(); }      // you wake up back outside
   else {
     if (p.target && p.target.hp <= 0) p.target = null;
@@ -2165,10 +2166,11 @@ function updateChurch(dt) {
   c.lit = c.done ? Math.min(1, c.lit + dt / 2.2) : Math.max(0, c.lit - dt / 1.2); if (!c.fight && c.stains.length) { c.stainA = (c.stainA == null ? 1 : c.stainA) - dt / .9; if (c.stainA <= 0) { c.stains = []; c.stainA = null; } } else if (c.fight) c.stainA = null; c.torchF = clamp(c.torchF + (c.torchOn ? dt * 3 : -dt * 2)); for (const n of c.npcs.concat(c.chest || [])) if (n.a < 1) n.a = Math.min(1, n.a + dt / 2.6);      // once the fight is over, the blood fades from the floor
 }
 function useUp(k) { const id = save.equip[k]; save.cards[id] = Math.max(0, cardN(id) - 1); save[id] = cardN(id) > 0; save.equip[k] = null; saveNow(); }      // one used; any others wait in the backpack, for the next fight
+const HEAL_T = 1, RING_T = 1;      // the ring widens and fades in a second, and by then the new hearts are red again
 function playDrink() {      // iced coffee mends half your hearts
   const c = church, id = save.equip.drink; if (!id || !have(id)) return;
-  if (id === 'coffee') { if (c.hp >= 6) { hudDrinkWob = performance.now(); return; } c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }      // already whole: the cup just trembles
-  c.fx.push({ k: 'drink', id, x: c.p.x, y: c.p.y, t: 0, T: .9 }); useUp('drink'); churchBanner(S().useSay[id], 2.4);
+  if (id === 'coffee') { if (c.hp >= 6) { hudDrinkWob = performance.now(); return; } c.healFrom = c.hp; c.hp = Math.min(6, c.hp + 3); chime(76, 0, .12); chime(83, .12, .12); chime(88, .24, .12); }      // already whole: the cup just trembles
+  c.heal = 0; c.healAt = hudDrink && hudDrink.slice(); useUp('drink'); churchBanner(S().useSay[id], 2.4);
 }
 function devMenu() {      // developer mode: a short list of tools, each opening a page of its own — jump to a round, or be given any item (it flies in as from a chest)
   if (document.getElementById('dbg')) return;
