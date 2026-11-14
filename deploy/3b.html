@@ -1108,6 +1108,7 @@ function shopBlocked(x, y) {
   if (x < 1.2 + SM && y > 1.0 - SM && y < 3.2 + SM) return true;                 // stove
   if (x > 1.9 - SM && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
   if (Math.hypot(x - 4.45, y - 3.0) < .26 + SM) return true;                     // bin
+  if (x < .55 + SM && y > 3.6 - SM && y < 4.8 + SM) return true;                 // the open bowl rack in the left corner
   return false;
 }
 const sgFree = (i, j) => i >= 0 && j >= 0 && i < SGX && j < SGY && !shopBlocked(i * SG, j * SG);
@@ -1150,6 +1151,7 @@ function stallTap(x, y) {
   else if (best === 'bin') { if (h) { goDo('dump', 3.8, 3.05); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 4.45, .95); if (!s.myBowl) chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }      // going to eat your own bowl: no tap chime, only the eating notes
   else if (best === 'jars') { s.jarAt = performance.now(); return; }
+  else if (best === 'rack') { s.rackAt = performance.now(); return; }      // the empty bowl rack only rocks, without a sound
       // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.noodle && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), .95); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
@@ -1295,6 +1297,11 @@ function drawStall(t) {
   v.disc(.6, 2.6, 1.0, .46, .5, [170, 176, 196]); v.disc(.6, 2.6, 1.5, .4, 0, [226, 160, 84]);
   ring('soup'); const lp = P(.86, 2.42, 1.55); line([lp, [lp[0] + s * .3, lp[1] - s * .5]], [150, 110, 90], s * .05); ctx.restore();
   for (let i = 0; i < 6; i++) { const act_ = (i % 2 === 0) ? (st.pot === 'cooking' ? 1 : st.pot === 'done' ? .7 : .3) : .5, ph = (t * .5 * (act_ + .4) + i * .17) % 1, p = P(.6 + .2 * Math.sin(t * 1.3 + i * 2), i % 2 ? 2.6 : 1.6, 1.6 + ph * 1.5); circ(p[0], p[1], s * (.08 + .15 * ph), [255, 250, 245], .28 * act_ * (1 - ph)); }
+  // an open bowl rack in the left corner, against the wall: two sides, three shelves and a top, each shelf with a low lip at the front. Empty. A tap rocks it for a moment, silently
+  { const jr = .03 * clamp(1 - (performance.now() - (st.rackAt || -1e9)) / 650) * Math.sin(performance.now() / 22), wd = [168, 120, 92], d = .5, y0 = 3.6, y1 = 4.8, H = 1.55;
+    v.box(.02 + jr, y0, 0, d, .06, H, wd);
+    for (const z of [.06, .55, 1.04, H - .05]) { v.box(.02 + jr, y0 + .06, z, d, y1 - y0 - .12, .05, wd); v.box(d - .02 + jr, y0 + .06, z + .05, .04, y1 - y0 - .12, .06, [150, 106, 82]); }
+    v.box(.02 + jr, y1 - .06, 0, d, .06, H, wd); hit('rack', .3, 4.2, .9, .7); }
   // the owner (always behind the prep table)
   const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05;
   const drawOwner = () => {
