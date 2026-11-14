@@ -1308,7 +1308,8 @@ function drawStall(t) {
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], CTY, 1.02, .3, c.dish); if (c.dish.soup) steam(SEATX[i], CTY, 1.12, i); } });
   const barFree = !st.seats[2]; if (st.myBowl || barFree) hit('bar', BARX, CTY, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done && st.hold === 'bowl' && barFree) { const p = P(BARX, CTY, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
   if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(BARX, CTY, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, a warm yellow ring of light below
-  if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl; iso_bowl(v, BARX, CTY, 1.02, .3, mb); if (mb.soup) steam(BARX, CTY, 1.12, 3); ctx.restore(); }
+  if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5, chiliN: st.eatT > .5 ? st.myBowl.chiliN : 0 } : st.myBowl;      // the noodles gone, the soup left keeps its colour: red with chili oil if the bowl was the hottest (MELO 2026-11-14)
+  iso_bowl(v, BARX, CTY, 1.02, .3, mb); if (mb.soup) steam(BARX, CTY, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
   ctx.restore();
   v.cy -= CTD * s;
