@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- Chili, cilantro and beef now leave your hand once they go in: for another helping, pick it up from its jar again\n- Something has changed in the church. Go and see",
-       'zh-Hant': "· 辣椒、香菜和牛肉放進碗裡後手就空了，要多放一份，就再去罐子裡拿一次\n· 教堂裡有了一些變化，等你去發現",
-       'zh-Hans': "· 辣椒、香菜和牛肉放进碗里后手就空了，要多放一份，就再去罐子里拿一次\n· 教堂里有了一些变化，等你去发现"}
+NEW = {'en-US': "- The ramen shop has been rearranged: an L-shaped prep table, a serving board set into the window, and bowls back to their full size\n- The chef serves and eats from the middle place, and taps on the floor walk to the middle of a tile\n- Shadows no longer climb the walls or hang over the edge",
+       'zh-Hant': "· 拉麵店重新佈置：L 型料理檯、嵌在窗口的上餐板，麵碗恢復原來的大小\n· 主角統一在中間的位置上餐和吃麵，點地板會走到格子中央\n· 影子不再爬上牆面，也不會懸在平台外",
+       'zh-Hans': "· 拉面店重新布置：L 型料理台、嵌在窗口的上餐板，面碗恢复原来的大小\n· 主角统一在中间的位置上餐和吃面，点地板会走到格子中央\n· 影子不再爬上墙面，也不会悬在平台外"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']

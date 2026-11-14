@@ -21,7 +21,7 @@ SCENES_ALL = {
       let text = orderText(want); for (let k = 0; k < 80; k++) { const t2 = orderText(want); if (t2.length < text.length) text = t2; }
       stall.seats = [null, { look: { kind: 'drunk', body: [226, 212, 186], hat: [44, 40, 56], name: '酒鬼' }, want, text, state: 'wait', t: 9, wait: 0, say: '', dish: null }, null]; stall.spawn = 999;
       stall.bowl = Object.assign(emptyBowl(), { noodle: true, soup: true, beef: true }); stall.bowlAnim = {};
-      Object.assign(stall.owner, { x: 2.44, y: 1.25, tx: 2.44, ty: 1.25, ptx: null, path: null }); setHold('bowl'); stall.pot = 'cooking'; stall.potT = .9; cookT = () => 99; }, 300);""",
+      Object.assign(stall.owner, { x: SPOT.put[0], y: SPOT.put[1], tx: SPOT.put[0], ty: SPOT.put[1], ptx: null, path: null }); setHold('bowl'); stall.pot = 'cooking'; stall.potT = .9; cookT = () => 99; }, 300);""",
  2: """setTimeout(() => { G.n = 1; G.t = HALF + 20; enterBar(); fade = 0; Object.assign(bar, { who: 'sailor', x: 2.5, y: 3.5, path: [] }); Object.assign(bar.cat, { x: .55, y: 2.3, tx: .55, ty: 2.3, sit: 999, face: 1 });
       setTimeout(() => { const k = BARHIT.keeper; if (k) cafeTap(k[0], k[1]); }, 300);
       setInterval(() => { bar.cat.meowT = 1.2; bar.cat.sit = 999; bar.keepSayT = bar.mySayT = bar.whoSayT = 0; }, 50); }, 300);""",
