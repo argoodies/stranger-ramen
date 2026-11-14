@@ -903,6 +903,8 @@ function drawWorld(t, dt) {
   // objects
   const objs = [];
   objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
+  objs.push({ k: -1e9 - 1, d: () => { const P = v.P.bind(v), sh = (x, y, z, w, d = .25) => poly([P(x, y, z), P(x + w, y, z), P(x + w, y + w + d, z), P(x, y + w + d, z)], [20, 12, 40], .3);      // small flat shadows of the buildings, falling only to the left, as in the ramen shop (MELO 2026-11-14)
+    sh(-1.5, -1.5, 0, 3, .35); sh(2.2, -4.4, 0, 1.3); sh(-4.92, 1.4, 0, 1.5); sh(9.08 + CDX, -.92 + CDY, CDZ, 1.84); } });      // the clock tower, the library, the ramen shop, the church (the coffee house stands on its own footing over the water, with no ground beside it to fall on)
   objs.push({ k: 0, d: () => drawTower(v, t) });
   objs.push({ k: 9.6 + CDX + CDY, d: () => drawChapel(v, t) });      // sorted where the church now stands, so whoever is in front of it is drawn over it
   objs.push({ k: 12.4, d: () => drawBarHouse(v, t) });
