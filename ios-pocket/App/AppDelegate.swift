@@ -56,7 +56,7 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         super.viewDidLoad()
         // the game's daytime sky behind the web view, so nothing dark shows while the page loads
         // (from then on the page reports its sky as it changes — see the "sky" message — so this tracks dusk and night too)
-        let rgb: [[CGFloat]] = [[226, 150, 130], [214, 166, 156], [204, 150, 148]]
+        let rgb: [[CGFloat]] = [[176, 170, 220], [236, 176, 190], [250, 170, 150]]
         sky.colors = rgb.map { UIColor(red: $0[0] / 255, green: $0[1] / 255, blue: $0[2] / 255, alpha: 1).cgColor }
         sky.locations = [0, 0.5, 1]
         sky.frame = view.bounds

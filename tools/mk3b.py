@@ -249,7 +249,7 @@ boot = '<script>\n' + botc3 + '\n</script>\n' + boot
 KICK = "\nrequestAnimationFrame(frame);\n</script>"
 assert src.count(KICK) == 1, 'frame kick-off not found in index.html'
 src = src.replace(KICK, "\n</script>", 1)      # /3b: the main game must not draw a frame (its title over the town) before /3b has taken over; the boot script starts the frames
-src = src.replace('</head>', '<style>html,body{background:linear-gradient(rgb(226,150,130),rgb(214,166,156) 50%,rgb(204,150,148))}#title{display:none!important}</style>\n</head>', 1)      # the lobby's daytime sky behind the page, never the night navy, and never the title
+src = src.replace('</head>', '<style>html,body{background:linear-gradient(rgb(176,170,220),rgb(236,176,190) 50%,rgb(250,170,150))}#title{display:none!important}</style>\n</head>', 1)      # the lobby's daytime sky behind the page, never the night navy, and never the title
 MEL = "const t = nextBar + i * 0.6 - AC.currentTime; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);"
 assert src.count(MEL) == 1, 'music melody line not found in index.html'
 src = src.replace(MEL, "const t = nextBar + i * 0.6 - AC.currentTime; if (window.__3bQuietMs && performance.now() + t * 1000 < window.__3bQuietMs) continue; chime(sc[melIdx], Math.max(0, t), rnd(0.05, 0.09), 2.2);", 1)      # /3b: the music's little melody notes keep out of the opening's 咚 咚 咚 丁零定 (the chord underneath plays on)
