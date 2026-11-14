@@ -18,6 +18,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
 i = src.index('const w = btn(L.devWipe'); j = src.index('box.appendChild(w);', i) + len('box.appendChild(w);')
 src = src[:i] + src[j:]      # /3b has no church and so no church developer menu: its wipe-everything button (the one localStorage.clear) goes, rather than being carried along unreachable
+TK = "TKEY = 'ctramen_t'"
+assert src.count(TK) == 1, 'game-time key not found in index.html'
+src = src.replace(TK, "TKEY = 'ctramen3b_t'", 1)      # /3b keeps its own game time, so it never moves the hour the main game opens at (they share the site's storage)
 boot = """<script>
 // /3b: only the three-player game in the clock tower. Between games the table is a quiet lobby in daylight: just you and the
 // Storyteller; tap the table to stroll about it, tap the Storyteller to talk, and the game begins in the night. When it is over

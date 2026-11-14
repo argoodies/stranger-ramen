@@ -980,10 +980,13 @@ function worldTap(sx, sy) {
 const stall = { board: false, drag: null, tip: null, glowOn: false, BD: null, sinceSelf: 0, myBowl: null, eatT: 0, ownSay: '', ownSayT: 0, pot: 'empty', potT: 0, strainer: false, bowl: null, seats: [null, null, null], spawn: 1.2, owner: { x: 2.4, y: 1.2, tx: 2.4, ty: 1.2 }, fx: [], fly: [], bowlAnim: {}, nope: null, nopeT: 0 };
 const save = JSON.parse(localStorage.getItem('ctramen') || '{"coins":0,"served":0}');
 const has = () => false;
-const HALF = 180, G = { n: 1, late: false, t: HALF };      // the game always opens at night
+const HALF = 180, G = { n: 1, late: false, t: HALF };      // a first game opens at night; after that the game opens at the hour it was left at
+const TKEY = 'ctramen3b_t', HOUR = HALF / 12; let savedHour = -1;      // the game's time is kept once each game hour (15 s), at the start of that hour (MELO 2026-11-14)
+{ let st = NaN; try { st = parseFloat(localStorage.getItem(TKEY)); } catch (e) {} if (st >= 0 && isFinite(st)) { G.t = st; G.n = (G.t % (2 * HALF)) >= HALF ? 1 : 0; } savedHour = Math.floor(G.t / HOUR); }
 function gameHour() { return (6 + 12 * (G.t % (2 * HALF)) / HALF) % 24; }
 function clockHands() { const h = gameHour(); return [(h % 12) / 12 * TAU, (h % 1) * TAU]; }
-function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = lerp(G.n, night ? 1 : 0, 1 - Math.pow(0.8, dt)); }
+function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = lerp(G.n, night ? 1 : 0, 1 - Math.pow(0.002, dt));      // day turns to night (and back) in about a second, as in /3b (was some fifteen seconds)
+  const hr = Math.floor(G.t / HOUR); if (hr !== savedHour) { savedHour = hr; try { localStorage.setItem(TKEY, String(hr * HOUR)); } catch (e) {} } }
 const cookT = () => has('fast') ? 1.3 : 2.6, waitMax = () => has('calm') ? 110 : 70, speedK = () => has('swift') ? 1.5 : 1;
 // ---- achievements: round badges on the wooden board in the shop. save.badges[id] = [x, y] (0..1 on the board), save.badgeNew = ids not yet looked at
 const BADGE_IDS = ['full', 'spicy', 'pukka', 'sailor', 'heretic', 'ring'], BADGE_HOME = { full: [.27, .27], spicy: [.73, .25], pukka: [.28, .7], sailor: [.72, .68], heretic: [.5, .47], ring: [.5, .85] };
