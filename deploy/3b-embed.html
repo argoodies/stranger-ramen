@@ -1081,7 +1081,7 @@ const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
-  if (x > .5 - SM && y < LANE_Y0) return true;                                  // counter under the window, and a strip in front of it: standing closer, the chef's shadow fell on its front face
+  if (y < LANE_Y0) return true;                                  // counter under the window, and a strip in front of it: standing closer, the chef's shadow fell on its front face
   if (x < STOVE_W + SM && y < 3.2 + SM) return true;                                // stove, and the sliver of floor behind it (the chef could slip along it into the corner left of the counter, drawn over the stove)
   if (x > PREP0 - SM + 1e-9 && y > 1.6 - SM && y < PREP_Y1 + SM) return true;                // prep table
   if (Math.hypot(x - BIN[0], y - BIN[1]) < .26 + SM) return true;               // bin
@@ -1266,10 +1266,10 @@ function drawStall(t) {
   const hk = hintKey(), RIM = { pot: [POT_X, 1.6, 1.52, .46], soup: [POT_X, 2.6, 1.52, .46], bowl: [PREPX.bowl, 2.07, 1.075, .3], chili: [PREPX.chili, 2.07, 1.0, .118], cilantro: [PREPX.cilantro, 2.07, 1.0, .118], beef: [PREPX.beef, 2.07, 1.0, .118], bin: [BIN[0], BIN[1], .55, .26], bar: [3.55, .3, 1.062, .28] }, rimOf = k => RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], .3, 1.045, .22] : null);
   const ring = k => { const rim = hk === k && rimOf(k); if (!rim) return; const pulse = Math.sin(t * 5), c = P(rim[0], rim[1], rim[2]), g = 1.12 + .04 * pulse; ctx.strokeStyle = css([255, 236, 170], .6 + .35 * pulse); ctx.lineWidth = Math.max(2.5, s * .06); ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(c[0], c[1], rim[3] * s * 1.2247 * g, rim[3] * s * .707 * g, 0, 0, TAU); ctx.stroke(); };
   { const c = [150, 108, 88], T = .06, bx = (x, y, z, dx, dy, dz) => { v.box(x, y, z, dx, dy, dz, c); sideDark(x, y, z, dx, dy, dz); };      // the serving counter is a shelf: two open shelves under its top, between two end boards (MELO 2026-11-14)
-    bx(.5, 0, 0, T, .6, .9);
-    for (const z of [.12, .5]) bx(.5 + T, 0, z, X - .5 - 2 * T, .56, .05);
+    bx(0, 0, 0, T, .6, .9);
+    for (const z of [.12, .5]) bx(T, 0, z, X - 2 * T, .56, .05);
     bx(X - T, 0, 0, T, .6, .9);
-    bx(.5, 0, .9, X - .5, .6, .1); }      // the prep table's colour (MELO 2026-11-14)
+    bx(0, 0, .9, X, .6, .1); }      // running the whole width, from the left wall (MELO 2026-11-14: it began under the window)      // the prep table's colour (MELO 2026-11-14)
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], .3, 1.02, .3, c.dish); if (c.dish.soup) steam(SEATX[i], .3, 1.12, i); } });
   hit('bar', 3.55, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done && st.hold === 'bowl') { const p = P(3.55, .3, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
