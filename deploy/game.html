@@ -735,7 +735,12 @@ function drawBar(t) {
   poly([P(0, 0, 0), P(N, 0, 0), P(N, 0, Hh), P(0, 0, Hh)], tn([150, 110, 96])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([132, 96, 86]));
   for (let k = 1; k < 8; k++) { line([P(k * N / 8, 0, 0), P(k * N / 8, 0, Hh)], tn([122, 88, 78]), 1, .6); line([P(0, k * N / 8, 0), P(0, k * N / 8, Hh)], tn([110, 80, 72]), 1, .6); }      // timber boards
   wallThick(v, N, N, Hh, -.34, tn([110, 80, 72]), tn([96, 70, 64]), tn([86, 62, 58]));
-  { const yc = 1.5, o = [0, yc, 0], dp = v.F('R', o, 0, .6); glow(dp[0], dp[1], s * 1.4, [255, 236, 190], .45); v.arch('R', o, .9, 1.25, [250, 226, 180]); const ep = v.F('R', o, 0, .5); BARHIT.exit = [ep[0], ep[1], s * .9]; }      // the door, in the upper-left wall
+  { const yc = 1.5, o = [0, yc, 0], dp = v.F('R', o, 0, .6), T = .24, ww = .9, hh = 1.25, out = [[-ww / 2, 0], [ww / 2, 0], [ww / 2, hh]]; for (let i = 0; i <= 12; i++) { const q = Math.PI * i / 12; out.push([ww / 2 * Math.cos(q), hh + ww / 2 * Math.sin(q)]); }      // cut through the thickness of the wall like the library window: inside its outline you see the threshold and the far jamb, then the light beyond
+    const rim = out.map(([u, w]) => v.F('R', o, u, w)), lc = mix([255, 196, 204], [255, 222, 160], nn); glow(dp[0], dp[1], s * 2.2, lc, .7);      // the light outside: rose by day like the library window, warm yellow by night (MELO, 2026-11-14); no shaft, the bar has its own lamp
+    ctx.save(); ctx.beginPath(); rim.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();
+    poly(rim, tn([100, 72, 64])); poly([P(0, yc - ww / 2, 0), P(0, yc + ww / 2, 0), P(-T, yc + ww / 2, 0), P(-T, yc - ww / 2, 0)], mix(tn([164, 116, 92]), lc, .35));      // the threshold: exactly the doorway's width, so it never paints over the foot of the jamb
+    v.arch('R', [-T, yc, 0], ww, hh, mix(lc, [255, 255, 255], .25).map(c => c * (1 - LIFT.bar * (1 - nn)))); ctx.restore();      // the opening is darkened by just as much as the daytime lift (roomLift) will brighten it, so it ends up the library window's colour, not white
+    const ep = v.F('R', o, 0, .5); BARHIT.exit = [ep[0], ep[1], s * .9]; }      // the door, in the upper-left wall
   v.box(.6, .02, 1.7, 2.8, .32, .08, [96, 66, 54]); v.box(.6, .02, 2.4, 2.8, .32, .08, [96, 66, 54]);      // the back shelf
   const jig = (k, ph) => .035 * clamp(1 - (performance.now() - (bar[k] || -1e9)) / 650) * Math.sin(performance.now() / 22 + ph);      // things tapped on the shelf or the counter rattle for a moment, silently, each a little out of step with the next (as the jars in the ramen shop do)
   const shelfHit = [];
@@ -1053,9 +1058,10 @@ function hintKey() {
   return null;
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
+const SHOPX = 5, SHOPY = 3.6;      // the shop's floor: 5 along the window wall, 3.6 deep (MELO's pick B, 2026-11-14; was 4.2)
 const SG = 0.2, SGX = 26, SGY = 22, SM = 0.2;
 function shopBlocked(x, y) {
-  if (x < SM || y < SM || x > 5 - SM * .5 || y > 4.2 - SM * .5) return true;
+  if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
   if (x > .5 - SM && y < .6 + SM) return true;                                   // counter under the window
   if (x < 1.2 + SM && y > 1.0 - SM && y < 3.2 + SM) return true;                 // stove
   if (x > 1.9 - SM && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
@@ -1083,7 +1089,7 @@ function shopPath(from, to) {
   if (!shopBlocked(to[0], to[1]) && clear(out[out.length - 1], to)) out.push(to);
   return out.slice(1);
 }
-const SHOP_DOOR = [1.8, 3.95];
+const SHOP_DOOR = [1.8, SHOPY - .25];
 // tap an object in the shop
 const HIT = {};
 function stallTap(x, y) {
@@ -1092,7 +1098,7 @@ function stallTap(x, y) {
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
   if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
     if (stall.hold && stall.hold !== 'bowl') { if (stall.hold === 'noodle') stall.pot = 'done'; setHold(null); chime(57, 0, .1, .6); return; }      // holding noodles, the soup ladle or a topping: a tap on bare floor puts it back (the noodles back in the pot)
-    const s = stall, v = s.V; if (!v) return; const [fx, fy] = v.inv(x, y); if (fx < -.4 || fy < -.4 || fx > 5.4 || fy > 4.7) return; if (fx < 1.3 && fy < 1.05) return;      // the sliver of floor behind the stove is too small to stand on: a tap there does nothing
+    const s = stall, v = s.V; if (!v) return; const [fx, fy] = v.inv(x, y); if (fx < -.4 || fy < -.4 || fx > SHOPX + .4 || fy > SHOPY + .5) return; if (fx < 1.3 && fy < 1.05) return;      // the sliver of floor behind the stove is too small to stand on: a tap there does nothing
     const g = shopBlocked(fx, fy) ? sgNearest([fx, fy]) : null, o = s.owner; o.tx = g ? g[0] * SG : fx; o.ty = g ? g[1] * SG : fy; s.mark = [o.tx, o.ty]; s.pend = null; s.leaving = false; chime(69, 0, .08, .8); return; }
   const s = stall, h = s.hold; let ok = false;
   if (best === 'exit') { if (h) { ok = false; } else { s.owner.tx = SHOP_DOOR[0]; s.owner.ty = SHOP_DOOR[1]; s.pend = null; s.leaving = true; chime(69, 0, .1, .8); return; } }
@@ -1173,10 +1179,10 @@ function iso_bowl(v, x, y, z, r, b) {
 function drawStall(t) {
   TK = 0; SHADOW = [80, 44, 60];
   skyNow(t, .15);
-  const st = stall, X = 5, Y = 4.2, Hh = 3.8, top = 104;
+  const st = stall, X = SHOPX, Y = SHOPY, Hh = 3.8, top = 104;
   const bowlR = 0;
   // the room is fitted to the screen: as wide as it can be, or as tall, whichever is smaller. On a narrow phone it keeps a margin either side (down to 86% of the width at 330 px) so the order bubbles have somewhere to go.
-  const s = Math.min(W / (9.5 * C30) * lerp(.86, 1, clamp((W - 330) / 110)), (H - top - 40) / 8.4), v = new View(W / 2 - 0.5 * C30 * s, Math.max(top, (H - 8.4 * s) * .42) + Hh * s, s), P = v.P.bind(v);
+  const SC = (X + Y) / 9.2, s = Math.min(W / (9.5 * SC * C30) * lerp(.86, 1, clamp((W - 330) / 110)), (H - top - 40) / (8.4 * SC)), v = new View(W / 2 - ((X - Y) / 2 + .1) * C30 * s, Math.max(top, (H - 8.4 * SC * s) * .42) + Hh * s, s), P = v.P.bind(v);
   st.V = v;      // kept for taps on the bare floor
   for (const k in HIT) delete HIT[k];
   const hit = (k, x, y, z, r) => { const p = P(x, y, z); HIT[k] = [p[0], p[1], r * s]; return p; };
