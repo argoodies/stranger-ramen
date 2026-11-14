@@ -1177,9 +1177,11 @@ function drawStall(t) {
   const wob = k => st.nope === k && st.nopeT > 0 ? Math.sin(st.nopeT * 60) * s * .04 : 0;
   // outside ground + customers behind the window
   { const ng = c => mix(c, [44, 60, 92], G.n * .7);      // outside the window: the town's grass with a few little flowers on it, dimming to blue at night
+    ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(4.5, 0, 1), P(4.5, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // seen only through the opening: on a wide screen the patch would otherwise stick out past the room
     poly([P(0, -2.2), P(X + 1, -2.2), P(X + 1, 0), P(0, 0)], ng([108, 180, 170]));
-    [[.5, -1.6], [1.2, -1.75], [1.9, -1.55], [2.7, -1.7], [3.3, -1.6], [4.1, -1.75], [4.8, -1.6], [5.5, -1.7]].forEach(([x, y], i) => { const q = P(x, y, .05); circ(q[0], q[1], s * .055, ng(i % 3 === 0 ? [255, 240, 244] : i % 3 === 1 ? [248, 160, 176] : [255, 214, 140])); }); }
+    [[.5, -1.6], [1.2, -1.75], [1.9, -1.55], [2.7, -1.7], [3.3, -1.6], [4.1, -1.75], [4.8, -1.6], [5.5, -1.7]].forEach(([x, y], i) => { const q = P(x, y, .05); circ(q[0], q[1], s * .055, ng(i % 3 === 0 ? [255, 240, 244] : i % 3 === 1 ? [248, 160, 176] : [255, 214, 140])); }); ctx.restore(); }
   const K = s * 1.2, heads = [];
+  ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(4.5, 0, 1), P(4.5, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // customers too are seen only through the window: on a wide screen one walking up or away no longer floats in the sky beside the shop
   st.seats.forEach((c, i) => {
     if (!c) return; let off = 0, a = 1;
     if (c.state === 'arrive') { off = (1 - eout(c.t / .8)) * 2.4; a = clamp(c.t / .4); }
@@ -1188,6 +1190,7 @@ function drawStall(t) {
     if (c.story) { storySeatPos[c.story] = [p[0], p[1] - bob]; (c.story === 'he' ? storyHe : storyShe)(p[0], p[1] - bob, K); } else fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
+  ctx.restore();
   // floor + walls
   for (let i = 0; i < X; i++) for (let j = 0; j < 4; j++) v.quad(i, j * Y / 4, 0, 1, Y / 4, (i + j) % 2 ? [196, 150, 120] : [210, 166, 132]);      // four whole rows across the room's depth, so no sliver of a fifth row is left along the front edge
   const wallB = [232, 204, 170], wallA = [214, 180, 150];
