@@ -226,8 +226,8 @@ function drawHero(x, y, k, ph, flip = 1, away = true) {
 function drawBotc(t, dt) {
   const g = BG; g.dark = lerp(g.dark, g.isNight ? 1 : 0, 1 - Math.pow(0.002, dt));
   TINT = [30, 30, 90]; TK = lerp(0.04, 0.34, g.dark); SHADOW = [58, 40, 96];
-  moonAt = [W * .8, H * .14]; drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark, 1 - g.dark); clouds(t, 1 - g.dark); moonAt = null;
-  const mx = W * .8, my = H * .14, sc = mix(ORBD, ORBN, g.dark); glow(mx, my, 130, sc, lerp(.45, .1, g.dark)); drawOrb(mx, my, 22, g.dark); drawGeese3(t, g.dark);
+  moonAt = [W * .8, H * .14]; drawSky(mix(SKYD[0], SKYN[0], g.dark), mix(SKYD[1], SKYN[1], g.dark), mix(SKYD[2], SKYN[2], g.dark), t, .1 + .9 * g.dark, 1 - g.dark); moonAt = null;
+  const mx = W * .8, my = H * .14, sc = mix(ORBD, ORBN, g.dark); glow(mx, my, 130, sc, lerp(.45, .1, g.dark)); drawOrb(mx, my, 22, g.dark); clouds(t, 1 - g.dark); drawGeese3(t, g.dark);
   const s = Math.min(W / 11.2, (H - 250) / 8.6), v = new View(W / 2, H * .6, s), P = v.P.bind(v);
   const top = [92, 168, 162], under = [70, 96, 130];
   v.disc(0, 0, -3.6, 1.1, 1.1, under); v.disc(0, 0, -2.5, 2.3, .9, under); v.disc(0, 0, -1.6, 3.4, 1.0, mix(under, top, .3)); v.disc(0, 0, -.6, 4.3, .6, top); v.disc(0, 0, 0, 2.3, 0, [120, 190, 180]);
