@@ -1023,7 +1023,7 @@ function complaint(b, w) {      // what an unhappy customer says: the first thin
   return k ? pick(B[k]) : pick(S().sayBad);
 }
 function spawnCustomer() {
-  const free = [0, 1, 2].filter(i => !stall.seats[i]); if (!free.length) return;
+  const free = [0, 1].filter(i => !stall.seats[i]); if (!free.length) return;      // customers only take the first two places; the third is for your own bowl (MELO 2026-11-14)
   const amount = () => Math.random() < .42 ? 0 : 1 + (Math.random() * 3 | 0);      // none, a little, as usual or a lot
   const look = randomLook(), w = { chili: amount(), cilantro: amount(), beef: Math.random() < .55 };
   if (look.kind === 'demon') w.chili = 3; if (look.kind === 'scarlet') w.cilantro = 0;
