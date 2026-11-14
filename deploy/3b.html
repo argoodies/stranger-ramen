@@ -1112,13 +1112,14 @@ function hintKey() {
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { wallB: [150, 110, 96], wallA: [132, 96, 86], top: [110, 80, 72], endX: [96, 70, 64], endY: [86, 62, 58], edgeL: [120, 84, 66], edgeR: [100, 70, 58], step: [176, 128, 104] };      // the shop's colours, matched to the coffee house (MELO 2026-11-14): the two walls, the wall tops and ends, the floor's front edges, the steps
+const PREP_Y1 = 2.75;      // the prep table's front edge: it runs from y 1.6 to here (MELO 2026-11-14: a little deeper, was 2.55)
 const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
   if (x > .5 - SM && y < LANE_Y0) return true;                                  // counter under the window, and a strip in front of it: standing closer, the chef's shadow fell on its front face
   if (x < STOVE_W + SM && y < 3.2 + SM) return true;                                // stove, and the sliver of floor behind it (the chef could slip along it into the corner left of the counter, drawn over the stove)
-  if (x > PREP0 - SM + 1e-9 && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
+  if (x > PREP0 - SM + 1e-9 && y > 1.6 - SM && y < PREP_Y1 + SM) return true;                // prep table
   if (Math.hypot(x - BIN[0], y - BIN[1]) < .26 + SM) return true;               // bin
   return false;
 }
@@ -1332,9 +1333,9 @@ function drawStall(t) {
     else if (hd === 'bowl') { const bx = hp[0] - s * .12, by = hp[1] + s * .08; bowlTopMini(bx, by, s * .3 * 1.2247, st.bowl);
       if (st.bowl.soup) for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3) % 1; circ(bx + Math.sin(t * 1.3 + i * 2) * s * .1, by - s * (.12 + .75 * ph), s * (.06 + .1 * ph), [255, 252, 248], .55 * (1 - ph)); } }      // a bowl with soup in it steams in his hands too, as it does on the counter
   };
-  const ow = st.owner, inFront = ow.y > 2.55, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y 2.55), beside its left end too; in front of the bin when deeper into the room than it
+  const ow = st.owner, inFront = ow.y > PREP_Y1, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y PREP_Y1), beside its left end too; in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings in a row, the gaps between them even and the beef clear of the table's end (MELO 2026-11-14); no hint ring reaches the next thing along
-  v.box(PREP0, 1.6, 0, X - PREP0, .95, 1.0, [150, 108, 88]);
+  v.box(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, 1.0, [150, 108, 88]);
   hit('bowl', PREPX.bowl, 2.07, 1.08, .47); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(PREPX.bowl, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .34, s * .19, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, PREPX.bowl, 2.07, 1.03, .3, st.bowl); if (st.bowl.soup) steam(PREPX.bowl, 2.07, 1.11, 4); } ctx.restore();
   ring('bowl');
   { const x = PREPX.chili; hit('chili', x, 2.07, 1 + .08 * TOPK, .26 * TOPK); ctx.save(); ctx.translate(wob('chili'), 0); grow(x, 2.07, 1.0, TOPK);
