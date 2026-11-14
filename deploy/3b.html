@@ -1278,6 +1278,9 @@ function drawStall(t) {
     ctx.restore(); }
   { const a = P(X / 2, .6, 0), b = P(X / 2, Y, 0), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, `rgba(22, 22, 60, ${.25 * DN})`);      // the floor darkens little by little from the serving counter to the way out (MELO 2026-11-14)
     poly([P(0, 0), P(X, 0), P(X, Y), P(0, Y)], [0, 0, 0], 0); ctx.fillStyle = gr; ctx.fill(); }
+  { const sh = (x, y, dx, dy) => { for (const [o, a] of [[.2, .16], [.1, .22]]) poly([P(x + o * .3, y + o * .3), P(x + dx + o, y + o * .3), P(x + dx + o, y + dy + o), P(x + o * .3, y + dy + o)], [20, 12, 40], a); };      // small soft shadows on the floor, cast a little toward the front right of each thing standing on it (MELO 2026-11-14)
+    sh(.5, 0, X - .5, .6); sh(0, 1.0, STOVE_W, 2.2); sh(PREP0, 1.6, X - PREP0, PREP_Y1 - 1.6);
+    for (const [o, a] of [[.14, .18], [.07, .24]]) { const q = P(BIN[0] + o, BIN[1] + o); ell(q[0], q[1], s * (.26 + o) * C30 * 1.42, s * (.26 + o) * .71, [20, 12, 40], a); } }
   const wallB = LW(SHOPC.wallB), wallA = LW(SHOPC.wallA);
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(3.55, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(3.55, 0, 2.8)], wallB);
