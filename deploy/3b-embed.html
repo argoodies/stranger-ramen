@@ -1317,6 +1317,7 @@ function drawStall(t) {
   ctx.restore();
   v.cy -= CTD * s;
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
+  { const q = P(st.owner.x, st.owner.y), k = s * 1.15; ell(q[0], q[1], .36 * k, .10 * k, [20, 12, 40], .3); }      // the chef's shadow, on the floor before any furniture, so the stove and the tables cover it where they stand in front of it (it lay across their sides, MELO 2026-11-14)
   // stove with the noodle pot and the soup pot
   sideBox(0, 1.0, 0, STOVE_W, 2, 1.0, [120, 104, 124]);
   let pileY = TABY; const pile = (x, z, n, piece) => { const p = P(x, pileY, z), bits = []; for (let i = 0; i < n; i++) { const a = i * 2.39996, r = Math.sqrt((i + .5) / n); bits.push([p[0] + Math.cos(a) * r * s * .085, p[1] + Math.sin(a) * r * s * .043 - s * .05 * (1 - r * r), i, a]); } bits.sort((u, w) => u[1] - w[1]).forEach(([bx, by, i, a]) => { ctx.save(); ctx.translate(bx, by); piece(i, a); ctx.restore(); }); };      // small chopped bits heaped on a board: spread on a sunflower spiral, higher in the middle, the far ones drawn first
@@ -1340,7 +1341,7 @@ function drawStall(t) {
     st.lit = lerp(st.lit || 0, clamp((1.0 - Math.hypot(st.owner.x - LAMP_XY[0], st.owner.y - LAMP_XY[1])) / .3 + .5), .18);      // under the lamp your face lights up, as by the library window (MELO 2026-11-14)
     const lit = c => { const d = c; return mix(d, mix(d, [255, 214, 140], .14), st.lit); }, oy = op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0);
     if (st.lit > .02) glow(op[0], oy - s * 1.15 * .6, s * 1.15 * 1.1, [255, 214, 140], .3 * st.lit);
-    fig(op[0], oy, s * 1.15, { kind: 'chef', apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) });
+    fig(op[0], oy, s * 1.15, { kind: 'chef', noShadow: true, apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) });
     HIT.own = [op[0] + s * .45, op[1] - s * 1.0, 0];
     const hp = [HIT.own[0] + wob('own'), HIT.own[1]], hd = st.hold;
     if (hd === 'noodle') { line([[hp[0], hp[1]], [hp[0] + s * .3, hp[1] - s * .3]], [150, 110, 90], s * .05); circ(hp[0], hp[1], s * .17, [190, 196, 214]); circ(hp[0], hp[1], s * .13, [250, 232, 170]); }
