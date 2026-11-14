@@ -1728,9 +1728,9 @@ function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight:
   if (c.inv > 0) { ctx.beginPath(); ctx.arc(x, 73, 11, -Math.PI / 2, -Math.PI / 2 + TAU * c.inv / 5); ctx.strokeStyle = css([255, 214, 120], .95); ctx.lineWidth = 2.5; ctx.stroke(); }      // the drink's five seconds, running down
 }
 const BUFFCOL = { speed: [255, 255, 255], freeze: [120, 180, 255] };
-function buffRings(x, y, s, t) {      // the prophecies at the chef's feet, in every scene: speed is a ring of white light (two rings when it is the only one); frost is a ring of white snowflakes going round,
+function buffRings(x, y, s, t) {      // the prophecies at the chef's feet, in every scene: each prophecy is one ring: speed a ring of white light, frost a ring of white snowflakes going round,
   const sp = buffOn('speed'), fr = buffOn('freeze');      // outside the speed ring when both are on (MELO 2026-11-14; frost was a blue ring)
-  if (sp) (fr ? [0] : [0, 1]).forEach(i => { const rr = s * (.5 + i * .14) * (1 + .04 * Math.sin(t * 3 + i)), cl = BUFFCOL.speed; ctx.beginPath(); ctx.ellipse(x, y, rr, rr * .5, 0, 0, TAU); ctx.fillStyle = css(cl, .12); ctx.fill(); ctx.strokeStyle = css(cl, .8); ctx.lineWidth = Math.max(1.5, s * .05); ctx.stroke(); });
+  if (sp) [0].forEach(i => { const rr = s * (.5 + i * .14) * (1 + .04 * Math.sin(t * 3 + i)), cl = BUFFCOL.speed; ctx.beginPath(); ctx.ellipse(x, y, rr, rr * .5, 0, 0, TAU); ctx.fillStyle = css(cl, .12); ctx.fill(); ctx.strokeStyle = css(cl, .8); ctx.lineWidth = Math.max(1.5, s * .05); ctx.stroke(); });
   if (fr) { const rr = s * (sp ? .7 : .58), n = 10; ctx.save(); ctx.strokeStyle = css([255, 255, 255], .92); ctx.lineWidth = Math.max(1, s * .022); ctx.lineCap = 'round';
     for (let k = 0; k < n; k++) { const a = k / n * TAU + t * .35, fx = x + Math.cos(a) * rr, fy = y + Math.sin(a) * rr * .5, f = s * (.06 + .008 * Math.sin(t * 3 + k)); ctx.beginPath();
       for (let j = 0; j < 3; j++) { const g = j * Math.PI / 3 + t * .6 + k, cx = Math.cos(g) * f, cy = Math.sin(g) * f; ctx.moveTo(fx - cx, fy - cy); ctx.lineTo(fx + cx, fy + cy); }
