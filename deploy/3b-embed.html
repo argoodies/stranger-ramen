@@ -1206,6 +1206,7 @@ const ROOM_TOP = 104, roomB = N => N + .83, roomScale = (N, Hh) => Math.min(W / 
 function drawStall(t) {
   TK = 0; SHADOW = [80, 44, 60];
   skyNow(t, .15);
+  const LT = c => mix(c, [22, 22, 60], .34);      // the walls, the floor and the steps as dark as the library's (its TK .34 toward [22, 22, 60]; MELO 2026-11-14)
   const st = stall, X = SHOPX, Y = SHOPY, Hh = 3.8, top = 104;
   const bowlR = 0;
   // the room is fitted to the screen: as wide as it can be, or as tall, whichever is smaller. On a narrow phone it keeps a margin either side (down to 86% of the width at 330 px) so the order bubbles have somewhere to go.
@@ -1231,18 +1232,18 @@ function drawStall(t) {
   ctx.restore();
   // floor + walls
   { const C = SHOPC, h = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); }, Q = (x0, y0, x1, y1, c) => poly([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)], c), w = .28, L = 1.7, e = .018;      // long cherry-brown planks along the window wall, staggered (MELO, 2026-11-14; was big square tiles)
-    ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, C.seam);
-    for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, h(r, x) < .5 ? C.plank1 : C.plank2);
+    ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, LT(C.seam));
+    for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, LT(h(r, x) < .5 ? C.plank1 : C.plank2));
     ctx.restore(); }
-  const wallB = SHOPC.wallB, wallA = SHOPC.wallA;
+  const wallB = LT(SHOPC.wallB), wallA = LT(SHOPC.wallA);
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(3.55, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(3.55, 0, 2.8)], wallB);
   const curtain = i => { const x0 = .56 + i * .6, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .56, 0, 2.8), P(x0 + .56, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); };
   for (let i = 0; i < 5; i++) curtain(i);
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
-  wallThick(v, X, Y, Hh, -.34, SHOPC.top, SHOPC.endX, SHOPC.endY);      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
+  wallThick(v, X, Y, Hh, -.34, LT(SHOPC.top), LT(SHOPC.endX), LT(SHOPC.endY));      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
   { ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(3.55, 0, 1), P(3.55, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // the sill and the jamb are seen only through the opening (unclipped, the sill's far corner poked out over the wall at the lower right); the jamb runs its whole height, and the first door-cloth hangs in front of it
-    poly([P(.5, -.24, 1), P(3.55, -.24, 1), P(3.55, 0, 1), P(.5, 0, 1)], SHOPC.top); poly([P(.5, -.24, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(.5, -.24, 2.8)], SHOPC.endX); ctx.restore(); curtain(0); }
+    poly([P(.5, -.24, 1), P(3.55, -.24, 1), P(3.55, 0, 1), P(.5, 0, 1)], LT(SHOPC.top)); poly([P(.5, -.24, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(.5, -.24, 2.8)], LT(SHOPC.endX)); ctx.restore(); curtain(0); }
   { // a little shelf on the wall where the painting used to hang, with a row of bottles and jars on it. They are empty: tap them and they rattle
     const yc = 2.1, z0 = 2.5,      // centred along the wall over the whole stove (1.0 to 3.2), between the two pots
       jk = clamp(1 - (performance.now() - (st.jarAt || -1e9)) / 650), J = (y0, w, h, c, nk, cap) => { const y = y0 + .035 * jk * Math.sin(performance.now() / 22 + y0 * 40); v.box(.06, yc + y - w / 2, z0 + .06, w, w, h, c); if (nk) v.box(.06 + w / 2 - .035, yc + y - .035, z0 + .06 + h, .07, .07, nk, c); if (cap) v.box(.06 + (nk ? w / 2 - .045 : -.01), yc + y - (nk ? .045 : w / 2 + .01), z0 + .06 + h + (nk || 0), nk ? .09 : w + .02, nk ? .09 : w + .02, .04, cap); };
@@ -1251,8 +1252,8 @@ function drawStall(t) {
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
   // the way out: a few steps going down from the middle of the front edge
   { const ew = 1.0, ex = X / 2 - ew / 2;
-    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], SHOPC.edgeL); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], SHOPC.edgeR);
-    for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step);
+    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], LT(SHOPC.edgeL)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], LT(SHOPC.edgeR));
+    const tint0 = TINT; TK = .34; TINT = [22, 22, 60]; for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step); TK = 0; TINT = tint0;
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   { const q = P(st.owner.x, st.owner.y); buffRings(q[0], q[1], s, t); }      // the prophecies on the floor, before the counter, the stove, the table and the bin
   // counter under the window, with the bowls already served
