@@ -92,6 +92,7 @@ const css = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 const WHITE = [246, 241, 232], SKIN = [246, 226, 206], DARK = [70, 52, 92];
 let TINT = [40, 30, 96], TK = 0.16, SHADOW = [58, 40, 96];
 const tint = c => TK ? mix(c, TINT, TK) : c;
+const LIFT = .14;      // how much brighter the bar and the ramen shop are by day (see roomLift)
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = a => a[(Math.random() * a.length) | 0];
 
@@ -303,6 +304,10 @@ class View {
 
 // The two back walls of a room are slabs, not sheets: draw their top faces and the two ends that face you.
 // The room's floor is X by Y, the walls stand on x = 0 and y = 0, Hh high; z0 is how far the ends run down past the floor.
+function roomLift(v, X, Y, Hh, z0, a, T = .24) {      // by day the bar and the ramen shop are lit a little more: an exposure boost over the room only (walls, floor and all in it), never the sky
+  if (a <= .005) return; const P = v.P.bind(v); ctx.save(); ctx.beginPath(); [P(-T, -T, Hh), P(X, -T, Hh), P(X, -T, z0), P(X, Y, z0), P(-T, Y, z0), P(-T, Y, Hh)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();
+  ctx.globalCompositeOperation = 'color-dodge'; ctx.fillStyle = css([255, 255, 255].map(c => c * a)); ctx.fillRect(0, 0, W, H); ctx.restore();      // color-dodge divides by (1 - fill): an exposure boost of about 1 / (1 - a) that keeps colours and contrast
+}
 function wallThick(v, X, Y, Hh, z0, top, endX, endY, T = .24) {
   const P = v.P.bind(v);
   poly([P(-T, -T, Hh), P(X, -T, Hh), P(X, 0, Hh), P(0, 0, Hh), P(0, Y, Hh), P(-T, Y, Hh)], top);
@@ -797,6 +802,7 @@ function drawBar(t) {
   if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   if (storyAfter) storyAfter(v, K, t, 'bar');
+  roomLift(v, N, N, Hh, -.34, LIFT * (1 - nn));
   const fs = clamp(s * .3, 12.5, 15), mw = Math.min(W * .62, 250);
   if (bar.keepSayT > 0 && bar.keeperAt) sayBubble(bar.keeperAt[0], bar.keeperAt[1] - K * 1.75, bar.keepSay, fs, clamp(bar.keepSayT * 2), mw);
   if (bar.mySayT > 0 && bar.at) sayBubble(bar.at[0], bar.at[1] - K * 1.75, bar.mySay, fs, clamp(bar.mySayT * 2), mw);
@@ -1287,6 +1293,7 @@ function drawStall(t) {
     let by = hy0 - 8 - bh; for (let n = 0; n < 60 && placed.some(r => bx < r[0] + r[2] + 4 && bx + cw + 4 > r[0] && by < r[1] + r[3] + 4 && by + bh + 4 > r[1]); n++) by -= 5;
     placed.push([bx, by, cw, bh, lines, fadeA, hx, hy0]);
   }
+  roomLift(v, X, Y, Hh, -.34, LIFT * (1 - clamp((G.n - .35) / .3)));
   // tails first, then the bubbles over them: a long tail reaching down never shows across another bubble
   for (const [bx, by, cw, bh, , fadeA, hx, hy0] of placed) { const tx = clamp(hx, bx + 12, bx + cw - 12); poly([[tx - 5, by + bh - 1], [tx + 5, by + bh - 1], [hx, hy0 - 1]], [250, 246, 238], .96 * fadeA); }
   for (const [bx, by, cw, bh, lines, fadeA] of placed) {
