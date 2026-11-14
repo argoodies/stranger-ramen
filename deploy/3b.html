@@ -1316,7 +1316,7 @@ function drawStall(t) {
   { ctx.save(); ctx.beginPath(); [P(.5, 0, SILL), P(WINR, 0, SILL), P(WINR, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // the sill and the jamb are seen only through the opening (unclipped, the sill's far corner poked out over the wall at the lower right); the jamb runs its whole height, and the first door-cloth hangs in front of it
     ctx.restore(); curtain(0); }
   { // a little shelf on the wall where the painting used to hang, with a row of bottles and jars on it. They are empty: tap them and they rattle
-    const yc = 2.1, z0 = 2.5,      // centred along the wall over the whole stove (1.0 to 3.2), between the two pots
+    const yc = SHOPY / 2, z0 = 2.5,      // in the middle of the wall, which is the middle of the stove too (1 to 3), between the two pots (MELO 2026-11-14)
       jk = clamp(1 - (performance.now() - (st.jarAt || -1e9)) / 650), J = (y0, w, h, c, nk, cap) => { const y = y0 + .035 * jk * Math.sin(performance.now() / 22 + y0 * 40); v.box(.06, yc + y - w / 2, z0 + .06, w, w, h, c); if (nk) v.box(.06 + w / 2 - .035, yc + y - .035, z0 + .06 + h, .07, .07, nk, c); if (cap) v.box(.06 + (nk ? w / 2 - .045 : -.01), yc + y - (nk ? .045 : w / 2 + .01), z0 + .06 + h + (nk || 0), nk ? .09 : w + .02, nk ? .09 : w + .02, .04, cap); };
     v.box(0, yc - .46, z0, .3, .92, .06, [176, 128, 96]);
     J(-.34, .16, .2, [236, 226, 206], 0, [176, 110, 90]); J(-.13, .12, .24, [96, 150, 120], .12, [120, 84, 70]); J(.06, .15, .15, [214, 96, 90], 0, [236, 226, 206]); J(.25, .11, .2, [150, 104, 84], .1, [226, 196, 140]); J(.39, .1, .12, [240, 200, 120], 0, [150, 104, 84]);
