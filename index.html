@@ -876,7 +876,8 @@ function drawWorld(t, dt) {
   if (storyAfter) storyAfter(v, K, t, 'town');
   for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
   if (player.sayT > 0 && mode === 'world' && !storyHook) { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)); sayBubble(p[0], p[1] - K * 1.75, player.say, clamp(W * .036, 12, 15), clamp(player.sayT * 2), Math.min(W * .62, 250)); }      // the chef's own words in the town (what a prophecy does)
-  if (mode === 'title') {
+  if (mode === 'title' && G.n < .5) titleBox = null;      // opening by day: the town alone, no title (MELO 2026-11-14)
+  if (mode === 'title' && G.n >= .5) {
     // the title, in the Monument Valley manner: thin lettering, centred high in the night sky above the island
     let a = v.P(1.5, -1.5, 7.5), chars = [...S().title], en = LANG === 'en', fs = Math.max(en ? 9 : 11, Math.min(clamp(s * (en ? .7 : .86), en ? 10 : 13, 26), (W - a[0]) / (en ? 3.85 + (chars.length - 1) * .74 : 11.6))), x0 = a[0] + fs * 1.15, gap = Math.min(fs * (en ? .92 : 1.9), (W - fs * 2.7 - x0) / (chars.length - 1)), y = a[1];
     ctx.font = `200 ${fs}px "PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei UI",sans-serif`;
