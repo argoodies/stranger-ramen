@@ -1280,7 +1280,7 @@ function drawStall(t) {
     poly([P(0, 0), P(X, 0), P(X, Y), P(0, Y)], [0, 0, 0], 0); ctx.fillStyle = gr; ctx.fill(); }
   { const sh = (x, y, dx, dy) => poly([P(x, y), P(x + dx + .1, y), P(x + dx + .1, y + dy + .1), P(x, y + dy + .1)], [20, 12, 40], .3);      // small flat shadows, one plain shape each in the chef's shadow colour (MELO 2026-11-14)
     sh(.5, 0, X - .5, .6); sh(0, 1.0, STOVE_W, 2.2); sh(PREP0, 1.6, X - PREP0, PREP_Y1 - 1.6);
-    { const q = P(BIN[0], BIN[1]); ell(q[0], q[1], s * .36 * 1.3, s * .1 * 1.3, [20, 12, 40], .3); } }      // the bin's, an ellipse like the chef's
+    { const r = .34, q = P(BIN[0] + .04, BIN[1] + .04); ell(q[0], q[1], r * s * C30 * Math.SQRT2, r * s * .5 * Math.SQRT2, [20, 12, 40], .3); } }      // the bin's: a round shadow lying flat on the floor, a little wider than the bin (r .26), in the chef's shadow colour
   const wallB = LW(SHOPC.wallB), wallA = LW(SHOPC.wallA);
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(3.55, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(3.55, 0, 2.8)], wallB);
