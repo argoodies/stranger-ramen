@@ -1116,7 +1116,12 @@ function hintKey() {
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
 const CTD = .2;      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
-const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];      // WOOD: the prep table and the serving counter, a light mahogany that stands apart from the floor and the walls (MELO 2026-11-14)      // where the shop's one hanging lamp hangs
+const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];
+let WOODSTYLE = 1; const WOODS = [null,
+  { body: [104, 70, 54], top: [172, 124, 86], seam: [62, 40, 34], slab: .1, oh: .04, vseam: .32 },      // 1 thick oak top on a walnut body of upright boards
+  { body: [132, 92, 66], alt: [108, 72, 54], top: [156, 110, 78], seam: [70, 46, 38], slab: .06, oh: .03, panel: .75, kick: .07, kickc: [80, 54, 44] },      // 2 framed cabinet doors
+  { body: [128, 88, 64], alt: [118, 80, 58], top: [164, 116, 82], seam: [66, 44, 36], slab: .07, oh: .03, planks: .17, kick: .07, kickc: [76, 52, 42] },      // 3 stacked horizontal boards
+  { body: [90, 62, 50], alt: [108, 76, 58], top: [206, 168, 122], seam: [56, 38, 32], slab: .12, oh: .05, slats: .09, kick: .08, kickc: [60, 42, 36] }];      // 4 a pale hinoki top on dark slats      // WOOD: the prep table and the serving counter, a light mahogany that stands apart from the floor and the walls (MELO 2026-11-14)      // where the shop's one hanging lamp hangs
 const PREP_Y1 = 2.55, PREP_H = 1.15;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
 const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
@@ -1249,7 +1254,21 @@ function drawStall(t) {
   TK = 0; SHADOW = [80, 44, 60];
   skyNow(t, .15);
   const DN = lerp(.65, 1, G.n), LT = c => mix(c, [22, 22, 60], .34 * DN), WN = lerp(.3, 1, G.n), LW = c => mix(c, [22, 22, 60], .02 * WN),      // LW: the walls, a little lighter than the floor, and by day lighter still (WN, MELO 2026-11-14)
-    sideBox = (x, y, z, dx, dy, dz, c) => { v.sh = c2 => [tint(mix(c2, [255, 255, 255], .06)), tint(mix(c2, [22, 22, 60], .1)), tint(mix(c2, [22, 22, 60], .2))]; v.box(x, y, z, dx, dy, dz, c); delete v.sh; };      // gentler steps between the top and the two sides than other boxes have, by day and by night alike (MELO 2026-11-14)      // a box whose two sides you see are darkened as the walls are, its top left as it is; the sides' own colours are darkened, not laid over, so no light seam shows along their edges (MELO 2026-11-14)      // DN: by day all this darkening is a third lighter (MELO 2026-11-14)      // the two sides you see of a box, darkened as the walls are; its top left as it is (MELO 2026-11-14)      // the walls, the floor and the steps as dark as the library's (its TK .34 toward [22, 22, 60]; MELO 2026-11-14)
+    sideBox = (x, y, z, dx, dy, dz, c) => { v.sh = c2 => [tint(mix(c2, [255, 255, 255], .06)), tint(mix(c2, [22, 22, 60], .1)), tint(mix(c2, [22, 22, 60], .2))]; v.box(x, y, z, dx, dy, dz, c); delete v.sh; };
+  const woodBox = (x, y, z, dx, dy, dz) => {      // a wooden counter: a body, a top slab, and the seams, panels or slats of its boards (WOODSTYLE picks the look; 0 a plain box)
+    const W = WOODS[WOODSTYLE]; if (!W) { sideBox(x, y, z, dx, dy, dz, WOOD); return; }
+    const P = v.P.bind(v), sd = (c, k) => tint(mix(c, [22, 22, 60], k)), oh = W.oh || 0, sl = W.slab, kb = W.kick || 0, bh = dz - sl,
+      L = (c, u0, u1, w0, w1, a = 1) => poly([P(x + u0, y + dy, z + w0), P(x + u1, y + dy, z + w0), P(x + u1, y + dy, z + w1), P(x + u0, y + dy, z + w1)], sd(c, .1), a),
+      R = (c, u0, u1, w0, w1, a = 1) => poly([P(x + dx, y + u0, z + w0), P(x + dx, y + u1, z + w0), P(x + dx, y + u1, z + w1), P(x + dx, y + u0, z + w1)], sd(c, .2), a);
+    sideBox(x, y, z, dx, dy, bh, W.body);
+    if (W.slats) { const n = Math.round(dx / W.slats); for (let i = 0; i < n; i += 2) L(W.alt, i * dx / n, (i + 1) * dx / n, kb, bh); const m = Math.round(dy / W.slats); for (let i = 0; i < m; i += 2) R(W.alt, i * dy / m, (i + 1) * dy / m, kb, bh); }
+    if (W.planks) { const n = Math.max(2, Math.round((bh - kb) / W.planks)); for (let i = 0; i < n; i++) { const w0 = kb + (bh - kb) * i / n, w1 = kb + (bh - kb) * (i + 1) / n; if (i % 2) { L(W.alt, 0, dx, w0, w1); R(W.alt, 0, dy, w0, w1); } if (i) { L(W.seam, 0, dx, w0 - .006, w0 + .006); R(W.seam, 0, dy, w0 - .006, w0 + .006); } } }
+    if (W.vseam) { const n = Math.round(dx / W.vseam); for (let i = 1; i < n; i++) L(W.seam, i * dx / n - .007, i * dx / n + .007, kb, bh); const m = Math.round(dy / W.vseam); for (let i = 1; i < m; i++) R(W.seam, i * dy / m - .007, i * dy / m + .007, kb, bh); }
+    if (W.panel) { const pm = .08, n = Math.max(1, Math.round(dx / W.panel)), pw = dx / n; for (let i = 0; i < n; i++) { L(W.alt, i * pw + pm, (i + 1) * pw - pm, kb + pm, bh - pm); L(W.seam, i * pw + pm, (i + 1) * pw - pm, bh - pm - .02, bh - pm); } const m = Math.max(1, Math.round(dy / W.panel)), qw = dy / m; for (let i = 0; i < m; i++) { R(W.alt, i * qw + pm, (i + 1) * qw - pm, kb + pm, bh - pm); R(W.seam, i * qw + pm, (i + 1) * qw - pm, bh - pm - .02, bh - pm); } }
+    if (kb) { L(W.kickc, 0, dx, 0, kb); R(W.kickc, 0, dy, 0, kb); }
+    L(W.seam, 0, dx, bh - .015, bh, .8); R(W.seam, 0, dy, bh - .015, bh, .8);      // the shadow under the top's lip
+    sideBox(x, y, z + bh, dx, dy + oh, sl, W.top);
+    for (const f of [.3, .62]) poly([P(x, y + (dy + oh) * f, z + dz), P(x + dx, y + (dy + oh) * f, z + dz), P(x + dx, y + (dy + oh) * f + .014, z + dz), P(x, y + (dy + oh) * f + .014, z + dz)], tint(mix(W.top, [60, 36, 30], .25)), .35); };      // a little grain along the top      // gentler steps between the top and the two sides than other boxes have, by day and by night alike (MELO 2026-11-14)      // a box whose two sides you see are darkened as the walls are, its top left as it is; the sides' own colours are darkened, not laid over, so no light seam shows along their edges (MELO 2026-11-14)      // DN: by day all this darkening is a third lighter (MELO 2026-11-14)      // the two sides you see of a box, darkened as the walls are; its top left as it is (MELO 2026-11-14)      // the walls, the floor and the steps as dark as the library's (its TK .34 toward [22, 22, 60]; MELO 2026-11-14)
   const st = stall, X = SHOPX, Y = SHOPY, Hh = 3.8, top = 104;
   const bowlR = 0;
   // the room is fitted to the screen: as wide as it can be, or as tall, whichever is smaller. On a narrow phone it keeps a margin either side (down to 86% of the width at 330 px) so the order bubbles have somewhere to go.
@@ -1309,7 +1328,7 @@ function drawStall(t) {
       STOCK = [[[1.25, .14, .2, [214, 196, 160], 0, [150, 96, 70]], [1.55, .1, .24, [96, 140, 110], .1, [120, 84, 70]], [1.85, .16, .16, [206, 90, 80], 0, [232, 220, 196]], [2.5, .12, .22, [226, 210, 180], 0, [176, 110, 90]], [2.8, .09, .26, [150, 104, 84], .1, [230, 196, 140]], [3.15, .15, .14, [236, 200, 120], 0, [150, 104, 84]], [3.5, .11, .2, [120, 150, 180], 0, [236, 226, 206]]],
                [[1.3, .1, .22, [150, 96, 84], .1, [226, 196, 140]], [1.65, .15, .17, [236, 226, 206], 0, [206, 90, 80]], [2.0, .12, .2, [96, 150, 120], 0, [236, 226, 206]], [2.65, .09, .24, [200, 160, 110], .1, [120, 84, 70]], [3.0, .14, .15, [214, 96, 90], 0, [236, 226, 206]], [3.35, .1, .2, [226, 210, 180], .08, [150, 104, 84]], [3.65, .13, .16, [176, 200, 150], 0, [120, 84, 70]]]];      // jars and bottles on the two shelves; the left ends are behind the stove (MELO 2026-11-14)
     // no bottom board: under the top there is only the floor between the two end boards (MELO 2026-11-14)
-    bx(0, 0, 0, X, .6, 1 - CTD);      // solid again (MELO 2026-11-14: an open stand was tried)
+    woodBox(0, 0, 0, X, .6, 1 - CTD);      // solid again (MELO 2026-11-14: an open stand was tried)
     v.cy += CTD * s;      // everything on the counter, with its taps and rings, placed for a top at 1.0 and lowered with it
     { const jk = clamp(1 - (performance.now() - (st.jarTopAt || -1e9)) / 650), x = .22, y = .3, sway = .06 * jk * Math.sin(performance.now() / 30);      // a potted plant at the left end of the counter top, in place of the jars (MELO 2026-11-14); tapped, its leaves shake
       v.disc(x, y, 1.0, .15, .18, [196, 112, 82]); v.disc(x, y, 1.18, .17, .03, [214, 128, 96]); v.disc(x, y, 1.21, .13, 0, [96, 66, 52]);      // a terracotta pot with a lip, and its soil
@@ -1362,7 +1381,7 @@ function drawStall(t) {
   };
   const ow = st.owner, inFront = ow.y > PREP_Y1, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y PREP_Y1), beside its left end too; in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings in a row, the gaps between them even and the beef clear of the table's end (MELO 2026-11-14); no hint ring reaches the next thing along
-  sideBox(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, PREP_H, WOOD);      // solid (MELO 2026-11-14: an open stand was tried)
+  woodBox(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, PREP_H);      // solid (MELO 2026-11-14: an open stand was tried)
   const liftPrep = (PREP_H - 1) * s; v.cy -= liftPrep;      // everything on the table, with its taps and rings, drawn as if on a table 1.0 high and lifted to stand on this one
   hit('bowl', PREPX.bowl, 2.07, 1.08, .47); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(PREPX.bowl, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .34, s * .19, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, PREPX.bowl, 2.07, 1.03, .3, st.bowl); if (st.bowl.soup) steam(PREPX.bowl, 2.07, 1.11, 4); } ctx.restore();
   ring('bowl');
