@@ -1040,9 +1040,9 @@ function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
 // the stove and the prep table (MELO 2026-11-14): the stove is STOVE_W wide with its pots scaled by POT_K; the prep table starts a step's width past it and runs to the right wall.
 // Along it: the bowl (r .3), then chili and cilantro on boards of radius TOP_R, then the beef on a plate of radius BEEF_R, the gaps between them even
-const STOVE_W = 1, POTY1 = 1.5, POTY2 = 2.5, POT_K = .87, TOP_R = .22, BEEF_R = .22, LEGX0 = 3, LEG_Y0 = 1.0, POT_X = STOVE_W / 2, PREP0 = 2, LANE = (STOVE_W + PREP0) / 2, TOPK = TOP_R / .12, BEEFK = BEEF_R / .12;      // the beef plate is drawn at the toppings' first size too, so its chopped bits come out the same size as theirs
-const TABY = (1.6 + 2.6) / 2, BACKX = LEGX0 - .35, BEEF_Y = (LEG_Y0 + 1.6) / 2, PREPX = (() => { const g = (4 - PREP0 - .6 - 4 * TOP_R) / 4, b = PREP0 + g + .3, c = b + .3 + g + TOP_R, d = c + 2 * TOP_R + g; return { bowl: b, chili: c, cilantro: d, beef: (LEGX0 + 4) / 2 }; })();      // the prep table is an L (MELO 2026-11-14): the bowl, chili and cilantro spread evenly along the whole long arm, the beef on the short arm (at BEEF_Y), which (x LEGX0 to the wall, from LEG_Y0 to the table) turns back toward the serving board      // the same gap before the bowl, between each two, and after the beef
-const SPOT = { boil: [LANE, POTY1], scoop: [LANE, POTY1], put: [PREPX.bowl, 1.25], soup: [LANE, POTY2], chili: [Math.min(PREPX.chili, BACKX), 1.25], cilantro: [Math.min(PREPX.cilantro, BACKX), 1.25], beef: [BACKX, BEEF_Y], bowl: [PREPX.bowl, 1.25] };      // the beef, on the L's short arm, is reached from the lane beside it
+const STOVE_W = 1, POTY1 = 1.5, POTY2 = 2.5, POT_K = .87, TOP_R = .22, BEEF_R = .22, LEGX0 = 3, LEG_Y0 = 1.0, PREP_Y0 = 2, POT_X = STOVE_W / 2, PREP0 = 2, LANE = (STOVE_W + PREP0) / 2, TOPK = TOP_R / .12, BEEFK = BEEF_R / .12;      // the beef plate is drawn at the toppings' first size too, so its chopped bits come out the same size as theirs
+const TABY = PREP_Y0 + .5, BACKX = LEGX0 - .35, BEEF_Y = (LEG_Y0 + PREP_Y0) / 2, PREPX = (() => { const g = (4 - PREP0 - .6 - 4 * TOP_R) / 4, b = PREP0 + g + .3, c = b + .3 + g + TOP_R, d = c + 2 * TOP_R + g; return { bowl: b, chili: c, cilantro: d, beef: (LEGX0 + 4) / 2 }; })();      // the prep table is an L (MELO 2026-11-14): the bowl, chili and cilantro spread evenly along the whole long arm, the beef on the short arm (at BEEF_Y), which (x LEGX0 to the wall, from LEG_Y0 to the table) turns back toward the serving board      // the same gap before the bowl, between each two, and after the beef
+const SPOT = { boil: [LANE, POTY1], scoop: [LANE, POTY1], put: [PREPX.bowl, PREP_Y0 - .45], soup: [LANE, POTY2], chili: [Math.min(PREPX.chili, BACKX), PREP_Y0 - .45], cilantro: [Math.min(PREPX.cilantro, BACKX), PREP_Y0 - .45], beef: [BACKX, BEEF_Y], bowl: [PREPX.bowl, PREP_Y0 - .45] };      // the beef, on the L's short arm, is reached from the lane beside it
 const FLYC = { noodle: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
 const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; stall.leaving = false; stall.pend = null; } };
 // things done on arrival: walk over first, then open the board / drop what you carry in the bin
@@ -1123,14 +1123,14 @@ let WOODSTYLE = 1; const WOODS = [null,
   { body: [132, 92, 66], alt: [108, 72, 54], top: [156, 110, 78], seam: [70, 46, 38], slab: .06, oh: .03, panel: .75, kick: .07, kickc: [80, 54, 44] },      // 2 framed cabinet doors
   { body: [128, 88, 64], alt: [118, 80, 58], top: [164, 116, 82], seam: [66, 44, 36], slab: .07, oh: .03, planks: .17, kick: .07, kickc: [76, 52, 42] },      // 3 stacked horizontal boards
   { body: [90, 62, 50], alt: [108, 76, 58], top: [206, 168, 122], seam: [56, 38, 32], slab: .12, oh: .05, slats: .09, kick: .08, kickc: [60, 42, 36] }];      // 4 a pale hinoki top on dark slats      // WOOD: the prep table and the serving counter, a light mahogany that stands apart from the floor and the walls (MELO 2026-11-14)      // where the shop's one hanging lamp hangs
-const PREP_Y1 = 2.6, PREP_H = PREP_H0;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
-const BIN = [3.5, 3.4];      // the bin      // the bin
+const PREP_Y1 = PREP_Y0 + 1, PREP_H = PREP_H0;      // the prep table's front edge (it runs from y PREP_Y0 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
+const BIN = [3.5, 3.5];      // the bin      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
   if (y < LANE_Y0) return true;                                  // counter under the window, and a strip in front of it: standing closer, the chef's shadow fell on its front face
   if (x < STOVE_W + SM && y < 3.0 + SM) return true;                                // stove, and the sliver of floor behind it (the chef could slip along it into the corner left of the counter, drawn over the stove)
-  if (x > PREP0 - SM + 1e-9 && y > 1.6 - SM && y < PREP_Y1 + SM) return true;                // prep table
+  if (x > PREP0 - SM + 1e-9 && y > PREP_Y0 - SM && y < PREP_Y1 + SM) return true;                // prep table
   if (x > LEGX0 - SM && y > LEG_Y0 - SM && y < PREP_Y1 + SM) return true;      // its short arm
   if (Math.hypot(x - BIN[0], y - BIN[1]) < .26 + SM) return true;               // bin
   return false;
@@ -1392,8 +1392,8 @@ function drawStall(t) {
   };
   const ow = st.owner, inFront = ow.y > PREP_Y1, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y PREP_Y1), beside its left end too; in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings in a row, the gaps between them even and the beef clear of the table's end (MELO 2026-11-14); no hint ring reaches the next thing along
-  woodBox(LEGX0, LEG_Y0, 0, X - LEGX0, 1.6 - LEG_Y0, PREP_H);      // the L's short arm, back toward the serving board: behind the long arm, after the chef when the chef is in the lane beside it
-  woodBox(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, PREP_H);      // solid (MELO 2026-11-14: an open stand was tried)
+  woodBox(LEGX0, LEG_Y0, 0, X - LEGX0, PREP_Y0 - LEG_Y0, PREP_H);      // the L's short arm, back toward the serving board: behind the long arm, after the chef when the chef is in the lane beside it
+  woodBox(PREP0, PREP_Y0, 0, X - PREP0, PREP_Y1 - PREP_Y0, PREP_H);      // solid (MELO 2026-11-14: an open stand was tried)
   const liftPrep = (PREP_H - 1) * s; v.cy -= liftPrep;      // everything on the table, with its taps and rings, drawn as if on a table 1.0 high and lifted to stand on this one
   hit('bowl', PREPX.bowl, TABY, 1.08, .47); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(PREPX.bowl, TABY, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .34, s * .19, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, PREPX.bowl, TABY, 1.03, .3, st.bowl); if (st.bowl.soup) steam(PREPX.bowl, TABY, 1.11, 4); } ctx.restore();
   ring('bowl');
