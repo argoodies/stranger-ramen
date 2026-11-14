@@ -1326,7 +1326,7 @@ function drawStall(t) {
     g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, DK.width, DK.height); g.setTransform(m);
     g.fillStyle = 'rgb(14, 10, 34)'; path(boxHull(-.24, -.24, -.34, X, Y, Hh)); g.fill(); for (let k = 0; k < 3; k++) { path(boxHull(X / 2 - .5, Y + k * .32, -1.1, X / 2 + .5, Y + k * .32 + .32, -.26 * k)); g.fill(); }      // the room and its three steps (each step on its own, so the dark keeps to their shape)
     g.globalCompositeOperation = 'destination-out'; g.fillStyle = '#000';
-    g.filter = `blur(${Math.max(2, s * .22 * m.a)}px)`; path(boxHull(0, .62, 0, X, BIN[1] + .3, 2.1)); g.fill(); g.filter = 'none';      // the lit part, soft-edged and tall enough for the chef: the lane, the stove, the prep table and the floor in front of it out to the bin (MELO 2026-11-14: was the lane only)
+    g.filter = `blur(${Math.max(2, s * .22 * m.a)}px)`; path(boxHull(0, .62, 0, X, BIN[1] + .3, Hh)); g.fill(); g.filter = 'none';      // the lit part, soft-edged and up to the top of the walls (MELO 2026-11-14): the lane, the stove, the prep table and the floor in front of it out to the bin (MELO 2026-11-14: was the lane only)
     path([P(.5, 0, 1), P(3.55, 0, 1), P(3.55, 0, 2.8), P(.5, 0, 2.8)]); g.fill(); g.globalCompositeOperation = 'source-over';      // the window and the customers in it
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = .6; ctx.drawImage(DK, 0, 0); ctx.restore(); }      // drawn solid and laid over at .6, so where the room and the steps overlap it is no darker
   // things flying into the bowl
