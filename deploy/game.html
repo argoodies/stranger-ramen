@@ -1256,7 +1256,6 @@ function drawStall(t) {
   poly([P(.5, -.24, SILL), P(WINR, -.24, SILL), P(WINR, 0, SILL), P(.5, 0, SILL)], LW(SHOPC.top));      // the sill, seen past the board's right end
   poly([P(.5, -.24, SILL), P(.5, 0, SILL), P(.5, 0, 2.8), P(.5, -.24, 2.8)], LW(SHOPC.endX));      // the window's near side, in the wall's thickness: behind the board, in front of the customers (MELO 2026-11-14)
   board(CTY - CTW / 2, 0);      // the half of the board outside the window
-  { const z = SILL + BT, y0 = CTY - CTW / 2; poly([P(BRDR + y0 - .05, y0, z), P(BRDR - .05, 0, z), P(BRDR, 0, z), P(BRDR + y0, y0, z)], tint(mix(WOODS[1].top, [22, 22, 60], .2))); }      // where the board meets the window's right side: its end is cut along the line of sight, so it shows as an edge, up against the wall and not into it (MELO 2026-11-14)
   ctx.restore();
   // floor + walls
   const FT = lerp(.04, .16, G.n);      // the floor's shade: the coffee house's by night, a little warmer and lighter by day so it sits with the walls (MELO 2026-11-14)
@@ -1294,6 +1293,11 @@ function drawStall(t) {
       STOCK = [[[1.25, .14, .2, [214, 196, 160], 0, [150, 96, 70]], [1.55, .1, .24, [96, 140, 110], .1, [120, 84, 70]], [1.85, .16, .16, [206, 90, 80], 0, [232, 220, 196]], [2.5, .12, .22, [226, 210, 180], 0, [176, 110, 90]], [2.8, .09, .26, [150, 104, 84], .1, [230, 196, 140]], [3.15, .15, .14, [236, 200, 120], 0, [150, 104, 84]], [3.5, .11, .2, [120, 150, 180], 0, [236, 226, 206]]],
                [[1.3, .1, .22, [150, 96, 84], .1, [226, 196, 140]], [1.65, .15, .17, [236, 226, 206], 0, [206, 90, 80]], [2.0, .12, .2, [96, 150, 120], 0, [236, 226, 206]], [2.65, .09, .24, [200, 160, 110], .1, [120, 84, 70]], [3.0, .14, .15, [214, 96, 90], 0, [236, 226, 206]], [3.35, .1, .2, [226, 210, 180], .08, [150, 104, 84]], [3.65, .13, .16, [176, 200, 150], 0, [120, 84, 70]]]];      // jars and bottles on the two shelves; the left ends are behind the stove (MELO 2026-11-14)
     // no bottom board: under the top there is only the floor between the two end boards (MELO 2026-11-14)
+    { const jk = clamp(1 - (performance.now() - (st.jarTopAt || -1e9)) / 650), x = .26, y = .32, k = 1.5, sway = .06 * jk * Math.sin(performance.now() / 30);      // a potted plant on the floor in the far corner, left of the window (MELO 2026-11-14); tapped, its leaves shake
+      v.disc(x, y, 0, .15 * k, .18 * k, [196, 112, 82]); v.disc(x, y, .18 * k, .17 * k, .03 * k, [214, 128, 96]); v.disc(x, y, .21 * k, .13 * k, 0, [96, 66, 52]);      // a terracotta pot with a lip, and its soil
+      const c = P(x, y, .21 * k); ctx.save(); ctx.translate(c[0], c[1]); ctx.rotate(sway);
+      for (const [a, l, w, col] of [[-1.1, .42, .1, [74, 140, 86]], [-.5, .5, .11, [96, 168, 100]], [0, .55, .12, [84, 156, 92]], [.5, .48, .11, [110, 180, 110]], [1.05, .4, .1, [74, 140, 86]], [-.2, .36, .09, [126, 192, 118]], [.25, .38, .09, [100, 172, 104]]]) { ctx.save(); ctx.rotate(a * .55); ctx.fillStyle = css(col); ctx.beginPath(); ctx.ellipse(0, -l * k * s / 2, w * k * s, l * k * s / 2, 0, 0, TAU); ctx.fill(); ctx.restore(); }      // a fan of long leaves
+      ctx.restore(); const q = P(x, y, .6); HIT.jartop0 = [q[0], q[1], s * .45]; }
     { const c = WOODS[1].body, sc = WOODS[1].seam, n = 10; sideBox(.5, 0, 0, BRDR - .5, .04, SILL, c); for (let i = 1; i < n; i++) { const x = .5 + (BRDR - .5) * i / n; poly([P(x - .007, .04, 0), P(x + .007, .04, 0), P(x + .007, .04, SILL), P(x - .007, .04, SILL)], tint(mix(sc, [22, 22, 60], .1))); } }      // under the board, a wooden wainscot of upright boards (MELO 2026-11-14)
     board(0, CTY + CTW / 2);      // just a board through the window, on the wall (MELO 2026-11-14)      // between the doorway's two sides (MELO 2026-11-14)      // solid again (MELO 2026-11-14: an open stand was tried)
     v.cy += CTD * s;      // everything on the counter, with its taps and rings, placed for a top at 1.0 and lowered with it
