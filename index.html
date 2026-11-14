@@ -1206,7 +1206,7 @@ const ROOM_TOP = 104, roomB = N => N + .83, roomScale = (N, Hh) => Math.min(W / 
 function drawStall(t) {
   TK = 0; SHADOW = [80, 44, 60];
   skyNow(t, .15);
-  const DN = lerp(.65, 1, G.n), LT = c => mix(c, [22, 22, 60], .34 * DN), WN = lerp(.3, 1, G.n), LW = c => mix(c, [22, 22, 60], .18 * WN),      // LW: the walls, a little lighter than the floor, and by day lighter still (WN, MELO 2026-11-14)
+  const DN = lerp(.65, 1, G.n), LT = c => mix(c, [22, 22, 60], .34 * DN), WN = lerp(.3, 1, G.n), LW = c => mix(c, [22, 22, 60], .09 * WN),      // LW: the walls, a little lighter than the floor, and by day lighter still (WN, MELO 2026-11-14)
     sideBox = (x, y, z, dx, dy, dz, c) => { const sh0 = View.prototype.sh; v.sh = c2 => { const r = sh0.call(v, c2); return [r[0], mix(r[1], [22, 22, 60], .34 * DN), mix(r[2], [22, 22, 60], .34 * DN)]; }; v.box(x, y, z, dx, dy, dz, c); delete v.sh; };      // a box whose two sides you see are darkened as the walls are, its top left as it is; the sides' own colours are darkened, not laid over, so no light seam shows along their edges (MELO 2026-11-14)      // DN: by day all this darkening is a third lighter (MELO 2026-11-14)      // the two sides you see of a box, darkened as the walls are; its top left as it is (MELO 2026-11-14)      // the walls, the floor and the steps as dark as the library's (its TK .34 toward [22, 22, 60]; MELO 2026-11-14)
   const st = stall, X = SHOPX, Y = SHOPY, Hh = 3.8, top = 104;
   const bowlR = 0;
@@ -1239,7 +1239,7 @@ function drawStall(t) {
   const curtain = i => { const x0 = .56 + i * .6, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .56, 0, 2.8), P(x0 + .56, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); };
   for (let i = 0; i < 5; i++) curtain(i);
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
-  { const a = P(0, .6, Hh / 2), b = P(0, Y, Hh / 2), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, `rgba(22, 22, 60, ${.15 * WN})`);      // the side wall darkens from the serving counter toward the way out, as the floor does (MELO 2026-11-14)
+  { const a = P(0, .6, Hh / 2), b = P(0, Y, Hh / 2), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, `rgba(22, 22, 60, ${.08 * WN})`);      // the side wall darkens from the serving counter toward the way out, as the floor does (MELO 2026-11-14)
     poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], [0, 0, 0], 0); ctx.fillStyle = gr; ctx.fill(); }
   wallThick(v, X, Y, Hh, -.34, LW(SHOPC.top), LW(SHOPC.endX), LW(SHOPC.endY));      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
   { ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(3.55, 0, 1), P(3.55, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // the sill and the jamb are seen only through the opening (unclipped, the sill's far corner poked out over the wall at the lower right); the jamb runs its whole height, and the first door-cloth hangs in front of it
