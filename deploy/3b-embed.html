@@ -808,7 +808,7 @@ function drawBar(t) {
   if (!storyHook) objs.push({ k: -1e9, d: () => { const q = P(bar.x, bar.y); buffRings(q[0], q[1], s, t); } });      // the prophecies lie on the floor: drawn before anything standing in the room
   if (!storyHook) objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
     bar.lit = lerp(bar.lit || 0, clamp((1.1 - Math.hypot(bar.x, bar.y - 1.5)) / .3 + .5), .18);      // as in the library (MELO 2026-11-14): in the room's own shade, lit by the light from the door only when standing at it
-    const lc = mix([255, 196, 204], [255, 222, 160], nn), up = 1 - LIFT.bar * (1 - nn), lit = c => mix(mix(c, [22, 22, 60], .34), mix(c, lc, .14), bar.lit).map(x => x * up);      // his face dark and lit exactly as in the library (its shade, TK .34 toward [22, 22, 60]), and held back by as much as the daytime lift (roomLift, an exposure of 1 / up) will raise it (MELO 2026-11-14)
+    const lc = mix([255, 196, 204], [255, 222, 160], nn), lit = c => mix(c, mix(c, lc, .14), bar.lit);      // his face always in its own colours, as in the ramen shop: no shade, only the warm light near the lamp, and the daytime lift like the rest of the room (MELO 2026-11-14)
     if (bar.lit > .02) glow(q[0], q[1] - K * .6, K * 1.1, lc, .3 * bar.lit);
     fig(q[0], q[1] - hop, K, { kind: 'chef', floor: floorOf(v, [[0, 0, N, N, 0]]), apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) }); bar.at = q; } });
   if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
