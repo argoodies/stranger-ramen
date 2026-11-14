@@ -1029,7 +1029,7 @@ function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
 // the stove and the prep table (MELO 2026-11-14): the stove is STOVE_W wide with its pots scaled by POT_K; the prep table starts a step's width past it and runs to the right wall.
 // Along it: the bowl (r .3), then chili and cilantro on boards of radius TOP_R, then the beef on a plate of radius BEEF_R, the gaps between them even
-const STOVE_W = .9, POT_K = .87, TOP_R = .15, BEEF_R = .18, POT_X = STOVE_W / 2, LANE = Math.round((STOVE_W + .4) * 100) / 100, PREP0 = Math.round((STOVE_W + .6) * 100) / 100, TOPK = TOP_R / .12, BEEFK = BEEF_R / .15;
+const STOVE_W = .9, POT_K = .87, TOP_R = .18, BEEF_R = .18, POT_X = STOVE_W / 2, LANE = Math.round((STOVE_W + .4) * 100) / 100, PREP0 = Math.round((STOVE_W + .6) * 100) / 100, TOPK = TOP_R / .12, BEEFK = BEEF_R / .15;
 const PREPX = (() => { const b = PREP0 + .34, f = 4 - .12 - BEEF_R, g = (f - BEEF_R - b - .3 - 4 * TOP_R) / 3, c = b + .3 + g + TOP_R; return { bowl: b, chili: c, cilantro: c + 2 * TOP_R + g, beef: f }; })();
 const SPOT = { boil: [LANE, 1.6], scoop: [LANE, 1.6], put: [PREPX.bowl, 1.25], soup: [LANE, 2.6], chili: [PREPX.chili, 1.25], cilantro: [PREPX.cilantro, 1.25], beef: [PREPX.beef, 1.25], bowl: [PREPX.bowl, 1.25] };
 const FLYC = { noodle: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
@@ -1139,18 +1139,9 @@ function shopPath(from, to) {
 const SHOP_DOOR = [SHOPX / 2, SHOPY - .25];      // the steps out are in the middle of the front edge
 // tap an object in the shop
 const HIT = {};
-// the prep table is shared out among the four things on it: a tap on its top (not its side), or a little above its back edge (where the piles and the bowl's rim stand up)
-// takes the thing nearest along the table, the borders halfway between neighbours (MELO 2026-11-14). The bin's own body still wins where it overlaps
-function prepAt(x, y) {
-  const v = stall.V; if (!v) return null; const s = v.s, X = SHOPX;
-  let px = null; { const q = v.inv(x, y + s); if (q[0] > PREP0 && q[0] < X && q[1] > 1.6 - .3 && q[1] < 2.55) px = q[0]; }      // on the top (z 1), or just behind it
-  if (px == null) return null;
-  const K = ['bowl', 'chili', 'cilantro', 'beef']; for (let i = 0; i < 3; i++) if (px < (PREPX[K[i]] + PREPX[K[i + 1]]) / 2) return K[i]; return 'beef';
-}
 function stallPick(x, y) {
   let best = null, bd = 1e9;
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
-  const pk = prepAt(x, y); if (pk && !(best === 'bin' && bd < 1)) best = pk;
   return best;
 }
 function stallTap(x, y) {
@@ -1290,7 +1281,7 @@ function drawStall(t) {
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   // counter under the window, with the bowls already served
   // the hint is a pulsing ring lying on the rim of the thing to touch next. Each ring is drawn straight after its own thing, so whatever stands in front of that thing (the soup ladle before the noodle pot, the owner before a bowl) also stands in front of its ring
-  const hk = hintKey(), RIM = { pot: [POT_X, 1.6, 1.52, .46], soup: [POT_X, 2.6, 1.52, .46], bowl: [PREPX.bowl, 2.07, 1.075, .3], chili: [PREPX.chili, 2.07, 1.17, .12], cilantro: [PREPX.cilantro, 2.07, 1.17, .12], beef: [PREPX.beef, 2.07, 1.08, .15], bin: [BIN[0], BIN[1], .55, .26], bar: [3.55, .3, 1.062, .28] }, rimOf = k => RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], .3, 1.045, .22] : null);
+  const hk = hintKey(), RIM = { pot: [POT_X, 1.6, 1.52, .46], soup: [POT_X, 2.6, 1.52, .46], bowl: [PREPX.bowl, 2.07, 1.075, .3], chili: [PREPX.chili, 2.07, 1.08, .12], cilantro: [PREPX.cilantro, 2.07, 1.08, .12], beef: [PREPX.beef, 2.07, 1.08, .15], bin: [BIN[0], BIN[1], .55, .26], bar: [3.55, .3, 1.062, .28] }, rimOf = k => RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], .3, 1.045, .22] : null);
   const ring = k => { const rim = hk === k && rimOf(k); if (!rim) return; const pulse = Math.sin(t * 5), c = P(rim[0], rim[1], rim[2]), g = 1.12 + .04 * pulse; ctx.strokeStyle = css([255, 236, 170], .6 + .35 * pulse); ctx.lineWidth = Math.max(2.5, s * .06); ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(c[0], c[1], rim[3] * s * 1.2247 * g, rim[3] * s * .707 * g, 0, 0, TAU); ctx.stroke(); };
   v.box(.5, 0, 0, X - .5, .6, 1.0, [176, 124, 96]);
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
@@ -1336,10 +1327,10 @@ function drawStall(t) {
   v.box(PREP0, 1.6, 0, X - PREP0, .95, 1.0, [150, 108, 88]);
   hit('bowl', PREPX.bowl, 2.07, 1.08, .47); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(PREPX.bowl, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .34, s * .19, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, PREPX.bowl, 2.07, 1.03, .3, st.bowl); if (st.bowl.soup) steam(PREPX.bowl, 2.07, 1.11, 4); } ctx.restore();
   ring('bowl');
-  { const x = PREPX.chili; hit('chili', x, 2.07, 1 + .15 * TOPK, .26 * TOPK); ctx.save(); ctx.translate(wob('chili'), 0); grow(x, 2.07, 1.0, TOPK);
-  v.disc(x, 2.07, 1.0, .12, .15, [196, 160, 120]); ring('chili'); pile(x, 1.15, 22, (i, a) => { ctx.rotate(a * 1.3); ctx.strokeStyle = css([[214, 48, 44], [190, 36, 40], [232, 80, 56]][i % 3]); ctx.lineWidth = s * .011; ctx.beginPath(); ctx.ellipse(0, 0, s * .019, s * .013, 0, 0, TAU); ctx.stroke(); }); ctx.restore(); }      // chopped chili: little red rings, hollow in the middle, heaped on a wooden board
-  { const x = PREPX.cilantro; hit('cilantro', x, 2.07, 1 + .15 * TOPK, .26 * TOPK); ctx.save(); ctx.translate(wob('cilantro'), 0); grow(x, 2.07, 1.0, TOPK);
-  v.disc(x, 2.07, 1.0, .12, .15, [196, 160, 120]); ring('cilantro'); pile(x, 1.15, 26, (i, a) => { ctx.rotate(a * 1.7); ctx.fillStyle = css([[96, 186, 106], [62, 152, 86], [120, 200, 112], [74, 166, 92]][i % 4]); ctx.beginPath(); ctx.ellipse(0, 0, s * .026, s * .014, 0, 0, TAU); ctx.fill(); }); ctx.restore(); }      // chopped cilantro: little leaves, heaped the same way
+  { const x = PREPX.chili; hit('chili', x, 2.07, 1 + .08 * TOPK, .26 * TOPK); ctx.save(); ctx.translate(wob('chili'), 0); grow(x, 2.07, 1.0, TOPK);
+  v.disc(x, 2.07, 1.0, .12, .06, [196, 160, 120]); ring('chili'); pile(x, 1.06, 22, (i, a) => { ctx.rotate(a * 1.3); ctx.strokeStyle = css([[214, 48, 44], [190, 36, 40], [232, 80, 56]][i % 3]); ctx.lineWidth = s * .011; ctx.beginPath(); ctx.ellipse(0, 0, s * .019, s * .013, 0, 0, TAU); ctx.stroke(); }); ctx.restore(); }      // chopped chili: little red rings, hollow in the middle, heaped on a wooden board
+  { const x = PREPX.cilantro; hit('cilantro', x, 2.07, 1 + .08 * TOPK, .26 * TOPK); ctx.save(); ctx.translate(wob('cilantro'), 0); grow(x, 2.07, 1.0, TOPK);
+  v.disc(x, 2.07, 1.0, .12, .06, [196, 160, 120]); ring('cilantro'); pile(x, 1.06, 26, (i, a) => { ctx.rotate(a * 1.7); ctx.fillStyle = css([[96, 186, 106], [62, 152, 86], [120, 200, 112], [74, 166, 92]][i % 4]); ctx.beginPath(); ctx.ellipse(0, 0, s * .026, s * .014, 0, 0, TAU); ctx.fill(); }); ctx.restore(); }      // chopped cilantro: little leaves, heaped the same way
   { const x = PREPX.beef; hit('beef', x, 2.07, 1 + .1 * BEEFK, .3 * BEEFK); ctx.save(); ctx.translate(wob('beef'), 0); grow(x, 2.07, 1.0, BEEFK);
   v.disc(x, 2.07, 1.0, .15, .07, [236, 238, 248]); ring('beef'); { const p = P(x, 2.07, 1.09); for (let i = 0; i < 3; i++) { ctx.save(); ctx.translate(p[0] + (i - 1) * s * .068, p[1] - i * s * .019); ctx.rotate(-.5); ctx.fillStyle = css([150, 86, 62]); rrect(-s * .09, -s * .038, s * .18, s * .075, s * .03); ctx.fill(); ctx.fillStyle = css([190, 124, 96]); rrect(-s * .06, -s * .013, s * .12, s * .023, s * .01); ctx.fill(); ctx.restore(); } } ctx.restore(); }
   if (inFront && !binFirst) drawOwner();
