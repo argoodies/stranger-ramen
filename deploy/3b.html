@@ -1246,7 +1246,7 @@ const ROOM_TOP = 104, roomB = N => N + .83, roomScale = (N, Hh) => Math.min(W / 
 function drawStall(t) {
   TK = 0; SHADOW = [80, 44, 60];
   skyNow(t, .15);
-  const LT = c => mix(c, [22, 22, 60], .34), sideDark = (x, y, z, dx, dy, dz) => { poly([P(x, y + dy, z), P(x + dx, y + dy, z), P(x + dx, y + dy, z + dz), P(x, y + dy, z + dz)], [22, 22, 60], .34); poly([P(x + dx, y, z), P(x + dx, y + dy, z), P(x + dx, y + dy, z + dz), P(x + dx, y, z + dz)], [22, 22, 60], .34); };      // the two sides you see of a box, darkened as the walls are; its top left as it is (MELO 2026-11-14)      // the walls, the floor and the steps as dark as the library's (its TK .34 toward [22, 22, 60]; MELO 2026-11-14)
+  const DN = lerp(.65, 1, G.n), LT = c => mix(c, [22, 22, 60], .34 * DN), sideDark = (x, y, z, dx, dy, dz) => { poly([P(x, y + dy, z), P(x + dx, y + dy, z), P(x + dx, y + dy, z + dz), P(x, y + dy, z + dz)], [22, 22, 60], .34 * DN); poly([P(x + dx, y, z), P(x + dx, y + dy, z), P(x + dx, y + dy, z + dz), P(x + dx, y, z + dz)], [22, 22, 60], .34 * DN); };      // DN: by day all this darkening is a third lighter (MELO 2026-11-14)      // the two sides you see of a box, darkened as the walls are; its top left as it is (MELO 2026-11-14)      // the walls, the floor and the steps as dark as the library's (its TK .34 toward [22, 22, 60]; MELO 2026-11-14)
   const st = stall, X = SHOPX, Y = SHOPY, Hh = 3.8, top = 104;
   const bowlR = 0;
   // the room is fitted to the screen: as wide as it can be, or as tall, whichever is smaller. On a narrow phone it keeps a margin either side (down to 86% of the width at 330 px) so the order bubbles have somewhere to go.
@@ -1275,7 +1275,7 @@ function drawStall(t) {
     ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, LT(C.seam));
     for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, LT(h(r, x) < .5 ? C.plank1 : C.plank2));
     ctx.restore(); }
-  { const a = P(X / 2, .6, 0), b = P(X / 2, Y, 0), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, 'rgba(22, 22, 60, .25)');      // the floor darkens little by little from the serving counter to the way out (MELO 2026-11-14)
+  { const a = P(X / 2, .6, 0), b = P(X / 2, Y, 0), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, `rgba(22, 22, 60, ${.25 * DN})`);      // the floor darkens little by little from the serving counter to the way out (MELO 2026-11-14)
     poly([P(0, 0), P(X, 0), P(X, Y), P(0, Y)], [0, 0, 0], 0); ctx.fillStyle = gr; ctx.fill(); }
   const wallB = LT(SHOPC.wallB), wallA = LT(SHOPC.wallA);
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
@@ -1294,8 +1294,8 @@ function drawStall(t) {
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
   // the way out: a few steps going down from the middle of the front edge
   { const ew = 1.0, ex = X / 2 - ew / 2;
-    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], mix(SHOPC.edgeL, [22, 22, 60], .6)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], mix(SHOPC.edgeR, [22, 22, 60], .6));      // the floor's sides all dark (MELO 2026-11-14)
-    const tint0 = TINT; TK = .46; TINT = [22, 22, 60]; for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step); TK = 0; TINT = tint0;
+    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], mix(SHOPC.edgeL, [22, 22, 60], .6 * DN)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], mix(SHOPC.edgeR, [22, 22, 60], .6 * DN));      // the floor's sides all dark (MELO 2026-11-14)
+    const tint0 = TINT; TK = .46 * DN; TINT = [22, 22, 60]; for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step); TK = 0; TINT = tint0;
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   { const q = P(st.owner.x, st.owner.y); buffRings(q[0], q[1], s, t); }      // the prophecies on the floor, before the counter, the stove, the table and the bin
   // counter under the window, with the bowls already served
