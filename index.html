@@ -2381,7 +2381,7 @@ function drawChurch(t, dt) {
   // inlaid in the flagstones: a ring, a square and a diamond in gold
   const past = c.story && c.storyIn && c.story.i >= 0;      // the church in the story, years ago: no torch and no ring of gold for the fight
   if (!past) { const cx = 8, q = P(cx, my), r = s * 2.3 * 1.22; ctx.lineWidth = Math.max(1.2, s * .04); ctx.strokeStyle = css(GOLD, .7);
-    loop([[cx - 2.3, my - 2.3], [cx + 2.3, my - 2.3], [cx + 2.3, my + 2.3], [cx - 2.3, my + 2.3]]); ctx.stroke();
+    loop([[cx - 3.2, my], [cx, my - 3.2], [cx + 3.2, my], [cx, my + 3.2]]); ctx.stroke(); loop([[cx - 2.3, my - 2.3], [cx + 2.3, my - 2.3], [cx + 2.3, my + 2.3], [cx - 2.3, my + 2.3]]); ctx.stroke();
     ctx.beginPath(); ctx.ellipse(q[0], q[1], r, r * .577, 0, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.ellipse(q[0], q[1], r * .5, r * .5 * .577, 0, 0, TAU); ctx.fillStyle = css([255, 240, 214], .5); ctx.fill(); ctx.stroke(); }
   poly([P(2.2, my - .6), P(CL, my - .6), P(CL, my + .6), P(2.2, my + .6)], tn([214, 128, 140]), .92); for (const y of [my - .5, my + .5]) line([P(2.2, y), P(CL, y)], GOLD, s * .03, .9);
   // the two walls: cream stone, a gold cornice, tall stained glass between slim pilasters
