@@ -1304,7 +1304,7 @@ function drawStall(t) {
     v.box(.02 + jr, y0, 0, d, .06, H, wd);
     [.06, .55, 1.04, H - .05].forEach((z, r) => { v.box(.02 + jr, y0 + .06, z, d, y1 - y0 - .12, .05, wd);
       if (r < 3) for (let k = 0; k < 4 - (r % 2); k++) { const y = y0 + .14 + k * .27 + (r % 2) * .12; v.box(.1 + jr, y, z + .05, .22, .18, .2 - (k + r) % 2 * .05, [[236, 226, 206], [170, 120, 90], [214, 180, 120]][(k + r) % 3]); }      // little tins and boxes, as on the coffee house shelf
-      v.box(d - .02 + jr, y0 + .06, z + .05, .04, y1 - y0 - .12, .06, [150, 106, 82]); });
+      if (r < 3) v.box(d - .02 + jr, y0 + .06, z + .05, .04, y1 - y0 - .12, .06, [150, 106, 82]); });      // the lip only on the shelves, not on the top (it stuck up above the sides there)
     v.box(.02 + jr, y1 - .06, 0, d, .06, H, wd); hit('rack', .3, 4.2, .9, .7); }
   // the owner (always behind the prep table)
   const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05;
