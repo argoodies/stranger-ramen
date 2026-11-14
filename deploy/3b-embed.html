@@ -1059,7 +1059,7 @@ function hintKey() {
   return null;
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
-const SHOPX = 5, SHOPY = 5;      // the shop's floor: a square, 5 by 5 (MELO, 2026-11-14; was 5 x 3.6), a bowl cabinet (decoration) in its left corner
+const SHOPX = 5, SHOPY = 5;      // the shop's floor: a square, 5 by 5 (MELO, 2026-11-14; was 5 x 3.6), the steps out in the middle of the front edge with a plain rug before them
 const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2;
 function shopBlocked(x, y) {
@@ -1068,8 +1068,6 @@ function shopBlocked(x, y) {
   if (x < 1.2 + SM && y > 1.0 - SM && y < 3.2 + SM) return true;                 // stove
   if (x > 1.9 - SM && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
   if (Math.hypot(x - 4.45, y - 3.0) < .26 + SM) return true;                     // bin
-  if (x < 1.2 + SM && y > 3.55 - SM && y < 4.85 + SM) return true;                // the bowl cabinet in the left corner, as deep as the stove
-  if (Math.hypot(x - 4.3, y - 4.3) < .36 + SM) return true;                       // the little round table in the right corner
   return false;
 }
 const sgFree = (i, j) => i >= 0 && j >= 0 && i < SGX && j < SGY && !shopBlocked(i * SG, j * SG);
@@ -1093,7 +1091,7 @@ function shopPath(from, to) {
   if (!shopBlocked(to[0], to[1]) && clear(out[out.length - 1], to)) out.push(to);
   return out.slice(1);
 }
-const SHOP_DOOR = [1.8, SHOPY - .25];
+const SHOP_DOOR = [SHOPX / 2, SHOPY - .25];      // the steps out are in the middle of the front edge
 // tap an object in the shop
 const HIT = {};
 function stallTap(x, y) {
@@ -1108,12 +1106,11 @@ function stallTap(x, y) {
   if (best === 'exit') { if (h) { ok = false; } else { s.owner.tx = SHOP_DOOR[0]; s.owner.ty = SHOP_DOOR[1]; s.pend = null; s.leaving = true; chime(69, 0, .1, .8); return; } }
   else if (best === 'pot') ok = h === 'noodle' ? false : s.pot === 'empty' ? act('boil') : grab('noodle');
   else if (ING.includes(best)) { if (h === best) { setHold(null); chime(57, 0, .1, .6); ok = true; } else { if (MORE.includes(h)) setHold(null); ok = grab(best); } }      // holding another topping: it goes back and this one is taken up
-  else if (best === 'cabinet') { s.cabAt = performance.now(); return; }      // the bowl cabinet only rocks, without a sound
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
   else if (best === 'bin') { if (h) { goDo('dump', 3.8, 3.05); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 4.45, .95); if (!s.myBowl) chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }      // going to eat your own bowl: no tap chime, only the eating notes
   else if (best === 'jars') { s.jarAt = performance.now(); return; }
-  else if (best === 'rtable') { s.tableAt = performance.now(); return; }      // the round table only rocks, without a sound      // empty jars: they only rattle, without a sound
+      // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.noodle && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), .95); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
   if (!ok) { s.nope = s.hold === 'bowl' ? 'own' : best; s.nopeT = 0.35; chime(45, 0, .1, .3); }      // a bowl that cannot go there: it is the bowl in your hands that trembles
@@ -1213,11 +1210,8 @@ function drawStall(t) {
     ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, C.seam);
     for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, h(r, x) < .5 ? C.plank1 : C.plank2);
     ctx.restore(); }
-  { const x0 = 1.35, x1 = 3.65, y0 = 3.45, y1 = 4.85, R = (a, b, c, d, col) => poly([P(a, b, .004), P(c, b, .004), P(c, d, .004), P(a, d, .004)], col), M = (cx, cy, rx, ry, col) => poly([P(cx - rx, cy, .004), P(cx, cy - ry, .004), P(cx + rx, cy, .004), P(cx, cy + ry, .004)], col);      // a big rug on the floor in front of the steps out: red, a cream border, an indigo diamond in the middle, fringes at both ends
-    for (let y = y0 + .06; y < y1 - .02; y += .09) { line([P(x0, y, .004), P(x0 - .09, y, .004)], [236, 214, 170], Math.max(1, s * .02)); line([P(x1, y, .004), P(x1 + .09, y, .004)], [236, 214, 170], Math.max(1, s * .02)); }
-    R(x0, y0, x1, y1, [172, 60, 58]); R(x0 + .1, y0 + .1, x1 - .1, y1 - .1, [236, 214, 170]); R(x0 + .16, y0 + .16, x1 - .16, y1 - .16, [172, 60, 58]);
-    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2; M(cx, cy, .72, .42, [236, 214, 170]); M(cx, cy, .64, .35, [70, 76, 128]); M(cx, cy, .3, .16, [236, 214, 170]); M(cx, cy, .22, .1, [172, 60, 58]);
-    for (const [px, py] of [[x0 + .3, y0 + .3], [x1 - .3, y0 + .3], [x0 + .3, y1 - .3], [x1 - .3, y1 - .3]]) M(px, py, .1, .1, [70, 76, 128]); }
+  { const x0 = 1.4, x1 = 3.6, y0 = 3.5, y1 = 4.85, R = (a, b, c, d, col) => poly([P(a, b, .004), P(c, b, .004), P(c, d, .004), P(a, d, .004)], col);      // a big plain rug in front of the steps out: oatmeal, with one quiet band of red-brown inside its edge
+    R(x0, y0, x1, y1, [212, 194, 166]); R(x0 + .1, y0 + .1, x1 - .1, y1 - .1, [158, 100, 84]); R(x0 + .15, y0 + .15, x1 - .15, y1 - .15, [212, 194, 166]); }
   const wallB = SHOPC.wallB, wallA = SHOPC.wallA;
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(4.5, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(4.5, 0, 2.8)], wallB);
@@ -1232,8 +1226,8 @@ function drawStall(t) {
     v.box(0, yc - .46, z0, .3, .92, .06, [176, 128, 96]);
     J(-.34, .16, .2, [236, 226, 206], 0, [176, 110, 90]); J(-.13, .12, .24, [96, 150, 120], .12, [120, 84, 70]); J(.06, .15, .15, [214, 96, 90], 0, [236, 226, 206]); J(.25, .11, .2, [150, 104, 84], .1, [226, 196, 140]); J(.39, .1, .12, [240, 200, 120], 0, [150, 104, 84]);
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
-  // the way out: a mat, then a few steps going down and out at the lower left
-  { const ex = 1.3, ew = 1.0;
+  // the way out: a few steps going down from the middle of the front edge
+  { const ew = 1.0, ex = X / 2 - ew / 2;
     poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], SHOPC.edgeL); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], SHOPC.edgeR);
     for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step);
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
@@ -1263,11 +1257,6 @@ function drawStall(t) {
   v.disc(.6, 2.6, 1.0, .46, .5, [170, 176, 196]); v.disc(.6, 2.6, 1.5, .4, 0, [226, 160, 84]);
   ring('soup'); const lp = P(.86, 2.42, 1.55); line([lp, [lp[0] + s * .3, lp[1] - s * .5]], [150, 110, 90], s * .05); ctx.restore();
   for (let i = 0; i < 6; i++) { const act_ = (i % 2 === 0) ? (st.pot === 'cooking' ? 1 : st.pot === 'done' ? .7 : .3) : .5, ph = (t * .5 * (act_ + .4) + i * .17) % 1, p = P(.6 + .2 * Math.sin(t * 1.3 + i * 2), i % 2 ? 2.6 : 1.6, 1.6 + ph * 1.5); circ(p[0], p[1], s * (.08 + .15 * ph), [255, 250, 245], .28 * act_ * (1 - ph)); }
-  // the bowl cabinet in the left corner, as deep as the stove so their fronts line up: only a decoration, a tap rocks it for a moment, silently
-  { const jc = .035 * clamp(1 - (performance.now() - (st.cabAt || -1e9)) / 650) * Math.sin(performance.now() / 22);
-    v.box(jc, 3.55, 0, 1.2, 1.3, 1.1, [168, 120, 92]);
-    for (const [y0, y1] of [[3.65, 4.17], [4.23, 4.75]]) poly([P(1.2 + jc, y0, .12), P(1.2 + jc, y1, .12), P(1.2 + jc, y1, .98), P(1.2 + jc, y0, .98)], [128, 88, 70]);      // its two doors
-    hit('cabinet', .6, 4.2, .9, .7); }
   // the owner (always behind the prep table)
   const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05;
   const drawOwner = () => {
@@ -1298,10 +1287,7 @@ function drawStall(t) {
   // bin for a bowl gone wrong
   hit('bin', 4.45, 3.0, .35, .42); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(4.45, 3.0, 0, .26, .55, [120, 132, 150]); v.disc(4.45, 3.0, .55, .21, 0, [50, 44, 70]); ctx.restore();
   ring('bin');
-  // a little round table in the right corner, bare, as in the bar: a tap only rocks it, silently. The owner standing nearer the front than it (between it and the room's front edges) is drawn over it, else it over him
-  const drawTable = () => { const jt = .035 * clamp(1 - (performance.now() - (st.tableAt || -1e9)) / 650) * Math.sin(performance.now() / 22);
-    v.disc(4.3, 4.3, 0, .16, .04, [96, 66, 54]); v.box(4.26 + jt, 4.26, .04, .08, .08, .62, [110, 76, 60]); v.disc(4.3 + jt, 4.3, .66, .36, .06, [176, 124, 90]); hit('rtable', 4.3, 4.3, .55, .5); };
-  if (binFirst && ow.x + ow.y > 4.3 + 4.3) { drawTable(); drawOwner(); } else { if (binFirst) drawOwner(); drawTable(); }
+  if (binFirst) drawOwner();
   // one hanging lamp, over the middle of the room
   for (const lx of [3.6]) { const a = P(lx, 1.3, Hh + .6), b = P(lx, 1.3, 3.2); line([a, b], [70, 52, 92], 1.5); glow(b[0], b[1] + s * .15, s * 1.7, [255, 214, 140], .5); poly([[b[0] - s * .22, b[1] + s * .16], [b[0] + s * .22, b[1] + s * .16], [b[0], b[1] - s * .12]], [226, 106, 96]); circ(b[0], b[1] + s * .18, s * .07, [255, 240, 190]); }
   // a hint for something that has no rim of its own: a plain ring round where it is tapped
