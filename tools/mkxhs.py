@@ -37,7 +37,7 @@ must('<script src' not in html and 'onclick=' not in html, 'unexpected script re
 scripts = [m.group(1) for m in blocks]
 for k, js in enumerate(scripts):      # storage through the boot shim
     n = js.count('localStorage.')
-    js = js.replace('localStorage.getItem(', '__kv.getItem(').replace('localStorage.setItem(', '__kv.setItem(')
+    js = js.replace('localStorage.getItem(', '__kv.getItem(').replace('localStorage.setItem(', '__kv.setItem(').replace('localStorage.clear(', '__kv.clear(')      # clear: the developer's wipe of all local data
     must('localStorage' not in js, f'app{k + 1}: a localStorage use the shim does not cover')
     for key in re.findall(r"__kv\.\w+\('([^']+)'", js): must(key in KEYS, f'unknown storage key {key}')
     scripts[k] = js.replace("'inset:0;", "'top:0;right:0;bottom:0;left:0;").replace(';inset:0;', ';top:0;right:0;bottom:0;left:0;')
@@ -78,7 +78,9 @@ BOOT = r"""/* boot: the saved game comes from the mini-tool Storage JS API when 
   }
   window.__kv = {
     getItem: function (k) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
-    setItem: function (k, v) { v = String(v); mem[k] = v; put(k, v); }
+    setItem: function (k, v) { v = String(v); mem[k] = v; put(k, v); },
+    clear: function () { KEYS.forEach(function (k) { delete mem[k]; quiet(function () { localStorage.removeItem(k); });      /* the developer's wipe: every saved key, in both stores */
+      if (useApi) { var p = quiet(function () { return mt().setStorage({ key: k, data: JSON.stringify(null) }); }); if (p && p.then) p.then(null, function () {}); } }); }
   };
   function start() {
     if (started) return; started = true; var i = 0;
