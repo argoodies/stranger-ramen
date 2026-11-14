@@ -1071,7 +1071,7 @@ function hintKey() {
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
-const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
+const SHOPC = { wallB: [150, 110, 96], wallA: [132, 96, 86], top: [110, 80, 72], endX: [96, 70, 64], endY: [86, 62, 58], edgeL: [120, 84, 66], edgeR: [100, 70, 58], step: [176, 128, 104] };      // the shop's colours, matched to the coffee house (MELO 2026-11-14): the two walls, the wall tops and ends, the floor's front edges, the steps
 const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
@@ -1224,17 +1224,15 @@ function drawStall(t) {
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
   ctx.restore();
-  // floor + walls
-  { const C = SHOPC, h = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); }, Q = (x0, y0, x1, y1, c) => poly([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)], c), w = .28, L = 1.7, e = .018;      // long cherry-brown planks along the window wall, staggered (MELO, 2026-11-14; was big square tiles)
-    ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, C.seam);
-    for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, h(r, x) < .5 ? C.plank1 : C.plank2);
-    ctx.restore(); }
+  // floor + walls: the same dark checker planks and timber walls as the coffee house (MELO, 2026-11-14; was long cherry planks and cream walls)
+  for (let i = 0; i < X; i++) for (let j = 0; j < Y; j++) v.quad(i, j, 0, 1, 1, (i + j) % 2 ? [150, 104, 84] : [164, 116, 92]);
   const wallB = SHOPC.wallB, wallA = SHOPC.wallA;
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(3.55, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(3.55, 0, 2.8)], wallB);
   const curtain = i => { const x0 = .56 + i * .6, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .56, 0, 2.8), P(x0 + .56, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); };
   for (let i = 0; i < 5; i++) curtain(i);
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
+  for (let k = 1; k < 8; k++) { const x = k * X / 8; if (x > .5 && x < 3.55) { line([P(x, 0, 0), P(x, 0, 1)], [122, 88, 78], 1, .6); line([P(x, 0, 2.8), P(x, 0, Hh)], [122, 88, 78], 1, .6); } else line([P(x, 0, 0), P(x, 0, Hh)], [122, 88, 78], 1, .6); line([P(0, k * Y / 8, 0), P(0, k * Y / 8, Hh)], [110, 80, 72], 1, .6); }      // timber boards, broken by the serving window
   wallThick(v, X, Y, Hh, -.34, SHOPC.top, SHOPC.endX, SHOPC.endY);      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
   { ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(3.55, 0, 1), P(3.55, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // the sill and the jamb are seen only through the opening (unclipped, the sill's far corner poked out over the wall at the lower right); the jamb runs its whole height, and the first door-cloth hangs in front of it
     poly([P(.5, -.24, 1), P(3.55, -.24, 1), P(3.55, 0, 1), P(.5, 0, 1)], SHOPC.top); poly([P(.5, -.24, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(.5, -.24, 2.8)], SHOPC.endX); ctx.restore(); curtain(0); }
