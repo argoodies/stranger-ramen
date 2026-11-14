@@ -1238,7 +1238,7 @@ function drawStall(t) {
     ctx.restore(); }
   { const a = P(X / 2, .6, 0), b = P(X / 2, Y, 0), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, `rgba(22, 22, 60, ${.25 * DN})`);      // the floor darkens little by little from the serving counter to the way out (MELO 2026-11-14)
     poly([P(0, 0), P(X, 0), P(X, Y), P(0, Y)], [0, 0, 0], 0); ctx.fillStyle = gr; ctx.fill(); }
-  const wallB = mix(LW(SHOPC.wallB), [255, 248, 236], .16 * (1 - G.n)), wallA = LW(SHOPC.wallA);      // the right-hand wall, with the window, a little lighter again by day (MELO 2026-11-14)
+  const wallB = mix(LW(SHOPC.wallB), [255, 248, 236], .08 * (1 - G.n)), wallA = LW(SHOPC.wallA);      // the right-hand wall, with the window, a little lighter again by day (MELO 2026-11-14)
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(3.55, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(3.55, 0, 2.8)], wallB);
   const curtain = i => { const x0 = .56 + i * .6, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .56, 0, 2.8), P(x0 + .56, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); };
