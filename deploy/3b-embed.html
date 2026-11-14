@@ -1406,8 +1406,9 @@ function boardUp() {
   if (d.moved) { settleBadges(d.id); settleBadges(null); knock(); saveNow(); } else { st.tip = st.tip === d.id ? null : d.id; chime(76, 0, .12, .9); }
 }
 function bowlTopMini(x, y, r, b) {
-  ell(x, y, r, r * .58, [236, 238, 248]); ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, b.soup ? [226, 160, 84] : [248, 246, 240]);
-  if (b.soup && (b.chiliN || 0) >= 3) ell(x, y, r * .78, r * .45, [214, 72, 40], .45);      // three sprinkles of chili or more: red oil spreads over the soup
+  ell(x, y, r, r * .58, [236, 238, 248]);
+  if (b.soup) ell(x, y, r * .91, r * .53, [226, 160, 84]); else { ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, [248, 246, 240]); }      // the soup comes up over the red band inside the rim, only the white lip left showing
+  if (b.soup && (b.chiliN || 0) >= 3) ell(x, y, r * .91, r * .53, [214, 72, 40], .45);      // three sprinkles of chili or more: red oil spreads over the soup
   if (b.noodle) {      // the noodles, Monument Valley flat: a pale oval lit from above in two flat tones, coiled by three smooth concentric arcs
     const nx = r * .5, ny = r * .28;
     ell(x, y, nx, ny, [236, 194, 118]);
