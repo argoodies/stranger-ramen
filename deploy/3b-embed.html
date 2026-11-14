@@ -1099,10 +1099,24 @@ function shopPath(from, to) {
 const SHOP_DOOR = [SHOPX / 2, SHOPY - .25];      // the steps out are in the middle of the front edge
 // tap an object in the shop
 const HIT = {};
-function stallTap(x, y) {
-  if (stall.oracle && stall.oracleAt && Math.hypot(x - stall.oracleAt[0], y - stall.oracleAt[1]) < 30) { if (stall.hold) return; goDo('oracle', 3.5, .95); chime(69, 0, .08, .7); return; }      // the prophecy mark: walk over to it (where you eat your own bowl), then it is yours
+// the prep table is shared out among the four things on it: a tap on its top, its front face, or a little above its back edge (where the piles and the bowl's rim stand up)
+// takes the thing nearest along the table, the borders halfway between neighbours (MELO 2026-11-14). The bin's own body still wins over the table's front edge
+function prepAt(x, y) {
+  const v = stall.V; if (!v) return null; const s = v.s, X = SHOPX;
+  let px = null; { const q = v.inv(x, y + s); if (q[0] > PREP0 && q[0] < X && q[1] > 1.6 - .3 && q[1] < 2.55) px = q[0]; }      // on the top (z 1), or just behind it
+  if (px == null) { const fx = (x - v.cx) / (s * C30) + 2.55, fz = (v.cy + (fx + 2.55) * s * .5 - y) / s; if (fx > PREP0 && fx < X && fz >= 0 && fz <= 1) px = fx; }      // on the front face (y 2.55)
+  if (px == null) return null;
+  const K = ['bowl', 'chili', 'cilantro', 'beef']; for (let i = 0; i < 3; i++) if (px < (PREPX[K[i]] + PREPX[K[i + 1]]) / 2) return K[i]; return 'beef';
+}
+function stallPick(x, y) {
   let best = null, bd = 1e9;
   for (const k in HIT) { if (k === 'own') continue; const h = HIT[k], d = Math.hypot(x - h[0], y - h[1]) / h[2]; if (d < 1.25 && d < bd) { bd = d; best = k; } }
+  const pk = prepAt(x, y); if (pk && !(best === 'bin' && bd < 1)) best = pk;
+  return best;
+}
+function stallTap(x, y) {
+  if (stall.oracle && stall.oracleAt && Math.hypot(x - stall.oracleAt[0], y - stall.oracleAt[1]) < 30) { if (stall.hold) return; goDo('oracle', 3.5, .95); chime(69, 0, .08, .7); return; }      // the prophecy mark: walk over to it (where you eat your own bowl), then it is yours
+  const best = stallPick(x, y);
   if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
     if (stall.hold && stall.hold !== 'bowl') { if (stall.hold === 'noodle') stall.pot = 'done'; setHold(null); chime(57, 0, .1, .6); return; }      // holding noodles, the soup ladle or a topping: a tap on bare floor puts it back (the noodles back in the pot)
     const s = stall, v = s.V; if (!v) return; const [fx, fy] = v.inv(x, y); if (fx < -.4 || fy < -.4 || fx > SHOPX + .4 || fy > SHOPY + .5) return; if (fx < STOVE_W + .1 && fy < 1.05) return;      // the sliver of floor behind the stove is too small to stand on: a tap there does nothing
