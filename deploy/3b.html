@@ -1291,7 +1291,7 @@ function drawStall(t) {
     if (!c) return; let off = 0, a = 1;
     if (c.state === 'arrive') { off = (1 - eout(c.t / .8)) * 2.4; a = clamp(c.t / .4); }
     if (c.state === 'leave') { off = -ease(c.t / 1.0) * 2.4; a = 1 - clamp(c.t / 1.0); }
-    const p = P(SEATX[i] + CUSTY - CTY + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
+    const p = P(SEATX[i] + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
     if (c.story) { storySeatPos[c.story] = [p[0], p[1] - bob]; (c.story === 'he' ? storyHe : storyShe)(p[0], p[1] - bob, K); } else fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], CTY, 1.05 - CTD); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
@@ -1345,11 +1345,13 @@ function drawStall(t) {
     v.cy += CTD * s;      // everything on the counter, with its taps and rings, placed for a top at 1.0 and lowered with it
    }      // the one jar stands on the counter top in the corner, against both walls (MELO 2026-11-14)      // running the whole width, from the left wall (MELO 2026-11-14: it began under the window)      // the prep table's colour (MELO 2026-11-14)
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
+  ctx.save(); { const wx = P(WINR, 0, 0)[0]; ctx.beginPath(); ctx.rect(-1e4, -1e4, wx + 1e4, 3e4); ctx.clip(); }      // what stands on the board (bowls, their rings and glow, steam) is cut off where the window's right side hides it: the third place sits partly behind the wall (MELO 2026-11-14)
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], CTY, 1.02, .3, c.dish); if (c.dish.soup) steam(SEATX[i], CTY, 1.12, i); } });
   const barFree = !st.seats[2]; if (st.myBowl || barFree) hit('bar', BARX, CTY, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done && st.hold === 'bowl' && barFree) { const p = P(BARX, CTY, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
   if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(BARX, CTY, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, a warm yellow ring of light below
   if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl; iso_bowl(v, BARX, CTY, 1.02, .3, mb); if (mb.soup) steam(BARX, CTY, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
+  ctx.restore();
   v.cy -= CTD * s;
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
   // stove with the noodle pot and the soup pot
