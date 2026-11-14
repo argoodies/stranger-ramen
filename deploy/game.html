@@ -618,7 +618,8 @@ function clouds(t, a) {      // little white clouds drifting slowly across the d
   for (const [x, y, k, sp] of CLOUDS) { const r = r0 * k, cx = ((x * span + t * 5 * sp) % span) - r0 * 4, cy = y * H;
     ctx.beginPath(); for (const [dx, dy, m] of [[0, 0, 1], [-.9, .25, .7], [.95, .2, .75], [-.4, -.35, .75], [.45, -.3, .65]]) { ctx.moveTo(cx + dx * r + r * m, cy + dy * r); ctx.arc(cx + dx * r, cy + dy * r, r * m, 0, TAU); } ctx.fillStyle = css([252, 250, 255], .92 * a); ctx.fill(); }      // one path, filled once: no brighter seams where the puffs overlap
 }
-function skyNow(t, dark = 0, stars = 1, cl = true) { const n = G.n, d = [20, 16, 44]; dark *= n; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
+function skyNow(t, dark = 0, stars = 1, cl = true, n = G.n) { const d = [20, 16, 44];      // n: how far into night; a dark room (the tower) passes 1 and keeps the night sky by day too
+  dark *= n; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
 function tree(v, i, j) {
   const x = i + .5, y = j + .5;
   v.box(x - .08, y - .08, 0, .16, .16, .45, [150, 110, 90]);
@@ -1175,8 +1176,12 @@ function drawStall(t) {
   const hit = (k, x, y, z, r) => { const p = P(x, y, z); HIT[k] = [p[0], p[1], r * s]; return p; };
   const wob = k => st.nope === k && st.nopeT > 0 ? Math.sin(st.nopeT * 60) * s * .04 : 0;
   // outside ground + customers behind the window
-  poly([P(0, -2.2), P(X + 1, -2.2), P(X + 1, 0), P(0, 0)], [60, 96, 110]);
+  { const ng = c => mix(c, [44, 60, 92], G.n * .7);      // outside the window: the town's grass, dimming to blue at night
+    ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(4.5, 0, 1), P(4.5, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // seen only through the opening: on a wide screen the patch would otherwise stick out past the room
+    poly([P(0, -2.2), P(X + 1, -2.2), P(X + 1, 0), P(0, 0)], ng([108, 180, 170]));
+    ctx.restore(); }
   const K = s * 1.2, heads = [];
+  ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(4.5, 0, 1), P(4.5, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // customers too are seen only through the window: on a wide screen one walking up or away no longer floats in the sky beside the shop
   st.seats.forEach((c, i) => {
     if (!c) return; let off = 0, a = 1;
     if (c.state === 'arrive') { off = (1 - eout(c.t / .8)) * 2.4; a = clamp(c.t / .4); }
@@ -1185,6 +1190,7 @@ function drawStall(t) {
     if (c.story) { storySeatPos[c.story] = [p[0], p[1] - bob]; (c.story === 'he' ? storyHe : storyShe)(p[0], p[1] - bob, K); } else fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
+  ctx.restore();
   // floor + walls
   for (let i = 0; i < X; i++) for (let j = 0; j < 4; j++) v.quad(i, j * Y / 4, 0, 1, Y / 4, (i + j) % 2 ? [196, 150, 120] : [210, 166, 132]);      // four whole rows across the room's depth, so no sliver of a fifth row is left along the front edge
   const wallB = [232, 204, 170], wallA = [214, 180, 150];
@@ -1463,7 +1469,7 @@ function towerTap(sx, sy) {
   const [x, y] = twv.inv(sx, sy); tw.pend = null; tw.tx = clamp(x, .4, TN - .4); tw.ty = clamp(y, .4, TN - .4); chime(69, 0, .07, .8);
 }
 function drawTowerRoom(t) {
-  TK = .42; TINT = [20, 18, 56]; SHADOW = [34, 26, 64]; skyNow(t, .45);
+  TK = .42; TINT = [20, 18, 56]; SHADOW = [34, 26, 64]; skyNow(t, .45, 1, true, 1);      // the tower inside is a dark room: night sky behind it even by day
   const N = TN, s = Math.min(W / (9.4 * C30), (H - 300) / (N + 3)), v = twv; v.s = s; v.cx = W / 2; v.cy = H * .5 - N * s * .5 + s * .6; const P = v.P.bind(v), tn = c => tint(c), K = s * 1.1, fl = .85 + .15 * Math.sin(t * 12) * Math.sin(t * 5.3);
   v.box(1.1, 1.1, -1.9, N - 2.2, N - 2.2, .7, [96, 88, 118]); v.box(.5, .5, -1.2, N - 1, N - 1, .7, [116, 106, 132]); v.box(0, 0, -.5, N, N, .5, [150, 140, 150]);      // a bare slab of stone floating in the dark: no walls
   for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if ((i + j) % 2) v.quad(i, j, 0, 1, 1, tn([164, 152, 160]));
@@ -1524,7 +1530,7 @@ function libTap(x, y) {
 function drawLib(t) {
   TK = 0.34; TINT = [22, 22, 60]; SHADOW = [40, 30, 70]; skyNow(t, .2);
   const N = LN, Hh = 3.4, s = Math.min(W / (8.8 * C30), (H - 300) / (Hh + N + .6)), v = lv; v.s = s; v.cx = W / 2; v.cy = Math.max(230, (H - (Hh + N) * s) * .5) + Hh * s; const P = v.P.bind(v), tn = c => tint(c);
-  const lightC = mix([255, 232, 180], [170, 190, 255], G.n);
+  const lightC = mix([255, 196, 204], [170, 190, 255], G.n);      // by day the window lets in the rose of the sky, by night a cool blue
   for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) v.quad(i, j, 0, 1, 1, tn((i + j) % 2 ? [186, 140, 110] : [200, 156, 122]));
   poly([P(0, 0, 0), P(N, 0, 0), P(N, 0, Hh), P(0, 0, Hh)], tn([226, 206, 176])); poly([P(0, 0, 0), P(0, N, 0), P(0, N, Hh), P(0, 0, Hh)], tn([206, 184, 156]));
   wallThick(v, N, N, Hh, -.34, tn([240, 224, 198]), tn([184, 162, 140]), tn([170, 148, 130]));
