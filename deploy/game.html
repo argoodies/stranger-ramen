@@ -1234,7 +1234,7 @@ function drawStall(t) {
     ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, LT(C.seam));
     for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, LT(h(r, x) < .5 ? C.plank1 : C.plank2));
     ctx.restore(); }
-  { const a = P(X / 2, .6, 0), b = P(X / 2, Y, 0), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, 'rgba(22, 22, 60, .5)');      // the floor darkens little by little from the serving counter to the way out (MELO 2026-11-14)
+  { const a = P(X / 2, .6, 0), b = P(X / 2, Y, 0), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, 'rgba(22, 22, 60, .25)');      // the floor darkens little by little from the serving counter to the way out (MELO 2026-11-14)
     poly([P(0, 0), P(X, 0), P(X, Y), P(0, Y)], [0, 0, 0], 0); ctx.fillStyle = gr; ctx.fill(); }
   const wallB = LT(SHOPC.wallB), wallA = LT(SHOPC.wallA);
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
@@ -1254,7 +1254,7 @@ function drawStall(t) {
   // the way out: a few steps going down from the middle of the front edge
   { const ew = 1.0, ex = X / 2 - ew / 2;
     poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], LT(SHOPC.edgeL)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], LT(SHOPC.edgeR));
-    const tint0 = TINT; TK = .58; TINT = [22, 22, 60]; for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step); TK = 0; TINT = tint0;
+    const tint0 = TINT; TK = .46; TINT = [22, 22, 60]; for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step); TK = 0; TINT = tint0;
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   { const q = P(st.owner.x, st.owner.y); buffRings(q[0], q[1], s, t); }      // the prophecies on the floor, before the counter, the stove, the table and the bin
   // counter under the window, with the bowls already served
