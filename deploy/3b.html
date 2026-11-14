@@ -1278,7 +1278,7 @@ function drawStall(t) {
     ctx.restore(); }
   { const a = P(X / 2, .6, 0), b = P(X / 2, Y, 0), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, `rgba(22, 22, 60, ${.25 * DN})`);      // the floor darkens little by little from the serving counter to the way out (MELO 2026-11-14)
     poly([P(0, 0), P(X, 0), P(X, Y), P(0, Y)], [0, 0, 0], 0); ctx.fillStyle = gr; ctx.fill(); }
-  { const sh = (x, y, dx, dy) => poly([P(x, y), P(x + dx, y), P(x + dx, y + dy + .12), P(x, y + dy + .12)], [20, 12, 40], .3);      // every shadow falls only to the left (toward +y, MELO 2026-11-14)
+  { const sh = (x, y, dx, dy) => poly([P(x, y), P(x + dx, y), P(x + dx, y + dy + .12), P(x, y + dy + .12)], [20, 12, 40], .3);      // the things' shadows fall only to the left (toward +y, MELO 2026-11-14); the chef's stays as it is
          // small flat shadows, one plain shape each in the chef's shadow colour (MELO 2026-11-14)
     sh(.5, 0, X - .5, .6); sh(0, 1.0, STOVE_W, 2.2); sh(PREP0, 1.6, X - PREP0, PREP_Y1 - 1.6);
     { const r = .3, q = P(BIN[0], BIN[1] + .1); ell(q[0], q[1], r * s * C30 * Math.SQRT2, r * s * .5 * Math.SQRT2, [20, 12, 40], .3); } }      // the bin's: a round shadow lying flat on the floor, a little wider than the bin (r .26), in the chef's shadow colour
@@ -1341,8 +1341,7 @@ function drawStall(t) {
     st.dim = lerp(st.dim || 0, clamp((st.owner.y - 3.0) / .4), .18);      // in the strip by the way out your face is in the shade, as in the library; further in it is bright (MELO 2026-11-14)
     const lit = c => { const d = mix(c, [22, 22, 60], .34 * DN * st.dim); return mix(d, mix(d, [255, 214, 140], .14), st.lit); }, oy = op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0);
     if (st.lit > .02) glow(op[0], oy - s * 1.15 * .6, s * 1.15 * 1.1, [255, 214, 140], .3 * st.lit);
-    ell(op[0] - s * .1 * C30, op[1] + s * .05, .36 * s * 1.15, .10 * s * 1.15, [20, 12, 40], .3);      // the chef's own shadow, like everything else's here falling a little to the left
-    fig(op[0], oy, s * 1.15, { kind: 'chef', apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN), noShadow: true });
+    fig(op[0], oy, s * 1.15, { kind: 'chef', apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) });
     HIT.own = [op[0] + s * .45, op[1] - s * 1.0, 0];
     const hp = [HIT.own[0] + wob('own'), HIT.own[1]], hd = st.hold;
     if (hd === 'noodle') { line([[hp[0], hp[1]], [hp[0] + s * .3, hp[1] - s * .3]], [150, 110, 90], s * .05); circ(hp[0], hp[1], s * .17, [190, 196, 214]); circ(hp[0], hp[1], s * .13, [250, 232, 170]); }
