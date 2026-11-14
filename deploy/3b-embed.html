@@ -1280,7 +1280,7 @@ function drawStall(t) {
     else if (hd === 'bowl') { const bx = hp[0] - s * .12, by = hp[1] + s * .08; bowlTopMini(bx, by, s * .36 * 1.2247, st.bowl);
       if (st.bowl.soup) for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3) % 1; circ(bx + Math.sin(t * 1.3 + i * 2) * s * .1, by - s * (.12 + .75 * ph), s * (.06 + .1 * ph), [255, 252, 248], .55 * (1 - ph)); } }      // a bowl with soup in it steams in his hands too, as it does on the counter
   };
-  const ow = st.owner, inFront = ow.y > 2.4 && !(ow.x < 1.9 && ow.y < 3.05), binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table only when past its front edge (beside its left end, the table is nearer); in front of the bin when deeper into the room than it
+  const ow = st.owner, inFront = ow.y > 2.55, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y 2.55), beside its left end too; in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings
   v.box(1.9, 1.6, 0, 3.1, .95, 1.0, [150, 108, 88]);
   hit('bowl', 2.44, 2.07, 1.1, .55); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(2.44, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .4, s * .22, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, 2.44, 2.07, 1.03, .36, st.bowl); if (st.bowl.soup) steam(2.44, 2.07, 1.13, 4); } ctx.restore();
