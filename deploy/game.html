@@ -1312,7 +1312,14 @@ function drawStall(t) {
   };
   const ow = st.owner, inFront = ow.y > PREP_Y1, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y PREP_Y1), beside its left end too; in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings in a row, the gaps between them even and the beef clear of the table's end (MELO 2026-11-14); no hint ring reaches the next thing along
-  sideBox(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, PREP_H, [150, 108, 88]);
+  { const c = [150, 108, 88], T = .06, x0 = PREP0, dx = X - PREP0, y0 = 1.6, dy = PREP_Y1 - 1.6, dk = [98, 64, 48];      // the prep table is an open shelf too, like the serving one: a back, two end boards, two dark shelves under its top, one of them on the floor (MELO 2026-11-14)
+    sideBox(x0, y0, 0, dx, T, PREP_H - .1, dk);
+    sideBox(x0, y0, 0, T, dy, PREP_H - .1, c);
+    sideBox(x0 + T, y0 + T, 0, dx - 2 * T, dy - T, .05, dk);
+    sideBox(x0 + T, y0 + T, .5, dx - 2 * T, dy - T, .05, dk);
+    { const xd = x0 + dx / 2, yd = y0 + dy - .2; v.disc(xd, yd, .55, .13, .03, [236, 238, 248]); v.disc(xd, yd, .58, .09, 0, [214, 218, 232]); }      // a small dish kept on the upper shelf
+    sideBox(X - T, y0, 0, T, dy, PREP_H - .1, c);
+    sideBox(x0, y0, PREP_H - .1, dx, dy, .1, c); }
   const liftPrep = (PREP_H - 1) * s; v.cy -= liftPrep;      // everything on the table, with its taps and rings, drawn as if on a table 1.0 high and lifted to stand on this one
   hit('bowl', PREPX.bowl, 2.07, 1.08, .47); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(PREPX.bowl, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .34, s * .19, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, PREPX.bowl, 2.07, 1.03, .3, st.bowl); if (st.bowl.soup) steam(PREPX.bowl, 2.07, 1.11, 4); } ctx.restore();
   ring('bowl');
