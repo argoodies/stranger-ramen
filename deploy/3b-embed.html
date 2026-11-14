@@ -1260,12 +1260,12 @@ function drawStall(t) {
   ring('soup'); const lp = P(.86, 2.42, 1.55); line([lp, [lp[0] + s * .3, lp[1] - s * .5]], [150, 110, 90], s * .05); ctx.restore();
   for (let i = 0; i < 6; i++) { const act_ = (i % 2 === 0) ? (st.pot === 'cooking' ? 1 : st.pot === 'done' ? .7 : .3) : .5, ph = (t * .5 * (act_ + .4) + i * .17) % 1, p = P(.6 + .2 * Math.sin(t * 1.3 + i * 2), i % 2 ? 2.6 : 1.6, 1.6 + ph * 1.5); circ(p[0], p[1], s * (.08 + .15 * ph), [255, 250, 245], .28 * act_ * (1 - ph)); }
   // an open rack in the left corner, against the wall: as high as the stove: two sides, two shelves and a top, each shelf with a low lip at the front and a few little tins and boxes on it. A tap rocks it for a moment, silently
-  { const jr = 0, jx = s * .05 * clamp(1 - (performance.now() - (st.rackAt || -1e9)) / 650) * Math.sin(performance.now() / 22), wd = [168, 120, 92], d = .5, y0 = 3.6, y1 = 4.8, H = 1.0;      // a tap shakes it from side to side for a moment, as the bin and the jars do
-    ctx.save(); ctx.translate(jx, 0); v.box(.02 + jr, y0, 0, d, .06, H, wd);
+  { const jr = 0, jx = s * .05 * clamp(1 - (performance.now() - (st.rackAt || -1e9)) / 650) * Math.sin(performance.now() / 22), wd = [168, 120, 92], d = .5, y0 = 3.6, y1 = 4.8, H = 1.0;      // a tap shakes the tins on it from side to side for a moment
+    v.box(.02 + jr, y0, 0, d, .06, H, wd);
     [.06, .5, H - .05].forEach((z, r) => { v.box(.02 + jr, y0 + .06, z, d, y1 - y0 - .12, .05, wd);
-      if (r < 2) for (let k = 0; k < 4 - (r % 2); k++) { const y = y0 + .14 + k * .27 + (r % 2) * .12; v.box(.1 + jr, y, z + .05, .22, .18, .2 - (k + r) % 2 * .05, [[236, 226, 206], [170, 120, 90], [214, 180, 120]][(k + r) % 3]); }      // little tins and boxes, as on the coffee house shelf
+      if (r < 2) for (let k = 0; k < 4 - (r % 2); k++) { const y = y0 + .14 + k * .27 + (r % 2) * .12; ctx.save(); ctx.translate(jx, 0); v.box(.1 + jr, y, z + .05, .22, .18, .2 - (k + r) % 2 * .05, [[236, 226, 206], [170, 120, 90], [214, 180, 120]][(k + r) % 3]); ctx.restore(); }      // little tins and boxes, as on the coffee house shelf; only they shake when tapped, not the rack (MELO)
       if (r < 2) v.box(d - .02 + jr, y0 + .06, z + .05, .04, y1 - y0 - .12, .06, [150, 106, 82]); });      // the lip only on the shelves, not on the top (it stuck up above the sides there)
-    v.box(.02 + jr, y1 - .06, 0, d, .06, H, wd); ctx.restore(); hit('rack', .3, 4.2, .6, .7); }
+    v.box(.02 + jr, y1 - .06, 0, d, .06, H, wd); hit('rack', .3, 4.2, .6, .7); }
   // the owner (always behind the prep table)
   const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05;
   const drawOwner = () => {
