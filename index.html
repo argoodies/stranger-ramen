@@ -966,7 +966,7 @@ function unlockBadge(id) { return false; }      // the achievement board is gone
 function knock() { if (!AC) return; const t = AC.currentTime; tone(150, t, .1, .32, 'triangle'); tone(92, t, .16, .22); tone(620, t, .03, .06); }
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
 stall.bowl = emptyBowl();
-const SEATX = [.95, 1.75, 2.55], CUSTY = -.95, BARX = 3.2;      // the counter runs out through the doorway (MELO 2026-11-14): the customers stand outside at its far end, and your own place is at its right end
+const SEATX = [.95, 1.75, 2.55], CUSTY = -.75, BARX = 3.2, CTW = .95, CTY = CTW / 4;      // CTW: the serving counter's whole width, the prep table's (MELO 2026-11-14), half inside the doorway and half out; CTY: the middle of its inside half, where the bowls stand      // the counter runs out through the doorway (MELO 2026-11-14): the customers stand outside at its far end, and your own place is at its right end
 const lvl = x => x === true ? 1 : x === false || x == null ? 0 : x;      // how much a customer asks for: 0 none, 1 a little, 2 as usual, 3 a lot (true/false from older callers mean 1/0)
 const cnt = (b, k) => Math.min(3, b[k + 'N'] || (b[k] ? 1 : 0));      // how much went into the bowl, 3 standing for three or more sprinkles
 function orderText(w) {      // one spoken sentence: (greeting) + the noodles + how much chili and cilantro, said together; no beef and no chili is a bowl of clear soup noodles
@@ -1236,7 +1236,7 @@ function drawStall(t) {
   for (const k in HIT) delete HIT[k];
   const hit = (k, x, y, z, r) => { const p = P(x, y, z); HIT[k] = [p[0], p[1], r * s]; return p; };
   const wob = k => st.nope === k && st.nopeT > 0 ? Math.sin(st.nopeT * 60) * s * .04 : 0;
-  const plant = () => { const jk = clamp(1 - (performance.now() - (st.jarTopAt || -1e9)) / 650), x = .64, y = -.3, sway = .06 * jk * Math.sin(performance.now() / 30);      // a potted plant at the left end of the counter top, in place of the jars (MELO 2026-11-14); tapped, its leaves shake
+  const plant = () => { const jk = clamp(1 - (performance.now() - (st.jarTopAt || -1e9)) / 650), x = .62, y = -.16, sway = .06 * jk * Math.sin(performance.now() / 30);      // a potted plant at the left end of the counter top, in place of the jars (MELO 2026-11-14); tapped, its leaves shake
       v.disc(x, y, 1.0, .15, .18, [196, 112, 82]); v.disc(x, y, 1.18, .17, .03, [214, 128, 96]); v.disc(x, y, 1.21, .13, 0, [96, 66, 52]);      // a terracotta pot with a lip, and its soil
       const c = P(x, y, 1.21); ctx.save(); ctx.translate(c[0], c[1]); ctx.rotate(sway);
       for (const [a, l, w, col] of [[-1.1, .42, .1, [74, 140, 86]], [-.5, .5, .11, [96, 168, 100]], [0, .55, .12, [84, 156, 92]], [.5, .48, .11, [110, 180, 110]], [1.05, .4, .1, [74, 140, 86]], [-.2, .36, .09, [126, 192, 118]], [.25, .38, .09, [100, 172, 104]]]) { ctx.save(); ctx.rotate(a * .55); ctx.fillStyle = css(col); ctx.beginPath(); ctx.ellipse(0, -l * s / 2, w * s, l * s / 2, 0, 0, TAU); ctx.fill(); ctx.restore(); }      // a fan of long leaves
@@ -1252,11 +1252,11 @@ function drawStall(t) {
     if (!c) return; let off = 0, a = 1;
     if (c.state === 'arrive') { off = (1 - eout(c.t / .8)) * 2.4; a = clamp(c.t / .4); }
     if (c.state === 'leave') { off = -ease(c.t / 1.0) * 2.4; a = 1 - clamp(c.t / 1.0); }
-    const p = P(SEATX[i] - .75 + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
+    const p = P(.45 + .9 * i + off, CUSTY), bob = c.state === 'eat' ? Math.abs(Math.sin(c.t * 5)) * s * .05 : Math.sin(t * 2 + i) * s * .015;
     if (c.story) { storySeatPos[c.story] = [p[0], p[1] - bob]; (c.story === 'he' ? storyHe : storyShe)(p[0], p[1] - bob, K); } else fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
-    if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05 - CTD); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
+    if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], CTY, 1.05 - CTD); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
-  woodBox(.5, -.84, 0, 3.05, .84, 1 - CTD);      // the half of the counter outside the doorway, as long as the half inside (MELO 2026-11-14)
+  woodBox(.5, -CTW / 2, 0, 3.05, CTW / 2, 1 - CTD);      // the half of the counter outside the doorway, as long as the half inside (MELO 2026-11-14)
   v.cy += CTD * s; plant(); v.cy -= CTD * s;
   ctx.restore();
   // floor + walls
@@ -1288,21 +1288,21 @@ function drawStall(t) {
   { const q = P(st.owner.x, st.owner.y); buffRings(q[0], q[1], s, t); }      // the prophecies on the floor, before the counter, the stove, the table and the bin
   // counter under the window, with the bowls already served
   // the hint is a pulsing ring lying on the rim of the thing to touch next. Each ring is drawn straight after its own thing, so whatever stands in front of that thing (the soup ladle before the noodle pot, the owner before a bowl) also stands in front of its ring
-  const hk = hintKey(), RIM = { pot: [POT_X, 1.6, 1.52, .46], soup: [POT_X, 2.6, 1.52, .46], bowl: [PREPX.bowl, 2.07, 1.075, .3], chili: [PREPX.chili, 2.07, 1.0, .118], cilantro: [PREPX.cilantro, 2.07, 1.0, .118], beef: [PREPX.beef, 2.07, 1.0, .118], bin: [BIN[0], BIN[1], .55, .26], bar: [BARX, .3, 1.062, .28] }, rimOf = k => RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], .3, 1.045, .22] : null);
+  const hk = hintKey(), RIM = { pot: [POT_X, 1.6, 1.52, .46], soup: [POT_X, 2.6, 1.52, .46], bowl: [PREPX.bowl, 2.07, 1.075, .3], chili: [PREPX.chili, 2.07, 1.0, .118], cilantro: [PREPX.cilantro, 2.07, 1.0, .118], beef: [PREPX.beef, 2.07, 1.0, .118], bin: [BIN[0], BIN[1], .55, .26], bar: [BARX, CTY, 1.062, .28] }, rimOf = k => RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], CTY, 1.045, .22] : null);
   const ring = k => { const rim = hk === k && rimOf(k); if (!rim) return; const pulse = Math.sin(t * 5), c = P(rim[0], rim[1], rim[2]), g = 1.12 + .04 * pulse; ctx.strokeStyle = css([255, 236, 170], .6 + .35 * pulse); ctx.lineWidth = Math.max(2.5, s * .06); ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(c[0], c[1], rim[3] * s * 1.2247 * g, rim[3] * s * .707 * g, 0, 0, TAU); ctx.stroke(); };
   { const c = WOOD, T = .06, bx = (x, y, z, dx, dy, dz, cc = c) => sideBox(x, y, z, dx, dy, dz, cc);      // the serving counter is a shelf: two open shelves under its top, between two end boards (MELO 2026-11-14)
     const J = (x, y, z, w, h, col, neck, cap) => { v.box(x - w / 2, y - w / 2, z, w, w, h, col); if (neck) v.box(x - .03, y - .03, z + h, .06, .06, neck, col); if (cap) v.box(x - (neck ? .04 : w / 2 + .01), y - (neck ? .04 : w / 2 + .01), z + h + (neck || 0), neck ? .08 : w + .02, neck ? .08 : w + .02, .04, cap); },      // a bottle (with a neck) or a jar (with a lid)
       STOCK = [[[1.25, .14, .2, [214, 196, 160], 0, [150, 96, 70]], [1.55, .1, .24, [96, 140, 110], .1, [120, 84, 70]], [1.85, .16, .16, [206, 90, 80], 0, [232, 220, 196]], [2.5, .12, .22, [226, 210, 180], 0, [176, 110, 90]], [2.8, .09, .26, [150, 104, 84], .1, [230, 196, 140]], [3.15, .15, .14, [236, 200, 120], 0, [150, 104, 84]], [3.5, .11, .2, [120, 150, 180], 0, [236, 226, 206]]],
                [[1.3, .1, .22, [150, 96, 84], .1, [226, 196, 140]], [1.65, .15, .17, [236, 226, 206], 0, [206, 90, 80]], [2.0, .12, .2, [96, 150, 120], 0, [236, 226, 206]], [2.65, .09, .24, [200, 160, 110], .1, [120, 84, 70]], [3.0, .14, .15, [214, 96, 90], 0, [236, 226, 206]], [3.35, .1, .2, [226, 210, 180], .08, [150, 104, 84]], [3.65, .13, .16, [176, 200, 150], 0, [120, 84, 70]]]];      // jars and bottles on the two shelves; the left ends are behind the stove (MELO 2026-11-14)
     // no bottom board: under the top there is only the floor between the two end boards (MELO 2026-11-14)
-    woodBox(.5, 0, 0, 3.05, .6, 1 - CTD);      // between the doorway's two sides (MELO 2026-11-14)      // solid again (MELO 2026-11-14: an open stand was tried)
+    woodBox(.5, 0, 0, 3.05, CTW / 2, 1 - CTD);      // between the doorway's two sides (MELO 2026-11-14)      // solid again (MELO 2026-11-14: an open stand was tried)
     v.cy += CTD * s;      // everything on the counter, with its taps and rings, placed for a top at 1.0 and lowered with it
    }      // the one jar stands on the counter top in the corner, against both walls (MELO 2026-11-14)      // running the whole width, from the left wall (MELO 2026-11-14: it began under the window)      // the prep table's colour (MELO 2026-11-14)
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
-  st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], .3, 1.02, .3, c.dish); if (c.dish.soup) steam(SEATX[i], .3, 1.12, i); } });
-  hit('bar', BARX, .3, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done && st.hold === 'bowl') { const p = P(BARX, .3, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
-  if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(BARX, .3, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, a warm yellow ring of light below
-  if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl; iso_bowl(v, BARX, .3, 1.02, .3, mb); if (mb.soup) steam(BARX, .3, 1.12, 3); ctx.restore(); }
+  st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], CTY, 1.02, .3, c.dish); if (c.dish.soup) steam(SEATX[i], CTY, 1.12, i); } });
+  hit('bar', BARX, CTY, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done && st.hold === 'bowl') { const p = P(BARX, CTY, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
+  if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(BARX, CTY, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, a warm yellow ring of light below
+  if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5 } : st.myBowl; iso_bowl(v, BARX, CTY, 1.02, .3, mb); if (mb.soup) steam(BARX, CTY, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
   v.cy -= CTD * s;
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
