@@ -1116,7 +1116,7 @@ function shopPath(from, to) {
   if (!shopBlocked(to[0], to[1]) && clear(out[out.length - 1], to)) out.push(to);
   return out.slice(1);
 }
-const SHOP_DOOR = [SHOPX / 2, SHOPY - .25];      // the steps out are in the middle of the front edge
+const SHOP_DOOR = [1.5, SHOPY - .25];      // the steps out are in front of the bottom row's second tile (MELO 2026-11-14; were in the middle of the front edge)
 // tap an object in the shop
 const HIT = {};
 function stallPick(x, y) {
@@ -1281,7 +1281,7 @@ function drawStall(t) {
     J(-.34, .16, .2, [236, 226, 206], 0, [176, 110, 90]); J(-.13, .12, .24, [96, 150, 120], .12, [120, 84, 70]); J(.06, .15, .15, [214, 96, 90], 0, [236, 226, 206]); J(.25, .11, .2, [150, 104, 84], .1, [226, 196, 140]); J(.39, .1, .12, [240, 200, 120], 0, [150, 104, 84]);
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
   // the way out: a few steps going down from the middle of the front edge
-  { const ew = 1.0, ex = X / 2 - ew / 2;
+  { const ew = 1.0, ex = SHOP_DOOR[0] - ew / 2;
     poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], mix([120, 84, 66], [26, 22, 62], FT + .25)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], mix([100, 70, 58], [26, 22, 62], FT + .25));      // the floor's sides all dark (MELO 2026-11-14)
     const tint0 = TINT; TK = FT; TINT = [26, 22, 62]; for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, [164, 116, 92]);      // the steps the floor's wood, in its shade (MELO 2026-11-14: they were a cold grey)
     TK = 0; TINT = tint0;
