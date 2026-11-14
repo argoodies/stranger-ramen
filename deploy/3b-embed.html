@@ -1071,7 +1071,7 @@ function hintKey() {
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
-const SHOPC = { wallB: [150, 110, 96], wallA: [132, 96, 86], top: [110, 80, 72], endX: [96, 70, 64], endY: [86, 62, 58], edgeL: [120, 84, 66], edgeR: [100, 70, 58], step: [176, 128, 104] };      // the shop's colours, matched to the coffee house (MELO 2026-11-14): the two walls, the wall tops and ends, the floor's front edges, the steps
+const SHOPC = { wallB: [176, 136, 120], wallA: [158, 120, 108], top: [110, 80, 72], endX: [96, 70, 64], endY: [86, 62, 58], edgeL: [120, 84, 66], edgeR: [100, 70, 58], step: [176, 128, 104] };      // the shop's colours, matched to the coffee house (MELO 2026-11-14; the walls a little lighter): the two walls, the wall tops and ends, the floor's front edges, the steps
 const PREP_Y1 = 2.55, PREP_H = 1.15;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
 const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
@@ -1234,7 +1234,7 @@ function drawStall(t) {
   const curtain = i => { const x0 = .56 + i * .6, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .56, 0, 2.8), P(x0 + .56, 0, 2.38 + w_), P(x0, 0, 2.38 - w_)], [206, 62, 68]); };
   for (let i = 0; i < 5; i++) curtain(i);
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
-  for (let k = 1; k < 8; k++) { const x = k * X / 8; if (x > .5 && x < 3.55) { line([P(x, 0, 0), P(x, 0, 1)], bt([122, 88, 78]), 1, .6); line([P(x, 0, 2.8), P(x, 0, Hh)], bt([122, 88, 78]), 1, .6); } else line([P(x, 0, 0), P(x, 0, Hh)], bt([122, 88, 78]), 1, .6); line([P(0, k * Y / 8, 0), P(0, k * Y / 8, Hh)], bt([110, 80, 72]), 1, .6); }      // timber boards, broken by the serving window
+  for (let k = 1; k < 8; k++) { const x = k * X / 8; if (x > .5 && x < 3.55) { line([P(x, 0, 0), P(x, 0, 1)], bt([150, 114, 102]), 1, .6); line([P(x, 0, 2.8), P(x, 0, Hh)], bt([150, 114, 102]), 1, .6); } else line([P(x, 0, 0), P(x, 0, Hh)], bt([150, 114, 102]), 1, .6); line([P(0, k * Y / 8, 0), P(0, k * Y / 8, Hh)], bt([136, 102, 92]), 1, .6); }      // timber boards, broken by the serving window
   wallThick(v, X, Y, Hh, -.34, bt(SHOPC.top), bt(SHOPC.endX), bt(SHOPC.endY));      // the walls are thick: their tops, their ends, and the sill and near jamb of the serving window
   { ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(3.55, 0, 1), P(3.55, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // the sill and the jamb are seen only through the opening (unclipped, the sill's far corner poked out over the wall at the lower right); the jamb runs its whole height, and the first door-cloth hangs in front of it
     poly([P(.5, -.24, 1), P(3.55, -.24, 1), P(3.55, 0, 1), P(.5, 0, 1)], bt(SHOPC.top)); poly([P(.5, -.24, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(.5, -.24, 2.8)], bt(SHOPC.endX)); ctx.restore(); curtain(0); }
