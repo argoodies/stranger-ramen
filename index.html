@@ -986,7 +986,7 @@ const ING = ['soup', 'chili', 'cilantro', 'beef'], MORE = ['chili', 'cilantro', 
 function setHold(h) { stall.hold = h; stall.strainer = h === 'noodle'; }
 function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
-const SPOT = { boil: [1.6, 1.6], scoop: [1.6, 1.6], put: [2.18, 1.25], soup: [1.6, 2.6], chili: [2.8, 1.25], cilantro: [3.27, 1.25], beef: [3.74, 1.25], bowl: [2.18, 1.25] };
+const SPOT = { boil: [1.6, 1.6], scoop: [1.6, 1.6], put: [2.17, 1.25], soup: [1.6, 2.6], chili: [2.96, 1.25], cilantro: [3.38, 1.25], beef: [3.79, 1.25], bowl: [2.17, 1.25] };
 const FLYC = { noodle: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
 const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; stall.leaving = false; stall.pend = null; } };
 // things done on arrival: walk over first, then open the board / drop what you carry in the bin
@@ -1232,8 +1232,8 @@ function drawStall(t) {
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   // counter under the window, with the bowls already served
   // the hint is a pulsing ring lying on the rim of the thing to touch next. Each ring is drawn straight after its own thing, so whatever stands in front of that thing (the soup ladle before the noodle pot, the owner before a bowl) also stands in front of its ring
-  const hk = hintKey(), RIM = { pot: [.6, 1.6, 1.52, .46], soup: [.6, 2.6, 1.52, .46], bowl: [2.18, 2.07, 1.085, .36], chili: [2.8, 2.07, 1.22, .22], cilantro: [3.27, 2.07, 1.22, .22], beef: [3.74, 2.07, 1.09, .23], bin: [BIN[0], BIN[1], .55, .26], bar: [3.55, .3, 1.068, .305] }, rimOf = k => RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], .3, 1.045, .22] : null);
-  const ring = (k, front) => { const rim = hk === k && rimOf(k); if (!rim) return; const pulse = Math.sin(t * 5), c = P(rim[0], rim[1], rim[2]), g = 1.12 + .04 * pulse; ctx.strokeStyle = css([255, 236, 170], .6 + .35 * pulse); ctx.lineWidth = Math.max(2.5, s * .06); ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(c[0], c[1], rim[3] * s * 1.2247 * g, rim[3] * s * .707 * g, 0, 0, front ? Math.PI : TAU); ctx.stroke(); };      // front: only its near half, the lower arc on screen
+  const hk = hintKey(), RIM = { pot: [.6, 1.6, 1.52, .46], soup: [.6, 2.6, 1.52, .46], bowl: [2.17, 2.07, 1.085, .36], chili: [2.96, 2.07, 1.22, .2], cilantro: [3.38, 2.07, 1.22, .2], beef: [3.79, 2.07, 1.09, .2], bin: [BIN[0], BIN[1], .55, .26], bar: [3.55, .3, 1.068, .305] }, rimOf = k => RIM[k] || (k.startsWith('spot') ? [SEATX[+k[4]], .3, 1.045, .22] : null);
+  const ring = k => { const rim = hk === k && rimOf(k); if (!rim) return; const pulse = Math.sin(t * 5), c = P(rim[0], rim[1], rim[2]), g = 1.12 + .04 * pulse; ctx.strokeStyle = css([255, 236, 170], .6 + .35 * pulse); ctx.lineWidth = Math.max(2.5, s * .06); ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(c[0], c[1], rim[3] * s * 1.2247 * g, rim[3] * s * .707 * g, 0, 0, TAU); ctx.stroke(); };
   v.box(.5, 0, 0, X - .5, .6, 1.0, [176, 124, 96]);
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], .3, 1.02, .33, c.dish); if (c.dish.soup) steam(SEATX[i], .3, 1.12, i); } });
@@ -1271,18 +1271,16 @@ function drawStall(t) {
       if (st.bowl.soup) for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3) % 1; circ(bx + Math.sin(t * 1.3 + i * 2) * s * .1, by - s * (.12 + .75 * ph), s * (.06 + .1 * ph), [255, 252, 248], .55 * (1 - ph)); } }      // a bowl with soup in it steams in his hands too, as it does on the counter
   };
   const ow = st.owner, inFront = ow.y > 2.55, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y 2.55), beside its left end too; in front of the bin when deeper into the room than it
-  // prep table: the bowl and the three toppings
+  // prep table: the bowl and the three toppings, spaced so that no hint ring (the rim size and a bit) reaches the next thing along: each ring is drawn on its own board under its own pile, and the next thing, nearer, never cuts it off
   v.box(1.8, 1.6, 0, X - 1.8, .95, 1.0, [150, 108, 88]);
-  hit('bowl', 2.18, 2.07, 1.1, .55); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(2.18, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .4, s * .22, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, 2.18, 2.07, 1.03, .36, st.bowl); if (st.bowl.soup) steam(2.18, 2.07, 1.13, 4); } ctx.restore();
+  hit('bowl', 2.17, 2.07, 1.1, .55); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(2.17, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .4, s * .22, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, 2.17, 2.07, 1.03, .36, st.bowl); if (st.bowl.soup) steam(2.17, 2.07, 1.13, 4); } ctx.restore();
   ring('bowl');
-  hit('chili', 2.8, 2.07, 1.2, .38); ctx.save(); ctx.translate(wob('chili'), 0);
-  v.disc(2.8, 2.07, 1.0, .22, .2, [196, 160, 120]); { const p = P(2.8, 2.07, 1.25); for (let i = 0; i < 9; i++) { const q = i * 0.7; ctx.save(); ctx.translate(p[0] + Math.cos(q) * s * .13, p[1] + Math.sin(q) * s * .065 - s * (.04 + .035 * (i % 3))); ctx.rotate(q * 1.7); ctx.fillStyle = css([[214, 48, 44], [184, 34, 40], [232, 84, 56]][i % 3]); ctx.beginPath(); ctx.ellipse(0, 0, s * .085, s * .05, 0, 0, TAU); ctx.fill(); ctx.restore(); } } ctx.restore();      // chunks of red chili piled on a wooden board, like the cilantro
-  ring('chili');
-  hit('cilantro', 3.27, 2.07, 1.2, .38); ctx.save(); ctx.translate(wob('cilantro'), 0);
-  v.disc(3.27, 2.07, 1.0, .22, .2, [196, 160, 120]); ring('cilantro'); { const p = P(3.27, 2.07, 1.25); for (let i = 0; i < 9; i++) { const q = i * 0.7; ell(p[0] + Math.cos(q) * s * .14, p[1] + Math.sin(q) * s * .07 - s * (.05 + .04 * (i % 3)), s * .1, s * .07, i % 2 ? [96, 186, 106] : [62, 152, 86]); } } ctx.restore();
-  hit('beef', 3.74, 2.07, 1.15, .38); ctx.save(); ctx.translate(wob('beef'), 0);
-  v.disc(3.74, 2.07, 1.0, .23, .08, [236, 238, 248]); ring('beef'); { const p = P(3.74, 2.07, 1.1); for (let i = 0; i < 3; i++) { ctx.save(); ctx.translate(p[0] + (i - 1) * s * .13, p[1] - i * s * .03); ctx.rotate(-.5); ctx.fillStyle = css([150, 86, 62]); rrect(-s * .15, -s * .06, s * .3, s * .12, s * .05); ctx.fill(); ctx.fillStyle = css([190, 124, 96]); rrect(-s * .1, -s * .02, s * .2, s * .035, s * .015); ctx.fill(); ctx.restore(); } } ctx.restore();
-  ['bowl', 'chili', 'cilantro'].forEach(k => ring(k, true));      // the things on the table now stand close together: the near half of a ring is drawn again over its neighbour in front, which would otherwise cut it off
+  hit('chili', 2.96, 2.07, 1.2, .38); ctx.save(); ctx.translate(wob('chili'), 0);
+  v.disc(2.96, 2.07, 1.0, .2, .2, [196, 160, 120]); ring('chili'); { const p = P(2.96, 2.07, 1.25); for (let i = 0; i < 9; i++) { const q = i * 0.7; ctx.save(); ctx.translate(p[0] + Math.cos(q) * s * .11, p[1] + Math.sin(q) * s * .055 - s * (.04 + .035 * (i % 3))); ctx.rotate(q * 1.7); ctx.fillStyle = css([[214, 48, 44], [184, 34, 40], [232, 84, 56]][i % 3]); ctx.beginPath(); ctx.ellipse(0, 0, s * .075, s * .045, 0, 0, TAU); ctx.fill(); ctx.restore(); } } ctx.restore();      // chunks of red chili piled on a wooden board, like the cilantro
+  hit('cilantro', 3.38, 2.07, 1.2, .38); ctx.save(); ctx.translate(wob('cilantro'), 0);
+  v.disc(3.38, 2.07, 1.0, .2, .2, [196, 160, 120]); ring('cilantro'); { const p = P(3.38, 2.07, 1.25); for (let i = 0; i < 9; i++) { const q = i * 0.7; ell(p[0] + Math.cos(q) * s * .11, p[1] + Math.sin(q) * s * .055 - s * (.05 + .04 * (i % 3)), s * .085, s * .06, i % 2 ? [96, 186, 106] : [62, 152, 86]); } } ctx.restore();
+  hit('beef', 3.79, 2.07, 1.15, .38); ctx.save(); ctx.translate(wob('beef'), 0);
+  v.disc(3.79, 2.07, 1.0, .2, .08, [236, 238, 248]); ring('beef'); { const p = P(3.79, 2.07, 1.1); for (let i = 0; i < 3; i++) { ctx.save(); ctx.translate(p[0] + (i - 1) * s * .09, p[1] - i * s * .025); ctx.rotate(-.5); ctx.fillStyle = css([150, 86, 62]); rrect(-s * .12, -s * .05, s * .24, s * .1, s * .04); ctx.fill(); ctx.fillStyle = css([190, 124, 96]); rrect(-s * .08, -s * .017, s * .16, s * .03, s * .013); ctx.fill(); ctx.restore(); } } ctx.restore();
   if (inFront && !binFirst) drawOwner();
   // bin for a bowl gone wrong
   hit('bin', BIN[0], BIN[1], .35, .42); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
