@@ -1098,12 +1098,11 @@ function shopPath(from, to) {
 const SHOP_DOOR = [SHOPX / 2, SHOPY - .25];      // the steps out are in the middle of the front edge
 // tap an object in the shop
 const HIT = {};
-// the prep table is shared out among the four things on it: a tap on its top, its front face, or a little above its back edge (where the piles and the bowl's rim stand up)
-// takes the thing nearest along the table, the borders halfway between neighbours (MELO 2026-11-14). The bin's own body still wins over the table's front edge
+// the prep table is shared out among the four things on it: a tap on its top (not its side), or a little above its back edge (where the piles and the bowl's rim stand up)
+// takes the thing nearest along the table, the borders halfway between neighbours (MELO 2026-11-14). The bin's own body still wins where it overlaps
 function prepAt(x, y) {
   const v = stall.V; if (!v) return null; const s = v.s, X = SHOPX;
   let px = null; { const q = v.inv(x, y + s); if (q[0] > PREP0 && q[0] < X && q[1] > 1.6 - .3 && q[1] < 2.55) px = q[0]; }      // on the top (z 1), or just behind it
-  if (px == null) { const fx = (x - v.cx) / (s * C30) + 2.55, fz = (v.cy + (fx + 2.55) * s * .5 - y) / s; if (fx > PREP0 && fx < X && fz >= 0 && fz <= 1) px = fx; }      // on the front face (y 2.55)
   if (px == null) return null;
   const K = ['bowl', 'chili', 'cilantro', 'beef']; for (let i = 0; i < 3; i++) if (px < (PREPX[K[i]] + PREPX[K[i + 1]]) / 2) return K[i]; return 'beef';
 }
