@@ -1072,7 +1072,7 @@ function hintKey() {
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { wallB: [150, 110, 96], wallA: [132, 96, 86], top: [110, 80, 72], endX: [96, 70, 64], endY: [86, 62, 58], edgeL: [120, 84, 66], edgeR: [100, 70, 58], step: [176, 128, 104] };      // the shop's colours, matched to the coffee house (MELO 2026-11-14): the two walls, the wall tops and ends, the floor's front edges, the steps
-const PREP_Y1 = 2.75;      // the prep table's front edge: it runs from y 1.6 to here (MELO 2026-11-14: a little deeper, was 2.55)
+const PREP_Y1 = 2.55, PREP_H = 1.15;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
 const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
@@ -1295,7 +1295,8 @@ function drawStall(t) {
   };
   const ow = st.owner, inFront = ow.y > PREP_Y1, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y PREP_Y1), beside its left end too; in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings in a row, the gaps between them even and the beef clear of the table's end (MELO 2026-11-14); no hint ring reaches the next thing along
-  v.box(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, 1.0, [150, 108, 88]);
+  v.box(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, PREP_H, [150, 108, 88]);
+  const liftPrep = (PREP_H - 1) * s; v.cy -= liftPrep;      // everything on the table, with its taps and rings, drawn as if on a table 1.0 high and lifted to stand on this one
   hit('bowl', PREPX.bowl, 2.07, 1.08, .47); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(PREPX.bowl, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .34, s * .19, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, PREPX.bowl, 2.07, 1.03, .3, st.bowl); if (st.bowl.soup) steam(PREPX.bowl, 2.07, 1.11, 4); } ctx.restore();
   ring('bowl');
   { const x = PREPX.chili; hit('chili', x, 2.07, 1 + .08 * TOPK, .26 * TOPK); ctx.save(); ctx.translate(wob('chili'), 0); grow(x, 2.07, 1.0, TOPK);
@@ -1304,6 +1305,7 @@ function drawStall(t) {
   ring('cilantro'); v.disc(x, 2.07, 1.0, .12, .06, [196, 160, 120]); pile(x, 1.06, 26, (i, a) => { ctx.rotate(a * 1.7); ctx.fillStyle = css([[96, 186, 106], [62, 152, 86], [120, 200, 112], [74, 166, 92]][i % 4]); ctx.beginPath(); ctx.ellipse(0, 0, s * .026, s * .014, 0, 0, TAU); ctx.fill(); }); ctx.restore(); }      // chopped cilantro: little leaves, heaped the same way
   { const x = PREPX.beef; hit('beef', x, 2.07, 1 + .08 * BEEFK, .26 * BEEFK); ctx.save(); ctx.translate(wob('beef'), 0); grow(x, 2.07, 1.0, BEEFK);
   ring('beef'); v.disc(x, 2.07, 1.0, .12, .056, [236, 238, 248]); pile(x, 1.056, 22, (i, a) => { ctx.rotate(a * 1.1); ctx.fillStyle = css([[150, 86, 62], [132, 72, 52], [172, 104, 78]][i % 3]); ctx.beginPath(); ctx.ellipse(0, 0, s * .021, s * .014, 0, 0, TAU); ctx.fill(); if (i % 4 === 0) { ctx.fillStyle = css([196, 132, 104]); ctx.beginPath(); ctx.ellipse(-s * .006, -s * .004, s * .008, s * .005, 0, 0, TAU); ctx.fill(); } }); ctx.restore(); }      // minced beef: little brown crumbs heaped on a white plate, like the chili and the cilantro
+  v.cy += liftPrep;
   if (inFront && !binFirst) drawOwner();
   // bin for a bowl gone wrong
   hit('bin', BIN[0], BIN[1], .35, .42); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
