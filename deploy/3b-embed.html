@@ -1045,7 +1045,7 @@ function serve(i) {
   save.served++; s.sinceSelf++; localStorage.setItem('ctramen', JSON.stringify(save));
   if (s.sinceSelf >= 3) { s.ownSay = S().hungry; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
   if (ok) [67, 71, 74, 79, 83].forEach((m, k) => chime(m, k * .09, .16, 1.4)); else { chime(61, 0, .16, 1); chime(62, 0.02, .12, 1); }
-  s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = Math.max(SEATX[i], 1.5); s.owner.ty = LANE_Y0;
+  s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = SERVEX; s.owner.ty = LANE_Y0;
   return true;
 }
 // whole steps in one go, for the automated checks: act('soup') = pick the ladle up + pour it in, act('serve', i) = lift the bowl + hand it over
