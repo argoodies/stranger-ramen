@@ -1447,16 +1447,16 @@ function boardUp() {
 }
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]);
-  if (b.soup) ell(x, y, r * .91, r * .53, [226, 160, 84]); else { ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, [248, 246, 240]); }      // the soup comes up over the red band inside the rim, only the white lip left showing
+  if (b.soup && !b.noodle) ell(x, y, r * .91, r * .53, [226, 160, 84]); else if (!b.soup) { ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, [248, 246, 240]); }      // the soup comes up over the red band inside the rim, only the white lip left showing
   const hot = b.soup && (b.chiliN || 0) >= 3;      // three sprinkles of chili or more: red oil spreads over the soup, and the noodles in it take on some of the red too
-  if (hot) ell(x, y, r * .91, r * .53, [214, 72, 40], .5);
+  if (hot && !b.noodle) ell(x, y, r * .91, r * .53, [214, 72, 40], .5);
   if (b.noodle) {      // the noodles, Monument Valley flat: a pale oval lit from above in two flat tones, coiled by three smooth concentric arcs
-    const k = b.soup ? 1.4 : 1, nx = r * .5 * k, ny = r * .28 * k;      // in soup the noodles spread out, wider (MELO 2026-11-14)
+    const nx = b.soup ? r * .91 : r * .5, ny = b.soup ? r * .53 : r * .28;      // with soup there is no separate ring of broth: the noodles themselves spread out to the rim, over the red band (MELO 2026-11-14)
     ell(x, y, nx, ny, [236, 194, 118]);
     ell(x, y - ny * .12, nx * .88, ny * .76, [246, 214, 146]);
     ctx.lineCap = 'round'; ctx.lineWidth = Math.max(1, r * .065); ctx.strokeStyle = css([255, 242, 200]);
     [[.76, 3.3, 6.1], [.52, 2.9, 5.6], [.28, 3.6, 6.5]].forEach(([k, a0, a1]) => { ctx.beginPath(); ctx.ellipse(x, y, nx * k, ny * k, 0, a0, a1); ctx.stroke(); });
-    if (hot) ell(x, y, nx, ny, [214, 72, 40], .3);
+    if (hot) ell(x, y, nx, ny, [214, 72, 40], .4);
   }
   const n = k => Math.min(3, b[k + 'N'] || (b[k] ? 1 : 0));      // 1, 2, 3 or more sprinkles: each looks different
   const nb = n('beef'), nc = n('chili'), ng = n('cilantro');
