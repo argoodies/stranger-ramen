@@ -618,7 +618,8 @@ function clouds(t, a) {      // little white clouds drifting slowly across the d
   for (const [x, y, k, sp] of CLOUDS) { const r = r0 * k, cx = ((x * span + t * 5 * sp) % span) - r0 * 4, cy = y * H;
     ctx.beginPath(); for (const [dx, dy, m] of [[0, 0, 1], [-.9, .25, .7], [.95, .2, .75], [-.4, -.35, .75], [.45, -.3, .65]]) { ctx.moveTo(cx + dx * r + r * m, cy + dy * r); ctx.arc(cx + dx * r, cy + dy * r, r * m, 0, TAU); } ctx.fillStyle = css([252, 250, 255], .92 * a); ctx.fill(); }      // one path, filled once: no brighter seams where the puffs overlap
 }
-function skyNow(t, dark = 0, stars = 1, cl = true) { const n = G.n, d = [20, 16, 44]; dark *= n; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
+function skyNow(t, dark = 0, stars = 1, cl = true, n = G.n) { const d = [20, 16, 44];      // n: how far into night; a dark room (the tower) passes 1 and keeps the night sky by day too
+  dark *= n; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
 function tree(v, i, j) {
   const x = i + .5, y = j + .5;
   v.box(x - .08, y - .08, 0, .16, .16, .45, [150, 110, 90]);
@@ -1463,7 +1464,7 @@ function towerTap(sx, sy) {
   const [x, y] = twv.inv(sx, sy); tw.pend = null; tw.tx = clamp(x, .4, TN - .4); tw.ty = clamp(y, .4, TN - .4); chime(69, 0, .07, .8);
 }
 function drawTowerRoom(t) {
-  TK = .42; TINT = [20, 18, 56]; SHADOW = [34, 26, 64]; skyNow(t, .45);
+  TK = .42; TINT = [20, 18, 56]; SHADOW = [34, 26, 64]; skyNow(t, .45, 1, true, 1);      // the tower inside is a dark room: night sky behind it even by day
   const N = TN, s = Math.min(W / (9.4 * C30), (H - 300) / (N + 3)), v = twv; v.s = s; v.cx = W / 2; v.cy = H * .5 - N * s * .5 + s * .6; const P = v.P.bind(v), tn = c => tint(c), K = s * 1.1, fl = .85 + .15 * Math.sin(t * 12) * Math.sin(t * 5.3);
   v.box(1.1, 1.1, -1.9, N - 2.2, N - 2.2, .7, [96, 88, 118]); v.box(.5, .5, -1.2, N - 1, N - 1, .7, [116, 106, 132]); v.box(0, 0, -.5, N, N, .5, [150, 140, 150]);      // a bare slab of stone floating in the dark: no walls
   for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if ((i + j) % 2) v.quad(i, j, 0, 1, 1, tn([164, 152, 160]));
