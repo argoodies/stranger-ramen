@@ -1061,7 +1061,7 @@ function hintKey() {
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 5, SHOPY = 5, SHOPW = 3.6, SHOPZ = -.18;      // the shop's floor: 5 by 5 in all, the wooden floor 3.6 deep, then a strip of stone floor a step lower (SHOPZ) running to the steps out (MELO, 2026-11-14)
 const shopZ = y => SHOPZ * clamp((y - SHOPW + .1) / .2);      // how high the floor is at depth y: a short step down from the wood to the stone
-const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], stone1: [186, 180, 174], stone2: [172, 167, 163], stone3: [196, 190, 182], grout: [134, 128, 126], stoneL: [150, 144, 140], stoneR: [128, 122, 120], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
+const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2;
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
@@ -1208,10 +1208,9 @@ function drawStall(t) {
   ctx.restore();
   // floor + walls
   { const C = SHOPC, h = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); }, Q = (x0, y0, x1, y1, c) => poly([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)], c), w = .28, L = 1.7, e = .018;      // long cherry-brown planks along the window wall, staggered (MELO, 2026-11-14; was big square tiles)
-    { const Z = SHOPZ, S = (x0, y0, x1, y1, c) => poly([P(x0, y0, Z), P(x1, y0, Z), P(x1, y1, Z), P(x0, y1, Z)], c), rh = .46, g = .03;      // the stone floor, a step down: flagstones in rows, each a little different grey
-      S(0, SHOPW, X, Y, C.grout); ctx.save(); ctx.beginPath(); [P(0, SHOPW, Z), P(X, SHOPW, Z), P(X, Y, Z), P(0, Y, Z)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();
-      for (let r = 0; SHOPW + r * rh < Y; r++) { let x = -h(r, 7) * .5; while (x < X) { const wd = .55 + h(r, x * 3) * .45, y0 = SHOPW + r * rh; S(x + g, y0 + g, x + wd - g, y0 + rh - g, [C.stone1, C.stone2, C.stone3][(h(x, r) * 3) | 0]); x += wd; } }
-      ctx.restore(); poly([P(0, SHOPW, 0), P(X, SHOPW, 0), P(X, SHOPW, Z), P(0, SHOPW, Z)], C.edgeL); }      // the wooden floor's edge, the step down
+    { const Z = SHOPZ;      // the stone floor, a step down: one plain slab the colour of the steps (the box shading gives its top and its two front faces the steps' own tones)
+      v.box(0, SHOPW, -.34, X, Y - SHOPW, .34 + Z, C.step);
+      poly([P(0, SHOPW, 0), P(X, SHOPW, 0), P(X, SHOPW, Z), P(0, SHOPW, Z)], C.edgeL); }      // the wooden floor's edge, the step down
     ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, SHOPW), P(0, SHOPW)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, SHOPW, C.seam);
     for (let r = 0; r * w < SHOPW; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, h(r, x) < .5 ? C.plank1 : C.plank2);
     ctx.restore(); }
@@ -1231,7 +1230,7 @@ function drawStall(t) {
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
   // the way out: a mat, then a few steps going down and out at the lower left
   { const ex = 1.3, ew = 1.0;
-    poly([P(0, Y, SHOPZ), P(X, Y, SHOPZ), P(X, Y, -.34), P(0, Y, -.34)], SHOPC.stoneL); poly([P(X, 0, 0), P(X, SHOPW, 0), P(X, SHOPW, -.34), P(X, 0, -.34)], SHOPC.edgeR); poly([P(X, SHOPW, SHOPZ), P(X, Y, SHOPZ), P(X, Y, -.34), P(X, SHOPW, -.34)], SHOPC.stoneR);
+    poly([P(X, 0, 0), P(X, SHOPW, 0), P(X, SHOPW, -.34), P(X, 0, -.34)], SHOPC.edgeR);
     for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 + SHOPZ - .26 * k, SHOPC.step);      // the first one level with the stone, then down
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   // counter under the window, with the bowls already served
