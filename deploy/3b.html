@@ -1112,7 +1112,7 @@ function hintKey() {
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 5, SHOPY = 5;      // the shop's floor: a square, 5 by 5 (MELO, 2026-11-14; was 5 x 3.6), the bowl cabinet in its left corner
-const SHOPC = { plank1: [230, 204, 166], plank2: [218, 190, 150], seam: [182, 150, 114], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [170, 128, 104], edgeR: [140, 102, 86], step: [200, 164, 134] };      // the shop's colours: floor planks (light oak) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
+const SHOPC = { plank1: [184, 108, 84], plank2: [170, 98, 76], seam: [126, 70, 56], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [140, 80, 64], edgeR: [118, 66, 54], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2;
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
@@ -1261,7 +1261,7 @@ function drawStall(t) {
   });
   ctx.restore();
   // floor + walls
-  { const C = SHOPC, h = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); }, Q = (x0, y0, x1, y1, c) => poly([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)], c), w = .28, L = 1.7, e = .018;      // long light-oak planks along the window wall, staggered (MELO, 2026-11-14; was big square tiles)
+  { const C = SHOPC, h = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); }, Q = (x0, y0, x1, y1, c) => poly([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)], c), w = .28, L = 1.7, e = .018;      // long cherry-wood planks along the window wall, staggered (MELO, 2026-11-14; was big square tiles)
     ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, C.seam);
     for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, h(r, x) < .5 ? C.plank1 : C.plank2);
     ctx.restore(); }
