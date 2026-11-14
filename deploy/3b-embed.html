@@ -1067,7 +1067,7 @@ function hintKey() {
   if (h) return 'bowl';
   if (s.myBowl) return s.eatT > 0 ? null : 'bar';
   if (s.done) return null;
-  if (!b.noodle) return s.pot === 'cooking' || (s.pot === 'empty' && !s.seats.some(Boolean)) ? null : 'pot';
+  if (!b.noodle) return s.pot === 'cooking' || !w.length ? null : 'pot';      // the pot is pointed at only while someone is waiting to order: not while the last customer is still eating (MELO 2026-11-14)
   if (!b.soup) return 'soup';
   if (self) return 'bowl';
   if (w.length) { const want = s.seats[w[0]].want; for (const k of ['chili', 'cilantro', 'beef']) if (cnt(b, k) < (k === 'beef' ? +!!want[k] : lvl(want[k]))) return k; return 'bowl'; }
