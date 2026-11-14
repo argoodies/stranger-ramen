@@ -1209,8 +1209,8 @@ function drawStall(t) {
     ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, C.seam);
     for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, h(r, x) < .5 ? C.plank1 : C.plank2);
     ctx.restore(); }
-  { const x0 = 1.4, x1 = 3.6, y0 = 3.5, y1 = 4.85, R = (a, b, c, d, col) => poly([P(a, b, .004), P(c, b, .004), P(c, d, .004), P(a, d, .004)], col);      // a big plain rug in front of the steps out: oatmeal, with one quiet band of red-brown inside its edge
-    R(x0, y0, x1, y1, [212, 194, 166]); R(x0 + .1, y0 + .1, x1 - .1, y1 - .1, [158, 100, 84]); R(x0 + .15, y0 + .15, x1 - .15, y1 - .15, [212, 194, 166]); }
+  { const x0 = .9, x1 = 4.1, y0 = 3.5, y1 = 4.85, R = (a, b, c, d, col) => poly([P(a, b, .004), P(c, b, .004), P(c, d, .004), P(a, d, .004)], col);      // a long plain rug in front of the steps out: dark oatmeal, with one quiet band of red-brown inside its edge
+    R(x0, y0, x1, y1, [176, 154, 126]); R(x0 + .1, y0 + .1, x1 - .1, y1 - .1, [122, 72, 60]); R(x0 + .15, y0 + .15, x1 - .15, y1 - .15, [176, 154, 126]); }
   const wallB = SHOPC.wallB, wallA = SHOPC.wallA;
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(4.5, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(4.5, 0, 2.8)], wallB);
