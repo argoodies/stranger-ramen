@@ -1070,7 +1070,7 @@ function hintKey() {
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
-const SHOPC = { wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [120, 84, 66], edgeR: [100, 70, 58], step: [176, 128, 104] };      // the shop's colours, the two walls in their own pale stone, the rest matched to the coffee house (MELO 2026-11-14): the two walls, the wall tops and ends, the floor's front edges, the steps
+const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
 const PREP_Y1 = 2.55, PREP_H = 1.15;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
 const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
@@ -1201,7 +1201,6 @@ const ROOM_TOP = 104, roomB = N => N + .83, roomScale = (N, Hh) => Math.min(W / 
 function drawStall(t) {
   TK = 0; SHADOW = [80, 44, 60];
   skyNow(t, .15);
-  const BTK = lerp(.1, .3, clamp((G.n - .35) / .3)), bt = c => mix(c, [26, 22, 62], BTK), barTK = f => { const k = TK, c = TINT, sh = SHADOW; TK = BTK; TINT = [26, 22, 62]; SHADOW = [44, 32, 72]; f(); TK = k; TINT = c; SHADOW = sh; };      // the floor and the steps take the coffee house's light, so their colours come out as there (MELO 2026-11-14); the rest of the shop stays untinted
   const st = stall, X = SHOPX, Y = SHOPY, Hh = 3.8, top = 104;
   const bowlR = 0;
   // the room is fitted to the screen: as wide as it can be, or as tall, whichever is smaller. On a narrow phone it keeps a margin either side (down to 86% of the width at 330 px) so the order bubbles have somewhere to go.
@@ -1225,8 +1224,11 @@ function drawStall(t) {
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], .3, 1.05); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
   ctx.restore();
-  // floor + walls: the same dark checker planks and timber walls as the coffee house (MELO, 2026-11-14; was long cherry planks and cream walls)
-  for (let i = 0; i < X; i++) for (let j = 0; j < Y; j++) v.quad(i, j, 0, 1, 1, bt((i + j) % 2 ? [150, 104, 84] : [164, 116, 92]));
+  // floor + walls
+  { const C = SHOPC, h = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); }, Q = (x0, y0, x1, y1, c) => poly([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)], c), w = .28, L = 1.7, e = .018;      // long cherry-brown planks along the window wall, staggered (MELO, 2026-11-14; was big square tiles)
+    ctx.save(); ctx.beginPath(); [P(0, 0), P(X, 0), P(X, Y), P(0, Y)].forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip(); Q(0, 0, X, Y, C.seam);
+    for (let r = 0; r * w < Y; r++) for (let x = -h(r, 1) * L; x < X; x += L) Q(x + e, r * w + e, x + L - e, r * w + w - e, h(r, x) < .5 ? C.plank1 : C.plank2);
+    ctx.restore(); }
   const wallB = SHOPC.wallB, wallA = SHOPC.wallA;
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, 1), P(0, 0, 1)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 1), P(.5, 0, 1), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(3.55, 0, 1), P(X, 0, 1), P(X, 0, 2.8), P(3.55, 0, 2.8)], wallB);
@@ -1244,8 +1246,8 @@ function drawStall(t) {
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
   // the way out: a few steps going down from the middle of the front edge
   { const ew = 1.0, ex = X / 2 - ew / 2;
-    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], bt(SHOPC.edgeL)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], bt(SHOPC.edgeR));
-    barTK(() => { for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step); });
+    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], SHOPC.edgeL); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], SHOPC.edgeR);
+    for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step);
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   { const q = P(st.owner.x, st.owner.y); buffRings(q[0], q[1], s, t); }      // the prophecies on the floor, before the counter, the stove, the table and the bin
   // counter under the window, with the bowls already served
