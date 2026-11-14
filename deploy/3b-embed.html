@@ -1080,7 +1080,7 @@ function shopBlocked(x, y) {
   if (x > 1.9 - SM && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
   if (Math.hypot(x - 4.45, y - 3.0) < .26 + SM) return true;                     // bin
   if (x < 1.2 + SM && y > 3.55 - SM && y < 4.85 + SM) return true;                // the bowl cabinet in the left corner, as deep as the stove
-  if (Math.hypot(x - 4.3, y - 4.3) < .36 + SM || Math.hypot(x - 3.55, y - 4.55) < .2 + SM) return true;      // the little round table and its stool in the right corner
+  if (Math.hypot(x - 4.3, y - 4.3) < .36 + SM) return true;                       // the little round table in the right corner
   return false;
 }
 const sgFree = (i, j) => i >= 0 && j >= 0 && i < SGX && j < SGY && !shopBlocked(i * SG, j * SG);
@@ -1124,7 +1124,7 @@ function stallTap(x, y) {
   else if (best === 'bin') { if (h) { goDo('dump', 3.8, 3.05); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 4.45, .95); if (!s.myBowl) chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }      // going to eat your own bowl: no tap chime, only the eating notes
   else if (best === 'jars') { s.jarAt = performance.now(); return; }
-  else if (best === 'rtable' || best === 'stool') { s[best === 'stool' ? 'stoolAt' : 'tableAt'] = performance.now(); return; }      // the round table and the stool only rock, without a sound      // empty jars: they only rattle, without a sound
+  else if (best === 'rtable') { s.tableAt = performance.now(); return; }      // the round table only rocks, without a sound      // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if ((h === 'dish' || (h === 'bowl' && s.bowl.noodle)) && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), .95); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
   if (!ok) { s.nope = s.hold === 'bowl' ? 'own' : best; s.nopeT = 0.35; chime(45, 0, .1, .3); }      // a bowl that cannot go there: it is the bowl in your hands that trembles
@@ -1306,9 +1306,8 @@ function drawStall(t) {
   hit('bin', 4.45, 3.0, .35, .42); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(4.45, 3.0, 0, .26, .55, [120, 132, 150]); v.disc(4.45, 3.0, .55, .21, 0, [50, 44, 70]); ctx.restore();
   ring('bin');
   if (binFirst) drawOwner();
-  // a little round table in the right corner, bare, as in the bar, with a stool beside it: a tap only rocks them, silently
-  { const jg = k => .035 * clamp(1 - (performance.now() - (st[k] || -1e9)) / 650) * Math.sin(performance.now() / 22), jt = jg('tableAt'), js = jg('stoolAt');
-    v.disc(3.55, 4.55, 0, .11, .03, [96, 66, 54]); v.box(3.52 + js, 4.52, .03, .06, .06, .38, [110, 76, 60]); v.disc(3.55 + js, 4.55, .41, .22, .06, [176, 124, 90]); hit('stool', 3.55, 4.55, .4, .35);
+  // a little round table in the right corner, bare, as in the bar: a tap only rocks it, silently
+  { const jg = k => .035 * clamp(1 - (performance.now() - (st[k] || -1e9)) / 650) * Math.sin(performance.now() / 22), jt = jg('tableAt');
     v.disc(4.3, 4.3, 0, .16, .04, [96, 66, 54]); v.box(4.26 + jt, 4.26, .04, .08, .08, .62, [110, 76, 60]); v.disc(4.3 + jt, 4.3, .66, .36, .06, [176, 124, 90]); hit('rtable', 4.3, 4.3, .55, .5); }
   // one hanging lamp, over the middle of the room
   for (const lx of [3.6]) { const a = P(lx, 1.3, Hh + .6), b = P(lx, 1.3, 3.2); line([a, b], [70, 52, 92], 1.5); glow(b[0], b[1] + s * .15, s * 1.7, [255, 214, 140], .5); poly([[b[0] - s * .22, b[1] + s * .16], [b[0] + s * .22, b[1] + s * .16], [b[0], b[1] - s * .12]], [226, 106, 96]); circ(b[0], b[1] + s * .18, s * .07, [255, 240, 190]); }
