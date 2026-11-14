@@ -1131,7 +1131,7 @@ function stallTap(x, y) {
   else if (best === 'bin') { if (h) { goDo('dump', BIN[0] - .65, BIN[1]); chime(57, 0, .08, .6); ok = true; } }
   else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 3.5, LANE_Y0); if (!s.myBowl) chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }      // going to eat your own bowl: no tap chime, only the eating notes
   else if (best === 'jars') { s.jarAt = performance.now(); return; }
-  else if (best === 'jartop' || best === 'jartop2') { s.jarTopAt = performance.now(); return; }
+  else if (best.startsWith('jartop')) { s.jarTopAt = performance.now(); return; }
       // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
   else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.noodle && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), LANE_Y0); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
@@ -1271,8 +1271,8 @@ function drawStall(t) {
     // no bottom board: under the top there is only the floor between the two end boards (MELO 2026-11-14)
     bx(X - T, 0, 0, T, .6, .9);
     bx(0, 0, .9, X, .6, .1);
-    { const [, w, h, col, neck, cap] = STOCK[1][1], x = w / 2 + .02, y = w / 2 + .02, jk = clamp(1 - (performance.now() - (st.jarTopAt || -1e9)) / 650), dx = .035 * jk * Math.sin(performance.now() / 22); J(x + dx, y, 1.0, w, h, col, neck, cap); const q = P(x, y, 1.0 + h / 2); HIT.jartop = [q[0], q[1], s * .2];
-      { const w2 = .14, h2 = .19, x2 = w2 / 2 + .02, y2 = y + w / 2 + .05 + w2 / 2, d2 = .035 * jk * Math.sin(performance.now() / 22 + 2.1); J(x2 + d2, y2, 1.0, w2, h2, [96, 150, 120], 0, [236, 226, 206]); const q2 = P(x2, y2, 1.0 + h2 / 2); HIT.jartop2 = [q2[0], q2[1], s * .2]; } }      // and a green jar in front of it, along the left wall (MELO 2026-11-14); a tap on either rattles both, out of step
+    { const jk = clamp(1 - (performance.now() - (st.jarTopAt || -1e9)) / 650), ROW = [[.15, .17, [236, 226, 206], 0, [206, 90, 80]], [.14, .19, [96, 150, 120], 0, [236, 226, 206]], [.1, .2, [200, 160, 110], .09, [120, 84, 70]], [.1, .12, [214, 96, 90], 0, [236, 226, 206]]];      // jars and a bottle in a row along the left wall on the counter top, from the corner to its front edge (MELO 2026-11-14); a tap on any rattles them all, out of step
+      let y = .02; ROW.forEach(([w, h, col, neck, cap], i) => { const x = w / 2 + .02, yc = y + w / 2, d = .035 * jk * Math.sin(performance.now() / 22 + i * 2.1); J(x + d, yc, 1.0, w, h, col, neck, cap); const q = P(x, yc, 1.0 + (h + (neck || 0)) / 2); HIT['jartop' + i] = [q[0], q[1], s * .18]; y += w + .03; }); }
    }      // the one jar stands on the counter top in the corner, against both walls (MELO 2026-11-14)      // running the whole width, from the left wall (MELO 2026-11-14: it began under the window)      // the prep table's colour (MELO 2026-11-14)
   const steam = (x, y, z, k) => { for (let i = 0; i < 3; i++) { const ph = (t * .45 + i / 3 + k * .37) % 1, q = P(x + .1 * Math.sin(t * 1.3 + i * 2 + k), y, z + ph * .75); circ(q[0], q[1], s * (.05 + .09 * ph), [255, 250, 245], .38 * (1 - ph)); } };      // a bowl with hot soup in it steams a little
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], .3, 1.02, .3, c.dish); if (c.dish.soup) steam(SEATX[i], .3, 1.12, i); } });
