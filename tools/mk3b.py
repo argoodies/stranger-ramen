@@ -16,6 +16,8 @@ def check_comments(code, where):      # a '//' comment runs to the end of its li
             raise SystemExit(f'{where}:{n}: code after a // comment would be lost:\n  {line.strip()[:200]}')
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+i = src.index('const w = btn(L.devWipe'); j = src.index('box.appendChild(w);', i) + len('box.appendChild(w);')
+src = src[:i] + src[j:]      # /3b has no church and so no church developer menu: its wipe-everything button (the one localStorage.clear) goes, rather than being carried along unreachable
 boot = """<script>
 // /3b: only the three-player game in the clock tower. Between games the table is a quiet lobby in daylight: just you and the
 // Storyteller; tap the table to stroll about it, tap the Storyteller to talk, and the game begins in the night. When it is over
