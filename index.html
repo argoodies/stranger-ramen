@@ -999,9 +999,9 @@ function refreshUI() {}
 const NOTE = { boil: 62, scoop: 66, put: 69, soup: 74, chili: 76, cilantro: 78, beef: 81, bowl: 71 };
 // the stove and the prep table (MELO 2026-11-14): the stove is STOVE_W wide with its pots scaled by POT_K; the prep table starts a step's width past it and runs to the right wall.
 // Along it: the bowl (r .3), then chili and cilantro on boards of radius TOP_R, then the beef on a plate of radius BEEF_R, the gaps between them even
-const STOVE_W = .9, POT_K = .87, TOP_R = .22, BEEF_R = .22, LEGX0 = 3.3, LEG_Y1 = 3.35, POT_X = STOVE_W / 2, LANE = Math.round((STOVE_W + .4) * 100) / 100, PREP0 = Math.round((STOVE_W + .6) * 100) / 100, TOPK = TOP_R / .12, BEEFK = BEEF_R / .12;      // the beef plate is drawn at the toppings' first size too, so its chopped bits come out the same size as theirs
-const PREPX = (() => { const g = (LEGX0 - PREP0 - .6 - 4 * TOP_R) / 4, b = PREP0 + g + .3, c = b + .3 + g + TOP_R, d = c + 2 * TOP_R + g; return { bowl: b, chili: c, cilantro: d, beef: (LEGX0 + 4) / 2 }; })();      // the prep table is an L (MELO 2026-11-14): the bowl, chili and cilantro along its long arm, evenly spaced, the beef in its corner, where the short arm (x LEGX0 to the wall, back to LEG_Y1) turns toward the door      // the same gap before the bowl, between each two, and after the beef
-const SPOT = { boil: [LANE, 1.6], scoop: [LANE, 1.6], put: [PREPX.bowl, 1.25], soup: [LANE, 2.6], chili: [PREPX.chili, 1.25], cilantro: [PREPX.cilantro, 1.25], beef: [PREPX.beef, 1.25], bowl: [PREPX.bowl, 1.25] };
+const STOVE_W = .9, POT_K = .87, TOP_R = .22, BEEF_R = .22, LEGX0 = 3.3, LEG_Y0 = 1.0, POT_X = STOVE_W / 2, LANE = Math.round((STOVE_W + .4) * 100) / 100, PREP0 = Math.round((STOVE_W + .6) * 100) / 100, TOPK = TOP_R / .12, BEEFK = BEEF_R / .12;      // the beef plate is drawn at the toppings' first size too, so its chopped bits come out the same size as theirs
+const PREPX = (() => { const g = (LEGX0 - PREP0 - .6 - 4 * TOP_R) / 4, b = PREP0 + g + .3, c = b + .3 + g + TOP_R, d = c + 2 * TOP_R + g; return { bowl: b, chili: c, cilantro: d, beef: (LEGX0 + 4) / 2 }; })();      // the prep table is an L (MELO 2026-11-14): the bowl, chili and cilantro along its long arm, evenly spaced, the beef in its corner, where the short arm (x LEGX0 to the wall, from LEG_Y0 to the table) turns back toward the serving board      // the same gap before the bowl, between each two, and after the beef
+const SPOT = { boil: [LANE, 1.6], scoop: [LANE, 1.6], put: [PREPX.bowl, 1.25], soup: [LANE, 2.6], chili: [PREPX.chili, 1.25], cilantro: [PREPX.cilantro, 1.25], beef: [PREPX.beef, 2.9], bowl: [PREPX.bowl, 1.25] };      // the beef, in the L's corner, is reached from in front of the table
 const FLYC = { noodle: [250, 232, 170], soup: [226, 160, 84], chili: [220, 40, 40], cilantro: [80, 170, 96], beef: [150, 86, 62] };
 const goTo = k => { const p = SPOT[k]; if (p) { stall.owner.tx = p[0]; stall.owner.ty = p[1]; stall.leaving = false; stall.pend = null; } };
 // things done on arrival: walk over first, then open the board / drop what you carry in the bin
@@ -1083,14 +1083,14 @@ let WOODSTYLE = 1; const WOODS = [null,
   { body: [128, 88, 64], alt: [118, 80, 58], top: [164, 116, 82], seam: [66, 44, 36], slab: .07, oh: .03, planks: .17, kick: .07, kickc: [76, 52, 42] },      // 3 stacked horizontal boards
   { body: [90, 62, 50], alt: [108, 76, 58], top: [206, 168, 122], seam: [56, 38, 32], slab: .12, oh: .05, slats: .09, kick: .08, kickc: [60, 42, 36] }];      // 4 a pale hinoki top on dark slats      // WOOD: the prep table and the serving counter, a light mahogany that stands apart from the floor and the walls (MELO 2026-11-14)      // where the shop's one hanging lamp hangs
 const PREP_Y1 = 2.55, PREP_H = PREP_H0;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
-const BIN = [2.75, 3.35];      // the bin, moved left of the prep table's short arm      // the bin
+const BIN = [3.5, 3.4];      // the bin      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
   if (y < LANE_Y0) return true;                                  // counter under the window, and a strip in front of it: standing closer, the chef's shadow fell on its front face
   if (x < STOVE_W + SM && y < 3.2 + SM) return true;                                // stove, and the sliver of floor behind it (the chef could slip along it into the corner left of the counter, drawn over the stove)
   if (x > PREP0 - SM + 1e-9 && y > 1.6 - SM && y < PREP_Y1 + SM) return true;                // prep table
-  if (x > LEGX0 - SM && y > 1.6 - SM && y < LEG_Y1 + SM) return true;      // its short arm
+  if (x > LEGX0 - SM && y > LEG_Y0 - SM && y < PREP_Y1 + SM) return true;      // its short arm
   if (Math.hypot(x - BIN[0], y - BIN[1]) < .26 + SM) return true;               // bin
   return false;
 }
@@ -1351,6 +1351,7 @@ function drawStall(t) {
   };
   const ow = st.owner, inFront = ow.y > PREP_Y1, binFirst = inFront && ow.x + ow.y > BIN[0] + BIN[1]; if (!inFront) drawOwner();      // in front of the prep table whenever past the plane of its front face (y PREP_Y1), beside its left end too; in front of the bin when deeper into the room than it
   // prep table: the bowl and the three toppings in a row, the gaps between them even and the beef clear of the table's end (MELO 2026-11-14); no hint ring reaches the next thing along
+  woodBox(LEGX0, LEG_Y0, 0, X - LEGX0, 1.6 - LEG_Y0, PREP_H);      // the L's short arm, back toward the serving board: behind the long arm, after the chef when the chef is in the lane beside it
   woodBox(PREP0, 1.6, 0, X - PREP0, PREP_Y1 - 1.6, PREP_H);      // solid (MELO 2026-11-14: an open stand was tried)
   const liftPrep = (PREP_H - 1) * s; v.cy -= liftPrep;      // everything on the table, with its taps and rings, drawn as if on a table 1.0 high and lifted to stand on this one
   hit('bowl', PREPX.bowl, 2.07, 1.08, .47); ctx.save(); ctx.translate(wob('bowl'), 0); if (st.hold === 'bowl') { const p = P(PREPX.bowl, 2.07, 1.03); ctx.beginPath(); ctx.ellipse(p[0], p[1], s * .34, s * .19, 0, 0, TAU); ctx.strokeStyle = css([255, 255, 255], .35); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]); } else { iso_bowl(v, PREPX.bowl, 2.07, 1.03, .3, st.bowl); if (st.bowl.soup) steam(PREPX.bowl, 2.07, 1.11, 4); } ctx.restore();
@@ -1362,9 +1363,7 @@ function drawStall(t) {
   { const x = PREPX.beef; hit('beef', x, 2.07, 1 + .08 * BEEFK, .26 * BEEFK); ctx.save(); ctx.translate(wob('beef'), 0); grow(x, 2.07, 1.0, BEEFK);
   ring('beef'); v.disc(x, 2.07, 1.0, .12, .056, [236, 238, 248]); pile(x, 1.056, 22, (i, a) => { ctx.rotate(a * 1.1); ctx.fillStyle = css([[150, 86, 62], [132, 72, 52], [172, 104, 78]][i % 3]); ctx.beginPath(); ctx.ellipse(0, 0, s * .021, s * .014, 0, 0, TAU); ctx.fill(); if (i % 4 === 0) { ctx.fillStyle = css([196, 132, 104]); ctx.beginPath(); ctx.ellipse(-s * .006, -s * .004, s * .008, s * .005, 0, 0, TAU); ctx.fill(); } }); ctx.restore(); }      // minced beef: little brown crumbs heaped on a white plate, like the chili and the cilantro
   v.cy += liftPrep;
-  const leg = () => woodBox(LEGX0, PREP_Y1, 0, X - LEGX0, LEG_Y1 - PREP_Y1, PREP_H), legFirst = !inFront || ow.y > LEG_Y1; if (legFirst) leg();      // the L's short arm: before the chef unless the chef stands beside it, left of it (then it is nearer us)
   if (inFront && !binFirst) drawOwner();
-  if (!legFirst) leg();
   // bin for a bowl gone wrong
   hit('bin', BIN[0], BIN[1], .35, .42); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
   ring('bin');
@@ -2646,7 +2645,7 @@ if (location.hash) {
     if (st >= 1) cook(); if (st >= 2) act('scoop'); if (st >= 3) act('put'); if (st >= 4) grab('soup'); if (st >= 5) intoBowl(); if (st >= 6) { act('chili'); } if (st >= 7) { act('cilantro'); } if (st >= 8) { act('beef'); } if (st >= 9) grab('bowl'); if (st === 10) { stall.bowl.soup = false; }
     o.x = o.tx; o.y = o.ty; o.ptx = o.tx; o.pty = o.ty; o.path = []; document.title = 'hint=' + hintKey(); }, 200);
   if (location.hash.startsWith('#hold')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); const m = location.hash.slice(5); if (m === 'soup') grab('soup'); else { act('soup'); act('beef'); if (m === 'beef') { stall.bowl.beef = false; grab('beef'); } else grab('bowl'); } stall.owner.x = stall.owner.tx; stall.owner.y = stall.owner.ty; stall.owner.ptx = stall.owner.tx; stall.owner.pty = stall.owner.ty; stall.owner.path = []; }, 200);
-  if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), LANE_Y0], bar: [3.5, LANE_Y0], bin: [BIN[0] - .65, BIN[1]], door: SHOP_DOOR, seat2: [SEATX[2], LANE_Y0] }; let bad = 0;
+  if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), LANE_Y0], bar: [BARX, LANE_Y0], bin: [BIN[0] - .65, BIN[1]], door: SHOP_DOOR, seat2: [SEATX[2], LANE_Y0] }; let bad = 0;
     for (const k in spots) { o.tx = spots[k][0]; o.ty = spots[k][1]; let n = 0, hit = 0; for (; n < 300; n++) { stall.leaving = false; updateStall(0.03); if (shopBlocked(o.x, o.y)) hit++; if (Math.hypot(o.x - o.tx, o.y - o.ty) < .02) break; } if (hit || n >= 300) bad++; log.push(k + ':' + n + (hit ? '!hit' + hit : '') + (n >= 300 ? '!stuck' : '')); }
     document.title = 'bad=' + bad + ' ' + log.join(' '); }, 300);
   if (location.hash === '#world' || location.hash === '#far' || location.hash === '#day') { G.t = 0; G.n = 0; }
