@@ -1031,7 +1031,7 @@ function serve(i) {
   save.served++; s.sinceSelf++; localStorage.setItem('ctramen', JSON.stringify(save));
   if (s.sinceSelf >= 3) { s.ownSay = S().hungry; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
   if (ok) [67, 71, 74, 79, 83].forEach((m, k) => chime(m, k * .09, .16, 1.4)); else { chime(61, 0, .16, 1); chime(62, 0.02, .12, 1); }
-  s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = Math.max(SEATX[i], 1.5); s.owner.ty = 0.95;
+  s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = Math.max(SEATX[i], 1.5); s.owner.ty = LANE_Y0;
   return true;
 }
 // whole steps in one go, for the automated checks: act('soup') = pick the ladle up + pour it in, act('serve', i) = lift the bowl + hand it over
@@ -1065,10 +1065,10 @@ function hintKey() {
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [232, 204, 170], wallA: [214, 180, 150], top: [246, 226, 198], endX: [190, 156, 128], endY: [176, 142, 118], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out
 const BIN = [3.5, 3.25];      // the bin
-const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2;
+const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
   if (x < SM || y < SM || x > SHOPX - SM * .5 || y > SHOPY - SM * .5) return true;
-  if (x > .5 - SM && y < .6 + SM) return true;                                   // counter under the window
+  if (x > .5 - SM && y < LANE_Y0) return true;                                  // counter under the window, and a strip in front of it: standing closer, the chef's shadow fell on its front face
   if (x < STOVE_W + SM && y < 3.2 + SM) return true;                                // stove, and the sliver of floor behind it (the chef could slip along it into the corner left of the counter, drawn over the stove)
   if (x > PREP0 - SM + 1e-9 && y > 1.6 - SM && y < 2.55 + SM) return true;                // prep table
   if (Math.hypot(x - BIN[0], y - BIN[1]) < .26 + SM) return true;               // bin
@@ -1104,7 +1104,7 @@ function stallPick(x, y) {
   return best;
 }
 function stallTap(x, y) {
-  if (stall.oracle && stall.oracleAt && Math.hypot(x - stall.oracleAt[0], y - stall.oracleAt[1]) < 30) { if (stall.hold) return; goDo('oracle', 3.5, .95); chime(69, 0, .08, .7); return; }      // the prophecy mark: walk over to it (where you eat your own bowl), then it is yours
+  if (stall.oracle && stall.oracleAt && Math.hypot(x - stall.oracleAt[0], y - stall.oracleAt[1]) < 30) { if (stall.hold) return; goDo('oracle', 3.5, LANE_Y0); chime(69, 0, .08, .7); return; }      // the prophecy mark: walk over to it (where you eat your own bowl), then it is yours
   const best = stallPick(x, y);
   if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
     if (stall.hold && stall.hold !== 'bowl') { if (stall.hold === 'noodle') stall.pot = 'done'; setHold(null); chime(57, 0, .1, .6); return; }      // holding noodles, the soup ladle or a topping: a tap on bare floor puts it back (the noodles back in the pot)
@@ -1116,19 +1116,19 @@ function stallTap(x, y) {
   else if (ING.includes(best)) { if (h === best) { setHold(null); chime(57, 0, .1, .6); ok = true; } else { if (MORE.includes(h)) setHold(null); ok = grab(best); } }      // holding another topping: it goes back and this one is taken up
   else if (best === 'bowl') { if (h === 'bowl') { setHold(null); goTo('bowl'); chime(64, 0, .12, .8); ok = true; } else ok = h ? intoBowl() : grab('bowl'); }
   else if (best === 'bin') { if (h) { goDo('dump', BIN[0] - .65, BIN[1]); chime(57, 0, .08, .6); ok = true; } }
-  else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 3.5, .95); if (!s.myBowl) chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }      // going to eat your own bowl: no tap chime, only the eating notes
+  else if (best === 'bar') { if ((s.myBowl && !h && s.eatT <= 0) || (!s.myBowl && s.sinceSelf >= 3 && h === 'bowl' && s.bowl.soup)) { goDo('bar', 3.5, LANE_Y0); if (!s.myBowl) chime(69, 0, .08, .7); ok = true; } else ok = barTap(); }      // going to eat your own bowl: no tap chime, only the eating notes
   else if (best === 'jars') { s.jarAt = performance.now(); return; }
       // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
-  else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.noodle && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), .95); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
+  else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.noodle && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, Math.max(SEATX[i], 1.5), LANE_Y0); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
   if (!ok) { s.nope = s.hold === 'bowl' ? 'own' : best; s.nopeT = 0.35; chime(45, 0, .1, .3); }      // a bowl that cannot go there: it is the bowl in your hands that trembles
 }
 function barTap() {
   const s = stall, b = s.bowl;
-  if (s.myBowl) { if (s.hold) return false; if (s.eatT > 0) return true; s.eatT = 2.4; s.owner.tx = 3.5; s.owner.ty = .95; [67, 71, 74].forEach((m, k) => chime(m, k * .5, .14, 1.2)); return true; }
+  if (s.myBowl) { if (s.hold) return false; if (s.eatT > 0) return true; s.eatT = 2.4; s.owner.tx = 3.5; s.owner.ty = LANE_Y0; [67, 71, 74].forEach((m, k) => chime(m, k * .5, .14, 1.2)); return true; }
   if (s.sinceSelf < 3) return false;      // customers still to feed: nothing is said, the bowl in your hands just trembles
   if (s.hold !== 'bowl' || !b.soup) return false;
-  scAch('own_ramen'); s.myBowl = Object.assign({}, b); s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = 3.5; s.owner.ty = .95; chime(79, 0, .18, 1.4); chime(83, .1, .14, 1.4);
+  scAch('own_ramen'); s.myBowl = Object.assign({}, b); s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = 3.5; s.owner.ty = LANE_Y0; chime(79, 0, .18, 1.4); chime(83, .1, .14, 1.4);
   s.ownSayT = 0; return true;
 }
 // the bin takes whatever is in your hand: a whole bowl, or just the ladle / topping / noodles you picked up
@@ -2566,7 +2566,7 @@ if (location.hash) {
     if (st >= 1) cook(); if (st >= 2) act('scoop'); if (st >= 3) act('put'); if (st >= 4) grab('soup'); if (st >= 5) intoBowl(); if (st >= 6) { act('chili'); } if (st >= 7) { act('cilantro'); } if (st >= 8) { act('beef'); } if (st >= 9) grab('bowl'); if (st === 10) { stall.bowl.soup = false; }
     o.x = o.tx; o.y = o.ty; o.ptx = o.tx; o.pty = o.ty; o.path = []; document.title = 'hint=' + hintKey(); }, 200);
   if (location.hash.startsWith('#hold')) setTimeout(() => { enterStall(); fade = 0; spawnCustomer(); spawnCustomer(); stall.seats.forEach(c => { if (c) c.state = 'wait'; }); act('boil'); stall.potT = 9; updateStall(.01); act('scoop'); act('put'); const m = location.hash.slice(5); if (m === 'soup') grab('soup'); else { act('soup'); act('beef'); if (m === 'beef') { stall.bowl.beef = false; grab('beef'); } else grab('bowl'); } stall.owner.x = stall.owner.tx; stall.owner.y = stall.owner.ty; stall.owner.ptx = stall.owner.tx; stall.owner.pty = stall.owner.ty; stall.owner.path = []; }, 200);
-  if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), .95], bar: [3.5, .95], bin: [BIN[0] - .65, BIN[1]], door: SHOP_DOOR, seat2: [SEATX[2], .95] }; let bad = 0;
+  if (location.hash === '#shopwalk') setTimeout(() => { const log = []; enterStall(); const o = stall.owner, spots = { start: [2.4, 1.2], pot: SPOT.boil, soup: SPOT.soup, put: SPOT.put, beef: SPOT.beef, seat0: [Math.max(SEATX[0], 1.5), LANE_Y0], bar: [3.5, LANE_Y0], bin: [BIN[0] - .65, BIN[1]], door: SHOP_DOOR, seat2: [SEATX[2], LANE_Y0] }; let bad = 0;
     for (const k in spots) { o.tx = spots[k][0]; o.ty = spots[k][1]; let n = 0, hit = 0; for (; n < 300; n++) { stall.leaving = false; updateStall(0.03); if (shopBlocked(o.x, o.y)) hit++; if (Math.hypot(o.x - o.tx, o.y - o.ty) < .02) break; } if (hit || n >= 300) bad++; log.push(k + ':' + n + (hit ? '!hit' + hit : '') + (n >= 300 ? '!stuck' : '')); }
     document.title = 'bad=' + bad + ' ' + log.join(' '); }, 300);
   if (location.hash === '#world' || location.hash === '#far' || location.hash === '#day') { G.t = 0; G.n = 0; }
