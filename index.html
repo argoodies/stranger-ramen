@@ -966,7 +966,7 @@ function unlockBadge(id) { return false; }      // the achievement board is gone
 function knock() { if (!AC) return; const t = AC.currentTime; tone(150, t, .1, .32, 'triangle'); tone(92, t, .16, .22); tone(620, t, .03, .06); }
 const emptyBowl = () => ({ noodle: false, soup: false, chili: false, cilantro: false, beef: false });
 stall.bowl = emptyBowl();
-const SEATX = [.85, 1.5, 2.15], CUSTY = -.12 - .95 / 2 - .25, BARX = 2.8, CTW = .95, CTY = -.12, WINR = 3.75, BRDR = WINR + CTY - CTW / 2;      // WINR: the window's right side; BRDR: the board's right end, short of it by just enough that the board's far corner shows through the window rather than running into the wall (MELO 2026-11-14)      // CTW: the serving counter's whole width, the prep table's (MELO 2026-11-14), half inside the doorway and half out; CTY: the board's middle, the middle of the wall's thickness, where the bowls stand (MELO 2026-11-14)      // the counter runs out through the doorway (MELO 2026-11-14): the customers stand outside at its far end, and your own place is at its right end
+const SEATX = [.9, 1.65, 2.4], CUSTY = -.12 - .95 / 2 - .25, BARX = 3.2, CTW = .95, CTY = -.12, WINR = 3.55, BRDR = WINR;      // WINR: the window's right side; BRDR: the board's right end, up against it (MELO 2026-11-14)      // CTW: the serving counter's whole width, the prep table's (MELO 2026-11-14), half inside the doorway and half out; CTY: the board's middle, the middle of the wall's thickness, where the bowls stand (MELO 2026-11-14)      // the counter runs out through the doorway (MELO 2026-11-14): the customers stand outside at its far end, and your own place is at its right end
 const lvl = x => x === true ? 1 : x === false || x == null ? 0 : x;      // how much a customer asks for: 0 none, 1 a little, 2 as usual, 3 a lot (true/false from older callers mean 1/0)
 const cnt = (b, k) => Math.min(3, b[k + 'N'] || (b[k] ? 1 : 0));      // how much went into the bowl, 3 standing for three or more sprinkles
 function orderText(w) {      // one spoken sentence: (greeting) + the noodles + how much chili and cilantro, said together; no beef and no chili is a bowl of clear soup noodles
@@ -1074,14 +1074,14 @@ function hintKey() {
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
-const CTD = 0, BT = .1, SILL = 1 - CTD - BT;      // CTD: the serving board's top below 1.0 (MELO 2026-11-14: raised back to 1.0); BT: the board's thickness; SILL: the wall stands up to its underside      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
+const PREP_H0 = 1.15, CTD = 1 - PREP_H0, BT = .1, SILL = 1 - CTD - BT;      // CTD: the serving board's top below 1.0 (MELO 2026-11-14: as high as the prep table, PREP_H0); BT: the board's thickness; SILL: the wall stands up to its underside      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
 const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];
 let WOODSTYLE = 1; const WOODS = [null,
   { body: [104, 70, 54], top: [172, 124, 86], seam: [86, 58, 46], slab: .1, oh: 0, vseam: .32 },      // 1 thick oak top on a walnut body of upright boards
   { body: [132, 92, 66], alt: [108, 72, 54], top: [156, 110, 78], seam: [70, 46, 38], slab: .06, oh: .03, panel: .75, kick: .07, kickc: [80, 54, 44] },      // 2 framed cabinet doors
   { body: [128, 88, 64], alt: [118, 80, 58], top: [164, 116, 82], seam: [66, 44, 36], slab: .07, oh: .03, planks: .17, kick: .07, kickc: [76, 52, 42] },      // 3 stacked horizontal boards
   { body: [90, 62, 50], alt: [108, 76, 58], top: [206, 168, 122], seam: [56, 38, 32], slab: .12, oh: .05, slats: .09, kick: .08, kickc: [60, 42, 36] }];      // 4 a pale hinoki top on dark slats      // WOOD: the prep table and the serving counter, a light mahogany that stands apart from the floor and the walls (MELO 2026-11-14)      // where the shop's one hanging lamp hangs
-const PREP_Y1 = 2.55, PREP_H = 1.15;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
+const PREP_Y1 = 2.55, PREP_H = PREP_H0;      // the prep table's front edge (it runs from y 1.6 to here) and its height (MELO 2026-11-14: a little taller, was 1.0, as the stove; the things on it were placed for 1.0 and are lifted)
 const BIN = [3.5, 3.25];      // the bin
 const SG = 0.2, SGX = 26, SGY = 26, SM = 0.2, LANE_Y0 = 1.0;      // LANE_Y0: the chef walks between the serving counter and the prep table no nearer the counter than this (MELO 2026-11-14; was .8)
 function shopBlocked(x, y) {
@@ -1256,6 +1256,7 @@ function drawStall(t) {
   poly([P(.5, -.24, SILL), P(WINR, -.24, SILL), P(WINR, 0, SILL), P(.5, 0, SILL)], LW(SHOPC.top));      // the sill, seen past the board's right end
   poly([P(.5, -.24, SILL), P(.5, 0, SILL), P(.5, 0, 2.8), P(.5, -.24, 2.8)], LW(SHOPC.endX));      // the window's near side, in the wall's thickness: behind the board, in front of the customers (MELO 2026-11-14)
   board(CTY - CTW / 2, 0);      // the half of the board outside the window
+  { const z = SILL + BT, y0 = CTY - CTW / 2; poly([P(BRDR + y0 - .05, y0, z), P(BRDR - .05, 0, z), P(BRDR, 0, z), P(BRDR + y0, y0, z)], tint(mix(WOODS[1].top, [22, 22, 60], .2))); }      // where the board meets the window's right side: its end is cut along the line of sight, so it shows as an edge, up against the wall and not into it (MELO 2026-11-14)
   ctx.restore();
   // floor + walls
   const FT = lerp(.04, .16, G.n);      // the floor's shade: the coffee house's by night, a little warmer and lighter by day so it sits with the walls (MELO 2026-11-14)
@@ -1263,7 +1264,7 @@ function drawStall(t) {
   const wallB = mix(LW(SHOPC.wallB), [255, 248, 236], .08 * (1 - G.n)), wallA = LW(SHOPC.wallA);      // the right-hand wall, with the window, a little lighter again by day (MELO 2026-11-14)
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, SILL), P(0, 0, SILL)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 0), P(.5, 0, 0), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(WINR, 0, 0), P(X, 0, 0), P(X, 0, 2.8), P(WINR, 0, 2.8)], wallB);      // no window: a doorway down to the floor (MELO 2026-11-14)
-  const curtain = i => { const x0 = .53 + i * .645, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .6, 0, 2.8), P(x0 + .6, 0, 2.5 + w_), P(x0, 0, 2.5 - w_)], [206, 62, 68]); };
+  const curtain = i => { const x0 = .56 + i * .6, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .56, 0, 2.8), P(x0 + .56, 0, 2.5 + w_), P(x0, 0, 2.5 - w_)], [206, 62, 68]); };
   for (let i = 0; i < 5; i++) curtain(i);
   poly([P(0, 0, 0), P(0, Y, 0), P(0, Y, Hh), P(0, 0, Hh)], wallA);
   { const a = P(0, .6, Hh / 2), b = P(0, Y, Hh / 2), gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); gr.addColorStop(0, 'rgba(22, 22, 60, 0)'); gr.addColorStop(1, `rgba(22, 22, 60, ${.08 * WN})`);      // the side wall darkens from the serving counter toward the way out, as the floor does (MELO 2026-11-14)
@@ -1293,7 +1294,7 @@ function drawStall(t) {
       STOCK = [[[1.25, .14, .2, [214, 196, 160], 0, [150, 96, 70]], [1.55, .1, .24, [96, 140, 110], .1, [120, 84, 70]], [1.85, .16, .16, [206, 90, 80], 0, [232, 220, 196]], [2.5, .12, .22, [226, 210, 180], 0, [176, 110, 90]], [2.8, .09, .26, [150, 104, 84], .1, [230, 196, 140]], [3.15, .15, .14, [236, 200, 120], 0, [150, 104, 84]], [3.5, .11, .2, [120, 150, 180], 0, [236, 226, 206]]],
                [[1.3, .1, .22, [150, 96, 84], .1, [226, 196, 140]], [1.65, .15, .17, [236, 226, 206], 0, [206, 90, 80]], [2.0, .12, .2, [96, 150, 120], 0, [236, 226, 206]], [2.65, .09, .24, [200, 160, 110], .1, [120, 84, 70]], [3.0, .14, .15, [214, 96, 90], 0, [236, 226, 206]], [3.35, .1, .2, [226, 210, 180], .08, [150, 104, 84]], [3.65, .13, .16, [176, 200, 150], 0, [120, 84, 70]]]];      // jars and bottles on the two shelves; the left ends are behind the stove (MELO 2026-11-14)
     // no bottom board: under the top there is only the floor between the two end boards (MELO 2026-11-14)
-    { const c = WOODS[1].body, sc = WOODS[1].seam, n = 8; sideBox(.5, 0, 0, BRDR - .5, .04, SILL, c); for (let i = 1; i < n; i++) { const x = .5 + (BRDR - .5) * i / n; poly([P(x - .007, .04, 0), P(x + .007, .04, 0), P(x + .007, .04, SILL), P(x - .007, .04, SILL)], tint(mix(sc, [22, 22, 60], .1))); } }      // under the board, a wooden wainscot of upright boards (MELO 2026-11-14)
+    { const c = WOODS[1].body, sc = WOODS[1].seam, n = 10; sideBox(.5, 0, 0, BRDR - .5, .04, SILL, c); for (let i = 1; i < n; i++) { const x = .5 + (BRDR - .5) * i / n; poly([P(x - .007, .04, 0), P(x + .007, .04, 0), P(x + .007, .04, SILL), P(x - .007, .04, SILL)], tint(mix(sc, [22, 22, 60], .1))); } }      // under the board, a wooden wainscot of upright boards (MELO 2026-11-14)
     board(0, CTY + CTW / 2);      // just a board through the window, on the wall (MELO 2026-11-14)      // between the doorway's two sides (MELO 2026-11-14)      // solid again (MELO 2026-11-14: an open stand was tried)
     v.cy += CTD * s;      // everything on the counter, with its taps and rings, placed for a top at 1.0 and lowered with it
    }      // the one jar stands on the counter top in the corner, against both walls (MELO 2026-11-14)      // running the whole width, from the left wall (MELO 2026-11-14: it began under the window)      // the prep table's colour (MELO 2026-11-14)
