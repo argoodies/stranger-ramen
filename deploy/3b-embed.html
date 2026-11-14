@@ -1254,7 +1254,7 @@ function drawStall(t) {
     { const q = P(.15, yc, z0 + .2); HIT.jars = [q[0], q[1], s * .5]; } delete HIT.board; }
   // the way out: a few steps going down from the middle of the front edge
   { const ew = 1.0, ex = X / 2 - ew / 2;
-    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], LT(SHOPC.edgeL)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], LT(SHOPC.edgeR));
+    poly([P(0, Y, 0), P(X, Y, 0), P(X, Y, -.34), P(0, Y, -.34)], mix(SHOPC.edgeL, [22, 22, 60], .6)); poly([P(X, 0, 0), P(X, Y, 0), P(X, Y, -.34), P(X, 0, -.34)], mix(SHOPC.edgeR, [22, 22, 60], .6));      // the floor's sides all dark (MELO 2026-11-14)
     const tint0 = TINT; TK = .46; TINT = [22, 22, 60]; for (let k = 0; k < 3; k++) v.box(ex, Y + k * .32, -1.1, ew, .32, 1.1 - .26 * k, SHOPC.step); TK = 0; TINT = tint0;
     hit('exit', ex + ew / 2, Y + .35, -.35, .85); }
   { const q = P(st.owner.x, st.owner.y); buffRings(q[0], q[1], s, t); }      // the prophecies on the floor, before the counter, the stove, the table and the bin
