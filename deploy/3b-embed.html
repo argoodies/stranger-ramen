@@ -1185,7 +1185,6 @@ function drawStall(t) {
   // outside ground + customers behind the window
   { const ng = c => mix(c, [44, 60, 92], G.n * .7);      // outside the window: the town's grass, dimming to blue at night
     ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(4.5, 0, 1), P(4.5, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // seen only through the opening: on a wide screen the patch would otherwise stick out past the room
-    poly([P(0, -2.2), P(X + 1, -2.2), P(X + 1, 0), P(0, 0)], ng([108, 180, 170]));
     ctx.restore(); }
   const K = s * 1.2, heads = [];
   ctx.save(); ctx.beginPath(); [P(.5, 0, 1), P(4.5, 0, 1), P(4.5, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // customers too are seen only through the window: on a wide screen one walking up or away no longer floats in the sky beside the shop
