@@ -1308,7 +1308,7 @@ function drawStall(t) {
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], CTY, 1.02, .3, c.dish); if (c.dish.soup) steam(SEATX[i], CTY, 1.12, i); } });
   const barFree = !st.seats[2]; if (st.myBowl || barFree) hit('bar', BARX, CTY, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done && st.hold === 'bowl' && barFree) { const p = P(BARX, CTY, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
   if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(BARX, CTY, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, a warm yellow ring of light below
-  if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5, chiliN: st.eatT > .5 ? st.myBowl.chiliN : 0 } : st.myBowl;      // the noodles gone, the soup left keeps its colour: red with chili oil if the bowl was the hottest (MELO 2026-11-14)
+  if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5, oil: (st.myBowl.chiliN || 0) >= 3 } : st.myBowl;      // the noodles, beef, cilantro and chili flakes eaten together; the soup left keeps its colour, red with chili oil if the bowl was the hottest (MELO 2026-11-14)
   iso_bowl(v, BARX, CTY, 1.02, .3, mb); if (mb.soup) steam(BARX, CTY, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
   ctx.restore();
@@ -1476,7 +1476,8 @@ function boardUp() {
 function bowlTopMini(x, y, r, b) {
   ell(x, y, r, r * .58, [236, 238, 248]);
   if (b.soup) ell(x, y, r * .91, r * .53, [226, 160, 84]); else { ell(x, y, r * .86, r * .5, [200, 70, 76]); ell(x, y, r * .78, r * .45, [248, 246, 240]); }      // the soup comes up over the red band inside the rim, only the white lip left showing
-  const hot = b.soup && (b.chiliN || 0) >= 3;      // three sprinkles of chili or more: red oil spreads over the soup, and the noodles in it take on some of the red too
+  const hot = b.soup && ((b.chiliN || 0) >= 3 || b.oil);      // oil: the chili flakes eaten with the noodles, the red oil left in the soup (MELO 2026-11-14)
+       // three sprinkles of chili or more: red oil spreads over the soup, and the noodles in it take on some of the red too
   if (hot) ell(x, y, r * .91, r * .53, [214, 72, 40], .5);
   if (b.noodle) {      // the noodles, Monument Valley flat: a pale oval lit from above in two flat tones, coiled by three smooth concentric arcs
     const k = b.soup ? 1.4 : 1, nx = r * .5 * k, ny = r * .28 * k;      // in soup the noodles spread out, wider (MELO 2026-11-14)
