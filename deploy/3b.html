@@ -1276,7 +1276,7 @@ function drawStall(t) {
   const st = stall, X = SHOPX, Y = SHOPY, Hh = 3.8, top = 104;
   const bowlR = 0;
   // the room is fitted to the screen: as wide as it can be, or as tall, whichever is smaller. On a narrow phone it keeps a margin either side (down to 86% of the width at 330 px) so the order bubbles have somewhere to go.
-  const SC = (X + Y) / 9.2, B = Math.max((X + Y) / 2 + .34, (X / 2 + .5 + Y + .96) / 2 + 1.1), s = Math.min(W / (9.5 * SC * C30) * lerp(.86, 1, clamp((W - 330) / 110)), (H - top - 40) / (Hh + B)), v = new View(W / 2 - ((X - Y) / 2 + .1) * C30 * s, Math.max(top, (H - (Hh + B) * s) * .5) + Hh * s, s), P = v.P.bind(v);      // B: how far below the floor's back corner the room reaches on screen (its front corner, or the foot of the steps); the room from wall tops to there is centred up and down, as the coffee house and the library are (MELO, 2026-11-14; was .42 of an old estimate, which sat it high)
+  const SC = (X + Y) / 9.2, B = Math.max((X + Y) / 2 + .34, (X / 2 + .5 + Y + .96) / 2 + 1.1), s = Math.min(W / (9.5 * SC * C30) * lerp(.86, 1, clamp((W - 330) / 110)), (H - top - 40) / (Hh + B)), v = new View(W / 2 - (X - Y) / 2 * C30 * s, Math.max(top, (H - (Hh + B) * s) * .5) + Hh * s, s), P = v.P.bind(v);      // B: how far below the floor's back corner the room reaches on screen (its front corner, or the foot of the steps); the room from wall tops to there is centred up and down, as the coffee house and the library are (MELO, 2026-11-14; was .42 of an old estimate, which sat it high)
   st.V = v;      // kept for taps on the bare floor
   for (const k in HIT) delete HIT[k];
   const hit = (k, x, y, z, r) => { const p = P(x, y, z); HIT[k] = [p[0], p[1], r * s]; return p; };
