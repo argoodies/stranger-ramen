@@ -1075,7 +1075,7 @@ function hintKey() {
   return null;
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
-const SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
+const EAT_STEP = .6, SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
 const PREP_H0 = 1, CTD = 1 - PREP_H0, BT = .1, SILL = 1 - CTD - BT;      // CTD: the serving board's top below 1.0 (MELO 2026-11-14: as high as the prep table, PREP_H0); BT: the board's thickness; SILL: the wall stands up to its underside      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
 const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];
@@ -1149,7 +1149,7 @@ function stallTap(x, y) {
 }
 function barTap() {
   const s = stall, b = s.bowl;
-  if (s.myBowl) { if (s.hold) return false; if (s.eatT > 0) return true; s.eatT = 2.4; s.owner.tx = SERVEX; s.owner.ty = LANE_Y0; [67, 71, 74].forEach((m, k) => chime(m, k * .5, .14, 1.2)); return true; }
+  if (s.myBowl) { if (s.hold) return false; if (s.eatT > 0) return true; s.eatT = 2.4; s.owner.tx = SERVEX; s.owner.ty = LANE_Y0; [67, 71, 74].forEach((m, k) => chime(m, (k + 1) * EAT_STEP, .14, 1.2)); return true; }      // a note as each part of the bowl goes: the noodles and toppings, then the soup, then the bowl (MELO 2026-11-15)
   if (s.sinceSelf < 3) return false;      // customers still to feed: nothing is said, the bowl in your hands just trembles
   if (s.hold !== 'bowl' || !b.soup) return false;
   scAch('own_ramen'); s.myBowl = Object.assign({}, b); s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = SERVEX; s.owner.ty = LANE_Y0; chime(79, 0, .18, 1.4); chime(83, .1, .14, 1.4);
@@ -1308,7 +1308,7 @@ function drawStall(t) {
   st.seats.forEach((c, i) => { if (c && c.dish && c.state !== 'leave') { iso_bowl(v, SEATX[i], BOWLY, 1.02, .33, c.dish); if (c.dish.soup) steam(SEATX[i], BOWLY, 1.12, i); } });
   const barFree = !st.seats[2]; if (st.myBowl || barFree) hit('bar', BARX, BOWLY, 1.1, .5); if (!st.myBowl && st.sinceSelf >= 3 && !st.done && st.hold === 'bowl' && barFree) { const p = P(BARX, BOWLY, 1.02); ell(p[0], p[1] - s * .04, s * .34, s * .195, [255, 226, 130], .55 + .2 * Math.sin(t * 4)); }
   if (st.oracle) { const k = st.oracle, cl = BUFFCOL[k], q = v.P(BARX, BOWLY, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawBuff(k, q[0], y, s * .24); st.oracleAt = [q[0], y]; }      // that prophecy's own mark floats over your place at the counter, a warm yellow ring of light below
-  if (st.myBowl) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 1.2 ? { noodle: false, soup: st.eatT > .5, oil: (st.myBowl.chiliN || 0) >= 3 } : st.myBowl;      // the noodles, beef, cilantro and chili flakes eaten together; the soup left keeps its colour, red with chili oil if the bowl was the hottest (MELO 2026-11-14)
+  if (st.myBowl && !(st.eatT > 0 && st.eatT < 2.4 - 3 * EAT_STEP)) { ctx.save(); ctx.translate(wob('bar'), 0); const mb = st.eatT > 0 && st.eatT < 2.4 - EAT_STEP ? { noodle: false, soup: st.eatT > 2.4 - 2 * EAT_STEP, oil: (st.myBowl.chiliN || 0) >= 3 } : st.myBowl;      // in time with the three eating notes (EAT_STEP apart from the start): the noodles and toppings go at the first, the soup at the second, the bowl at the third (MELO 2026-11-15)      // the noodles, beef, cilantro and chili flakes eaten together; the soup left keeps its colour, red with chili oil if the bowl was the hottest (MELO 2026-11-14)
   iso_bowl(v, BARX, BOWLY, 1.02, .33, mb); if (mb.soup) steam(BARX, BOWLY, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
   ctx.restore();
