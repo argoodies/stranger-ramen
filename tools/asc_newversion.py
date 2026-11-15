@@ -15,9 +15,9 @@ vs = must('GET', f'/v1/apps/{APP}/appStoreVersions?limit=20')['data']
 v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
-NEW = {'en-US': "- The ramen shop has been rearranged: an L-shaped prep table, a serving board set into the window, and bowls back to their full size\n- The chef serves and eats from the middle place, and taps on the floor walk to the middle of a tile\n- Shadows no longer climb the walls or hang over the edge",
-       'zh-Hant': "· 拉麵店重新佈置：L 型料理檯、嵌在窗口的上餐板，麵碗恢復原來的大小\n· 主角統一在中間的位置上餐和吃麵，點地板會走到格子中央\n· 影子不再爬上牆面，也不會懸在平台外",
-       'zh-Hans': "· 拉面店重新布置：L 型料理台、嵌在窗口的上餐板，面碗恢复原来的大小\n· 主角统一在中间的位置上餐和吃面，点地板会走到格子中央\n· 影子不再爬上墙面，也不会悬在平台外"}
+NEW = {'en-US': "- Toppings look the way they do in their jars: rings of chili, leaves of cilantro, and thin slices of beef, one slice for each helping\n- The ramen shop sits in the middle of the screen, the same size as the other rooms, and its window looks out on the sky\n- When the chef eats his own bowl, the noodles, the soup and the bowl go in time with the three notes\n- The crow's beak is a deeper orange",
+       'zh-Hant': "· 配料跟罐子裡的一樣：辣椒圈、香菜葉，牛肉是薄薄的肉片，加一次一片\n· 拉麵店置中，和其他房間一樣大，上餐窗外直接看到天空\n· 主角自己吃麵時，麵、湯、碗跟著三聲音效依次消失\n· 烏鴉的嘴變成更深的橙色",
+       'zh-Hans': "· 配料跟罐子里的一样：辣椒圈、香菜叶，牛肉是薄薄的肉片，加一次一片\n· 拉面店居中，和其他房间一样大，上餐窗外直接看到天空\n· 主角自己吃面时，面、汤、碗跟着三声音效依次消失\n· 乌鸦的嘴变成更深的橙色"}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
