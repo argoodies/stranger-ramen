@@ -1026,7 +1026,7 @@ function intoBowl() {
   if (h === 'noodle') { if (b.noodle) return false; b.noodle = true; } else { if (!b.noodle || (b[h] && !MORE.includes(h))) return false; again = b[h]; b[h] = true; }
   s.bowlAnim[h] = 0;
   goTo('put'); chime(NOTE[h === 'noodle' ? 'put' : h] + (MORE.includes(h) ? Math.min(2, b[h + 'N'] || 0) * 2 : 0), 0, .2, 1.4);      // each further sprinkle a little higher
-  if (MORE.includes(h)) b[h + 'N'] = (b[h + 'N'] || 0) + 1;      // how many times it went in: 1, 2, 3 and more each look different in the bowl
+  if (MORE.includes(h)) { b[h + 'N'] = (b[h + 'N'] || 0) + 1; if (b[h + 'N'] <= 3) { b.bits = (b.bits || []).slice(); for (let i = 0; i < 3; i++) { const q = Math.random() * TAU, d = Math.sqrt(Math.random()) * .92; b.bits.push({ k: h, x: Math.cos(q) * d, y: Math.sin(q) * d }); } } }      // each sprinkle drops three bits at random spots in the bowl, up to three sprinkles of each (MELO 2026-11-15)      // how many times it went in: 1, 2, 3 and more each look different in the bowl
   if (h === 'chili' && b.chiliN >= 3) unlockBadge('spicy');
   if (b.chili && b.cilantro && b.beef) unlockBadge('full');
   if (HIT.own && HIT.bowl) s.fly.push({ a: [HIT.own[0], HIT.own[1]], b: [HIT.bowl[0], HIT.bowl[1]], t: 0, c: FLYC[h] });
@@ -1490,6 +1490,7 @@ function bowlTopMini(x, y, r, b) {
   }
   const n = k => Math.min(3, b[k + 'N'] || (b[k] ? 1 : 0));      // 1, 2, 3 or more sprinkles: each looks different
   const nb = n('beef'), nc = n('chili'), ng = n('cilantro');
+  if (b.bits) { for (const p of b.bits) { const x1 = x + p.x * r * .58, y1 = y + p.y * r * .32; if (p.k === 'beef') { ell(x1, y1, r * .09, r * .055, [150, 86, 62]); ell(x1 - r * .025, y1 - r * .015, r * .035, r * .02, [196, 132, 104]); } else if (p.k === 'chili') ell(x1, y1, r * .085, r * .05, [220, 40, 40]); else ell(x1, y1, r * .11, r * .05, [70, 160, 90]); } return; }      // bits dropped at random (see intoBowl), in the order they went in; a bowl made without them (the screenshots) keeps the set places below
   if (nb) for (const [dx, dy] of [[[-.2, -.08]], [[-.25, -.1], [-.07, -.17]], [[-.27, -.05], [-.1, -.17], [-.2, .07]]][nb - 1]) { ell(x + dx * r, y + dy * r, r * .09, r * .055, [150, 86, 62]); ell(x + dx * r - r * .025, y + dy * r - r * .015, r * .035, r * .02, [196, 132, 104]); }      // crumbs of minced beef, the size of the chili flecks
   if (nc) for (const [dx, dy] of [[[.22, -.1]], [[.2, -.13], [.3, -.03]], [[.18, -.15], [.31, -.05], [.12, .02]]][nc - 1]) ell(x + dx * r, y + dy * r, r * .085, r * .05, [220, 40, 40]);      // flecks of chili
   if (ng) for (const [dx, dy] of [[[.12, .14]], [[.06, .15], [.2, .1]], [[.03, .16], [.17, .12], [-.06, .1], [.26, .02]]][ng - 1]) ell(x + dx * r, y + dy * r, r * .11, r * .05, [70, 160, 90]);      // leaves of cilantro
