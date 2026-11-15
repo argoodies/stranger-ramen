@@ -705,14 +705,15 @@ function barCat(dt) {      // the cat: now padding about the floor, now sitting 
   const st = Math.min(d, .55 * dt); c.x += dx / d * st; c.y += dy / d * st; c.face = Math.sign(dx - dy) || c.face; c.depth = Math.sign(dx + dy); }      // face: which way it heads across the screen
 function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 2.8); c.y = clamp(c.y, .2, 3.8); if (c.x < 1.1 && c.y < 1.1) c.y = 1.1; if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
 function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3 * buffK())) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT', 'mySayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); }
-function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
+function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; if (save.coffeeTaken != null) bar.taken = save.coffeeTaken;      // the day the iced coffee was taken is kept in the save: gone for the rest of that day, even after the game is closed and opened again (MELO 2026-11-15)
+  Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
  whoSayT: 0, keepSayT: 0, mySayT: 0, cat: { x: .5, y: 3.5, tx: .5, ty: 3.5, sit: 4, t: 0, face: 1, meowT: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }
 function leaveBar() { mode = 'world'; $('zoom').style.display = 'none'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
 function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
   if (hit('exit')) return barGo([0, 1], 'exit');
   if (hit('take')) { const per = Math.floor(G.t / HALF), id = 'coffee';      // the iced coffee on the little table: yours to take, once each day
-    scAch('iced_coffee'); bar.taken = per; save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.drink || !have(save.equip.drink)) save.equip.drink = id; saveNow();
+    scAch('iced_coffee'); bar.taken = save.coffeeTaken = per; save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.drink || !have(save.equip.drink)) save.equip.drink = id; saveNow();
     bar.mySay = S().takeCoffee; bar.mySayT = 3; chime(84, 0, .1); chime(91, .1, .1); return; }
   if (hit('table')) { bar.wobTable = performance.now(); return; }      // the bare table rocks, silently
   if (hit('cat')) { const c = bar.cat; c.meowT = 1.6; c.sit = Math.max(c.sit, 2.5); sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); return; }      // stroking the cat: a meow
