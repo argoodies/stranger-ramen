@@ -1067,7 +1067,7 @@ function intoBowl() {
   if (h === 'noodle') { if (b.noodle) return false; b.noodle = true; } else { if (!b.noodle || (b[h] && !MORE.includes(h))) return false; again = b[h]; b[h] = true; }
   s.bowlAnim[h] = 0;
   goTo('put'); chime(NOTE[h === 'noodle' ? 'put' : h] + (MORE.includes(h) ? Math.min(2, b[h + 'N'] || 0) * 2 : 0), 0, .2, 1.4);      // each further sprinkle a little higher
-  if (MORE.includes(h)) { b[h + 'N'] = (b[h + 'N'] || 0) + 1; if (b[h + 'N'] <= 3) { b.bits = (b.bits || []).slice(); const q0 = Math.random() * TAU, d0 = Math.sqrt(Math.random()) * .62, cx = Math.cos(q0) * d0, cy = Math.sin(q0) * d0; for (let i = 0; i < 3; i++) { const q = q0 + i * TAU / 3 + (Math.random() - .5) * 1.2, d = .12 + Math.random() * .1; b.bits.push({ k: h, x: cx + Math.cos(q) * d, y: cy + Math.sin(q) * d * 1.6, a: Math.random() * Math.PI }); } } }      // each sprinkle drops three bits in one little cluster at a random spot in the bowl, up to three sprinkles of each (MELO 2026-11-15)      // how many times it went in: 1, 2, 3 and more each look different in the bowl
+  if (MORE.includes(h)) { b[h + 'N'] = (b[h + 'N'] || 0) + 1; if (!b.seed) b.seed = 1 + (Math.random() * 1e9 | 0); }      // how many times it went in: 1, 2, 3 and more each look different in the bowl; the seed lays this bowl's bits out its own way (MELO 2026-11-15)
   if (h === 'chili' && b.chiliN >= 3) unlockBadge('spicy');
   if (b.chili && b.cilantro && b.beef) unlockBadge('full');
   if (HIT.own && HIT.bowl) s.fly.push({ a: [HIT.own[0], HIT.own[1]], b: [HIT.bowl[0], HIT.bowl[1]], t: 0, c: FLYC[h] });
@@ -1531,11 +1531,15 @@ function bowlTopMini(x, y, r, b) {
   }
   const n = k => Math.min(3, b[k + 'N'] || (b[k] ? 1 : 0));      // 1, 2, 3 or more sprinkles: each looks different
   const nb = n('beef'), nc = n('chili'), ng = n('cilantro');
-  if (b.bits) { for (const p of b.bits) { const x1 = x + p.x * r * .58, y1 = y + p.y * r * .32; if (p.k === 'beef') { ell(x1, y1, r * .09, r * .055, [150, 86, 62]); ell(x1 - r * .025, y1 - r * .015, r * .035, r * .02, [196, 132, 104]); } else { const ch = p.k === 'chili', w = r * (ch ? .07 : .085), hh = r * (ch ? .04 : .06), ca = Math.cos(p.a || 0), sa = Math.sin(p.a || 0), sk = ch ? 0 : .5;      // chili and cilantro in four-sided bits (MELO 2026-11-15): chili a little slab, cilantro a leaning leaf; each turned its own way, laid flat in the bowl
-        poly([[-w, -hh], [w - sk * w, -hh], [w, hh], [-w + sk * w, hh]].map(([u, w2]) => [x1 + u * ca - w2 * sa, y1 + (u * sa + w2 * ca) * .58]), ch ? [220, 40, 40] : [70, 160, 90]); } } return; }      // bits dropped at random (see intoBowl), in the order they went in; a bowl made without them (the screenshots) keeps the set places below
-  if (nb) for (const [dx, dy] of [[[-.2, -.08]], [[-.25, -.1], [-.07, -.17]], [[-.27, -.05], [-.1, -.17], [-.2, .07]]][nb - 1]) { ell(x + dx * r, y + dy * r, r * .09, r * .055, [150, 86, 62]); ell(x + dx * r - r * .025, y + dy * r - r * .015, r * .035, r * .02, [196, 132, 104]); }      // crumbs of minced beef, the size of the chili flecks
-  if (nc) for (const [dx, dy] of [[[.22, -.1]], [[.2, -.13], [.3, -.03]], [[.18, -.15], [.31, -.05], [.12, .02]]][nc - 1]) ell(x + dx * r, y + dy * r, r * .085, r * .05, [220, 40, 40]);      // flecks of chili
-  if (ng) for (const [dx, dy] of [[[.12, .14]], [[.06, .15], [.2, .1]], [[.03, .16], [.17, .12], [-.06, .1], [.26, .02]]][ng - 1]) ell(x + dx * r, y + dy * r, r * .11, r * .05, [70, 160, 90]);      // leaves of cilantro
+  {      // the toppings, each in its own place on the noodles as on a real bowl, more of it with each sprinkle, laid out a little differently in every bowl (MELO 2026-11-15)
+    let sd = (b.seed || 7) >>> 0; const R = () => { sd = (sd + 0x6D2B79F5) >>> 0; let q = Math.imul(sd ^ sd >>> 15, 1 | sd); q = q + Math.imul(q ^ q >>> 7, 61 | q) ^ q; return ((q ^ q >>> 14) >>> 0) / 4294967296; },
+      spot = (cu, cw, rad) => { const a = R() * TAU, d = Math.sqrt(R()) * rad; return [x + (cu + Math.cos(a) * d) * r, y + (cw + Math.sin(a) * d) * r * .58, d / rad]; },      // a point round (cu, cw), flattened as the bowl is
+      quad = (cx, cy, w, h, a, sk, c) => { const ca = Math.cos(a), sa = Math.sin(a); poly([[-w, -h], [w - sk * w, -h], [w, h], [-w + sk * w, h]].map(([u, v2]) => [cx + u * ca - v2 * sa, cy + (u * sa + v2 * ca) * .58]), c); };
+    if (nc && b.soup) for (let i = 0; i < [0, 3, 6, 9][nc]; i++) { const a = R() * TAU, d = .74 + R() * .12, px = x + Math.cos(a) * d * r, py = y + Math.sin(a) * d * r * .58, rr = r * (.04 + R() * .03); ell(px, py, rr, rr * .62, [214, 70, 34], .85); ell(px - rr * .3, py - rr * .2, rr * .35, rr * .2, [255, 190, 150], .8); }      // chili: drops of red oil out on the soup round the noodles
+    if (nb) { const g = []; for (let i = 0; i < [0, 6, 9, 13][nb]; i++) g.push(spot(-.3, -.06, [0, .13, .17, .21][nb])); g.sort((p, q) => p[1] - q[1]).forEach(([px, py, e]) => { const hy = py - (1 - e) * r * .07; ell(px, hy, r * .075, r * .048, [138, 76, 54]); ell(px - r * .02, hy - r * .014, r * .03, r * .016, [192, 128, 98]); }); }      // minced beef: one little heap, higher in the middle
+    if (nc) for (let i = 0; i < [0, 4, 6, 9][nc]; i++) { const [px, py] = spot(.32, -.12, [0, .11, .14, .17][nc]); quad(px, py, r * .06, r * .036, R() * Math.PI, 0, R() < .5 ? [222, 40, 40] : [196, 28, 36]); }      // chili flakes, little red slabs
+    if (ng) for (let i = 0; i < [0, 4, 7, 10][ng]; i++) { const [px, py] = spot(.04, .3, [0, .12, .16, .2][ng]); quad(px, py, r * .072, r * .046, R() * Math.PI, .5, R() < .5 ? [70, 160, 90] : [108, 192, 112]); }      // chopped cilantro last, on top: leaning green leaves
+  }
 }
 
 // round character token, as in the video: cream disc + flat icon (blue = good, red = evil)
