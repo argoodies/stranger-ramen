@@ -1496,7 +1496,13 @@ function bowlTopMini(x, y, r, b) {
       heap = (cu, cw, n, rad, f) => { const a0 = R() * TAU, ps = []; for (let i = 0; i < n; i++) { const d = rad * Math.sqrt((i + .5) / n), a = a0 + i * 2.39996; ps.push([x + (cu + Math.cos(a) * d) * r, y + (cw + Math.sin(a) * d) * r * .58 - (1 - d / rad) * r * .06, i, R()]); } ps.sort((p, q) => p[1] - q[1]).forEach(([px, py, i, k]) => { ctx.save(); ctx.translate(px, py); ctx.scale(1, .58); f(i, k * TAU); ctx.restore(); }); };      // a sunflower spiral, so the bits sit evenly and tightly; higher in the middle, the back ones drawn first
     const HR = [0, .13, .18, .22], HN = [0, 6, 10, 15];
     if (nc && !hot) ell(x + .3 * r, y - .12 * r * .58, HR[nc] * r * 1.45, HR[nc] * r * 1.45 * .58, [222, 96, 50], .14 + .08 * nc);      // the chili's oil, a red sheen spreading round its heap
-    if (nb) heap(-.3, -.1, HN[nb], HR[nb], (i, a) => { ctx.rotate(a); ctx.fillStyle = css([[150, 86, 62], [132, 72, 52], [172, 104, 78]][i % 3]); ctx.beginPath(); ctx.ellipse(0, 0, r * .075, r * .058, 0, 0, TAU); ctx.fill(); if (i % 3 === 0) { ctx.fillStyle = css([196, 132, 104]); ctx.beginPath(); ctx.ellipse(-r * .022, -r * .016, r * .028, r * .018, 0, 0, TAU); ctx.fill(); } });      // minced beef
+    if (nb) for (let k = 0; k < nb; k++) {      // beef in big sliced pieces, one slice a sprinkle, fanned out overlapping at the back left; cut straight by the knife, with a band of fat along one edge (MELO 2026-11-15)
+      const cx = x + (-.36 + k * .15 + (R() - .5) * .04) * r, cy = y + (-.1 + k * .07 + (R() - .5) * .04) * r * .58, a = -.3 + k * .28 + (R() - .5) * .25, w = r * .22, h = r * .2, ca = Math.cos(a), sa = Math.sin(a),
+        T = pts => pts.map(([u, v2]) => [cx + u * ca - v2 * sa, cy + (u * sa + v2 * ca) * .58]), sl = [[-w, -h * .8], [w * .92, -h], [w, h * .85], [-w * .9, h]];
+      poly(T(sl).map(([px, py]) => [px, py + r * .03]), [104, 56, 40]);      // its cut edge, seen below it
+      poly(T(sl), [158, 90, 64]);
+      poly(T([[-w, -h * .8], [w * .92, -h], [w * .935, -h * .7], [-w * .97, -h * .55]]), [222, 174, 146]);      // the fat
+      poly(T([[-w * .7, h * .15], [w * .65, -h * .05], [w * .65, h * .05], [-w * .7, h * .25]]), [184, 116, 88], .8); }      // the grain
     if (nc) heap(.3, -.12, HN[nc], HR[nc], (i, a) => { ctx.rotate(.25 * Math.sin(a * 3)); ctx.strokeStyle = css([[214, 48, 44], [190, 36, 40], [232, 80, 56]][i % 3]); ctx.lineWidth = r * .03; ctx.beginPath(); ctx.ellipse(0, 0, r * .062, r * .046, 0, 0, TAU); ctx.stroke(); });      // chili rings, hollow in the middle
     if (ng) heap(0, .3, HN[ng], HR[ng], (i, a) => { ctx.rotate(a * 1.7); ctx.fillStyle = css([[96, 186, 106], [62, 152, 86], [120, 200, 112], [74, 166, 92]][i % 4]); ctx.beginPath(); ctx.ellipse(0, 0, r * .085, r * .05, 0, 0, TAU); ctx.fill(); });      // cilantro leaves, last, on top
   }
