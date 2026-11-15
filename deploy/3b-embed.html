@@ -336,7 +336,7 @@ function fig(x, y, k, o = {}) {
   if (o.apron) poly([[x - .16 * k, y - .08 * k], [x + .16 * k, y - .08 * k], [x + .09 * k, y - .55 * k], [x - .09 * k, y - .55 * k]], o.apron, a);
   const hx = ax + lean * .2 * k, hy = ay - .06 * k, hr = .17 * k;
   if (kind === 'crow') {
-    poly([[hx - hr * .5, hy - .05 * k], [hx - hr * 2.3, hy + .05 * k], [hx - hr * .5, hy + .09 * k]], [240, 170, 70], a);
+    poly([[hx - hr * .5, hy - .05 * k], [hx - hr * 2.3, hy + .05 * k], [hx - hr * .5, hy + .09 * k]], [236, 128, 30], a);      // a deeper orange, clear against the rose sky by day (MELO 2026-11-15; was [240, 170, 70])
     circ(hx, hy, hr, body, a); circ(hx - hr * .35, hy - hr * .15, hr * .2, [250, 250, 250], a); return;
   }
   const hair = [44, 24, 52];
@@ -1243,11 +1243,7 @@ function drawStall(t) {
   const wob = k => st.nope === k && st.nopeT > 0 ? Math.sin(st.nopeT * 60) * s * .04 : 0;
   const board = (ya, yb) => { const c = WOODS[1].top, z = SILL + BT, y0 = CTY - CTW / 2; sideBox(.5, ya, SILL, BRDR - .5, yb - ya, BT, c);
     for (const f of [.3, .62]) { const u = Math.max(ya, y0 + CTW * f), w = Math.min(yb, y0 + CTW * f + .014); if (w > u) poly([P(.5, u, z), P(BRDR, u, z), P(BRDR, w, z), P(.5, w, z)], tint(mix(c, [60, 36, 30], .25)), .35); } };      // the serving board, centred on the middle of the wall's thickness (CTY), so as much of it is inside as out (MELO 2026-11-14); drawn in two pieces, the one behind the wall's inner face and the one in front, with the grain running along it
-  // outside ground + customers behind the window
-  { const ng = c => mix(c, [44, 60, 92], G.n * .7);      // outside the window: the town's grass, dimming to blue at night
-    ctx.save(); ctx.beginPath(); [P(.5, 0, SILL), P(WINR, 0, SILL), P(WINR, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // seen only through the opening: on a wide screen the patch would otherwise stick out past the room
-    v.quad(-2, -4, 0, 7, 3.76, ng([150, 170, 120]));      // the ground outside the doorway
-    ctx.restore(); }
+  // customers behind the window, against the sky itself: nothing is drawn outside, so the window shows the same sky as round the room (MELO 2026-11-15; was the town's grass, dimming to blue at night)
   const K = s * 1.2, heads = [];
   ctx.save(); ctx.beginPath(); [P(.5, 0, SILL), P(WINR, 0, SILL), P(WINR, 0, 2.8), P(.5, 0, 2.8)].forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // customers too are seen only through the window: on a wide screen one walking up or away no longer floats in the sky beside the shop
   st.seats.forEach((c, i) => {
