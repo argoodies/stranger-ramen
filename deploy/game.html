@@ -233,6 +233,10 @@ function setLang(p) {
   if (m) m.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.l === langPref); if (b.dataset.l === 'auto') b.textContent = STR[LANG].auto; });
 }
 const S = () => STR[LANG];
+// what the chef says on picking a language, in the language just picked (as in the three-player game)
+const SWITCHED = { hans: { hans: '已切换为简体中文', hant: '已切换为繁体中文', en: '已切换为英语', auto: '已切换为跟随系统' },
+  hant: { hans: '已切換為簡體中文', hant: '已切換為繁體中文', en: '已切換為英語', auto: '已切換為跟隨系統' },
+  en: { hans: 'Switched to Simplified Chinese', hant: 'Switched to Traditional Chinese', en: 'Switched to English', auto: 'Now following the system' } };
 // break a line of speech to a width: Chinese breaks anywhere (never before punctuation), English at spaces
 function wrapText(txt, maxw) {
   const out = [];
@@ -892,7 +896,7 @@ function drawWorld(t, dt) {
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   if (storyAfter) storyAfter(v, K, t, 'town');
   for (const n of npcs) if (n.sayT > 0) { const p = v.P(wx(n.x, n.y), n.y, wz(n.x, n.y)); sayBubble(p[0], p[1] - K * 1.75, n.say, clamp(W * .036, 12, 15), clamp(n.sayT * 2), Math.min(W * .62, 250)); }
-  if (player.sayT > 0 && mode === 'world' && !storyHook) { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)); sayBubble(p[0], p[1] - K * 1.75, player.say, clamp(W * .036, 12, 15), clamp(player.sayT * 2), Math.min(W * .62, 250)); }      // the chef's own words in the town (what a prophecy does)
+  if (player.sayT > 0 && (mode === 'world' || mode === 'title') && !storyHook && !hideChef) { const p = v.P(wx(player.x, player.y), player.y, wz(player.x, player.y)); sayBubble(p[0], p[1] - K * 1.75, player.say, clamp(W * .036, 12, 15), clamp(player.sayT * 2), Math.min(W * .62, 250)); }      // the chef's own words in the town (what a prophecy does)
   if (mode === 'title' && G.n < .5) titleBox = null;      // opening by day: the town alone, no title (MELO 2026-11-14)
   if (mode === 'title' && G.n >= .5) {
     // the title, in the Monument Valley manner: thin lettering, centred high in the night sky above the island
@@ -1941,7 +1945,7 @@ function churchSpawn(tier = 1, bosses = false) {      // the foes of a round: se
 const shielded = e => e.shieldT > 0 && e.hp > 0;      // the Advocate's shield: for three seconds after it is thrown, nothing gets through
 const churchXmin = () => CX0, churchXmax = () => CX1;
 function toastSay(txt) {      // outside the church: the chef says it too, in his own bubble wherever he is
-  if (mode === 'stall') { stall.ownSay = txt; stall.ownSayT = 3; } else if (mode === 'bar') { bar.mySay = txt; bar.mySayT = 3; } else if (mode === 'lib') { lib.say = txt; lib.sayT = 3; } else if (mode === 'tower') tw.say = { text: txt, t: 3 }; else if (mode === 'world') { player.say = txt; player.sayT = 3; }
+  if (mode === 'stall') { stall.ownSay = txt; stall.ownSayT = 3; } else if (mode === 'bar') { bar.mySay = txt; bar.mySayT = 3; } else if (mode === 'lib') { lib.say = txt; lib.sayT = 3; } else if (mode === 'tower') tw.say = { text: txt, t: 3 }; else if (mode === 'world' || mode === 'title') { player.say = txt; player.sayT = 3; }
 }
 let wholeCv = null;
 function whole(a, fn) {      // draw fn() at alpha a as one piece: first whole on a canvas of its own, so its overlapping parts never show through one another
@@ -2653,7 +2657,7 @@ $('lang').addEventListener('click', e => { e.stopPropagation(); $('langMenu').cl
 // a tap on any other button (a capsule, a pill) closes it too; taps on the picture close it in their own handlers and do nothing else
 document.addEventListener('pointerdown', e => { const m = $('langMenu'); if (m.classList.contains('open') && !m.contains(e.target) && !$('lang').contains(e.target) && e.target !== cv && e.target !== $('title')) m.classList.remove('open'); }, true);
 // choosing a language takes effect at once (the next line anyone speaks is in the new language) and is remembered; the menu closes
-$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); chime(74, 0, .12, .8); }));
+$('langMenu').querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setLang(b.dataset.l); $('langMenu').classList.remove('open'); toastSay((SWITCHED[LANG] || SWITCHED.en)[b.dataset.l]); chime(74, 0, .12, .8); }));
 setLang(langPref);
 const ZOOM_ICO = ['<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10h6M14 10V4M10 14H4M10 14v6M14 10l7-7M10 14l-7 7"/></svg>'];
 $('zoom').addEventListener('click', () => { zoomTarget = zoomTarget > 0.5 ? 0 : 1; $('zoom').innerHTML = ZOOM_ICO[zoomTarget]; });
