@@ -76,9 +76,16 @@ function ghost(x, y, r, role, tilt = 0) {      // a see-through token (MELO 2026
 const GHOSTS = () => {      // the Heretic's cross hollow, only a white outline round it (MELO 2026-11-16): the game's own cross (45°, its outline centred) drawn flat off-screen, spread out by d all round, the cross itself cut out
   const r = 500, S = 1024, d = r * .04, m = document.createElement('canvas'); m.width = m.height = S; const keep = ctx; ctx = m.getContext('2d');
   const k3 = [circ, ell, glow]; circ = ell = glow = () => {}; roleToken(C, C, r, 'heretic', 1, [255, 255, 255]); [circ, ell, glow] = k3; ctx = keep;
-  const o = document.createElement('canvas'); o.width = o.height = S; const oc = o.getContext('2d');
-  for (let i = 0; i < 64; i++) oc.drawImage(m, Math.cos(i * TAU / 64) * d, Math.sin(i * TAU / 64) * d);
-  oc.globalCompositeOperation = 'source-in'; oc.fillStyle = '#fff'; oc.fillRect(0, 0, S, S); oc.globalCompositeOperation = 'destination-out'; oc.drawImage(m, 0, 0); ctx.drawImage(o, 0, 0); };
+  const ring = src => { const o = document.createElement('canvas'); o.width = o.height = S; const oc = o.getContext('2d');      // src's outline: src spread out by d all round, in white, with src cut out of it
+    for (let i = 0; i < 64; i++) oc.drawImage(src, Math.cos(i * TAU / 64) * d, Math.sin(i * TAU / 64) * d);
+    oc.globalCompositeOperation = 'source-in'; oc.fillStyle = '#fff'; oc.fillRect(0, 0, S, S); oc.globalCompositeOperation = 'destination-out'; oc.drawImage(src, 0, 0); ctx.drawImage(o, 0, 0); };
+  const inner = document.createElement('canvas'); inner.width = inner.height = S; { const ic = inner.getContext('2d'), im = m.getContext('2d').getImageData(0, 0, S, S), D = im.data;      // the thin cross inside (drawn brown in the flat copy) on its own
+    for (let i = 0; i < D.length; i += 4) if (!(D[i + 3] > 0 && D[i] < 200)) D[i + 3] = 0; ic.putImageData(im, 0, 0); }
+  ring(m);
+  { const di = r * .03, e = document.createElement('canvas'); e.width = e.height = S; const ec = e.getContext('2d'); ec.drawImage(inner, 0, 0);      // the thin cross's outline runs just inside its edge, so a clear band of sky stays between the two outlines
+    ec.globalCompositeOperation = 'destination-in'; for (let i = 0; i < 32; i++) ec.drawImage(inner, Math.cos(i * TAU / 32) * di, Math.sin(i * TAU / 32) * di);
+    const o = document.createElement('canvas'); o.width = o.height = S; const oc = o.getContext('2d'); oc.drawImage(inner, 0, 0); oc.globalCompositeOperation = 'source-in'; oc.fillStyle = '#fff'; oc.fillRect(0, 0, S, S);
+    oc.globalCompositeOperation = 'destination-out'; oc.drawImage(e, 0, 0); ctx.drawImage(o, 0, 0); } };      // the outer outline and, inside it, the thin cross's own outline (MELO 2026-11-16)
 make('A2', () => { BG(); GHOSTS(); });      // no streamers (MELO 2026-11-16); was BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS();
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
