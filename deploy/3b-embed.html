@@ -632,9 +632,8 @@ const FOOT = [20, 12, 40];      // the faint mark at the foot of anything small 
 function footSq(v, x, y, z, hx, hy = hx, a = .22) { const P = v.P.bind(v); poly([P(x - hx, y - hy, z), P(x + hx, y - hy, z), P(x + hx, y + hy, z), P(x - hx, y + hy, z)], FOOT, a); }
 function footRound(v, x, y, z, r, a = .22) { const pts = []; for (let i = 0; i < 40; i++) { const q = TAU * i / 40; pts.push(v.P(x + r * Math.cos(q), y + r * Math.sin(q), z)); } poly(pts, FOOT, a); }      // traced the way v.disc traces its circle, so it lies exactly round the foot it sits under
 function tree(v, i, j) {
-  const x = i + .5, y = j + .5; footSq(v, x, y, 0, .13);      // only the trunk marks the ground, like the lamp posts: the needles let the light through (MELO 2026-11-16)
- 
-  v.box(x - .08, y - .08, 0, .16, .16, .45, [150, 110, 90]);
+  const x = i + .5, y = j + .5; footRound(v, x, y, 0, .12);      // only the trunk marks the ground: the needles let the light through (MELO 2026-11-16)
+  v.disc(x, y, 0, .08, .45, [150, 110, 90]);      // a round trunk, and a round mark at its foot
   for (const [z, w, h, c] of [[.4, .9, .9, [70, 150, 130]], [.95, .7, .8, [90, 170, 146]], [1.45, .46, .7, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z, w, h, c);
 }
 function lamp(v, i, j, t) {
