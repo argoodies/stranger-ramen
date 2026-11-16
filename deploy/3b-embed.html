@@ -2421,6 +2421,12 @@ function drawChurch(t, dt) {
   for (const e of suckers) drawVortex(P, e.x, e.y, t, e.spin > 0, s);
   if (suckers.length) ctx.restore();
   if (LAMP < 1) { ctx.fillStyle = css([14, 12, 44], .5 * (1 - LAMP)); ctx.fillRect(0, 0, W, H); }      // the night in the church: lit windows or not, the stone stays dark (only the story's lamps lift it)
+  if (c.torchF > 0 && !past) { const f = c.torchF, fl = 1 + .04 * Math.sin(t * 13), DK = [14, 12, 44];      // the torch's shadows (MELO 2026-11-16): only what stands still in the church casts one, the four candlesticks on the floor and the Holy Cross on the wall behind it; the chef and the foes cast none, so the fight stays easy to read
+    ctx.save(); loop([[0, 0], [CL, 0], [CL, CW], [0, CW]]); ctx.clip();      // kept to the floor
+    for (const [x, y] of CANDLES) { const dx = x - TORCH[0], dy = y - TORCH[1], d = Math.hypot(dx, dy), ux = dx / d, uy = dy / d, nx = -uy, ny = ux, L = 2.4 * fl, w0 = .07, w1 = .17, a = P(x, y), b = P(x + ux * L, y + uy * L), g = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+      g.addColorStop(0, css(DK, .42 * f)); g.addColorStop(1, css(DK, 0)); ctx.fillStyle = g; ctx.beginPath(); [[x + nx * w0, y + ny * w0], [x + ux * L + nx * w1, y + uy * L + ny * w1], [x + ux * L - nx * w1, y + uy * L - ny * w1], [x - nx * w0, y - ny * w0]].forEach(([px, py], n) => { const q = P(px, py); n ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath(); ctx.fill(); } ctx.restore();      // a long soft streak from the foot, straight away from the fire, fading as it goes
+    const Lz = 1.65 * fl, k = TORCH[0] / (TORCH[0] - .95), wp = (y, z) => P(0, TORCH[1] + (y - TORCH[1]) * k, Lz + (z - Lz) * k), rect = (y0, y1, z0, z1) => poly([wp(y0, z0), wp(y1, z0), wp(y1, z1), wp(y0, z1)], DK, .42 * f);
+    rect(my - .11, my + .11, .62, 3.82); rect(my - .8, my + .8, 2.7, 2.92); }      // the cross thrown on the back wall, a little larger than itself, from the fire as high as a man
   // marks on the floor: what is about to hit, and where
   for (const sh of c.shots) { const q = P(sh.x1, sh.y1), u = sh.t / sh.T, r = s * .62 * 1.22; ell(q[0], q[1], r, r * .577, RED, .1 + .2 * u); ctx.beginPath(); ctx.ellipse(q[0], q[1], r, r * .577, 0, 0, TAU); ctx.strokeStyle = css([255, 110, 110], .5 + .4 * u); ctx.lineWidth = 1.5; ctx.stroke(); }
   for (const e of c.foes) { if (e.hp <= 0 || e.inv || e.wave !== c.wave) continue;
