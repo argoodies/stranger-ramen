@@ -1049,7 +1049,7 @@ function serve(i) {
   const ok = !!b.soup && same(b, c.want);
   c.state = 'eat'; c.t = 0; c.ok = ok; c.dish = Object.assign({}, b); c.say = !b.soup ? S().drySay : ok ? pick(S().sayOk) : complaint(b, c.want);
   save.served++; s.sinceSelf++; localStorage.setItem('ctramen', JSON.stringify(save));
-  if (s.sinceSelf >= 3) { s.ownSay = S().hungry; s.ownSayT = 4; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
+  if (s.sinceSelf >= 3) { s.hungryDue = true; s.seats.forEach((o2, k) => { if (o2 && k !== i && (o2.state === 'wait' || o2.state === 'arrive')) { o2.state = 'leave'; o2.t = 0; o2.say = ''; } }); }
   if (ok) [67, 71, 74, 79, 83].forEach((m, k) => chime(m, k * .09, .16, 1.4)); else { chime(61, 0, .16, 1); chime(62, 0.02, .12, 1); }
   s.bowl = emptyBowl(); s.bowlAnim = {}; setHold(null); s.owner.tx = SERVEX; s.owner.ty = LANE_Y0;
   return true;
@@ -1190,6 +1190,7 @@ function updateStall(dt) {
     if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; }
     if (s.pend && !(o.path && o.path.length)) { const p = s.pend; s.pend = null; if (p === 'oracle') { if (s.oracle) { save.buffs[s.oracle] = true; saveNow(); s.oracle = false; s.ownSay = S().gotProphecy; s.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } else if (p === 'dump') dump(); else if (p === 'bar') barTap(); else if (p.startsWith('serve')) serve(+p[5]); else if (p === 'board' && !s.hold) { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); } } }
   if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
+  if (s.hungryDue && s.seats.every(c => !c)) { s.hungryDue = false; if (!s.myBowl && !s.done) { s.ownSay = S().hungry; s.ownSayT = 4; } }      // "time to make one for myself" only once the third customer has eaten and gone (MELO 2026-11-16; was said the moment the third bowl was served)
   if (s.ownSayT > 0) s.ownSayT -= dt;
   { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
   if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (Math.random() < .3) s.oracle = pick(BUFFS); else if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }      // your own bowl finished: three times in ten, nothing is said and a prophecy mark appears where the bowl stood
@@ -1767,13 +1768,14 @@ function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn 
   if (wearing('twin') && !hide2) { const gx = x - K * .3; line([[gx, hy], [gx - K * .04, hy - K * .14]], [110, 80, 70], Math.max(2, K * .07)); poly([[gx, hy - K * .14], [gx - K * .17, hy - K * .16], [gx - K * .2, hy - K * .5], [gx - K * .06, hy - K * .52]], [206, 212, 230]); }
 }
 function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight: the hearts (a seventh, golden, when you came in fed), the charm worn, and a card if one is held
-  for (let i = 0; i < max; i++) { const gold = i === 6; const hc = gold ? [255, 204, 110] : [236, 96, 110], hw = church.heal != null && church.healFrom != null && i >= church.healFrom && i < hp ? 1 - clamp((church.heal - .15) / (HEAL_T - .15)) : 0; if (hw > 0) glow(W / 2 + (i - (max - 1) / 2) * 22, 74, 13, [255, 236, 170], .6 * hw); drawHeart(W / 2 + (i - (max - 1) / 2) * 22, 74, 7.5, i < hp ? mix(hc, [255, 244, 200], hw) : [70, 58, 100], i < hp ? 1 : .8); }      // hearts just won back start as light, then slowly redden
+  const HY = hudY();      // the bar's height on screen: under the corner buttons whenever they show (the prophecies on the left met the drink, MELO 2026-11-16)
+  for (let i = 0; i < max; i++) { const gold = i === 6; const hc = gold ? [255, 204, 110] : [236, 96, 110], hw = church.heal != null && church.healFrom != null && i >= church.healFrom && i < hp ? 1 - clamp((church.heal - .15) / (HEAL_T - .15)) : 0; if (hw > 0) glow(W / 2 + (i - (max - 1) / 2) * 22, HY + 1, 13, [255, 236, 170], .6 * hw); drawHeart(W / 2 + (i - (max - 1) / 2) * 22, HY + 1, 7.5, i < hp ? mix(hc, [255, 244, 200], hw) : [70, 58, 100], i < hp ? 1 : .8); }      // hearts just won back start as light, then slowly redden
   let x = W / 2 + ((max - 1) / 2 + 1) * 22 + 4;
-  const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && ringUsed) ctx.globalAlpha = .3; drawItem(id, x, 73, id === 'ring' ? 9.5 : 8); ctx.restore(); x += 26; }
+  const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && ringUsed) ctx.globalAlpha = .3; drawItem(id, x, HY, id === 'ring' ? 9.5 : 8); ctx.restore(); x += 26; }
   const c = church; hudDrink = null; const pulse = .5 + .2 * Math.sin(performance.now() / 300);
-  const did = save.equip.drink; if (did && have(did)) { const wt = (performance.now() - hudDrinkWob) / 1000, dx = W / 2 - ((max - 1) / 2 + 1) * 22 - 4 + (wt < .4 ? Math.sin(wt * 60) * 3 * (1 - wt / .4) : 0); glow(dx, 73, 16, [255, 230, 170], pulse);
-    if (hp === 1 && c.fight) { const t = performance.now() / 1000, beat = .5 + .5 * Math.sin(t * 7), ring = (t * 1.4) % 1; glow(dx, 73, 30 + 8 * beat, [255, 214, 120], .55 + .35 * beat); ctx.beginPath(); ctx.arc(dx, 73, 13 + 12 * ring, 0, TAU); ctx.strokeStyle = css([255, 226, 150], .85 * (1 - ring)); ctx.lineWidth = 2; ctx.stroke(); }      // one heart left: the drink calls out, a quick warm beat and a ring spreading from it
-    drawItem(did, dx, 73, 9); hudDrink = [dx, 73]; }      // a drink to take, to the left of the hearts: tap it
+  const did = save.equip.drink; if (did && have(did)) { const wt = (performance.now() - hudDrinkWob) / 1000, dx = W / 2 - ((max - 1) / 2 + 1) * 22 - 4 + (wt < .4 ? Math.sin(wt * 60) * 3 * (1 - wt / .4) : 0); glow(dx, HY, 16, [255, 230, 170], pulse);
+    if (hp === 1 && c.fight) { const t = performance.now() / 1000, beat = .5 + .5 * Math.sin(t * 7), ring = (t * 1.4) % 1; glow(dx, HY, 30 + 8 * beat, [255, 214, 120], .55 + .35 * beat); ctx.beginPath(); ctx.arc(dx, HY, 13 + 12 * ring, 0, TAU); ctx.strokeStyle = css([255, 226, 150], .85 * (1 - ring)); ctx.lineWidth = 2; ctx.stroke(); }      // one heart left: the drink calls out, a quick warm beat and a ring spreading from it
+    drawItem(did, dx, HY, 9); hudDrink = [dx, HY]; }      // a drink to take, to the left of the hearts: tap it
   if (c.heal != null && c.healAt && c.heal < RING_T) { const u = c.heal / RING_T, v = 1 - (1 - u) * (1 - u); ctx.beginPath(); ctx.arc(c.healAt[0], c.healAt[1], 10 + 26 * v, 0, TAU); ctx.strokeStyle = css([255, 210, 100], 1 - u); ctx.lineWidth = 3 * (1 - u) + 1; ctx.stroke(); }      // the tapped cup sends out one yellow ring
   if (c.inv > 0) { ctx.beginPath(); ctx.arc(x, 73, 11, -Math.PI / 2, -Math.PI / 2 + TAU * c.inv / 5); ctx.strokeStyle = css([255, 214, 120], .95); ctx.lineWidth = 2.5; ctx.stroke(); }      // the drink's five seconds, running down
 }
@@ -1786,6 +1788,7 @@ function drawBuff(k, x, y, r) {      // a prophecy's mark: a round badge, white 
   if (k === 'speed') for (const dx of [-.12, .14]) { ctx.moveTo((dx - .12) * r, -.28 * r); ctx.lineTo((dx + .12) * r, 0); ctx.lineTo((dx - .12) * r, .28 * r); }      // two chevrons, centred well inside the ring
   else for (let i = 0; i < 3; i++) { const g = i * Math.PI / 3, cx = Math.cos(g) * r * .5, cy = Math.sin(g) * r * .5; ctx.moveTo(-cx, -cy); ctx.lineTo(cx, cy); for (const sg of [-1, 1]) { const ex = sg * cx * .78, ey = sg * cy * .78, nx = -Math.sin(g) * r * .1, ny = Math.cos(g) * r * .1; ctx.moveTo(ex + nx, ey + ny); ctx.lineTo(sg * cx * .58, sg * cy * .58); ctx.lineTo(ex - nx, ey - ny); } }      // a snowflake: three strokes, each end with a small fork
   ctx.stroke(); ctx.restore(); }
+function hudY() { let b = 0; for (const el of document.querySelectorAll('#top button.pill')) if (el.style.display !== 'none' && el.offsetParent !== null) b = Math.max(b, el.getBoundingClientRect().bottom); return Math.max(73, b ? b + 24 : 0); }      // 73 as before, or 24 below the lowest corner button that is showing
 let hudDrink = null, hudDrinkWob = -1e9;      // where the card sits on the fight's top bar, so a tap can play it
 function drawScales(x, y, r, a = 1) {      // a little gold pair of scales: a post, a beam, two pans on strings
   const g = css([236, 200, 120], a), w = Math.max(1, r * .12); ctx.save(); ctx.strokeStyle = g; ctx.fillStyle = g; ctx.lineWidth = w; ctx.lineCap = 'round';
