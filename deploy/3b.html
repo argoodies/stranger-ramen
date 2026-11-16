@@ -677,8 +677,9 @@ function tree(v, i, j) {
   v.disc(x, y, 0, .08, .45, [150, 110, 90]);      // a round trunk, and a round mark at its foot
   for (const [z, w, h, c] of [[.4, .9, .9, [70, 150, 130]], [.95, .7, .8, [90, 170, 146]], [1.45, .46, .7, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z, w, h, c);
 }
+// lamp: the post is round, .071 across so it looks as thick on screen as the old .1 square post seen corner-on (MELO 2026-11-16)
 function lamp(v, i, j, t) {
-  const x = i + .5, y = j + .5; footSq(v, x, y, 0, .05); v.box(x - .05, y - .05, 0, .1, .1, 1.3, [90, 80, 120]);
+  const x = i + .5, y = j + .5; footRound(v, x, y, 0, .071); v.disc(x, y, 0, .071, 1.3, [90, 80, 120]);
   const p = v.P(x, y, 1.45); glow(p[0], p[1], v.s * 1.5, [255, 214, 140], (0.2 + 0.8 * G.n) * (0.75 + 0.1 * Math.sin(t * 3 + i)));
   v.box(x - .14, y - .14, 1.3, .28, .28, .3, [255, 226, 160]); v.pyramid(x - .2, y - .2, 1.6, .4, .22, [90, 80, 120]);
 }
