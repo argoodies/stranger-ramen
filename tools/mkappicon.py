@@ -69,10 +69,16 @@ function ribbons(n, wd, L0, L1, grav, flare, alt, sd) { seed = sd;      // thin 
 const SKYN = [[8, 10, 34], [20, 20, 62], [42, 32, 84]];      // the game's night sky: near black above, deep blue, purple at the horizon
 const BG = () => { const g = ctx.createLinearGradient(0, 0, 0, N); g.addColorStop(0, css(SKYN[0])); g.addColorStop(.5, css(SKYN[1])); g.addColorStop(1, css(SKYN[2])); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3); };      // the night sky as it shades down to the horizon, with stars (MELO 2026-11-16; was one flat purple, then briefly the rose daytime sky)
 const TOKS = () => { token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); };
-function ghost(x, y, r, role, tilt = 0) {      // a see-through token (MELO 2026-11-16): two white rings, the outer one dashed, and the role's own picture inside, no disc
+function ghost(x, y, r, role, tilt = 0) {      // a see-through token (MELO 2026-11-16): two white rings, the outer one dashed, and the role's own picture inside as an outline only, no disc
   ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * .045; ctx.beginPath(); ctx.arc(x, y, r * .86, 0, TAU); ctx.stroke();
   ctx.setLineDash([r * .13, r * .09]); ctx.lineCap = 'round'; ctx.lineDashOffset = r * .02; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.restore();
-  const keep = [circ, ell, glow]; circ = ell = glow = () => {}; ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); roleToken(0, 0, r, role); ctx.restore(); [circ, ell, glow] = keep; }
+  // the picture itself hollow too: only its outline, in the role's colour (the shape drawn flat, spread out by d all round, then the shape cut out of it)
+  const S = Math.ceil(r * 2.6), d = r * .035, col = role === 'pukka' ? [206, 40, 62] : [60, 130, 230], keep = ctx;
+  const m = document.createElement('canvas'); m.width = m.height = S; ctx = m.getContext('2d'); ctx.translate(S / 2, S / 2); ctx.rotate(tilt); roleToken(0, 0, r, role, 1, col); ctx = keep;
+  const o = document.createElement('canvas'); o.width = o.height = S; const oc = o.getContext('2d');
+  for (let i = 0; i < 48; i++) oc.drawImage(m, Math.cos(i * TAU / 48) * d, Math.sin(i * TAU / 48) * d);
+  oc.globalCompositeOperation = 'source-in'; oc.fillStyle = css(col); oc.fillRect(0, 0, S, S);
+  oc.globalCompositeOperation = 'destination-out'; oc.drawImage(m, 0, 0); ctx.drawImage(o, x - S / 2, y - S / 2); }
 const GHOSTS = () => { ghost(C - 200, C + 150, 175, 'sailor', -.12); ghost(C + 200, C + 150, 175, 'pukka', .12); ghost(C, C - 160, 185, 'heretic', 0); };
 make('A2', () => { BG(); GHOSTS(); });      // no streamers (MELO 2026-11-16); was BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS();
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
