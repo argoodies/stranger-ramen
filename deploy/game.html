@@ -2593,11 +2593,10 @@ function drawIcon(t) {
 // ------------------------------------------------------------ main
 let fade = 0, last = performance.now(), T = 0;
 let pillN = -1;
-function pillSky() {      // the corner buttons follow the sky (/3b passes its own night through window.__skyN): dark see-through by night, light frosted with dark marks by day (MELO 2026-11-16); the tower room is always dark
-  const n = Math.round((window.__skyN ? window.__skyN() : mode === 'tower' ? 1 : clamp(G.n)) * 20) / 20; if (n === pillN) return; pillN = n; const st = document.documentElement.style, m = (a, b) => mix(a, b, n);
+function pillSky() {      // the corner buttons follow the sky: dark see-through by night, light frosted with dark marks by day (MELO 2026-11-16); the tower room is always dark
+  const n = Math.round((mode === 'tower' ? 1 : clamp(G.n)) * 20) / 20; if (n === pillN) return; pillN = n; const st = document.documentElement.style, m = (a, b) => mix(a, b, n);
   st.setProperty('--pb', css(m([255, 248, 252], [30, 24, 60]), lerp(.62, .62, n))); st.setProperty('--pf', css(m([74, 58, 102], [244, 236, 220]))); st.setProperty('--pd', css(m([255, 255, 255], [255, 255, 255]), lerp(.8, .22, n)));
-  st.setProperty('--mb', css(m([255, 248, 252], [30, 24, 60]), lerp(.88, .82, n))); st.setProperty('--mo', css(m([120, 90, 170], [255, 236, 170]), lerp(.16, .2, n))); st.setProperty('--mf', css(m([58, 42, 88], [255, 233, 176])));
-  const k = n < .5 ? 0 : 1; st.setProperty('--kb', k ? 'rgba(0,0,0,.35)' : 'rgba(255,248,252,.62)'); st.setProperty('--kt', k ? '#fff' : 'rgb(74,58,102)'); st.setProperty('--ks', k ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.9)'); }      // --kb/--kt/--ks: /3b's round language mark (its circle, its two tiles, the strokes on them), day or night with nothing between: its lobby can rest half dark, where a blend would wash the mark out
+  st.setProperty('--mb', css(m([255, 248, 252], [30, 24, 60]), lerp(.88, .82, n))); st.setProperty('--mo', css(m([120, 90, 170], [255, 236, 170]), lerp(.16, .2, n))); st.setProperty('--mf', css(m([58, 42, 88], [255, 233, 176]))); }
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
