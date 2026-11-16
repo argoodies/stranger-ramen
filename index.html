@@ -629,7 +629,7 @@ function skyNow(t, dark = 0, stars = 1, cl = true, n = G.n) { const d = [20, 16,
   dark *= n; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
 const FOOT = [20, 12, 40];      // the faint mark at the foot of anything small standing on the ground (MELO 2026-11-16): its own shape, a little larger, very light
 function footSq(v, x, y, z, hx, hy = hx, a = .22) { const P = v.P.bind(v); poly([P(x - hx, y - hy, z), P(x + hx, y - hy, z), P(x + hx, y + hy, z), P(x - hx, y + hy, z)], FOOT, a); }
-function footRound(v, x, y, z, r, a = .22) { const q = v.P(x, y, z), rx = r * v.s * 1.2247; ell(q[0], q[1], rx, rx * .577, FOOT, a); }
+function footRound(v, x, y, z, r, a = .22) { const pts = []; for (let i = 0; i < 40; i++) { const q = TAU * i / 40; pts.push(v.P(x + r * Math.cos(q), y + r * Math.sin(q), z)); } poly(pts, FOOT, a); }      // traced the way v.disc traces its circle, so it lies exactly round the foot it sits under
 function tree(v, i, j) {
   const x = i + .5, y = j + .5; footSq(v, x, y, 0, .13);      // only the trunk marks the ground, like the lamp posts: the needles let the light through (MELO 2026-11-16)
  
@@ -805,7 +805,7 @@ function drawBar(t) {
       circ(hx + f * k * .03, hy + k * .05, k * .025, pink);      // a tiny nose
       BARHIT.cat = [q[0], q[1] - k * .4, s * .45]; c.at = [hx, hy]; } }); }
   { const per = Math.floor(G.t / HALF), up = per % 2 === 0 && bar.taken !== per, jt = jig('wobTable', 0); { const tq = P(.5, .5, .5); BARHIT.table = [tq[0], tq[1], s * .5]; }      // a little round table by the door, bare: a tap just rocks it (the iced coffee to take away stands at the left end of the counter, below)
-    objs.push({ k: 1.05, d: () => { footRound(v, .5, .5, 0, .25); v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46 + jt, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5 + jt, .5, .66, .36, .06, [176, 124, 90]);
+    objs.push({ k: 1.05, d: () => { footRound(v, .5, .5, 0, .2); v.disc(.5, .5, 0, .16, .04, [96, 66, 54]); v.box(.46 + jt, .46, .04, .08, .08, .62, [110, 76, 60]); v.disc(.5 + jt, .5, .66, .36, .06, [176, 124, 90]);
     } }); }
   // you
   if (storyHook) storyHook(v, objs, K, t, 'bar');      // the story's people, when the coffee house is the stage
@@ -874,7 +874,7 @@ function drawWorld(t, dt) {
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
   objs.push({ k: -2.0, d: () => drawHouse(v, t) });
   for (const [i, j] of TREES) objs.push({ k: i + j + 1, d: () => tree(v, i, j) });
-  objs.push({ k: 8.8 + .3 + .5, d: () => { const x = 8.28, y = .3, z = CDZ; footRound(v, x, y, z, .2); v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
+  objs.push({ k: 8.8 + .3 + .5, d: () => { const x = 8.28, y = .3, z = CDZ; footRound(v, x, y, z, .18); v.disc(x, y, z, .14, .1, [176, 110, 80]); v.box(x - .03, y - .03, z + .1, .06, .06, .12, [150, 110, 90]);      // a small clipped cypress in a pot, off to the side of the church door
     for (const [dz, w, h, c] of [[.18, .3, .34, [70, 150, 130]], [.38, .23, .3, [90, 170, 146]], [.56, .15, .26, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z + dz, w, h, c); } });
   for (const [i, j] of LAMPS) objs.push({ k: i + j + 1, d: () => lamp(v, i, j, t) });
   const K = s * 0.72;
@@ -1369,7 +1369,7 @@ function drawStall(t) {
   v.cy += liftPrep;
   if (inFront && !binFirst) drawOwner();
   // bin for a bowl gone wrong
-  hit('bin', BIN[0], BIN[1], .35, .42); footRound(v, BIN[0], BIN[1], 0, .34); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
+  hit('bin', BIN[0], BIN[1], .35, .42); footRound(v, BIN[0], BIN[1], 0, .3); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
   ring('bin');
   if (binFirst) drawOwner();
   // one hanging lamp, over the middle of the room
