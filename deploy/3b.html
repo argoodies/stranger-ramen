@@ -669,7 +669,8 @@ function clouds(t, a) {      // little white clouds drifting slowly across the d
 function skyNow(t, dark = 0, stars = 1, cl = true, n = G.n) { const d = [20, 16, 44];      // n: how far into night; a dark room (the tower) passes 1 and keeps the night sky by day too
   dark *= n; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
 const FOOT = [20, 12, 40];      // the faint mark at the foot of anything small standing on the ground (MELO 2026-11-16): its own shape, a little larger, very light
-function footSq(v, x, y, z, hx, hy = hx, a = .22) { const P = v.P.bind(v); poly([P(x - hx, y - hy, z), P(x + hx, y - hy, z), P(x + hx, y + hy, z), P(x - hx, y + hy, z)], FOOT, a); }
+// footSq: hx, hy are the half-sizes of the square foot itself; the mark reaches .046 past it all round, the same rim on screen (.04 s) as footRound's
+function footSq(v, x, y, z, hx, hy = hx, a = .22) { hx += .046; hy += .046; const P = v.P.bind(v); poly([P(x - hx, y - hy, z), P(x + hx, y - hy, z), P(x + hx, y + hy, z), P(x - hx, y + hy, z)], FOOT, a); }
 function footRound(v, x, y, z, r, a = .22) { const q = v.P(x, y, z), d = v.s * .04; ell(q[0], q[1], r * v.s * 1.2247 + d, r * v.s * .7071 + d, FOOT, a); }      // r: the radius of the round foot itself; the mark is its outline on screen grown by the same few pixels all round (grown on the ground it came out twice as wide at the sides as in front, MELO 2026-11-16)
 function tree(v, i, j) {
   const x = i + .5, y = j + .5; footRound(v, x, y, 0, .08);      // only the trunk marks the ground: the needles let the light through (MELO 2026-11-16)
@@ -677,7 +678,7 @@ function tree(v, i, j) {
   for (const [z, w, h, c] of [[.4, .9, .9, [70, 150, 130]], [.95, .7, .8, [90, 170, 146]], [1.45, .46, .7, [120, 190, 160]]]) v.pyramid(x - w / 2, y - w / 2, z, w, h, c);
 }
 function lamp(v, i, j, t) {
-  const x = i + .5, y = j + .5; footSq(v, x, y, 0, .11); v.box(x - .05, y - .05, 0, .1, .1, 1.3, [90, 80, 120]);
+  const x = i + .5, y = j + .5; footSq(v, x, y, 0, .05); v.box(x - .05, y - .05, 0, .1, .1, 1.3, [90, 80, 120]);
   const p = v.P(x, y, 1.45); glow(p[0], p[1], v.s * 1.5, [255, 214, 140], (0.2 + 0.8 * G.n) * (0.75 + 0.1 * Math.sin(t * 3 + i)));
   v.box(x - .14, y - .14, 1.3, .28, .28, .3, [255, 226, 160]); v.pyramid(x - .2, y - .2, 1.6, .4, .22, [90, 80, 120]);
 }
@@ -1641,7 +1642,7 @@ function drawTowerRoom(t) {
   if (tw.moving && !tw.pend) { const q = P(tw.tx, tw.ty); ell(q[0], q[1], s * .3, s * .15, [255, 240, 200], .35); }
   const objs = [];
   objs.push({ k: TTORCH[0] + TTORCH[1], d: () => { const [x, y] = TTORCH, top = P(x, y, 1.5);      // the torch: the only light there is
-    footSq(v, x, y, 0, .26); v.box(x - .18, y - .18, 0, .36, .36, .1, [150, 120, 90]); v.box(x - .05, y - .05, .1, .1, .1, 1.1, [120, 88, 70]); v.box(x - .2, y - .2, 1.2, .4, .4, .14, [176, 140, 96]);
+    footSq(v, x, y, 0, .18); v.box(x - .18, y - .18, 0, .36, .36, .1, [150, 120, 90]); v.box(x - .05, y - .05, .1, .1, .1, 1.1, [120, 88, 70]); v.box(x - .2, y - .2, 1.2, .4, .4, .14, [176, 140, 96]);
     glow(top[0], top[1], s * 4.4 * fl, [255, 170, 90], .8); glow(top[0], top[1] - s * .2, s * 1.3, [255, 220, 150], .9);
     poly([[top[0] - s * .16, top[1] + s * .1], [top[0] + s * .16, top[1] + s * .1], [top[0] + s * .05 * Math.sin(t * 9), top[1] - s * .62 * fl]], [255, 150, 70]); poly([[top[0] - s * .09, top[1] + s * .1], [top[0] + s * .09, top[1] + s * .1], [top[0] - s * .03 * Math.sin(t * 11), top[1] - s * .36 * fl]], [255, 230, 150]); } });
   objs.push({ k: TMAN[0] + TMAN[1], d: () => { const q = P(TMAN[0], TMAN[1]); fig(q[0], q[1], K, { kind: 'teller', body: mix([132, 100, 172], [255, 190, 120], .16), hat: [70, 52, 100] }); tw.HIT.man = [q[0], q[1] - K * .7]; tw.manAt = q;
@@ -2482,13 +2483,13 @@ function drawChurch(t, dt) {
     v.box(.55, my - .5, .4, .8, 1, .22, [246, 236, 226]);
     { const wk = clamp(1 - (performance.now() - (c.crossWob || -1e9)) / 700), b = P(.95, my, .62), ang = .025 * wk * Math.sin(performance.now() / 45); ctx.save(); ctx.translate(b[0], b[1]); ctx.rotate(ang); ctx.translate(-b[0], -b[1]); v.box(.84, my - .11, .62, .22, .22, 3.2, GOLD); v.box(.84, my - .8, 2.7, .22, 1.6, .22, GOLD); ctx.restore(); }      // it rocks on its foot when tapped
     if (LAMP > 0) { const q = P(.95, my, 2.6); glow(q[0], q[1], s * (3 + .18 * Math.sin(t * 2)), [255, 236, 180], .75 * LAMP); }
-    for (const y of [my - 1.1, my + 1.1]) { footSq(v, 1.01, y, .4, .08); v.box(.96, y - .05, .4, .1, .1, .7, [250, 244, 232]); if (LAMP > 0) { const q = P(1.01, y, 1.22); glow(q[0], q[1], s * (.8 + .08 * Math.sin(t * 9 + y)), [255, 214, 140], .85 * LAMP); circ(q[0], q[1], s * .055, [255, 240, 190], LAMP); } } } });      // in play the candles by the cross stay unlit (the church's light is the windows'); only the story's lamps light them
+    for (const y of [my - 1.1, my + 1.1]) { footSq(v, 1.01, y, .4, .05); v.box(.96, y - .05, .4, .1, .1, .7, [250, 244, 232]); if (LAMP > 0) { const q = P(1.01, y, 1.22); glow(q[0], q[1], s * (.8 + .08 * Math.sin(t * 9 + y)), [255, 214, 140], .85 * LAMP); circ(q[0], q[1], s * .055, [255, 240, 190], LAMP); } } } });      // in play the candles by the cross stay unlit (the church's light is the windows'); only the story's lamps light them
   if (!past) objs.push({ k: TORCH[0] + TORCH[1], d: () => { const [x, y] = TORCH, f = c.torchF, top = P(x, y, 1.5), fl = .85 + .15 * Math.sin(t * 13);      // the torch: a brazier on a post, cold until you light it
-    footSq(v, x, y, 0, .28); v.box(x - .2, y - .2, 0, .4, .4, .12, GOLD); v.box(x - .06, y - .06, .12, .12, .12, 1.05, [150, 104, 84]); v.box(x - .22, y - .22, 1.17, .44, .44, .16, GOLD);
+    footSq(v, x, y, 0, .2); v.box(x - .2, y - .2, 0, .4, .4, .12, GOLD); v.box(x - .06, y - .06, .12, .12, .12, 1.05, [150, 104, 84]); v.box(x - .22, y - .22, 1.17, .44, .44, .16, GOLD);
     if (f > 0) { glow(top[0], top[1], s * 3.6 * f * fl, [255, 170, 90], .75 * f); glow(top[0], top[1] - s * .2, s * 1.2 * f, [255, 220, 150], .9 * f);
       poly([[top[0] - s * .16 * f, top[1] + s * .1], [top[0] + s * .16 * f, top[1] + s * .1], [top[0] + s * .05 * Math.sin(t * 9), top[1] - s * .62 * f * fl]], [255, 150, 70]); poly([[top[0] - s * .09 * f, top[1] + s * .1], [top[0] + s * .09 * f, top[1] + s * .1], [top[0] - s * .03 * Math.sin(t * 11), top[1] - s * .36 * f * fl]], [255, 230, 150]); }
     else if (!c.fight && !c.done && !c.storyIn) { const yy = top[1] - s * .5 - Math.abs(Math.sin(t * 3)) * s * .12, r = s * .11; glow(top[0], yy, r * 4, [255, 236, 170], .7); poly([[top[0], yy - r * 1.3], [top[0] + r, yy], [top[0], yy + r * 1.3], [top[0] - r, yy]], [255, 236, 170]); } } });
-  for (const [x, y] of CANDLES) objs.push({ k: x + y, d: () => { footSq(v, x, y, 0, .19); v.box(x - .12, y - .12, 0, .24, .24, .12, GOLD); v.box(x - .04, y - .04, .12, .08, .08, 1.3, GOLD); v.box(x - .14, y - .14, 1.42, .28, .28, .06, GOLD);      // a faint square at the foot, the shape of the base and a little larger, keeps each one standing on the floor
+  for (const [x, y] of CANDLES) objs.push({ k: x + y, d: () => { footSq(v, x, y, 0, .12); v.box(x - .12, y - .12, 0, .24, .24, .12, GOLD); v.box(x - .04, y - .04, .12, .08, .08, 1.3, GOLD); v.box(x - .14, y - .14, 1.42, .28, .28, .06, GOLD);      // a faint square at the foot, the shape of the base and a little larger, keeps each one standing on the floor
     if (LAMP > 0) { const q = P(x, y, 1.72); glow(q[0], q[1], s * (1 + .1 * Math.sin(t * 8 + x + y)), [255, 214, 140], .8 * LAMP); circ(q[0], q[1], s * .06, [255, 240, 190], LAMP); } } });      // tall candlesticks in the corners: unlit in play, lit by the story's lamps
   const halo = (x, hy, hr) => { ctx.beginPath(); ctx.ellipse(x, hy - hr * 1.5, hr * 1.05, hr * .36, 0, 0, TAU); ctx.strokeStyle = css([255, 222, 130]); ctx.lineWidth = Math.max(1.5, K * .045); ctx.stroke(); glow(x, hy - hr * 1.5, hr * 2.4, [255, 226, 150], .5); };
   for (const n of c.npcs) { if (!seen(n.x)) { n.at = null; continue; } objs.push({ k: n.x + n.y + .3, d: () => {
@@ -2504,7 +2505,7 @@ function drawChurch(t, dt) {
   if (c.chest) { const ch = c.chest; objs.push({ k: ch.x + ch.y + .2, d: () => {      // the chest: wood and gold; opened, its lid stands up over the dark hollow
     const a = 1, W0 = [176, 120, 84], W1 = [150, 98, 72], q = P(ch.x, ch.y); whole(ease(ch.a), () => {
     if (!ch.open) glow(q[0], q[1] - s * .3, s * (1.3 + .15 * Math.sin(t * 4)), [255, 236, 170], .6);
-    footSq(v, ch.x, ch.y, 0, .38, .5, .22 * a); v.box(ch.x - .3, ch.y - .42, 0, .6, .84, .36, W0, a);      // the gold strap is thin plates laid on the outside (front, and over the top), so nothing of it shows through the wood
+    footSq(v, ch.x, ch.y, 0, .3, .42, .22 * a); v.box(ch.x - .3, ch.y - .42, 0, .6, .84, .36, W0, a);      // the gold strap is thin plates laid on the outside (front, and over the top), so nothing of it shows through the wood
     if (ch.open) { const z = .36, i = .05, x0 = ch.x - .3 + i, x1 = ch.x + .3 - i, y0 = ch.y - .42 + i, y1 = ch.y + .42 - i;
       v.box(ch.x + .3, ch.y - .06, 0, .015, .12, .36, GOLD, a);
       poly([P(x0, y0, z), P(x1, y0, z), P(x1, y1, z), P(x0, y1, z)], [74, 48, 40], a);      // the hollow inside, dark
