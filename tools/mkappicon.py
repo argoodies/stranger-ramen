@@ -73,16 +73,7 @@ function ghost(x, y, r, role, tilt = 0) {      // a see-through token (MELO 2026
   ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * .045; ctx.beginPath(); ctx.arc(x, y, r * .86, 0, TAU); ctx.stroke();
   ctx.setLineDash([r * .13, r * .09]); ctx.lineCap = 'round'; ctx.lineDashOffset = r * .02; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.restore();
   const keep = [circ, ell, glow]; circ = ell = glow = () => {}; ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); roleToken(0, 0, r, role); ctx.restore(); [circ, ell, glow] = keep; }
-function heretic(x, y, r) {      // the Heretic's budded cross drawn for the icon (MELO 2026-11-16): the game's colours, line weights and trefoil buds,
-  // but all four arms the same length round the crossing, so the crossing, the outline and the weight all sit on the icon's middle
-  const q = r * .95, w = r * .11, A = .47, c = [60, 130, 230], c2 = [244, 232, 208];
-  ctx.save(); ctx.translate(x, y); ctx.rotate(-Math.PI / 4); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  const ends = [[0, -A, 0, -1], [0, A, 0, 1], [-A, 0, -1, 0], [A, 0, 1, 0]];
-  const bar = (col, k, bud) => { ctx.strokeStyle = css(col); ctx.lineWidth = w * k;
-    ctx.beginPath(); ctx.moveTo(0, -(A - .06) * q); ctx.lineTo(0, (A - .06) * q); ctx.moveTo(-(A - .06) * q, 0); ctx.lineTo((A - .06) * q, 0); ctx.stroke();
-    for (const [ex, ey, ux, uy] of ends) for (const [a1, b1] of [[.1, 0], [-.04, .14], [-.04, -.14]]) { ctx.beginPath(); ctx.arc((ex + ux * a1 - uy * b1) * q, (ey + uy * a1 + ux * b1) * q, bud * q, 0, TAU); ctx.fillStyle = css(col); ctx.fill(); } };
-  bar(c, 3.0, .125); bar(c2, 1.25, .06); ctx.restore(); }
-const GHOSTS = () => heretic(C, C, 500);
+const GHOSTS = () => { const keep = [circ, ell, glow]; circ = ell = glow = () => {}; roleToken(C - 500 * .95 * .01 * Math.SQRT1_2, C, 500, 'heretic'); [circ, ell, glow] = keep; };      // only the Heretic's picture, big, in the middle: no rings, no disc (MELO 2026-11-16); moved left so the crossing of the bars (0, .01q down the rotated arm) sits on the middle line      // the Heretic alone in the middle (MELO 2026-11-16; the Sailor and the Pukka dropped)
 make('A2', () => { BG(); GHOSTS(); });      // no streamers (MELO 2026-11-16); was BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS();
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
