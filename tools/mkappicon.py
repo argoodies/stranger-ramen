@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""The Tiny Clocktower app icon (2026-11-04; sky changed 2026-11-16): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken,
-without shadow or glow), on the game's clear rose daytime sky (no clouds) with a soft light behind them, and 24 straight streamers in the confetti colours bursting out
+"""The Tiny Clocktower app icon (2026-11-04; sky made the game's graded night sky 2026-11-16): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken,
+without shadow or glow), on the game's night sky shading from near black above to purple below, with stars and a warm light behind them, and 24 straight streamers in the confetti colours bursting out
 all round, starting 200-260 out from the middle (staggered) so they do not meet behind the tokens; the burst sits 35 above the
 middle, the one going straight up is 15% shorter, the ones behind the lower tokens reach past them, and all are 30% longer. Writes
 ios-pocket/App/Assets.xcassets/AppIcon.appiconset/icon_1024.png.
@@ -66,8 +66,8 @@ function ribbons(n, wd, L0, L1, grav, flare, alt, sd) { seed = sd;      // thin 
     const P = [], Q = []; for (let t = 0; t <= 1.0001; t += .04) { const behind = [[-200, 150 + 35, 175], [200, 150 + 35, 175]].reduce((m, [tx, ty, tr]) => { const along = Math.cos(q) * tx + Math.sin(q) * ty, off = Math.abs(-Math.sin(q) * tx + Math.cos(q) * ty); return off < tr * .9 ? Math.max(m, along + Math.sqrt(tr * tr - off * off) + 15) : m; }, 0), outer = Math.max(Math.max(40, L + 80 - r0) * (-Math.sin(q) > .97 ? .85 : 1) + r0, behind), outer2 = r0 + (outer - r0) * 1.3, r = r0 + t * (outer2 - r0), w = wd * (1 + flare * t) / 2, sx = C + Math.cos(q) * r, sy = C - 35 + Math.sin(q) * r + grav * t * t, nx = -Math.sin(q), ny = Math.cos(q);
       P.push([sx + nx * w, sy + ny * w]); Q.push([sx - nx * w, sy - ny * w]); }
     ctx.fillStyle = css(c); ctx.beginPath(); P.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); for (let j = Q.length - 1; j >= 0; j--) ctx.lineTo(Q[j][0], Q[j][1]); ctx.closePath(); ctx.fill(); } }
-const SKYD = [[176, 170, 220], [236, 176, 190], [250, 170, 150]];      // the game's daytime sky: pale lilac above, rose in the middle, coral below
-const BG = () => { const g = ctx.createLinearGradient(0, 0, 0, N); g.addColorStop(0, css(SKYD[0])); g.addColorStop(.5, css(SKYD[1])); g.addColorStop(1, css(SKYD[2])); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); glow(C, C, N * .32, [255, 236, 210], .35); };      // a clear rose daytime sky, no clouds (MELO 2026-11-16; was the night sky with stars)
+const SKYN = [[8, 10, 34], [20, 20, 62], [42, 32, 84]];      // the game's night sky: near black above, deep blue, purple at the horizon
+const BG = () => { const g = ctx.createLinearGradient(0, 0, 0, N); g.addColorStop(0, css(SKYN[0])); g.addColorStop(.5, css(SKYN[1])); g.addColorStop(1, css(SKYN[2])); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3); };      // the night sky as it shades down to the horizon, with stars (MELO 2026-11-16; was one flat purple, then briefly the rose daytime sky)
 const TOKS = () => { token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); };
 make('A2', () => { BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS(); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
