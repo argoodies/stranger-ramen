@@ -81,11 +81,7 @@ const GHOSTS = () => {      // the Heretic's cross hollow, only a white outline 
     oc.globalCompositeOperation = 'source-in'; oc.fillStyle = '#fff'; oc.fillRect(0, 0, S, S); oc.globalCompositeOperation = 'destination-out'; oc.drawImage(src, 0, 0); ctx.drawImage(o, 0, 0); };
   const inner = document.createElement('canvas'); inner.width = inner.height = S; { const ic = inner.getContext('2d'), im = m.getContext('2d').getImageData(0, 0, S, S), D = im.data;      // the thin cross inside (drawn brown in the flat copy) on its own
     for (let i = 0; i < D.length; i += 4) if (!(D[i + 3] > 0 && D[i] < 200)) D[i + 3] = 0; ic.putImageData(im, 0, 0); }
-  ring(m);
-  { const di = r * .03, e = document.createElement('canvas'); e.width = e.height = S; const ec = e.getContext('2d'); ec.drawImage(inner, 0, 0);      // the thin cross's outline runs just inside its edge, so a clear band of sky stays between the two outlines
-    ec.globalCompositeOperation = 'destination-in'; for (let i = 0; i < 32; i++) ec.drawImage(inner, Math.cos(i * TAU / 32) * di, Math.sin(i * TAU / 32) * di);
-    const o = document.createElement('canvas'); o.width = o.height = S; const oc = o.getContext('2d'); oc.drawImage(inner, 0, 0); oc.globalCompositeOperation = 'source-in'; oc.fillStyle = '#fff'; oc.fillRect(0, 0, S, S);
-    oc.globalCompositeOperation = 'destination-out'; oc.drawImage(e, 0, 0); ctx.drawImage(o, 0, 0); } };      // the outer outline and, inside it, the thin cross's own outline (MELO 2026-11-16)
+  m.getContext('2d').globalCompositeOperation = 'destination-out'; m.getContext('2d').drawImage(inner, 0, 0); ctx.drawImage(m, 0, 0); };      // the game's cross with its colours turned: the blue made white, the cream made see-through, so the sky shows through the thin cross and its buds (MELO 2026-11-16; was white outlines)
 make('A2', () => { BG(); GHOSTS(); });      // no streamers (MELO 2026-11-16); was BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS();
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
