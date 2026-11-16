@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""App Store listing for MomentPuzzle (app 6829382085), English only: version string, store text, URLs, category,
+"""App Store listing for Moment Puzzle (app 6829382085), English only: version string, store text, URLs, category,
 review contact and screenshots (iphone_N / ipad_N from a folder).
 usage: tiny_store.py <versionString> <screenshotDir> [buildNumber]"""
 import sys, json, os, hashlib, urllib.request, time
@@ -9,7 +9,7 @@ SITE = 'https://moment-puzzle.fly.dev'      # the app's own little site (tiny-si
 SUB = '3‑Player Deduction'
 DESC = """Three seats, one Storyteller, and a secret in every hand.
 
-MomentPuzzle is a pocket-sized game of hidden roles for one player. You and two computer players sit around a small floating table. Each of you is dealt a role in secret, and only the Storyteller knows the truth.
+Moment Puzzle is a pocket-sized game of hidden roles for one player. You and two computer players sit around a small floating table. Each of you is dealt a role in secret, and only the Storyteller knows the truth.
 
 THE ROLES
 • Good: each night, choose a player — either you or they are drunk until dusk. You can't die.
@@ -37,7 +37,7 @@ vs = J('GET', f'/v1/apps/{APP}/appStoreVersions?limit=10')['data']
 v = next((x for x in vs if x['attributes']['appVersionState'] in ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED')), None)
 if not v: raise SystemExit('no editable version: ' + ', '.join(f"{x['attributes']['versionString']} {x['attributes']['appVersionState']}" for x in vs))
 VID = v['id']
-J('PATCH', f'/v1/appStoreVersions/{VID}', {'data': {'type': 'appStoreVersions', 'id': VID, 'attributes': {'versionString': VER, 'copyright': '2026 MomentPuzzle'}}}); print('version', VER, VID)
+J('PATCH', f'/v1/appStoreVersions/{VID}', {'data': {'type': 'appStoreVersions', 'id': VID, 'attributes': {'versionString': VER, 'copyright': '2026 Moment Puzzle'}}}); print('version', VER, VID)
 if BN:
     b = J('GET', f'/v1/builds?filter[app]={APP}&filter[version]={BN}&fields[builds]=version,processingState')['data']
     assert b and b[0]['attributes']['processingState'] == 'VALID', b
