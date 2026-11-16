@@ -52,7 +52,7 @@ def sub1(old, new):
 sub1('canvas{position:fixed;inset:0;', 'canvas{position:fixed;top:0;right:0;bottom:0;left:0;')
 sub1('#title{position:fixed;inset:0;', '#title{position:fixed;top:0;right:0;bottom:0;left:0;')
 sub1('top:calc(10px + max(env(safe-area-inset-top), var(--sat, 0px)));', 'top:calc(10px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));')
-sub1('align-items:center;gap:8px;pointer-events:none;z-index:6}', 'align-items:center;pointer-events:none;z-index:6}')
+sub1('align-items:flex-start;gap:8px;pointer-events:none;z-index:6}', 'align-items:flex-start;pointer-events:none;z-index:6}')
 sub1('grid-template-columns:repeat(4,1fr);gap:8px;', 'grid-template-columns:repeat(4,1fr);grid-gap:8px;')
 sub1('font:700 min(11.5vw,72px) var(--serif);', 'font:700 11.5vw var(--serif);')
 sub1('flex-direction:column;gap:6px;padding:8px;', 'flex-direction:column;padding:8px;')
