@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Tiny Clocktower app icon (2026-11-04; sky made the game's graded night sky 2026-11-16): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken,
+"""The Tiny Clocktower app icon (2026-11-04; sky made the game's graded night sky 2026-11-16): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken; since 2026-11-16 only the Heretic's cross, hollow with a white outline, on the rose daytime sky,
 without shadow or glow), on the game's night sky shading from near black above to purple below, with stars and a warm light behind them, and 24 straight streamers in the confetti colours bursting out
 all round, starting 200-260 out from the middle (staggered) so they do not meet behind the tokens; the burst sits 35 above the
 middle, the one going straight up is 15% shorter, the ones behind the lower tokens reach past them, and all are 30% longer. Writes
@@ -66,14 +66,19 @@ function ribbons(n, wd, L0, L1, grav, flare, alt, sd) { seed = sd;      // thin 
     const P = [], Q = []; for (let t = 0; t <= 1.0001; t += .04) { const behind = [[-200, 150 + 35, 175], [200, 150 + 35, 175]].reduce((m, [tx, ty, tr]) => { const along = Math.cos(q) * tx + Math.sin(q) * ty, off = Math.abs(-Math.sin(q) * tx + Math.cos(q) * ty); return off < tr * .9 ? Math.max(m, along + Math.sqrt(tr * tr - off * off) + 15) : m; }, 0), outer = Math.max(Math.max(40, L + 80 - r0) * (-Math.sin(q) > .97 ? .85 : 1) + r0, behind), outer2 = r0 + (outer - r0) * 1.3, r = r0 + t * (outer2 - r0), w = wd * (1 + flare * t) / 2, sx = C + Math.cos(q) * r, sy = C - 35 + Math.sin(q) * r + grav * t * t, nx = -Math.sin(q), ny = Math.cos(q);
       P.push([sx + nx * w, sy + ny * w]); Q.push([sx - nx * w, sy - ny * w]); }
     ctx.fillStyle = css(c); ctx.beginPath(); P.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); for (let j = Q.length - 1; j >= 0; j--) ctx.lineTo(Q[j][0], Q[j][1]); ctx.closePath(); ctx.fill(); } }
-const SKYN = [[8, 10, 34], [20, 20, 62], [42, 32, 84]];      // the game's night sky: near black above, deep blue, purple at the horizon
-const BG = () => { const g = ctx.createLinearGradient(0, 0, 0, N); g.addColorStop(0, css(SKYN[0])); g.addColorStop(.5, css(SKYN[1])); g.addColorStop(1, css(SKYN[2])); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3); };      // the night sky as it shades down to the horizon, with stars (MELO 2026-11-16; was one flat purple, then briefly the rose daytime sky)
+const SKYD = [[176, 170, 220], [236, 176, 190], [250, 170, 150]];      // the game's daytime sky: pale lilac above, rose in the middle, coral below
+const BG = () => { const g = ctx.createLinearGradient(0, 0, 0, N); g.addColorStop(0, css(SKYD[0])); g.addColorStop(.5, css(SKYD[1])); g.addColorStop(1, css(SKYD[2])); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); glow(C, C, N * .32, [255, 236, 210], .35); };      // the rose daytime sky (MELO 2026-11-16; was the night sky with stars)
 const TOKS = () => { token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); };
 function ghost(x, y, r, role, tilt = 0) {      // a see-through token (MELO 2026-11-16): two white rings, the outer one dashed, and the role's own picture inside, no disc
   ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * .045; ctx.beginPath(); ctx.arc(x, y, r * .86, 0, TAU); ctx.stroke();
   ctx.setLineDash([r * .13, r * .09]); ctx.lineCap = 'round'; ctx.lineDashOffset = r * .02; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.restore();
   const keep = [circ, ell, glow]; circ = ell = glow = () => {}; ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); roleToken(0, 0, r, role); ctx.restore(); [circ, ell, glow] = keep; }
-const GHOSTS = () => { const keep = [circ, ell, glow]; circ = ell = glow = () => {}; roleToken(C, C, 500, 'heretic'); [circ, ell, glow] = keep; };      // only the Heretic's picture, big, in the middle: no rings, no disc (MELO 2026-11-16); its outline centred, the same margin left and right (248 / 248; the crossing then sits 3.4 right of the middle)      // the Heretic alone in the middle (MELO 2026-11-16; the Sailor and the Pukka dropped)
+const GHOSTS = () => {      // the Heretic's cross hollow, only a white outline round it (MELO 2026-11-16): the game's own cross (45°, its outline centred) drawn flat off-screen, spread out by d all round, the cross itself cut out
+  const r = 500, S = 1024, d = r * .04, m = document.createElement('canvas'); m.width = m.height = S; const keep = ctx; ctx = m.getContext('2d');
+  const k3 = [circ, ell, glow]; circ = ell = glow = () => {}; roleToken(C, C, r, 'heretic', 1, [255, 255, 255]); [circ, ell, glow] = k3; ctx = keep;
+  const o = document.createElement('canvas'); o.width = o.height = S; const oc = o.getContext('2d');
+  for (let i = 0; i < 64; i++) oc.drawImage(m, Math.cos(i * TAU / 64) * d, Math.sin(i * TAU / 64) * d);
+  oc.globalCompositeOperation = 'source-in'; oc.fillStyle = '#fff'; oc.fillRect(0, 0, S, S); oc.globalCompositeOperation = 'destination-out'; oc.drawImage(m, 0, 0); ctx.drawImage(o, 0, 0); };
 make('A2', () => { BG(); GHOSTS(); });      // no streamers (MELO 2026-11-16); was BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS();
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
