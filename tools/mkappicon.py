@@ -69,7 +69,12 @@ function ribbons(n, wd, L0, L1, grav, flare, alt, sd) { seed = sd;      // thin 
 const SKYN = [[8, 10, 34], [20, 20, 62], [42, 32, 84]];      // the game's night sky: near black above, deep blue, purple at the horizon
 const BG = () => { const g = ctx.createLinearGradient(0, 0, 0, N); g.addColorStop(0, css(SKYN[0])); g.addColorStop(.5, css(SKYN[1])); g.addColorStop(1, css(SKYN[2])); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); stars(55, .6); glow(C, C, N * .32, [255, 210, 160], .3); };      // the night sky as it shades down to the horizon, with stars (MELO 2026-11-16; was one flat purple, then briefly the rose daytime sky)
 const TOKS = () => { token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); };
-make('A2', () => { BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS(); });
+function ghost(x, y, r, role, tilt = 0) {      // a see-through token (MELO 2026-11-16): two white rings, the outer one dashed, and the role's own picture inside, no disc
+  ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * .045; ctx.beginPath(); ctx.arc(x, y, r * .86, 0, TAU); ctx.stroke();
+  ctx.setLineDash([r * .13, r * .09]); ctx.lineCap = 'round'; ctx.lineDashOffset = r * .02; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.restore();
+  const keep = [circ, ell, glow]; circ = ell = glow = () => {}; ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); roleToken(0, 0, r, role); ctx.restore(); [circ, ell, glow] = keep; }
+const GHOSTS = () => { ghost(C - 200, C + 150, 175, 'sailor', -.12); ghost(C + 200, C + 150, 175, 'pukka', .12); ghost(C, C - 160, 185, 'heretic', 0); };
+make('A2', () => { BG(); GHOSTS(); });      // no streamers (MELO 2026-11-16); was BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS();
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
 open('/tmp/mkappicon.html', 'w', encoding='utf-8').write(page)
