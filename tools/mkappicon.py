@@ -73,7 +73,7 @@ function ghost(x, y, r, role, tilt = 0) {      // a see-through token (MELO 2026
   ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * .045; ctx.beginPath(); ctx.arc(x, y, r * .86, 0, TAU); ctx.stroke();
   ctx.setLineDash([r * .13, r * .09]); ctx.lineCap = 'round'; ctx.lineDashOffset = r * .02; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.restore();
   const keep = [circ, ell, glow]; circ = ell = glow = () => {}; ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); roleToken(0, 0, r, role); ctx.restore(); [circ, ell, glow] = keep; }
-const GHOSTS = () => { const keep = [circ, ell, glow]; circ = ell = glow = () => {}; roleToken(C - 500 * .95 * .01 * Math.SQRT1_2, C, 500, 'heretic'); [circ, ell, glow] = keep; };      // only the Heretic's picture, big, in the middle: no rings, no disc (MELO 2026-11-16); moved left so the crossing of the bars (0, .01q down the rotated arm) sits on the middle line      // the Heretic alone in the middle (MELO 2026-11-16; the Sailor and the Pukka dropped)
+const GHOSTS = () => { const keep = [circ, ell, glow]; circ = ell = glow = () => {}; roleToken(C, C, 500, 'heretic'); [circ, ell, glow] = keep; };      // only the Heretic's picture, big, in the middle: no rings, no disc (MELO 2026-11-16); its outline centred, the same margin left and right (248 / 248; the crossing then sits 3.4 right of the middle)      // the Heretic alone in the middle (MELO 2026-11-16; the Sailor and the Pukka dropped)
 make('A2', () => { BG(); GHOSTS(); });      // no streamers (MELO 2026-11-16); was BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS();
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
