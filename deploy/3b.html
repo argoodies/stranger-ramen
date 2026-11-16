@@ -1409,7 +1409,7 @@ function drawStall(t) {
   v.cy += liftPrep;
   if (inFront && !binFirst) drawOwner();
   // bin for a bowl gone wrong
-  hit('bin', BIN[0], BIN[1], .35, .42); footRound(v, BIN[0], BIN[1], 0, .3); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
+  hit('bin', BIN[0], BIN[1], .35, .42); footRound(v, BIN[0], BIN[1], 0, .3, .32); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
   ring('bin');
   if (binFirst) drawOwner();
   // one hanging lamp, over the middle of the room
