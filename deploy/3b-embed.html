@@ -11,7 +11,7 @@ html,body{margin:0;height:100%;background:#0e0c24;overflow:hidden;touch-action:n
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #top{position:fixed;top:calc(10px + max(env(safe-area-inset-top), var(--sat, 0px)));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none;z-index:6}
 #top>*{pointer-events:auto}
-:root{--pb:rgba(30,24,60,.1);--pf:#f4ecdc;--pd:rgba(255,255,255,.22);--mb:rgba(30,24,60,.82);--mo:rgba(255,236,170,.2);--mf:#ffe9b0}      /* the corner buttons by night; by day pillSky() turns them light (MELO 2026-11-16) */
+:root{--pb:rgba(30,24,60,.1);--pf:#fff;--pd:rgba(255,255,255,.75);--mt:#f4ecdc;--mb:rgba(30,24,60,.82);--mo:rgba(255,236,170,.2);--mf:#ffe9b0}      /* the corner buttons by night; by day pillSky() turns them light (MELO 2026-11-16) */
 .pill{background:var(--pb);color:var(--pf);border:1px solid var(--pd);border-radius:999px;padding:8px 14px;font:300 15px var(--serif);letter-spacing:.12em}
 button.pill{cursor:pointer}
 button.pill:active{transform:scale(.96)}
@@ -40,7 +40,7 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
 #leave,#enter{display:none!important}
 #langMenu{display:none;position:absolute;left:0;top:46px;z-index:5;flex-direction:column;gap:6px;padding:8px;border-radius:16px;background:var(--mb);border:1px solid var(--pd);backdrop-filter:blur(6px)}
 #langMenu.open{display:flex}
-#langMenu button{appearance:none;border:0;border-radius:11px;padding:9px 18px;font:300 15px var(--serif);letter-spacing:.08em;color:var(--pf);background:transparent;white-space:nowrap;text-align:left;cursor:pointer}
+#langMenu button{appearance:none;border:0;border-radius:11px;padding:9px 18px;font:300 15px var(--serif);letter-spacing:.08em;color:var(--mt);background:transparent;white-space:nowrap;text-align:left;cursor:pointer}
 #langMenu button.on{background:var(--mo);color:var(--mf)}
 #err{position:fixed;left:0;top:0;right:0;color:#ff8;background:#600;font:12px monospace;z-index:9;white-space:pre-wrap}
 </style>
@@ -2597,7 +2597,7 @@ let pillN = -1;
 function pillSky() {      // the corner buttons follow the sky: dark see-through by night, light frosted with dark marks by day (MELO 2026-11-16); they follow the sky that is drawn, not the hour, so in the church or the tower room by day they are night buttons
   // the sky actually behind the scene: the church is always under the night sky (only its story of years ago is lit warm), the tower room too; the view from the top, the town and the rooms follow the hour
   const n = Math.round(clamp(mode === 'church' ? 1 - (church.storyIn ? ease(church.lamp || 0) : 0) : mode === 'tower' && !tw.view ? 1 : G.n) * 20) / 20; if (n === pillN) return; pillN = n; const st = document.documentElement.style, m = (a, b) => mix(a, b, n);
-  st.setProperty('--pb', css(m([255, 248, 252], [30, 24, 60]), .1));      /* nearly see-through by day and by night: only the thin edge and the mark show (MELO 2026-11-16) */ st.setProperty('--pf', css(m([74, 58, 102], [244, 236, 220]))); st.setProperty('--pd', css(m([255, 255, 255], [255, 255, 255]), lerp(.8, .22, n)));
+  st.setProperty('--pb', css(m([255, 248, 252], [30, 24, 60]), .1));      /* nearly see-through by day and by night: only the thin edge and the mark show (MELO 2026-11-16) */ st.setProperty('--pf', '#fff'); st.setProperty('--pd', 'rgba(255,255,255,.75)'); st.setProperty('--mt', css(m([74, 58, 102], [244, 236, 220])));      /* white edge and white mark by day and by night alike (MELO 2026-11-16); the open language menu keeps its words dark on its light day ground */
   st.setProperty('--mb', css(m([255, 248, 252], [30, 24, 60]), lerp(.88, .82, n))); st.setProperty('--mo', css(m([120, 90, 170], [255, 236, 170]), lerp(.16, .2, n))); st.setProperty('--mf', css(m([58, 42, 88], [255, 233, 176]))); }
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
