@@ -841,7 +841,9 @@ function drawChapel0(v, t) {      // the church on the little island: a stone na
   const a = v.P(10, 0, 4.7), b = v.P(10, 0, 5.35), m = v.P(10, 0, 5.1), w = v.s * .05; line([a, b], tint([246, 200, 120]), w); line([[m[0] - v.s * .16, m[1]], [m[0] + v.s * .16, m[1]]], tint([246, 200, 120]), w);
 }
 const titleFrame = () => {      // the title and the island as one group, centred up and down, the title just above the spire (but clear of the moon); lw, lh: the logo's size
-  const s = Math.min(W / 19.5, (W / 2 - 10) / 9.3, H * .56 / 19.6), im = LOGO[LANG] || LOGO.hans, ar = im.naturalWidth ? im.naturalHeight / im.naturalWidth : .17, lw = Math.min(W * .7, 480, H * .075 / ar), lh = lw * ar, gap = Math.max(26, H * .035);
+  const s = Math.min(W / 19.5, (W / 2 - 10) / 9.3, H * .56 / 19.6), gap = Math.max(26, H * .035);
+  // the room kept for the title is the tallest language's, whichever is shown: switching language on the title screen leaves the island where it is (English is flatter and would lift it ~6px)
+  let lw = 0, lh = 0; for (const im of Object.values(LOGO)) { const ar = im.naturalWidth ? im.naturalHeight / im.naturalWidth : .17, w = Math.min(W * .7, 480, H * .075 / ar); if (w * ar > lh) { lh = w * ar; lw = w; } }
   const top = Math.max((H - (lh + gap + 19.6 * s)) / 2, H * .13 + 26 + 18), ty = top + lh / 2;      // the spire's tip is 12.8 s above the island's centre, its lowest corner about 6.8 s below
   return { s, oX: W / 2, oY: top + lh + gap + 12.8 * s, ty, lw, lh }; };      // the title screen's framing: the clock tower (at the island's centre, the world's origin) stands on the centre line of the screen; the church reaches about 9.2 s out to the right, so that sets the scale on a narrow screen
 function drawWorld(t, dt) {
