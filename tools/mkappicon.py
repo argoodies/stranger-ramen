@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""The Tiny Clocktower app icon. Since 2026-11-16 just the burst of streamers on the game's clear rose daytime sky, no tokens (TOKS is kept
-but not drawn). Before that (2026-11-04): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken,
+"""The Tiny Clocktower app icon (2026-11-04; sky changed 2026-11-16): the three role tokens in a triangle (the Heretic on top, drawn by the game's own roleToken,
 without shadow or glow), on the game's clear rose daytime sky (no clouds) with a soft light behind them, and 24 straight streamers in the confetti colours bursting out
 all round, starting 200-260 out from the middle (staggered) so they do not meet behind the tokens; the burst sits 35 above the
 middle, the one going straight up is 15% shorter, the ones behind the lower tokens reach past them, and all are 30% longer. Writes
@@ -70,7 +69,7 @@ function ribbons(n, wd, L0, L1, grav, flare, alt, sd) { seed = sd;      // thin 
 const SKYD = [[176, 170, 220], [236, 176, 190], [250, 170, 150]];      // the game's daytime sky: pale lilac above, rose in the middle, coral below
 const BG = () => { const g = ctx.createLinearGradient(0, 0, 0, N); g.addColorStop(0, css(SKYD[0])); g.addColorStop(.5, css(SKYD[1])); g.addColorStop(1, css(SKYD[2])); ctx.fillStyle = g; ctx.fillRect(0, 0, N, N); glow(C, C, N * .32, [255, 236, 210], .35); };      // a clear rose daytime sky, no clouds (MELO 2026-11-16; was the night sky with stars)
 const TOKS = () => { token(C - 200, C + 150, 175, 'sailor', -.12); token(C + 200, C + 150, 175, 'pukka', .12); token(C, C - 160, 185, 'heretic', 0); };
-make('A2', () => { BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); });      // the streamers alone on the sky, no tokens (MELO 2026-11-16)
+make('A2', () => { BG(); ribbons(24, 50, 300, 380, 20, 0, 0, 7); TOKS(); });
 document.body.textContent = '@@' + JSON.stringify(out) + '@@';
 </script></body></html>""" % code
 open('/tmp/mkappicon.html', 'w', encoding='utf-8').write(page)
