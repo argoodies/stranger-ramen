@@ -1101,7 +1101,7 @@ function hintKey() {
 const EAT_STEP = .6, SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
 const PREP_H0 = 1, CTD = 1 - PREP_H0, BT = .1, SILL = 1 - CTD - BT;      // CTD: the serving board's top below 1.0 (MELO 2026-11-14: as high as the prep table, PREP_H0); BT: the board's thickness; SILL: the wall stands up to its underside      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
-let SHOPDARK = { c: [44, 26, 52], a: .28, r: 2.4, pool: 0 };      // the ramen shop's dark (colour, how much) and the lamp's pool (radius in cells, strength): none, the prep table stays in the dark (MELO 2026-11-17)
+let SHOPDARK = { c: [44, 26, 52], a: .28 }, shopCv = [], shopMain = null, FACE_Y = 1.0;      // the ramen shop's dark (colour, how much); its layers (see drawOwner); how high the chef's face is, in his heights
 const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];
 let WOODSTYLE = 1; const WOODS = [null,
   { body: [104, 70, 54], top: [172, 124, 86], seam: [86, 58, 46], slab: .1, oh: 0, vseam: .32 },      // 1 thick oak top on a walnut body of upright boards
@@ -1360,10 +1360,21 @@ function drawStall(t) {
   for (let i = 0; i < 6; i++) { const act_ = (i % 2 === 0) ? (st.pot === 'cooking' ? 1 : st.pot === 'done' ? .7 : .3) : .5, ph = (t * .5 * (act_ + .4) + i * .17) % 1, p = P(POT_X + .2 * POT_K * Math.sin(t * 1.3 + i * 2), i % 2 ? POTY2 : POTY1, 1 + (.6 + ph * 1.5) * POT_K); circ(p[0], p[1], s * POT_K * (.08 + .15 * ph), [255, 250, 245], .28 * act_ * (1 - ph)); }
   // the owner (always behind the prep table)
   const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05;
-  const drawOwner = () => {
-    st.lit = lerp(st.lit || 0, clamp((1.0 - Math.hypot(st.owner.x - LAMP_XY[0], st.owner.y - LAMP_XY[1])) / .3 + .5), .18);      // under the lamp, at the serving counter, your face lights up, as by the library window (MELO 2026-11-14); the room's dark (SHOPDARK) is taken back out of it there, nothing else is lit (MELO 2026-11-17)
-    const lit = c => { const D = SHOPDARK, u = c.map((x, i) => clamp((x - D.a * D.c[i]) / (1 - D.a), 0, 255)); return mix(c, mix(u, [255, 214, 140], .14), st.lit); }, oy = op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0);
-    if (st.lit > .02) glow(op[0], oy - s * 1.15 * .6, s * 1.15 * 1.1, [255, 214, 140], .3 * st.lit);
+  const T_ = -.24, Z_ = -.34, roomOut = [P(T_, T_, Hh), P(T_, Y, Hh), P(T_, Y, Z_), P(X, Y, Z_), P(X, T_, Z_), P(X, T_, Hh)], roomHole = [P(.5, 0, SILL), P(WINR, 0, SILL), P(WINR, 0, 2.8), P(.5, 0, 2.8)];      // the room, and the serving window you see out of
+  const darkOn = (g, room) => { g.save(); if (room) { g.beginPath(); for (const pts of [roomOut, roomHole]) { pts.forEach((q, k) => k ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1])); g.closePath(); } g.clip('evenodd'); }
+    g.globalCompositeOperation = 'source-atop'; g.fillStyle = css(SHOPDARK.c, SHOPDARK.a); g.fillRect(0, 0, W, H); g.restore(); };      // the room's dark on what is drawn so far: in the room but not out through the window (room), or on all of it (the chef, who is in the room wherever he stands)
+  const layer = k => { const c = shopCv[k] || (shopCv[k] = document.createElement('canvas')); if (c.width !== cv.width || c.height !== cv.height) { c.width = cv.width; c.height = cv.height; } const g = c.getContext('2d'), m = ctx.getTransform(); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height); g.setTransform(m); return g; };
+  const paste = (to, from) => { to.save(); to.setTransform(1, 0, 0, 1, 0, 0); to.drawImage(from.canvas, 0, 0); to.restore(); };
+  const drawOwner = () => {      // the chef in the room's dark, all of him alike (MELO 2026-11-17: the window was cutting him in two); only his face lit, at the serving counter. Everything drawn after him goes on a layer of its own, darkened at the end, so nothing is darkened twice
+    st.lit = lerp(st.lit || 0, clamp(1 - (st.owner.y - LANE_Y0 - .1) / .3), .18);      // at the serving counter your face lights up (MELO 2026-11-17)
+    shopMain = ctx; darkOn(ctx, true);
+    const go = ctx = layer(0); ownerFig(false); darkOn(go, false);
+    if (st.lit > .02) { const gf = ctx = layer(1); ownerFig(true); const hx = op[0], hy = op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0) - s * 1.15 * FACE_Y, R = s * 1.15 * .26, gr = gf.createRadialGradient(hx, hy, 0, hx, hy, R);
+      gr.addColorStop(0, `rgba(0,0,0,${st.lit})`); gr.addColorStop(.55, `rgba(0,0,0,${st.lit})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); gf.save(); gf.globalCompositeOperation = 'destination-in'; gf.fillStyle = gr; gf.fillRect(0, 0, W, H); gf.restore(); paste(go, gf); }
+    ctx = shopMain; paste(ctx, go); ctx = layer(2);
+  };
+  const ownerFig = face => {
+    const lit = c => face ? mix(c, [255, 214, 140], .1) : c, oy = op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0);
     fig(op[0], oy, s * 1.15, { kind: 'chef', noShadow: true, apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) });
     HIT.own = [op[0] + s * .45, op[1] - s * 1.0, 0];
     const hp = [HIT.own[0] + wob('own'), HIT.own[1]], hd = st.hold;
@@ -1394,11 +1405,7 @@ function drawStall(t) {
   hit('bin', BIN[0], BIN[1], .35, .42); footRound(v, BIN[0], BIN[1], 0, .26); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
   ring('bin');
   if (binFirst) drawOwner();
-  { // the room's dark, laid over everything in it (but not what is seen out through the serving window), then the lamp's warm pool on the floor and the counters under it
-    const T = -.24, Z = -.34, out = [P(T, T, Hh), P(T, Y, Hh), P(T, Y, Z), P(X, Y, Z), P(X, T, Z), P(X, T, Hh)], hole = [P(.5, 0, SILL), P(WINR, 0, SILL), P(WINR, 0, 2.8), P(.5, 0, 2.8)];
-    ctx.save(); ctx.beginPath(); out.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); hole.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip('evenodd');
-    ctx.fillStyle = css(SHOPDARK.c, SHOPDARK.a); ctx.fillRect(0, 0, W, H);
-    const f = P(LAMP_XY[0], LAMP_XY[1], 0); ctx.translate(f[0], f[1]); ctx.scale(1, .577); glow(0, 0, s * SHOPDARK.r, [255, 206, 140], SHOPDARK.pool); ctx.restore(); }
+  if (shopMain) { const ga = ctx; ctx = shopMain; darkOn(ga, true); paste(ctx, ga); shopMain = null; } else darkOn(ctx, true);      // what was drawn after the chef, in the room's dark
   // one hanging lamp, over the middle of the room
   for (const lx of [LAMP_XY[0]]) { const a = P(lx, LAMP_XY[1], Hh + .6), b = P(lx, LAMP_XY[1], 3.2); line([a, b], [70, 52, 92], 1.5); glow(b[0], b[1] + s * .15, s * 1.7, [255, 214, 140], .5); poly([[b[0] - s * .22, b[1] + s * .16], [b[0] + s * .22, b[1] + s * .16], [b[0], b[1] - s * .12]], [226, 106, 96]); circ(b[0], b[1] + s * .18, s * .07, [255, 240, 190]); glow(b[0], b[1] + s * .18, s * .55, [255, 236, 180], .7 + .05 * Math.sin(t * 3)); }      // and a small bright halo round the bulb (MELO 2026-11-14)
   // a hint for something that has no rim of its own: a plain ring round where it is tapped
