@@ -17,6 +17,8 @@ button.pill{cursor:pointer}
 button.pill:active{transform:scale(.96)}
 button.pill.hint{animation:pillpulse 1.2s ease-in-out infinite;border-color:rgba(255,236,170,.9)}
 @keyframes pillpulse{50%{box-shadow:0 0 0 5px rgba(255,236,170,.55)}}
+#bag.gain{animation:baggain .9s ease-out 2}      /* something new in the backpack: a warm ring spreads out from it twice, then it is as it always is (MELO 2026-11-17) */
+@keyframes baggain{0%{box-shadow:0 0 0 0 rgba(255,236,170,.9);border-color:rgba(255,236,170,1)}100%{box-shadow:0 0 0 12px rgba(255,236,170,0)}}
 #coins{letter-spacing:.06em}
 #ui{position:fixed;left:0;right:0;bottom:0;padding:8px 12px calc(12px + env(safe-area-inset-bottom));display:none;z-index:3}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:520px;margin:0 auto}
@@ -725,7 +727,7 @@ function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
   if (hit('exit')) return barGo([0, 1], 'exit');
   if (hit('take')) { const per = Math.floor(G.t / HALF), id = 'coffee';      // the iced coffee on the little table: yours to take, once each day
-    scAch('iced_coffee'); bar.taken = save.coffeeTaken = per; save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.drink || !have(save.equip.drink)) save.equip.drink = id; saveNow();
+    scAch('iced_coffee'); bar.taken = save.coffeeTaken = per; save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.drink || !have(save.equip.drink)) save.equip.drink = id; saveNow(); bagGlow();
     bar.mySay = S().takeCoffee; bar.mySayT = 3; chime(84, 0, .1); chime(91, .1, .1); return; }
   if (hit('table')) { bar.wobTable = performance.now(); return; }      // the bare table rocks, silently
   if (hit('cat')) { const c = bar.cat; c.meowT = 1.6; c.sit = Math.max(c.sit, 2.5); sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); return; }      // stroking the cat: a meow
@@ -2237,10 +2239,14 @@ function churchTalk(n) { const c = church, last = c.tier >= TIERS; if (c.say && 
 function churchOpen() {      // the chest before the cross: one thing you do not have yet, picked at random
   const c = church, ch = c.chest; if (!ch || ch.open || ch.a < 1) return; ch.open = true; c.fly = { id: ch.id, n: ch, t: 0 }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12);
 }
+function bagGlow() {      // a new thing in the backpack: its button glows (if it is hidden just now, the glow plays when it shows)
+  const b = $('bag'); b.classList.remove('gain'); void b.offsetWidth; b.classList.add('gain');
+}
+$('bag').addEventListener('animationend', e => { if (e.animationName === 'baggain') e.currentTarget.classList.remove('gain'); });
 function churchGift(id) {      // out of the chest and into the backpack; it goes straight on only if nothing is in that place
   const k = ITEMS[id]; save[id] = true;
   if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id;
-  churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14));
+  churchBanner(S().got(S().items[id][0]), 3); saveNow(); bagGlow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14));
   if (!church.npcs.length) { const my = CW / 2, ch = church.chest, [x, y] = clearOfBody([[2.6, my - 1.9], [2.6, my + 1.9], [4.4, my - 2.3], [4.4, my + 2.3], [2.6, my], [5.4, my - 2.6], [5.4, my + 2.6]], 'girl', ch && [ch.x, ch.y]); church.npcs.push({ who: 'flower', x, y, a: 0, mark: true }); }      // she keeps clear of the fallen whirlwind and of the chest
 }
 function updateChurch(dt) {
@@ -2378,7 +2384,7 @@ function devMenu() {      // developer mode: a short list of tools, each opening
 function devHour(h) {      // time runs forward (never back) to h o'clock; day and night switch over at once
   const P2 = 2 * HALF, want = ((h - 6 + 24) % 24) / 12 * HALF, cur = G.t % P2; G.t += ((want - cur) % P2 + P2) % P2; G.n = (G.t % P2) >= HALF ? 1 : 0; chime(74, 0, .1); chime(81, .1, .1); }
 function devGive(id) { const c = church; if (c.fly) return; c.fly = { id, n: { at: [W / 2, H * .3] }, t: 0, dev: true }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12); }      // the item flies down to the chef, just as out of a chest
-function devGift(id) { const k = ITEMS[id]; save[id] = true; if (STACK(id)) save.cards[id] = cardN(id) + 1; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
+function devGift(id) { const k = ITEMS[id]; save[id] = true; if (STACK(id)) save.cards[id] = cardN(id) + 1; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); bagGlow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
 function debugAsk(msg, val, done) {      // a small input box over the game (window.prompt is not shown inside the app's web view)
   if (document.getElementById('dbg')) return;
   const d = document.createElement('div'); d.id = 'dbg'; d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,8,30,.55);z-index:99';
