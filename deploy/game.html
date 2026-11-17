@@ -1097,7 +1097,7 @@ function hintKey() {
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const EAT_STEP = .6, SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
-const SHOPC = { stove: [120, 104, 124], plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
+const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
 const PREP_H0 = 1, CTD = 1 - PREP_H0, BT = .1, SILL = 1 - CTD - BT;      // CTD: the serving board's top below 1.0 (MELO 2026-11-14: as high as the prep table, PREP_H0); BT: the board's thickness; SILL: the wall stands up to its underside      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
 const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];
 let WOODSTYLE = 1; const WOODS = [null,
@@ -1236,9 +1236,7 @@ function iso_bowl(v, x, y, z, r, b) {
 // a square room N by N seen from above at a slant, Hh high: the scale and the screen height of its back floor corner, worked out as for the ramen shop (wide enough on a phone,
 // as tall as the screen allows elsewhere, the room from its wall tops down to the foot of its steps centred up and down, never higher than 104 px from the top)
 const ROOM_TOP = 104, roomB = N => N + .83, roomScale = (N, Hh) => Math.min(W / (9.5 * (2 * N / 9.2) * C30) * lerp(.86, 1, clamp((W - 330) / 110)), (H - ROOM_TOP - 40) / (Hh + roomB(N))), roomTop = (N, Hh, s) => Math.max(ROOM_TOP, (H - (Hh + roomB(N)) * s) * .5) + Hh * s;
-let SHOPC_DAY = { top: [252, 242, 222], endX: [222, 206, 184], endY: [208, 190, 168] };      // by day the wall tops and ends are the shop's outside wall seen in section, so its cream (PAL_DAY.wall; MELO 2026-11-17, A). The shop's colours by day where they differ from SHOPC (night): eased into it as night falls (see drawWorld's PAL_DAY)
-function drawStall(t) { const keep = {}; for (const k in SHOPC_DAY) { keep[k] = SHOPC[k]; SHOPC[k] = mix(SHOPC_DAY[k], SHOPC[k], G.n); } try { drawStall0(t); } finally { Object.assign(SHOPC, keep); } }
-function drawStall0(t) {
+function drawStall(t) {
   TK = 0; SHADOW = [80, 44, 60];
   skyNow(t, .15);
   const DN = lerp(.65, 1, G.n), LT = c => mix(c, [22, 22, 60], .34 * DN), WN = lerp(.3, 1, G.n), LW = c => mix(c, [22, 22, 60], .02 * WN),      // LW: the walls, a little lighter than the floor, and by day lighter still (WN, MELO 2026-11-14)
@@ -1340,7 +1338,7 @@ function drawStall0(t) {
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
   { const q = P(st.owner.x, st.owner.y), k = s * 1.15; floorClip(floorOf(v, [[0, 0, X, Y, 0]])); ell(q[0], q[1], .36 * k, .10 * k, [20, 12, 40], .3); ctx.restore(); }      // the chef's shadow, on the floor before any furniture, so the stove and the tables cover it where they stand in front of it (it lay across their sides, MELO 2026-11-14)
   // stove with the noodle pot and the soup pot
-  sideBox(0, 1.0, 0, STOVE_W, 2, 1.0, SHOPC.stove);
+  sideBox(0, 1.0, 0, STOVE_W, 2, 1.0, [120, 104, 124]);
   let pileY = TABY; const pile = (x, z, n, piece) => { const p = P(x, pileY, z), bits = []; for (let i = 0; i < n; i++) { const a = i * 2.39996, r = Math.sqrt((i + .5) / n); bits.push([p[0] + Math.cos(a) * r * s * .085, p[1] + Math.sin(a) * r * s * .043 - s * .05 * (1 - r * r), i, a]); } bits.sort((u, w) => u[1] - w[1]).forEach(([bx, by, i, a]) => { ctx.save(); ctx.translate(bx, by); piece(i, a); ctx.restore(); }); };      // small chopped bits heaped on a board: spread on a sunflower spiral, higher in the middle, the far ones drawn first
   const grow = (x, y, z, k) => { const c = P(x, y, z); ctx.translate(c[0], c[1]); ctx.scale(k, k); ctx.translate(-c[0], -c[1]); };      // things drawn at their first size and scaled about where they stand (pots, toppings): their rings and rattles scale with them
   ctx.save(); grow(POT_X, POTY1, 1.0, POT_K);
