@@ -2197,7 +2197,9 @@ function churchBossDown() {      // the boss falls, and everything it brought wi
   for (const f of c.foes) if (f.hp > 0) { f.hp = 0; f.dead = rnd(.4, .8); if (f.suck) f.corpse = true; else churchPoof(f); }
   bell(146.8, .14); [62, 66, 69, 74].forEach((m, i) => chime(m, .15 * i, .13)); churchCleared();
 }
+function haptic(k) { try { window.webkit.messageHandlers.gc.postMessage({ t: 'haptic', k }); } catch (e) {} }      // iOS only: a tap of the phone, for a parry and for a kill and nothing else (MELO 2026-11-17)
 function churchKill(e) {
+  haptic(e.boss ? 'bossKill' : 'kill');
   const c = church, p = c.p; e.hp = 0; e.dead = .5; if (e.suck) e.corpse = true; else churchPoof(e); sfx(330, .2, .22, 'triangle', .05); sfx(165, .25, .2, 'sine', .05); if (p.target === e) { p.target = null; p.tx = p.x; p.ty = p.y; }      // the great whirlwind leaves its body behind
   if (e.boss && !c.foes.some(f => f.boss && f.kind !== 'adv' && f.hp > 0)) return churchBossDown();      // once every whirlwind, great or small, is down, the Advocates vanish with them      // the last boss standing takes the rest with it
   if (!c.foes.some(f => f.hp > 0)) { if (c.bossOut) churchCleared(); else churchSpawn(c.tier, true); }
@@ -2218,7 +2220,7 @@ function churchStrike(e, parry) {      // one blade landing on a foe
   const d = Math.hypot(e.x - p.x, e.y - p.y) || 1, Z = zoneOf(e.wave), kb = parry ? (e.boss ? .5 : .9) : e.boss || e.dash > 0 ? 0 : .22;      // a parry always throws the foe back, the boss too
   e.x = clamp(e.x + (e.x - p.x) / d * kb, Z[0], Z[1]); e.y = clamp(e.y + (e.y - p.y) / d * kb, CY0, CY1);
   // caught in the very act of attacking: the knife bites deeper — ten times with the kitchen knife, three with the Exorcist's Knife or the twin blades
-  if (parry) { e.parried = true; c.flash = .3; sfx(1900, .25, .16, 'triangle'); sfx(2850, .18, .08); sfx(620, .1, .14, 'square'); }
+  if (parry) { haptic('parry'); e.parried = true; c.flash = .3; sfx(1900, .25, .16, 'triangle'); sfx(2850, .18, .08); sfx(620, .1, .14, 'square'); }
   if (parry && e.boss && sleepy() && Math.random() < .3) { e.stun = 3; e.wind = 0; e.dash = 0; e.combo = 0; sfx(523, .5, .08, 'sine'); sfx(392, .7, .07, 'sine', .15); }      // the Exorcist's Knife: three parries in ten put a boss (and only a boss) to sleep for three seconds, and no blow wakes it
   const shut = shielded(e); churchDamage(e, parry ? (sleepy() || wearing('twin') ? 3 : 10) : 1);
   if (parry && !shut && buffOn('freeze') && e.hp > 0) { e.frz = 5; c.fx.push({ k: 'frost', x: e.x, y: e.y, t: 0, T: .6 }); sfx(1760, .4, .08, 'sine'); sfx(2640, .5, .05, 'sine', .05); }      // the Prophecy of Frost: a parry chills the foe blue for five seconds, slowing it to a crawl
