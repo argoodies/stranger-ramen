@@ -493,6 +493,8 @@ function musicTick() {
 let CLOTH = [214, 52, 60];      // the shop's door-cloths
 const PAL = { stone: [238, 216, 186], roof: [226, 106, 96], isl: [108, 180, 170], under: [72, 118, 134], house: [244, 190, 130], path: [150, 206, 190], walk: [88, 128, 152], step: [80, 118, 142], wall: [250, 232, 200] };
 let PAL_DAY = { isl: [170, 208, 172], path: [238, 232, 212], stone: [248, 234, 208], roof: [222, 120, 106], wall: [252, 242, 222], walk: [176, 164, 210], step: [166, 154, 204], under: [160, 148, 200] };      // the town by day, one palette for the pink sky (MELO 2026-11-17): mint grass, cream paving and stone, coral roofs, lilac walkways. Eased into PAL (night) as night falls, in the town only (see drawWorld)
+let WIN_DAY = { glass: [248, 232, 192], dark: [70, 52, 92], door: [248, 232, 192], glow: 0 };      // by day the lit windows and doorways are a pale yellow and give no glow (MELO 2026-11-17). The town's windows and doorways by day: glass for the lit windows, the dark ones, what you see through an open door, and how much their glow shows; night is the warm light
+const wLit = c => mix(WIN_DAY.glass, c, G.n), wDark = () => mix(WIN_DAY.dark, DARK, G.n), wDoor = c => mix(WIN_DAY.door, c, G.n), wGlow = a => a * lerp(WIN_DAY.glow, 1, G.n);
 let SHADOW_DAY = [120, 84, 128];      // by day the town's sides shade toward a soft plum, not the night's deep violet, so the stone stays clean
 const DOOR = [-5, 3], TDOOR = [3, 0], LDOOR = [2, -3];
 const blocked = new Set();
@@ -658,9 +660,9 @@ function drawTower(v, t) {
   v.box(-1.5, -1.5, 0, 3, 3, 1.2, mix(st, PAL.under, .12));
   v.box(-1, -1, 1.2, 2, 2, 5, st);
   const lit = [255, 214, 140];
-  { const dp = v.F('R', [1, 0, 1.2], 0, .6); glow(dp[0], dp[1], v.s * (1.2 + .15 * Math.sin(t * 3)), [255, 214, 140], .7); }
-  v.arch('R', [1, 0, 1.2], .7, .9, lit); v.arch('R', [1, 0, 3.6], .36, .6, lit);
-  v.arch('L', [-.55, 1, 4.0], .2, .7, lit); v.arch('L', [.55, 1, 4.0], .2, .7, DARK);
+  { const dp = v.F('R', [1, 0, 1.2], 0, .6); glow(dp[0], dp[1], v.s * (1.2 + .15 * Math.sin(t * 3)), [255, 214, 140], wGlow(.7)); }
+  v.arch('R', [1, 0, 1.2], .7, .9, wDoor(lit)); v.arch('R', [1, 0, 3.6], .36, .6, wLit(lit));
+  v.arch('L', [-.55, 1, 4.0], .2, .7, wLit(lit)); v.arch('L', [.55, 1, 4.0], .2, .7, wDark());
   v.box(-1.3, -1.3, 6.2, 2.6, 2.6, 2.6, mix(st, [255, 255, 255], .15));
   v.clock('L', [0, 1.3, 7.5], .98, ah, am); v.clock('R', [1.3, 0, 7.5], .98, ah, am);
   v.box(-1.5, -1.5, 8.8, 3, 3, .3, st); v.pyramid(-1.3, -1.3, 9.1, 2.6, 2.8, PAL.roof);
@@ -671,13 +673,13 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
   const [, wl, wr] = v.sh(PAL.wall), [rt, rl, rr] = v.sh(PAL.roof), lit = [255, 220, 150], wood = tint([176, 120, 84]);
   poly([P(x0, y1, 0), P(x1, y1, 0), P(x1, y1, h), P(x0, y1, h)], wl); poly([P(x1, y0, 0), P(x1, y1, 0), P(x1, y1, h), P(x1, y0, h)], wr);
   // the doorway
-  const o = [x0 + .62, y1, 0], dp = v.F('L', o, 0, .4); glow(dp[0], dp[1], v.s * 1.3, [255, 200, 120], .8); if (G.late) glow(dp[0], dp[1], v.s * (2.4 + .5 * Math.sin(t * 4)), [255, 226, 160], .8);
-  poly([v.F('L', o, -.31, 0), v.F('L', o, .31, 0), v.F('L', o, .31, .8), v.F('L', o, -.31, .8)], wood); poly([v.F('L', o, -.25, 0), v.F('L', o, .25, 0), v.F('L', o, .25, .76), v.F('L', o, -.25, .76)], lit);
+  const o = [x0 + .62, y1, 0], dp = v.F('L', o, 0, .4); glow(dp[0], dp[1], v.s * 1.3, [255, 200, 120], wGlow(.8)); if (G.late) glow(dp[0], dp[1], v.s * (2.4 + .5 * Math.sin(t * 4)), [255, 226, 160], .8);
+  poly([v.F('L', o, -.31, 0), v.F('L', o, .31, 0), v.F('L', o, .31, .8), v.F('L', o, -.31, .8)], wood); poly([v.F('L', o, -.25, 0), v.F('L', o, .25, 0), v.F('L', o, .25, .76), v.F('L', o, -.25, .76)], wDoor(lit));
   // three door-cloths on a rod, stirring a little
   line([v.F('L', o, -.42, .84), v.F('L', o, .42, .84)], tint([70, 52, 60]), Math.max(1.5, v.s * .035));
   for (let i = 0; i < 3; i++) { const u0 = -.38 + i * .26, len = .34 + .05 * (i % 2) + .03 * Math.sin(t * 2 + i); poly([v.F('L', o, u0, .84), v.F('L', o, u0 + .23, .84), v.F('L', o, u0 + .23, .84 - len + .02 * Math.sin(t * 2.3 + i)), v.F('L', o, u0, .84 - len)], tint(CLOTH)); }
   // the arched window in the side wall
-  { const wz = h / 2 - .2, wo = [x1, ym, wz], g = v.F('R', wo, 0, .25); glow(g[0], g[1], v.s * .8, lit, .6); v.arch('R', wo, .34, .3, lit); }      // centred on the wall, across and up
+  { const wz = h / 2 - .2, wo = [x1, ym, wz], g = v.F('R', wo, 0, .25); glow(g[0], g[1], v.s * .8, lit, wGlow(.6)); v.arch('R', wo, .34, .3, wLit(lit)); }      // centred on the wall, across and up
   // a spire like the clocktower's on its own thin red eave, then the chimney
   v.box(x0 - ov, y0 - ov, h, w + 2 * ov, w + 2 * ov, .08, mix(PAL.roof, [60, 20, 40], .25)); v.pyramid(x0 - ov, y0 - ov, h + .08, w + 2 * ov, SP, PAL.roof);
   { const zr = x => h + .08 + SP * (1 - (x - x0 - w / 2) / (w / 2 + ov)), a = cx, b = cx + .28, c = cy, d = cy + .28, T = zr(a) + .34, [kt, kl, kr] = v.sh(PAL.wall);      // the chimney stands on the slope facing right, its foot cut to the pitch
@@ -689,8 +691,8 @@ function drawBarHouse(v, t) {      // the little coffee house: stone walls, a fl
   v.box(x0 - .05, y0 - .05, -.3, w + .1, w + .1, .3, PAL.walk);      // a thin footing in the church bridge's blue, no island round it
   v.box(x0, y0, 0, w, w, h, PAL.stone); v.box(x0 - .04, y0 - .04, h, w + .08, w + .08, .16, mix(PAL.stone, [255, 255, 255], .2));      // walls, and the parapet round the flat roof
   // a wide window on each face you can see, glowing, with a dark frame and a sill
-  const win = (pl, o) => { const wl = .8, wh = .55, z = .32, c = (u, zz) => v.F(pl, o, u, zz); { const g = c(0, z + wh / 2); glow(g[0], g[1], v.s * .9, lit, .45); }
-    poly([c(-wl / 2 - .04, z - .04), c(wl / 2 + .04, z - .04), c(wl / 2 + .04, z + wh + .04), c(-wl / 2 - .04, z + wh + .04)], [70, 56, 52]); poly([c(-wl / 2, z), c(wl / 2, z), c(wl / 2, z + wh), c(-wl / 2, z + wh)], lit);
+  const win = (pl, o) => { const wl = .8, wh = .55, z = .32, c = (u, zz) => v.F(pl, o, u, zz); { const g = c(0, z + wh / 2); glow(g[0], g[1], v.s * .9, lit, wGlow(.45)); }
+    poly([c(-wl / 2 - .04, z - .04), c(wl / 2 + .04, z - .04), c(wl / 2 + .04, z + wh + .04), c(-wl / 2 - .04, z + wh + .04)], [70, 56, 52]); poly([c(-wl / 2, z), c(wl / 2, z), c(wl / 2, z + wh), c(-wl / 2, z + wh)], wLit(lit));
     line([c(0, z), c(0, z + wh)], [70, 56, 52], Math.max(1.2, v.s * .025));
     for (let k = 0; k < 6; k++) { const u0 = -wl / 2 - .06 + k * (wl + .12) / 6, u1 = u0 + (wl + .12) / 6, za = z + wh + .1, zb = z + wh + .3, out = .2;      // the striped awning, sloping out over the window
       const q = (u, zz, d) => pl === 'R' ? P(o[0] + d, o[1] - u, zz) : P(o[0] + u, o[1] + d, zz); poly([q(u0, zb, 0), q(u1, zb, 0), q(u1, za, out), q(u0, za, out)], k % 2 ? CR : GR); }
@@ -841,11 +843,11 @@ function drawChapel(v, t) { const P0 = v.P; v.P = (x, y, z = 0) => P0.call(v, x 
 function drawChapel0(v, t) {      // the church on the little island: a stone nave, a steep red roof, a thin spire with a cross
   const st = PAL.stone, lit = [255, 214, 140], o = [10, .92, 0];
   v.box(9.08, -.92, 0, 1.84, 1.84, 1.7, st);
-  { const dp = v.F('L', o, 0, .45), sl = [[6.5, -2], [8.5, -2], [8.5, .75], [6.5, .75]].map(([x, y]) => v.P(x - CDX, y - CDY, 0)); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.moveTo(sl[0][0], sl[0][1]); for (const q of sl) ctx.lineTo(q[0], q[1]); ctx.closePath(); ctx.clip('evenodd'); glow(dp[0], dp[1], v.s * (1.1 + .14 * Math.sin(t * 3)), lit, .75); ctx.restore(); } v.arch('L', o, .42, .64, lit);      // the door's glow lights the walls but not the slab, which keeps the coffee house slab's blue
-  v.arch('L', [9.45, .92, .76], .16, .26, tint(DARK)); v.arch('L', [10.55, .92, .76], .16, .26, tint(DARK));      // the lit door between two small dark windows; one window round the side is lit
-  for (const y of [-.55, .55]) v.arch('R', [10.92, y, .76], .16, .26, y < 0 ? lit : tint(DARK));      // the side wall's pair: same size (the belfry window's), height and spacing as the pair beside the door, and evenly placed either side of the wall's middle
+  { const dp = v.F('L', o, 0, .45), sl = [[6.5, -2], [8.5, -2], [8.5, .75], [6.5, .75]].map(([x, y]) => v.P(x - CDX, y - CDY, 0)); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.moveTo(sl[0][0], sl[0][1]); for (const q of sl) ctx.lineTo(q[0], q[1]); ctx.closePath(); ctx.clip('evenodd'); glow(dp[0], dp[1], v.s * (1.1 + .14 * Math.sin(t * 3)), lit, wGlow(.75)); ctx.restore(); } v.arch('L', o, .42, .64, wDoor(lit));      // the door's glow lights the walls but not the slab, which keeps the coffee house slab's blue
+  v.arch('L', [9.45, .92, .76], .16, .26, tint(wDark())); v.arch('L', [10.55, .92, .76], .16, .26, tint(wDark()));      // the lit door between two small dark windows; one window round the side is lit
+  for (const y of [-.55, .55]) v.arch('R', [10.92, y, .76], .16, .26, y < 0 ? wLit(lit) : tint(wDark()));      // the side wall's pair: same size (the belfry window's), height and spacing as the pair beside the door, and evenly placed either side of the wall's middle
   v.pyramid(8.95, -1.05, 1.7, 2.1, 1.25, PAL.roof);
-  v.box(9.78, -.22, 2.2, .44, .44, 1.5, mix(st, [255, 255, 255], .15)); v.arch('L', [10, .22, 3.0], .16, .26, tint(DARK)); v.pyramid(9.7, -.3, 3.7, .6, 1.0, PAL.roof);
+  v.box(9.78, -.22, 2.2, .44, .44, 1.5, mix(st, [255, 255, 255], .15)); v.arch('L', [10, .22, 3.0], .16, .26, tint(wDark())); v.pyramid(9.7, -.3, 3.7, .6, 1.0, PAL.roof);
   const a = v.P(10, 0, 4.7), b = v.P(10, 0, 5.35), m = v.P(10, 0, 5.1), w = v.s * .05; line([a, b], tint([246, 200, 120]), w); line([[m[0] - v.s * .16, m[1]], [m[0] + v.s * .16, m[1]]], tint([246, 200, 120]), w);
 }
 const titleFrame = () => {      // the title and the island as one group, centred up and down, the title just above the spire (but clear of the moon); lw, lh: the logo's size
@@ -883,7 +885,7 @@ function drawWorld0(t, dt) {
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(wx(c[0] + .5, c[1] + .5), c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
-  objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
+  objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], wGlow(.7)); } v.arch('L', [2.85, -3.1, 0], .4, .56, wDoor([255, 214, 140])); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
   objs.push({ k: 0, d: () => drawTower(v, t) });
   objs.push({ k: 9.6 + CDX + CDY, d: () => drawChapel(v, t) });      // sorted where the church now stands, so whoever is in front of it is drawn over it
   objs.push({ k: 12.4, d: () => drawBarHouse(v, t) });
