@@ -492,6 +492,7 @@ function musicTick() {
 // ------------------------------------------------------------ world
 let CLOTH = [214, 52, 60];      // the shop's door-cloths
 const PAL = { stone: [238, 216, 186], roof: [226, 106, 96], isl: [108, 180, 170], under: [72, 118, 134], house: [244, 190, 130], path: [150, 206, 190] };
+let ISL_DAY = [166, 206, 168], PATH_DAY = [204, 226, 196];      // the island's grass and path by day, a warm mint to sit with the pink sky (MELO 2026-11-17, D1; was the night teal): eased into PAL.isl / PAL.path as night falls
 const DOOR = [-5, 3], TDOOR = [3, 0], LDOOR = [2, -3];
 const blocked = new Set();
 const key = (i, j) => i + ',' + j;
@@ -870,9 +871,10 @@ function drawWorld(t, dt) {
   if (storyFrame) { const TF = titleFrame(), z = zoomOut; v.s = s = lerp(sNear, TF.s, z); v.cx = lerp(W / 2 - (camX - camY) * s * C30, TF.oX - (camX - camY - 3) * s * C30, z); v.cy = lerp(H * .62 - (camX + camY) * s * .5, TF.oY - (camX + camY) * s * .5, z) + storyPan; }      // the story's last shot draws back until the town sits exactly as in the view from the top of the tower
   if (hideChef) { const TF = titleFrame(); v.s = s = TF.s; v.cx = TF.oX - (camX - camY - 3) * s * C30; v.cy = TF.oY - (camX + camY) * s * .5; }      // the view from the top of the tower: framed as the title screen, the island at the title's size and place
   // ground
-  v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
-  v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
-  for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
+  const isl = mix(ISL_DAY, PAL.isl, G.n), pth = mix(PATH_DAY, PAL.path, G.n);
+  v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, isl, .3));
+  v.box(-5, -5, -1, 10, 10, 1, isl);
+  for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(pth)); }
   for (let i = 0; i < 4; i++) v.box(5.09 + i * .352, .02, -.4 * i - .6, .26, .96, .2, [80, 118, 142]);      // four stepping stones down to the church, evenly spaced from the island's edge to the church's slab, each hanging in the air with a gap before the next, across and down
   v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
   v.box(6.5, -2, CDZ - .3, 2, 2.75, .3, [88, 128, 152]);      // the strip in front of the church is kept narrow      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
