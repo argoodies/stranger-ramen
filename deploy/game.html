@@ -492,8 +492,8 @@ function musicTick() {
 // ------------------------------------------------------------ world
 let CLOTH = [214, 52, 60];      // the shop's door-cloths
 const PAL = { stone: [238, 216, 186], roof: [226, 106, 96], isl: [108, 180, 170], under: [72, 118, 134], house: [244, 190, 130], path: [150, 206, 190], walk: [88, 128, 152], step: [80, 118, 142], wall: [250, 232, 200] };
-let PAL_DAY = { stone: [238, 226, 210], roof: [204, 112, 104], wall: [248, 234, 214], walk: [150, 148, 190], step: [140, 138, 184], under: [136, 132, 178] };      // a softer brick red and lilac walkways to sit with the pink sky (MELO 2026-11-17, B; the lavender rose before it was too pink). The town's colours by day, where they differ from PAL (night): eased into PAL as night falls, in the town only (see drawWorld)
-let ISL_DAY = [166, 206, 168], PATH_DAY = [204, 226, 196];      // the island's grass and path by day, a warm mint to sit with the pink sky (MELO 2026-11-17, D1; was the night teal): eased into PAL.isl / PAL.path as night falls
+let PAL_DAY = { isl: [170, 208, 172], path: [238, 232, 212], stone: [248, 234, 208], roof: [222, 120, 106], wall: [252, 242, 222], walk: [176, 164, 210], step: [166, 154, 204], under: [160, 148, 200] };      // the town by day, one palette for the pink sky (MELO 2026-11-17): mint grass, cream paving and stone, coral roofs, lilac walkways. Eased into PAL (night) as night falls, in the town only (see drawWorld)
+let SHADOW_DAY = [120, 84, 128];      // by day the town's sides shade toward a soft plum, not the night's deep violet, so the stone stays clean
 const DOOR = [-5, 3], TDOOR = [3, 0], LDOOR = [2, -3];
 const blocked = new Set();
 const key = (i, j) => i + ',' + j;
@@ -856,7 +856,7 @@ const titleFrame = () => {      // the title and the island as one group, centre
   return { s, oX: W / 2, oY: top + lh + gap + 12.8 * s, ty, lw, lh }; };      // the title screen's framing: the clock tower (at the island's centre, the world's origin) stands on the centre line of the screen; the church reaches about 9.2 s out to the right, so that sets the scale on a narrow screen
 function drawWorld(t, dt) { const keep = {}; for (const k in PAL_DAY) { keep[k] = PAL[k]; PAL[k] = mix(PAL_DAY[k], PAL[k], G.n); } try { drawWorld0(t, dt); } finally { Object.assign(PAL, keep); } }
 function drawWorld0(t, dt) {
-  TINT = [40, 30, 96]; TK = lerp(0.03, 0.2, G.n); SHADOW = [58, 40, 96];
+  TINT = [40, 30, 96]; TK = lerp(0.03, 0.2, G.n); SHADOW = mix(SHADOW_DAY, [58, 40, 96], G.n);
   moonAt = [W * 0.8, H * 0.13]; skyNow(t, storyRain ? .4 : 0, storyRain ? 0 : 1, false); moonAt = null; if (storySky) storySky(t); if (storyRain) rainField(wv, t, wv.s * .72, 'far');      // the rain that lands behind the island      // the story's shooting stars belong to the sky, behind everything
   const mx = W * 0.8, my = H * 0.13, sunc = mix(ORBD, ORBN, G.n); if (!storyRain) { glow(mx, my, 150, sunc, lerp(.5, .1, G.n)); drawOrb(mx, my, 26, G.n); clouds(t, 1 - G.n); }      // under the story's rain: no moon, no birds
   if (!storyRain) for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], G.n), 2, lerp(.95, .7, G.n)); }
@@ -873,7 +873,7 @@ function drawWorld0(t, dt) {
   if (storyFrame) { const TF = titleFrame(), z = zoomOut; v.s = s = lerp(sNear, TF.s, z); v.cx = lerp(W / 2 - (camX - camY) * s * C30, TF.oX - (camX - camY - 3) * s * C30, z); v.cy = lerp(H * .62 - (camX + camY) * s * .5, TF.oY - (camX + camY) * s * .5, z) + storyPan; }      // the story's last shot draws back until the town sits exactly as in the view from the top of the tower
   if (hideChef) { const TF = titleFrame(); v.s = s = TF.s; v.cx = TF.oX - (camX - camY - 3) * s * C30; v.cy = TF.oY - (camX + camY) * s * .5; }      // the view from the top of the tower: framed as the title screen, the island at the title's size and place
   // ground
-  const isl = mix(ISL_DAY, PAL.isl, G.n), pth = mix(PATH_DAY, PAL.path, G.n);
+  const isl = PAL.isl, pth = PAL.path;
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, isl);
   for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(pth)); }
