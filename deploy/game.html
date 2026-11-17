@@ -2664,7 +2664,8 @@ $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('lan
 cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (bag.open && mode !== 'title') { bagTap(e.clientX, e.clientY); return; } if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'bar') { cafeTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
-$('bag').addEventListener('click', () => { bag.open = !bag.open; bag.sel = null; chime(bag.open ? 74 : 62, 0, .12, .8); });
+$('bag').addEventListener('click', () => { $('bag').classList.remove('gain');      // the glow was there to be tapped: once it is, the button is as it always is (MELO 2026-11-17)
+  bag.open = !bag.open; bag.sel = null; chime(bag.open ? 74 : 62, 0, .12, .8); });
 for (const k of ['speed', 'freeze']) $(k === 'speed' ? 'bspeed' : 'bfreeze').addEventListener('click', () => { if (mode === 'church') churchBanner(S().buffSay[k], 3); else toastSay(S().buffSay[k]); chime(81, 0, .08, .7); });      // a tap says what the prophecy does
 $('bclose').addEventListener('click', () => { bag.open = false; bag.drag = null; chime(62, 0, .1, .8); });
 $('bback').addEventListener('click', () => { if (stall.board) closeBoard(); });
