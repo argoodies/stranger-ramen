@@ -1101,7 +1101,7 @@ function hintKey() {
 const EAT_STEP = .6, SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
 const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
 const PREP_H0 = 1, CTD = 1 - PREP_H0, BT = .1, SILL = 1 - CTD - BT;      // CTD: the serving board's top below 1.0 (MELO 2026-11-14: as high as the prep table, PREP_H0); BT: the board's thickness; SILL: the wall stands up to its underside      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
-let SHOPDARK = { c: [44, 26, 52], a: .28, r: 2.4, pool: .55 };      // the ramen shop's dark (colour, how much) and the lamp's pool on the floor (radius in cells, strength)
+let SHOPDARK = { c: [44, 26, 52], a: .28, r: 2.4, pool: 0 };      // the ramen shop's dark (colour, how much) and the lamp's pool (radius in cells, strength): none, the prep table stays in the dark (MELO 2026-11-17)
 const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];
 let WOODSTYLE = 1; const WOODS = [null,
   { body: [104, 70, 54], top: [172, 124, 86], seam: [86, 58, 46], slab: .1, oh: 0, vseam: .32 },      // 1 thick oak top on a walnut body of upright boards
