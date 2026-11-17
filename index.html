@@ -491,7 +491,8 @@ function musicTick() {
 
 // ------------------------------------------------------------ world
 let CLOTH = [214, 52, 60];      // the shop's door-cloths
-const PAL = { stone: [238, 216, 186], roof: [226, 106, 96], isl: [108, 180, 170], under: [72, 118, 134], house: [244, 190, 130], path: [150, 206, 190] };
+const PAL = { stone: [244, 226, 200], roof: [214, 104, 92], isl: [150, 178, 140], under: [118, 94, 112], house: [244, 190, 130], path: [150, 206, 190], walk: [222, 208, 188], step: [210, 196, 176], wall: [250, 234, 210] };      // one stone for the whole town (MELO 2026-11-17, after Stardew Valley): sage ground, cream stone and flagstones, red roofs
+const COBBLE = { stone: [226, 214, 196], grout: [150, 132, 124], vary: .12 }, WALKCOB = { stone: [222, 208, 188], grout: [166, 148, 136], vary: .12 };      // the cobbled paths, and the flagstones on the platforms and stepping stones
 const DOOR = [-5, 3], TDOOR = [3, 0], LDOOR = [2, -3];
 const blocked = new Set();
 const key = (i, j) => i + ',' + j;
@@ -627,7 +628,8 @@ function drawSky(top, mid, bot, t, starA = 1, rose = 0) {      // rose: how much
     put(7, .4, 1.4, 1.1, 1.4); put(210, .58, 2.2, .4, .9); }      // thinner toward the bottom
   for (const [x, y, r, ph] of starCache) { let m = moonAt ? clamp((Math.hypot(x - moonAt[0], y - moonAt[1]) - 100) / 110) : 1; if (mode === 'title' && titleBox) { const b = titleBox, dx = Math.max(0, Math.abs(x - b.cx) - b.hw) / (b.fs * 1.5), dy = Math.max(0, Math.abs(y - b.y) - b.fs * 1.1) / (b.fs * 1.5); m *= 1 - b.u * .9 * (1 - clamp(Math.hypot(dx, dy))); } m *= 1 - .85 * Math.pow(clamp(y / (H * .58)), 1.3); if (m > 0) circ(x, y, r, [255, 250, 230], m * starA * (0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + ph)))); }      // no stars show in the moon's glow; behind the title they are only faint; and they fade toward the bottom of the sky
 }
-const SKYD = [[176, 170, 220], [236, 176, 190], [250, 170, 150]], SKYN = [[8, 10, 34], [20, 20, 62], [42, 32, 84]];      // by day: rose clouds of dawn, pale lilac above, rose in the middle, coral below
+const SKYD = [[198, 156, 212], [238, 174, 190], [250, 176, 156]], SKYN = [[10, 10, 34], [26, 22, 66], [50, 36, 92]], SKYK = [[124, 92, 172], [222, 124, 150], [250, 154, 114]].map((c, i) => mix(SKYD[i], c, .35));      // day lilac to rose, dusk (SKYK) violet to coral, night deep indigo (MELO 2026-11-17)
+const DUSK = .35, tod3 = (n, a, b, c) => n <= DUSK ? mix(a, b, n / DUSK) : mix(b, c, (n - DUSK) / (1 - DUSK)), tod3n = (n, a, b, c) => n <= DUSK ? lerp(a, b, n / DUSK) : lerp(b, c, (n - DUSK) / (1 - DUSK));      // G.n runs 0 (day), DUSK (dusk), 1 (night): anything set for the three is eased between them      // by day: rose clouds of dawn, pale lilac above, rose in the middle, coral below
 const CLOUDS = [[.18, .135, 1.1, 1], [.7, .2, .8, .6], [.46, .27, .6, .8], [.88, .33, 1, .7], [.1, .38, .9, 1.1], [.6, .44, .7, .9]];      // x, y (of the screen), size, drift speed: none higher than the sun (at .13 of the screen; the first drifts right across it, and the clouds are drawn after the sun so they hide it), none below the middle
 function clouds(t, a) {      // little white clouds drifting slowly across the day sky
   if (a <= 0) return; const r0 = Math.min(W, H) * .045, span = W + r0 * 8;
@@ -635,7 +637,7 @@ function clouds(t, a) {      // little white clouds drifting slowly across the d
     ctx.beginPath(); for (const [dx, dy, m] of [[-.2, 0, 1], [-.9, .25, .7], [.95, .2, .75]]) { ctx.moveTo(cx + dx * r + r * m, cy + dy * r); ctx.arc(cx + dx * r, cy + dy * r, r * m, 0, TAU); } ctx.fillStyle = css([252, 250, 255], .92 * a); ctx.fill(); }      // one path, filled once: no brighter seams where the puffs overlap; one round puff on top, a little left of the middle, a smaller one either side below it (MELO 2026-11-16: no puff at the top right, then only one on top, then it moved left)
 }
 function skyNow(t, dark = 0, stars = 1, cl = true, n = G.n) { const d = [20, 16, 44];      // n: how far into night; a dark room (the tower) passes 1 and keeps the night sky by day too
-  dark *= n; drawSky(mix(mix(SKYD[0], SKYN[0], n), d, dark), mix(mix(SKYD[1], SKYN[1], n), d, dark), mix(mix(SKYD[2], SKYN[2], n), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
+  dark *= n; drawSky(mix(tod3(n, SKYD[0], SKYK[0], SKYN[0]), d, dark), mix(tod3(n, SKYD[1], SKYK[1], SKYN[1]), d, dark), mix(tod3(n, SKYD[2], SKYK[2], SKYN[2]), d, dark), t, (.1 + .9 * n) * stars); if (stars && cl) clouds(t, 1 - n); }      // the town's sky: plain, no rose glow (that is the three-player table's alone); by day the darkening is let go, so the sky stays clear, and clouds drift
 const FOOT = [20, 12, 40];      // the faint mark at the foot of anything small standing on the ground (MELO 2026-11-16): its own shape, a little larger, very light
 // footSq: hx, hy are the half-sizes of the square foot itself; the mark reaches .046 past it all round, the same rim on screen (.04 s) as footRound's
 function footSq(v, x, y, z, hx, hy = hx, a = .22) { hx += .046; hy += .046; const P = v.P.bind(v); poly([P(x - hx, y - hy, z), P(x + hx, y - hy, z), P(x + hx, y + hy, z), P(x - hx, y + hy, z)], FOOT, a); }
@@ -666,7 +668,7 @@ function drawTower(v, t) {
 }
 function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a red spire with a chimney, a lit doorway under three red door-cloths, an arched window in the gable end
   const x0 = -4.92, y0 = 1.4, w = 1.5, x1 = x0 + w, y1 = y0 + w, ym = y0 + w / 2, h = 1.42, SP = 1.5, ov = .16, cx = x0 + 1.13, cy = ym - .4, P = v.P.bind(v);
-  const [, wl, wr] = v.sh([250, 232, 200]), [rt, rl, rr] = v.sh(PAL.roof), lit = [255, 220, 150], wood = tint([176, 120, 84]);
+  const [, wl, wr] = v.sh(PAL.wall), [rt, rl, rr] = v.sh(PAL.roof), lit = [255, 220, 150], wood = tint([176, 120, 84]);
   poly([P(x0, y1, 0), P(x1, y1, 0), P(x1, y1, h), P(x0, y1, h)], wl); poly([P(x1, y0, 0), P(x1, y1, 0), P(x1, y1, h), P(x1, y0, h)], wr);
   // the doorway
   const o = [x0 + .62, y1, 0], dp = v.F('L', o, 0, .4); glow(dp[0], dp[1], v.s * 1.3, [255, 200, 120], .8); if (G.late) glow(dp[0], dp[1], v.s * (2.4 + .5 * Math.sin(t * 4)), [255, 226, 160], .8);
@@ -678,13 +680,13 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
   { const wz = h / 2 - .2, wo = [x1, ym, wz], g = v.F('R', wo, 0, .25); glow(g[0], g[1], v.s * .8, lit, .6); v.arch('R', wo, .34, .3, lit); }      // centred on the wall, across and up
   // a spire like the clocktower's on its own thin red eave, then the chimney
   v.box(x0 - ov, y0 - ov, h, w + 2 * ov, w + 2 * ov, .08, mix(PAL.roof, [60, 20, 40], .25)); v.pyramid(x0 - ov, y0 - ov, h + .08, w + 2 * ov, SP, PAL.roof);
-  { const zr = x => h + .08 + SP * (1 - (x - x0 - w / 2) / (w / 2 + ov)), a = cx, b = cx + .28, c = cy, d = cy + .28, T = zr(a) + .34, [kt, kl, kr] = v.sh([250, 232, 200]);      // the chimney stands on the slope facing right, its foot cut to the pitch
+  { const zr = x => h + .08 + SP * (1 - (x - x0 - w / 2) / (w / 2 + ov)), a = cx, b = cx + .28, c = cy, d = cy + .28, T = zr(a) + .34, [kt, kl, kr] = v.sh(PAL.wall);      // the chimney stands on the slope facing right, its foot cut to the pitch
     poly([P(a, d, zr(a)), P(b, d, zr(b)), P(b, d, T), P(a, d, T)], kl); poly([P(b, d, zr(b)), P(b, c, zr(b)), P(b, c, T), P(b, d, T)], kr); poly([P(a, c, T), P(b, c, T), P(b, d, T), P(a, d, T)], kt); }
   for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1, q = P(cx + .14 + .25 * Math.sin(t + i * 2) * ph, cy + .14, h + .08 + SP * (1 - (cx - x0 - w / 2) / (w / 2 + ov)) + .46 + ph * 1.5); circ(q[0], q[1], v.s * (.08 + .12 * ph), [240, 236, 250], .3 * (1 - ph)); }
 }
 function drawBarHouse(v, t) {      // the little coffee house: stone walls, a flat roof with a low parapet and a board on top, wide lit shop windows under red-and-cream striped awnings. Its door opens onto the walkway, round the back
   const x0 = 6, y0 = 2.85, w = 1.3, h = 1.35, lit = [255, 214, 140], nn = clamp((G.n - .35) / .3), P = v.P.bind(v), GR = PAL.roof, CR = [244, 234, 214];      // the awnings striped in the town's roof red
-  v.box(x0 - .05, y0 - .05, -.3, w + .1, w + .1, .3, [88, 128, 152]);      // a thin footing in the church bridge's blue, no island round it
+  v.box(x0 - .05, y0 - .05, -.3, w + .1, w + .1, .3, PAL.walk);      // a thin footing in the church bridge's blue, no island round it
   v.box(x0, y0, 0, w, w, h, PAL.stone); v.box(x0 - .04, y0 - .04, h, w + .08, w + .08, .16, mix(PAL.stone, [255, 255, 255], .2));      // walls, and the parapet round the flat roof
   // a wide window on each face you can see, glowing, with a dark frame and a sill
   const win = (pl, o) => { const wl = .8, wh = .55, z = .32, c = (u, zz) => v.F(pl, o, u, zz); { const g = c(0, z + wh / 2); glow(g[0], g[1], v.s * .9, lit, .45); }
@@ -853,14 +855,14 @@ const titleFrame = () => {      // the title and the island as one group, centre
   const top = Math.max((H - (lh + gap + 19.6 * s)) / 2, H * .13 + 26 + 18), ty = top + lh / 2;      // the spire's tip is 12.8 s above the island's centre, its lowest corner about 6.8 s below
   return { s, oX: W / 2, oY: top + lh + gap + 12.8 * s, ty, lw, lh }; };      // the title screen's framing: the clock tower (at the island's centre, the world's origin) stands on the centre line of the screen; the church reaches about 9.2 s out to the right, so that sets the scale on a narrow screen
 function drawWorld(t, dt) {
-  TINT = [40, 30, 96]; TK = lerp(0.03, 0.2, G.n); SHADOW = [58, 40, 96];
+  TINT = tod3(G.n, [40, 30, 96], [255, 128, 100], [24, 22, 70]); TK = tod3n(G.n, .03, .16, .42); SHADOW = tod3(G.n, [110, 70, 120], [120, 60, 110], [40, 30, 80]);      // the light over the town: day clear, dusk a warm rose, night a deep blue, the lamps and windows the only warmth (MELO 2026-11-17)
   moonAt = [W * 0.8, H * 0.13]; skyNow(t, storyRain ? .4 : 0, storyRain ? 0 : 1, false); moonAt = null; if (storySky) storySky(t); if (storyRain) rainField(wv, t, wv.s * .72, 'far');      // the rain that lands behind the island      // the story's shooting stars belong to the sky, behind everything
   const mx = W * 0.8, my = H * 0.13, sunc = mix(ORBD, ORBN, G.n); if (!storyRain) { glow(mx, my, 150, sunc, lerp(.5, .1, G.n)); drawOrb(mx, my, 26, G.n); clouds(t, 1 - G.n); }      // under the story's rain: no moon, no birds
   if (!storyRain) for (let i = 0; i < 3; i++) { const x = ((t * 26 + i * 170) % (W + 200)) - 100, y = H * 0.2 + i * 26 + 10 * Math.sin(t * .9 + i), f = 6 * Math.sin(t * 7 + i * 1.7); line([[x - 10, y - f], [x, y], [x + 10, y - f]], mix([255, 255, 255], [200, 190, 220], G.n), 2, lerp(.95, .7, G.n)); }
   if (hideChef && tw.view) drawTowerView(t, false);      // what happens in the sky, behind everything that stands on the ground
   zoomOut = lerp(zoomOut, zoomTarget, 1 - Math.pow(0.02, dt));
   let sNear = clamp(Math.min(W, H) / 10.5, 28, 60), sFar = Math.min(W / 21, H / 26), s = hideChef ? Math.min(W * .036, H * .03) : lerp(sNear, sFar, zoomOut);
-  const fx = lerp(player.x, 1.5, zoomOut), fy = lerp(player.y, -1.5, zoomOut);
+  const fx = lerp(player.x, .25, zoomOut), fy = lerp(player.y, -.25, zoomOut);      // zoomed out, the town sits in the middle of the screen (MELO 2026-11-17; was 1.5, -1.5, left of centre)
   camX = lerp(camX, fx, 1 - Math.pow(0.01, dt)); camY = lerp(camY, fy, 1 - Math.pow(0.01, dt));
   const v = wv; v.s = s; v.cx = W / 2 - (camX - camY) * s * C30; v.cy = H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut) + storyPan;      // storyPan: the story's camera, looking up into the sky
   titleK = lerp(titleK, mode === 'title' ? 1 : 0, 1 - Math.pow(0.02, dt));
@@ -869,13 +871,16 @@ function drawWorld(t, dt) {
     v.s = s = s2; v.cx = lerp(W / 2 - (camX - camY) * s * C30, oX - (camX - camY - 3) * s * C30, titleK); v.cy = lerp(H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut), oY - (camX + camY) * s * .5, titleK) + storyPan; }
   if (storyFrame) { const TF = titleFrame(), z = zoomOut; v.s = s = lerp(sNear, TF.s, z); v.cx = lerp(W / 2 - (camX - camY) * s * C30, TF.oX - (camX - camY - 3) * s * C30, z); v.cy = lerp(H * .62 - (camX + camY) * s * .5, TF.oY - (camX + camY) * s * .5, z) + storyPan; }      // the story's last shot draws back until the town sits exactly as in the view from the top of the tower
   if (hideChef) { const TF = titleFrame(); v.s = s = TF.s; v.cx = TF.oX - (camX - camY - 3) * s * C30; v.cy = TF.oY - (camX + camY) * s * .5; }      // the view from the top of the tower: framed as the title screen, the island at the title's size and place
+  const cobTop = (x, y, w, d, z, nx, ny) => { const C = WALKCOB; v.quad(x, y, z, w, d, tint(C.grout)); const sw = w / nx, sd = d / ny, g = Math.min(sw, sd) * .08;      // flagstones on a platform's top: nx by ny stones with joints, each a shade apart
+    for (let a = 0; a < nx; a++) for (let b = 0; b < ny; b++) { const h = Math.abs(Math.sin((x * 3.1 + y * 5.7 + a * 1.3 + b * 2.9) * 12.9898) * 43758.5453 % 1), f = h * 2 - 1; v.quad(x + a * sw + g, y + b * sd + g, z, sw - 2 * g, sd - 2 * g, tint(mix(C.stone, f > 0 ? [255, 246, 220] : C.grout, Math.abs(f) * C.vary))); } };
   // ground
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
-  for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
-  for (let i = 0; i < 4; i++) v.box(5.09 + i * .352, .02, -.4 * i - .6, .26, .96, .2, [80, 118, 142]);      // four stepping stones down to the church, evenly spaced from the island's edge to the church's slab, each hanging in the air with a gap before the next, across and down
-  v.box(5, 3, -0.3, 1, 1, 0.3, [88, 128, 152]);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
-  v.box(6.5, -2, CDZ - .3, 2, 2.75, .3, [88, 128, 152]);      // the strip in front of the church is kept narrow      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
+  { const C = COBBLE; for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i, j, 0, 1, 1, tint(C.grout));      // the cell's joints, then its stones: four to a cell in a running bond, each a shade apart
+      const st = [[0, 0, .5, .5], [.5, 0, .5, .5], [0, .5, .5, .5], [.5, .5, .5, .5]]; st.forEach(([a, b, w, d], q) => { const h = Math.sin((i * 7.1 + j * 3.3 + q * 1.7) * 12.9898) * 43758.5453 % 1, f = (h < 0 ? -h : h) * 2 - 1; v.quad(i + a + .04, j + b + .04, 0, w - .08, d - .08, tint(mix(C.stone, f > 0 ? [255, 246, 220] : C.grout, Math.abs(f) * C.vary))); }); } }
+  for (let i = 0; i < 4; i++) { v.box(5.09 + i * .352, .02, -.4 * i - .6, .26, .96, .2, PAL.step); cobTop(5.09 + i * .352, .02, .26, .96, -.4 * i - .4, 1, 2); }      // four stepping stones down to the church, evenly spaced from the island's edge to the church's slab, each hanging in the air with a gap before the next, across and down
+  v.box(5, 3, -0.3, 1, 1, 0.3, PAL.walk); cobTop(5, 3, 1, 1, 0, 2, 2);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
+  v.box(6.5, -2, CDZ - .3, 2, 2.75, .3, PAL.walk); cobTop(6.5, -2, 2, 2.75, CDZ, 4, 5);      // the strip in front of the church is kept narrow      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(wx(c[0] + .5, c[1] + .5), c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
@@ -965,10 +970,11 @@ const save = JSON.parse(localStorage.getItem('ctramen') || '{"coins":0,"served":
 const has = () => false;
 const HALF = 180, G = { n: 1, late: false, t: HALF };      // a first game opens at night; after that the game opens at the hour it was left at
 const TKEY = 'ctramen_t', HOUR = HALF / 12; let savedHour = -1;      // the game's time is kept once each game hour (15 s), at the start of that hour (MELO 2026-11-14)
-{ let st = NaN; try { st = parseFloat(localStorage.getItem(TKEY)); } catch (e) {} if (st >= 0 && isFinite(st)) { G.t = st; G.n = (G.t % (2 * HALF)) >= HALF ? 1 : 0; } savedHour = Math.floor(G.t / HOUR); }
+{ let st = NaN; try { st = parseFloat(localStorage.getItem(TKEY)); } catch (e) {} if (st >= 0 && isFinite(st)) { G.t = st; G.n = nWant(); } savedHour = Math.floor(G.t / HOUR); }
+function nWant() { const h = gameHour(); return h >= 18 || h < 6 ? 1 : h >= 16 ? DUSK : 0; }      // night from six to six; the last two hours of day are dusk (MELO 2026-11-17)
 function gameHour() { return (6 + 12 * (G.t % (2 * HALF)) / HALF) % 24; }
 function clockHands() { const h = gameHour(); return [(h % 12) / 12 * TAU, (h % 1) * TAU]; }
-function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = lerp(G.n, night ? 1 : 0, 1 - Math.pow(0.002, dt));      // day turns to night (and back) in about a second, as in /3b (was some fifteen seconds)
+function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = lerp(G.n, nWant(), 1 - Math.pow(0.002, dt));      // day turns to night (and back) in about a second, as in /3b (was some fifteen seconds)
   const hr = Math.floor(G.t / HOUR); if (hr !== savedHour) { savedHour = hr; try { localStorage.setItem(TKEY, String(hr * HOUR)); } catch (e) {} } }
 const cookT = () => has('fast') ? 1.3 : 2.6, waitMax = () => has('calm') ? 110 : 70, speedK = () => has('swift') ? 1.5 : 1;
 // ---- achievements: round badges on the wooden board in the shop. save.badges[id] = [x, y] (0..1 on the board), save.badgeNew = ids not yet looked at
@@ -1093,7 +1099,7 @@ function hintKey() {
 }
 // --- walking inside the shop: a fine grid with the furniture (plus a body's width) blocked out
 const EAT_STEP = .6, SHOPX = 4, SHOPY = 4;      // the shop's floor: a square, 4 by 4 like the coffee house and the library (MELO, 2026-11-14; was 5 x 5, and before that 5 x 3.6), the steps out in the middle of the front edge
-const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [196, 168, 140], wallA: [178, 148, 124], top: [214, 192, 166], endX: [160, 130, 106], endY: [146, 118, 98], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
+const SHOPC = { plank1: [170, 108, 88], plank2: [156, 98, 80], seam: [118, 72, 58], wallB: [236, 220, 198], wallA: [224, 206, 184], top: [246, 234, 214], endX: [214, 196, 174], endY: [204, 186, 164], edgeL: [132, 82, 66], edgeR: [112, 68, 56], step: [200, 164, 134] };      // the shop's colours: floor planks (cherry-brown, MELO 2026-11-14) and their seams, the two walls, the wall tops and ends, the floor's front edges, the steps out (MELO 2026-11-14: the walls darker)
 const PREP_H0 = 1, CTD = 1 - PREP_H0, BT = .1, SILL = 1 - CTD - BT;      // CTD: the serving board's top below 1.0 (MELO 2026-11-14: as high as the prep table, PREP_H0); BT: the board's thickness; SILL: the wall stands up to its underside      // the serving counter's top stands this much below the window sill (MELO 2026-11-14)
 const LAMP_XY = [2.9, 1.3], WOOD = [112, 76, 58];
 let WOODSTYLE = 1; const WOODS = [null,
@@ -1232,10 +1238,11 @@ function iso_bowl(v, x, y, z, r, b) {
 // a square room N by N seen from above at a slant, Hh high: the scale and the screen height of its back floor corner, worked out as for the ramen shop (wide enough on a phone,
 // as tall as the screen allows elsewhere, the room from its wall tops down to the foot of its steps centred up and down, never higher than 104 px from the top)
 const ROOM_TOP = 104, roomB = N => N + .83, roomScale = (N, Hh) => Math.min(W / (9.5 * (2 * N / 9.2) * C30) * lerp(.86, 1, clamp((W - 330) / 110)), (H - ROOM_TOP - 40) / (Hh + roomB(N))), roomTop = (N, Hh, s) => Math.max(ROOM_TOP, (H - (Hh + roomB(N)) * s) * .5) + Hh * s;
+const shopLM = { c: document.createElement('canvas') };
 function drawStall(t) {
-  TK = 0; SHADOW = [80, 44, 60];
+  TK = 0; SHADOW = [80, 44, 60]; const GN = 0, n3 = (a, b, c) => tod3(G.n, a, b, c), L = { amb: n3([176, 160, 184], [132, 100, 132], [56, 54, 104]), la: tod3n(G.n, .3, .48, .8), lr: tod3n(G.n, 2.6, 2.8, 3), win: n3([255, 206, 200], [255, 160, 120], [110, 110, 190]), wa: tod3n(G.n, .28, .34, .12), da: tod3n(G.n, .16, .2, .06), out: n3([255, 255, 255], [236, 196, 196], [120, 118, 180]) };      // a dark room by day too, lit by its lamp and by the sky through the window and the door: day rose, dusk mauve, night blue (MELO 2026-11-17). The room's own colours stay put (GN 0); this light map, laid over it, does the time of day
   skyNow(t, .15);
-  const DN = lerp(.65, 1, G.n), LT = c => mix(c, [22, 22, 60], .34 * DN), WN = lerp(.3, 1, G.n), LW = c => mix(c, [22, 22, 60], .02 * WN),      // LW: the walls, a little lighter than the floor, and by day lighter still (WN, MELO 2026-11-14)
+  const DN = lerp(.65, 1, GN), LT = c => mix(c, [22, 22, 60], .34 * DN), WN = lerp(.3, 1, GN), LW = c => mix(c, [22, 22, 60], .02 * WN),      // LW: the walls, a little lighter than the floor, and by day lighter still (WN, MELO 2026-11-14)
     sideBox = (x, y, z, dx, dy, dz, c) => { v.sh = c2 => [tint(mix(c2, [255, 255, 255], .06)), tint(mix(c2, [22, 22, 60], .1)), tint(mix(c2, [22, 22, 60], .2))]; v.box(x, y, z, dx, dy, dz, c); delete v.sh; };
   const woodBox = (x, y, z, dx, dy, dz) => {      // a wooden counter: a body, a top slab, and the seams, panels or slats of its boards (WOODSTYLE picks the look; 0 a plain box)
     const W = WOODS[WOODSTYLE]; if (!W) { sideBox(x, y, z, dx, dy, dz, WOOD); return; }
@@ -1259,7 +1266,7 @@ function drawStall(t) {
   for (const k in HIT) delete HIT[k];
   const hit = (k, x, y, z, r) => { const p = P(x, y, z); HIT[k] = [p[0], p[1], r * s]; return p; };
   const wob = k => st.nope === k && st.nopeT > 0 ? Math.sin(st.nopeT * 60) * s * .04 : 0;
-  const board = (ya, yb) => { const c = WOODS[1].top, z = SILL + BT, y0 = CTY - CTW / 2; sideBox(.5, ya, SILL, BRDR - .5, yb - ya, BT, c);
+  const OUTM = c => c.map((x, i) => x * L.out[i] / 255), board = (ya, yb, o = c => c) => { const c = o(WOODS[1].top), z = SILL + BT, y0 = CTY - CTW / 2; sideBox(.5, ya, SILL, BRDR - .5, yb - ya, BT, c);
     for (const f of [.3, .62]) { const u = Math.max(ya, y0 + CTW * f), w = Math.min(yb, y0 + CTW * f + .014); if (w > u) poly([P(.5, u, z), P(BRDR, u, z), P(BRDR, w, z), P(.5, w, z)], tint(mix(c, [60, 36, 30], .25)), .35); } };      // the serving board, centred on the middle of the wall's thickness (CTY), so as much of it is inside as out (MELO 2026-11-14); drawn in two pieces, the one behind the wall's inner face and the one in front, with the grain running along it
   // customers behind the window, against the sky itself: nothing is drawn outside, so the window shows the same sky as round the room (MELO 2026-11-15; was the town's grass, dimming to blue at night)
   const K = s * 1.2, heads = [];
@@ -1272,14 +1279,14 @@ function drawStall(t) {
     if (c.story) { storySeatPos[c.story] = [p[0], p[1] - bob]; (c.story === 'he' ? storyHe : storyShe)(p[0], p[1] - bob, K); } else fig(p[0] + wob('seat' + i), p[1] - bob, K, Object.assign({ a }, c.look)); heads.push([i, p[0], p[1] - K * 1.72, a]);
     if (c.state === 'wait') { HIT['seat' + i] = [p[0], p[1] - K * .95, K * .62]; const sp = P(SEATX[i], BOWLY, 1.05 - CTD); HIT['spot' + i] = [sp[0], sp[1], s * .42]; }
   });
-  poly([P(.5, -.24, SILL), P(WINR, -.24, SILL), P(WINR, 0, SILL), P(.5, 0, SILL)], LW(SHOPC.top));      // the sill, seen past the board's right end
-  poly([P(.5, -.24, SILL), P(.5, 0, SILL), P(.5, 0, 2.8), P(.5, -.24, 2.8)], LW(SHOPC.endX));      // the window's near side, in the wall's thickness: behind the board, in front of the customers (MELO 2026-11-14)
-  board(BRD_Y0, 0);      // the board in the window and outside
+  poly([P(.5, -.24, SILL), P(WINR, -.24, SILL), P(WINR, 0, SILL), P(.5, 0, SILL)], OUTM(LW(SHOPC.top)));      // the sill, seen past the board's right end
+  poly([P(.5, -.24, SILL), P(.5, 0, SILL), P(.5, 0, 2.8), P(.5, -.24, 2.8)], OUTM(LW(SHOPC.endX)));      // the window's near side, in the wall's thickness: behind the board, in front of the customers (MELO 2026-11-14)
+  board(BRD_Y0, 0, OUTM);      // the board in the window and outside
   ctx.restore();
   // floor + walls
-  const FT = lerp(.04, .16, G.n);      // the floor's shade: the coffee house's by night, a little warmer and lighter by day so it sits with the walls (MELO 2026-11-14)
-  for (let i = 0; i < X; i++) for (let j = 0; j < Y; j++) v.quad(i, j, 0, 1, 1, mix((i + j) % 2 ? [150, 104, 84] : [164, 116, 92], [26, 22, 62], FT));      // the coffee house's floor, in its light, and no darkening toward the way out (MELO 2026-11-14)
-  const wallB = mix(LW(SHOPC.wallB), [255, 248, 236], .08 * (1 - G.n)), wallA = LW(SHOPC.wallA);      // the right-hand wall, with the window, a little lighter again by day (MELO 2026-11-14)
+  const FT = lerp(.04, .16, GN);      // the floor's shade: the coffee house's by night, a little warmer and lighter by day so it sits with the walls (MELO 2026-11-14)
+  for (let i = 0; i < X; i++) for (let j = 0; j < Y; j++) v.quad(i, j, 0, 1, 1, mix((i + j) % 2 ? [162, 116, 92] : [176, 128, 100], [26, 22, 62], FT));      // the coffee house's floor, in its light, and no darkening toward the way out (MELO 2026-11-14)
+  const wallB = mix(LW(SHOPC.wallB), [255, 248, 236], .08 * (1 - GN)), wallA = LW(SHOPC.wallA);      // the right-hand wall, with the window, a little lighter again by day (MELO 2026-11-14)
   poly([P(0, 0, 0), P(X, 0, 0), P(X, 0, SILL), P(0, 0, SILL)], wallB); poly([P(0, 0, 2.8), P(X, 0, 2.8), P(X, 0, Hh), P(0, 0, Hh)], wallB);
   poly([P(0, 0, 0), P(.5, 0, 0), P(.5, 0, 2.8), P(0, 0, 2.8)], wallB); poly([P(WINR, 0, 0), P(X, 0, 0), P(X, 0, 2.8), P(WINR, 0, 2.8)], wallB);      // no window: a doorway down to the floor (MELO 2026-11-14)
   const curtain = i => { const x0 = .56 + i * .6, w_ = .05 * Math.sin(t * 1.6 + i); poly([P(x0, 0, 2.8), P(x0 + .56, 0, 2.8), P(x0 + .56, 0, 2.5 + w_), P(x0, 0, 2.5 - w_)], [206, 62, 68]); };
@@ -1334,7 +1341,7 @@ function drawStall(t) {
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
   { const q = P(st.owner.x, st.owner.y), k = s * 1.15; floorClip(floorOf(v, [[0, 0, X, Y, 0]])); ell(q[0], q[1], .36 * k, .10 * k, [20, 12, 40], .3); ctx.restore(); }      // the chef's shadow, on the floor before any furniture, so the stove and the tables cover it where they stand in front of it (it lay across their sides, MELO 2026-11-14)
   // stove with the noodle pot and the soup pot
-  sideBox(0, 1.0, 0, STOVE_W, 2, 1.0, [120, 104, 124]);
+  sideBox(0, 1.0, 0, STOVE_W, 2, 1.0, [186, 122, 104]);
   let pileY = TABY; const pile = (x, z, n, piece) => { const p = P(x, pileY, z), bits = []; for (let i = 0; i < n; i++) { const a = i * 2.39996, r = Math.sqrt((i + .5) / n); bits.push([p[0] + Math.cos(a) * r * s * .085, p[1] + Math.sin(a) * r * s * .043 - s * .05 * (1 - r * r), i, a]); } bits.sort((u, w) => u[1] - w[1]).forEach(([bx, by, i, a]) => { ctx.save(); ctx.translate(bx, by); piece(i, a); ctx.restore(); }); };      // small chopped bits heaped on a board: spread on a sunflower spiral, higher in the middle, the far ones drawn first
   const grow = (x, y, z, k) => { const c = P(x, y, z); ctx.translate(c[0], c[1]); ctx.scale(k, k); ctx.translate(-c[0], -c[1]); };      // things drawn at their first size and scaled about where they stand (pots, toppings): their rings and rattles scale with them
   ctx.save(); grow(POT_X, POTY1, 1.0, POT_K);
@@ -1386,6 +1393,16 @@ function drawStall(t) {
   hit('bin', BIN[0], BIN[1], .35, .42); footRound(v, BIN[0], BIN[1], 0, .26); ctx.save(); ctx.translate(wob('bin'), 0); v.disc(BIN[0], BIN[1], 0, .26, .55, [120, 132, 150]); v.disc(BIN[0], BIN[1], .55, .21, 0, [50, 44, 70]); ctx.restore();
   ring('bin');
   if (binFirst) drawOwner();
+  { const cv = shopLM.c, g = cv.getContext('2d'); if (cv.width !== ctx.canvas.width) { cv.width = ctx.canvas.width; cv.height = ctx.canvas.height; }
+    g.setTransform(ctx.getTransform()); g.globalCompositeOperation = 'source-over'; g.fillStyle = css(L.amb); g.fillRect(-1e4, -1e4, 3e4, 3e4); g.globalCompositeOperation = 'lighter';
+    const pool = (q, r, c, a) => { const gr = g.createRadialGradient(q[0], q[1], 0, q[0], q[1], r); gr.addColorStop(0, css(c, a)); gr.addColorStop(.45, css(c, a * .55)); gr.addColorStop(1, css(c, 0)); g.fillStyle = gr; g.save(); g.translate(q[0], q[1]); g.scale(1, .62); g.translate(-q[0], -q[1]); g.fillRect(q[0] - r, q[1] - r, 2 * r, 2 * r); g.restore(); };
+    pool(P(LAMP_XY[0], LAMP_XY[1], .9), s * L.lr, [255, 196, 120], L.la);      // the lamp: a warm pool on the floor, the counters and the near walls
+    pool(P((.5 + WINR) / 2, .9, .6), s * 2.2, L.win, L.wa);      // the sky's own light, spilling in through the serving window
+    pool(P(SHOP_DOOR[0], Y - .2, 0), s * 1.6, L.win, L.da || 0);      // and through the way out
+    ctx.save(); ctx.beginPath(); const sub = (Q, o = 1) => { let A = 0; Q.forEach((q, k) => { const r = Q[(k + 1) % Q.length]; A += q[0] * r[1] - r[0] * q[1]; }); if (A * o < 0) Q = Q.slice().reverse(); Q.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); }; sub([P(-.24, -.24, Hh), P(X, -.24, Hh), P(X, -.24, -.34), P(X, Y, -.34), P(-.24, Y, -.34), P(-.24, Y, Hh)]);
+    { const ew = 1.0, ex = SHOP_DOOR[0] - ew / 2; for (let k = 0; k < 3; k++) { const y0 = Y + k * .32, y1 = y0 + .32, z1 = -1.1 + 1.1 - .26 * k; sub([P(ex, y0, z1), P(ex + ew, y0, z1), P(ex + ew, y0, -1.1), P(ex + ew, y1, -1.1), P(ex, y1, -1.1), P(ex, y1, z1)]); } }
+    sub([P(.5, 0, SILL + BT + .02), P(.5, 0, 2.5), P(WINR, 0, 2.5), P(WINR, 0, SILL + BT + .02)], -1); ctx.clip('nonzero');
+    ctx.globalCompositeOperation = 'multiply'; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(cv, 0, 0); ctx.restore(); }
   // one hanging lamp, over the middle of the room
   for (const lx of [LAMP_XY[0]]) { const a = P(lx, LAMP_XY[1], Hh + .6), b = P(lx, LAMP_XY[1], 3.2); line([a, b], [70, 52, 92], 1.5); glow(b[0], b[1] + s * .15, s * 1.7, [255, 214, 140], .5); poly([[b[0] - s * .22, b[1] + s * .16], [b[0] + s * .22, b[1] + s * .16], [b[0], b[1] - s * .12]], [226, 106, 96]); circ(b[0], b[1] + s * .18, s * .07, [255, 240, 190]); glow(b[0], b[1] + s * .18, s * .55, [255, 236, 180], .7 + .05 * Math.sin(t * 3)); }      // and a small bright halo round the bulb (MELO 2026-11-14)
   // a hint for something that has no rim of its own: a plain ring round where it is tapped
@@ -1403,7 +1420,6 @@ function drawStall(t) {
     let by = hy0 - 8 - bh; for (let n = 0; n < 60 && placed.some(r => bx < r[0] + r[2] + 4 && bx + cw + 4 > r[0] && by < r[1] + r[3] + 4 && by + bh + 4 > r[1]); n++) by -= 5;
     placed.push([bx, by, cw, bh, lines, fadeA, hx, hy0]);
   }
-  roomLift(v, X, Y, Hh, -.34, LIFT.stall * (1 - clamp((G.n - .35) / .3)));
   // tails first, then the bubbles over them: a long tail reaching down never shows across another bubble
   for (const [bx, by, cw, bh, , fadeA, hx, hy0] of placed) { const tx = clamp(hx, bx + 12, bx + cw - 12); poly([[tx - 5, by + bh - 1], [tx + 5, by + bh - 1], [hx, hy0 - 1]], [250, 246, 238], .96 * fadeA); }
   for (const [bx, by, cw, bh, lines, fadeA] of placed) {
@@ -2382,7 +2398,7 @@ function devMenu() {      // developer mode: a short list of tools, each opening
   home(); d.addEventListener('pointerdown', e => { if (e.target === d) close(); }); document.body.appendChild(d);
 }
 function devHour(h) {      // time runs forward (never back) to h o'clock; day and night switch over at once
-  const P2 = 2 * HALF, want = ((h - 6 + 24) % 24) / 12 * HALF, cur = G.t % P2; G.t += ((want - cur) % P2 + P2) % P2; G.n = (G.t % P2) >= HALF ? 1 : 0; chime(74, 0, .1); chime(81, .1, .1); }
+  const P2 = 2 * HALF, want = ((h - 6 + 24) % 24) / 12 * HALF, cur = G.t % P2; G.t += ((want - cur) % P2 + P2) % P2; G.n = nWant(); chime(74, 0, .1); chime(81, .1, .1); }
 function devGive(id) { const c = church; if (c.fly) return; c.fly = { id, n: { at: [W / 2, H * .3] }, t: 0, dev: true }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12); }      // the item flies down to the chef, just as out of a chest
 function devGift(id) { const k = ITEMS[id]; save[id] = true; if (STACK(id)) save.cards[id] = cardN(id) + 1; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; churchBanner(S().got(S().items[id][0]), 3); saveNow(); bagGlow(); [74, 78, 81, 86].forEach((m, i) => chime(m, .12 * i, .14)); }      // as from the chest, but nobody comes to say thanks
 function debugAsk(msg, val, done) {      // a small input box over the game (window.prompt is not shown inside the app's web view)
