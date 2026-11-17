@@ -1984,10 +1984,9 @@ function churchRest() {      // thanks have been said: the good soul and the che
 function leaveChurch() {      // back outside, at the church door; any prophecy is spent
   save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'none'; $('bback').style.display = 'none';
   player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
-  if (save.ch1 && !save.rateAsked) setTimeout(askRating, 2500);      // chapter one beaten: a moment after stepping back into the town, ask for a rating
 }
-function askRating() {      // iOS app only (the web page and Android have no such handler): ask once ever; the shell keeps its own once-only flag too, and iOS itself never shows it to someone who has already rated
-  if (save.rateAsked || mode !== 'world' || storyHook) return;      // walked straight back in, or something else is on: try again next time out of the church
+function askRating() {      // when the flower girl has finished saying chapter two is still being made (MELO 2026-11-17). iOS app only (the web page and Android have no such handler): ask once ever; the shell keeps its own once-only flag too, and iOS itself never shows it to someone who has already rated
+  if (save.rateAsked || mode !== 'church') return;
   try { window.webkit.messageHandlers.gc.postMessage({ t: 'rate' }); } catch (e) { return; }
   save.rateAsked = true; saveNow();
 }
@@ -2222,7 +2221,7 @@ function churchHit(e) {      // one attack: the knife you carry, or a bare fist.
   if (wearing('twin') && e.hp > 0) p.second = { e, t: .16, parry };
 }
 function churchTalk(n) { const c = church, last = c.tier >= TIERS; if (c.say && c.say.n === n) return; n.mark = false; c.exitOpen = true;
-  if (c.ended) { c.say = { n, text: S().ch2Soon, t: 3.4 }; chime(78, 0, .12); return; }      // the ending: she stays, and tells you chapter two is still being made (MELO 2026-11-15; she used to say her congratulations again)
+  if (c.ended) { c.say = { n, text: S().ch2Soon, t: 3.4, rate: true }; chime(78, 0, .12); return; }      // the ending: she stays, and tells you chapter two is still being made (MELO 2026-11-15; she used to say her congratulations again)
   if (c.practice) { c.say = { n, text: S().again((save.runs || 0) + 1), t: 2.4, again: true }; chime(78, 0, .12); return; }      // the practice hall: she offers the chapter again
   c.say = { n, text: last ? S().congrats(save.runs || 1) : S().thanks, t: last ? 3.4 : 2.4, bye: !last, end: last }; chime(n.who === 'saint' ? 74 : 78, 0, .12); }      // whoever appears has one thing to say; when it is said, the church goes quiet and dark again
 function churchOpen() {      // the chest before the cross: one thing you do not have yet, picked at random
@@ -2318,7 +2317,7 @@ function updateChurch(dt) {
     if (t0 < .9 && q.t >= .9) { q.from.hp = 0; q.from.dead = .5; churchPoof(q.from); sfx(110, .4, .2, 'sawtooth'); }
     if (q.to.kind === 'adv') { const u = clamp((q.t - .9) / .7); q.to.x = lerp(.95, 3.6, u); q.to.z = lerp(2.92, 0, u) + Math.sin(u * Math.PI) * 1.1; }      // the Advocate leaps down from the cross
     if (q.t >= 1.6) { Object.assign(q.to, { kind: 'imp', boss: true, hp: BOSSHP, max: BOSSHP, inv: false, z: 0, x: 3.6, hx: 3.6, hy: q.to.y, cd: 1.2, wind: 0, dash: 0, hit: .3 }); if (c.adv === q.to) c.adv = null; churchPoof(q.to, [240, 80, 90]); bell(110, .12); c.pass = null; } }
-  if (c.say && (c.say.t -= dt) <= 0) { const bye = c.say.bye, again = c.say.again, end = c.say.end; c.say = null; if (again) churchAgain(); else if (end) churchEnded(); else if (bye && c.done) churchRest(); }
+  if (c.say && (c.say.t -= dt) <= 0) { const bye = c.say.bye, again = c.say.again, end = c.say.end, rate = c.say.rate; c.say = null; if (rate) askRating(); if (again) churchAgain(); else if (end) churchEnded(); else if (bye && c.done) churchRest(); }
   if (c.fly && (c.fly.t += dt) > 1.1) { const id = c.fly.id, dev = c.fly.dev; c.fly = null; if (dev) devGift(id); else churchGift(id); }
   for (const b of c.stains) b.t += dt;
   c.lit = c.done ? Math.min(1, c.lit + dt / 2.2) : Math.max(0, c.lit - dt / 1.2); if (!c.fight && c.stains.length) { c.stainA = (c.stainA == null ? 1 : c.stainA) - dt / .9; if (c.stainA <= 0) { c.stains = []; c.stainA = null; } } else if (c.fight) c.stainA = null; c.torchF = clamp(c.torchF + (c.torchOn ? dt * 3 : -dt * 2)); for (const n of c.npcs.concat(c.chest || [])) if (n.a < 1) n.a = Math.min(1, n.a + dt / 2.6);      // once the fight is over, the blood fades from the floor
