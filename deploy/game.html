@@ -2239,8 +2239,8 @@ function churchTalk(n) { const c = church, last = c.tier >= TIERS; if (c.say && 
 function churchOpen() {      // the chest before the cross: one thing you do not have yet, picked at random
   const c = church, ch = c.chest; if (!ch || ch.open || ch.a < 1) return; ch.open = true; c.fly = { id: ch.id, n: ch, t: 0 }; noise(.2, .3, 400, 1200); chime(72, 0, .12); chime(79, .1, .12);
 }
-function bagGlow() {      // a new thing in the backpack: its button glows (if it is hidden just now, the glow plays when it shows)
-  const b = $('bag'); b.classList.remove('gain'); void b.offsetWidth; b.classList.add('gain');
+function bagGlow() {      // a new thing in the backpack: once the chef has said he has it, a moment later its button glows (MELO 2026-11-17); if it is hidden just then, the glow plays when it shows
+  setTimeout(() => { const b = $('bag'); b.classList.remove('gain'); void b.offsetWidth; b.classList.add('gain'); }, 1300);
 }
 $('bag').addEventListener('animationend', e => { if (e.animationName === 'baggain') e.currentTarget.classList.remove('gain'); });
 function churchGift(id) {      // out of the chest and into the backpack; it goes straight on only if nothing is in that place
