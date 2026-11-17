@@ -92,9 +92,6 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         if message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "rate" {
             askRating(); return
         }
-        if message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "haptic" {
-            haptic(body["k"] as? String ?? ""); return
-        }
         if message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "rateDebug" {
             debugRating(); return
         }
@@ -107,20 +104,6 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
     }
 
     // the App Store rating sheet, once ever (iOS also skips it for anyone who has already rated, and limits it to 3 a year)
-    // the fight's two taps of the phone: a parry is a crisp knock, a kill a fuller one, the boss going down the heaviest
-    private let parryTap = UIImpactFeedbackGenerator(style: .rigid)
-    private let killTap = UIImpactFeedbackGenerator(style: .medium)
-    private let bossTap = UIImpactFeedbackGenerator(style: .heavy)
-
-    private func haptic(_ kind: String) {
-        switch kind {
-        case "parry": parryTap.impactOccurred(intensity: 1.0); parryTap.prepare()
-        case "kill": killTap.impactOccurred(intensity: 0.8); killTap.prepare()
-        case "bossKill": bossTap.impactOccurred(intensity: 1.0); bossTap.prepare()
-        default: break
-        }
-    }
-
     private func askRating() {
         let key = "ratingAsked"
         guard !UserDefaults.standard.bool(forKey: key),
