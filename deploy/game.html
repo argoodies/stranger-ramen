@@ -1984,6 +1984,12 @@ function churchRest() {      // thanks have been said: the good soul and the che
 function leaveChurch() {      // back outside, at the church door; any prophecy is spent
   save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'none'; $('bback').style.display = 'none';
   player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
+  if (save.ch1 && !save.rateAsked) setTimeout(askRating, 2500);      // chapter one beaten: a moment after stepping back into the town, ask for a rating
+}
+function askRating() {      // iOS app only (the web page and Android have no such handler): ask once ever; the shell keeps its own once-only flag too, and iOS itself never shows it to someone who has already rated
+  if (save.rateAsked || mode !== 'world' || storyHook) return;      // walked straight back in, or something else is on: try again next time out of the church
+  try { window.webkit.messageHandlers.gc.postMessage({ t: 'rate' }); } catch (e) { return; }
+  save.rateAsked = true; saveNow();
 }
 function churchHurt(src) {
   const c = church, p = c.p, dmg = 1; if (c.hurt > 0 || c.down > 0 || !c.fight || c.inv > 0) return;      // nothing lands while the bottle's five seconds last

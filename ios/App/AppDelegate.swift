@@ -1,6 +1,7 @@
 import UIKit
 import WebKit
 import GameKit
+import StoreKit
 
 // Thin native shell: the whole game is the bundled web/index.html, shown full screen in a WKWebView.
 @main
@@ -86,13 +87,25 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         }
     }
 
-    // the game reports an achievement: {t: 'ach', id: 'sc.<name>'}
+    // the game reports an achievement: {t: 'ach', id: 'sc.<name>'}; or asks for a rating: {t: 'rate'}
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "rate" {
+            askRating(); return
+        }
         guard message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "ach",
               let id = body["id"] as? String, GKLocalPlayer.local.isAuthenticated else { return }
         let achievement = GKAchievement(identifier: id)
         achievement.percentComplete = 100
         achievement.showsCompletionBanner = true
         GKAchievement.report([achievement], withCompletionHandler: nil)
+    }
+
+    // the App Store rating sheet, once ever (iOS also skips it for anyone who has already rated, and limits it to 3 a year)
+    private func askRating() {
+        let key = "ratingAsked"
+        guard !UserDefaults.standard.bool(forKey: key),
+              let scene = view.window?.windowScene else { return }
+        UserDefaults.standard.set(true, forKey: key)
+        SKStoreReviewController.requestReview(in: scene)
     }
 }
