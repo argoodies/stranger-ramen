@@ -92,6 +92,9 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         if message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "rate" {
             askRating(); return
         }
+        if message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "rateDebug" {
+            debugRating(); return
+        }
         guard message.name == "gc", let body = message.body as? [String: Any], body["t"] as? String == "ach",
               let id = body["id"] as? String, GKLocalPlayer.local.isAuthenticated else { return }
         let achievement = GKAchievement(identifier: id)
@@ -107,5 +110,21 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
               let scene = view.window?.windowScene else { return }
         UserDefaults.standard.set(true, forKey: key)
         SKStoreReviewController.requestReview(in: scene)
+    }
+
+    // developer mode: ask now, whatever the once-only flag says, then tell the game whether the sheet came up.
+    // iOS gives no answer of its own, so look for the sheet's window a moment later; TestFlight builds never show it.
+    private func debugRating() {
+        if Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt" { reportRating("testflight"); return }
+        guard let scene = view.window?.windowScene else { reportRating("rated"); return }
+        SKStoreReviewController.requestReview(in: scene)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            let shown = scene.windows.contains { !$0.isHidden && String(describing: type(of: $0)).contains("SKStoreReview") }
+            self?.reportRating(shown ? "shown" : "rated")
+        }
+    }
+
+    private func reportRating(_ result: String) {
+        webView?.evaluateJavaScript("window.__rateResult && window.__rateResult('\(result)')", completionHandler: nil)
     }
 }
