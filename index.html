@@ -2070,11 +2070,12 @@ function coinCap() { const el = $('coin'); if (el.style.display === 'none') retu
 function capFx(cls) { const el = $('coin'); el.classList.remove('bump', 'nope', 'glow'); void el.offsetWidth; el.classList.add(cls); }
 $('coin').addEventListener('animationend', e => e.currentTarget.classList.remove('bump', 'nope', 'glow'));
 let chefPt = null;      // the chef's middle on the screen, set as he is drawn in the ramen shop or the coffee house: coins you get fly to him
-function addCoins(n, from, delay = 0) {      // n coins, flying from a point on the screen to the chef one after another, into the backpack (MELO 2026-11-18)
+function addCoins(n, from, delay = 0, quiet = false) {      // quiet: no glow on the backpack button (selling: the backpack is open, the coins are seen arriving in it)
+       // n coins, flying from a point on the screen to the chef one after another, into the backpack (MELO 2026-11-18)
   const was = save.coins; save.coins = Math.min(COINMAX, save.coins + n); saveNow(); const got = save.coins - was;
-  if (!from) { coinShown = save.coins; bagGlow(); return; }
+  if (!from) { coinShown = save.coins; if (!quiet) bagGlow(); return; }
   for (let k = 0; k < n; k++) { coinBusy++; const a0 = [from[0] + (k - (n - 1) / 2) * 7, from[1]]; flyers.push({ id: 'coin', a: a0, to: () => chefPt || [a0[0], a0[1] - 46], t: 0, d: .6, delay: delay + k * .09, r: 11, arc: 40, rise: true,
-    done: () => { coinBusy--; if (k < got) coinShown = Math.min(COINMAX, coinShown + 1); if (k === n - 1) bagGlow(); chime(88 + (k % 3) * 2, 0, .06, .5); } }); }
+    done: () => { coinBusy--; if (k < got) coinShown = Math.min(COINMAX, coinShown + 1); if (k === n - 1 && !quiet) bagGlow(); chime(88 + (k % 3) * 2, 0, .06, .5); } }); }
 }
 function payCoin(to, done) {      // pay one coin; false if there is none
   if (save.coins < 1) { capFx('nope'); knock(); toastSay(S().noCoin); return false; }      // none: the count shakes and the chef says so
@@ -2100,7 +2101,7 @@ const sellable = id => id !== 'coin' && ITEMS[id] !== 'drink';      // coins and
 function sellOne(id, at) {      // the shipping box: one of a thing goes, 5 coins come at once; the one worn may go too (MELO 2026-11-18), and another of it is put on if you have one
   if (!have(id) || !sellable(id)) return; const k = ITEMS[id]; save.cards[id] = Math.max(0, cardN(id) - 1);
   if (!have(id)) { save[id] = false; if (save.equip[k] === id) save.equip[k] = null; if (bag.sel === id) bag.sel = bag.selAt = null; } else if (bag.selAt != null && !(typeof bag.selAt === 'number' ? bagSlabs()[bag.selAt] : have(save.equip[bag.selAt]))) bag.selAt = null;
-  addCoins(SELL, at); bag.shipT = performance.now(); chime(72, 0, .1); chime(79, .08, .1);
+  addCoins(SELL, at, 0, true); bag.shipT = performance.now(); chime(72, 0, .1); chime(79, .08, .1);
 }
 
 // Inside the church: one bright room (x along it, y across), drawn mirrored so that it runs from the lower left to the upper right, with the Holy Cross at the far end.
