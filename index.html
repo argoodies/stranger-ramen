@@ -491,7 +491,7 @@ function musicTick() {
 
 // ------------------------------------------------------------ world
 let CLOTH = [214, 52, 60];      // the shop's door-cloths
-const PAL = { stone: [244, 226, 200], roof: [214, 104, 92], isl: [150, 178, 140], under: [118, 94, 112], house: [244, 190, 130], path: [236, 226, 208], walk: [222, 208, 188], step: [210, 196, 176], wall: [250, 234, 210] };      // one stone for the whole town (MELO 2026-11-17, after Stardew Valley): sage ground, cream stone and flagstones, red roofs
+const PAL = { stone: [244, 226, 200], roof: [214, 104, 92], isl: [150, 178, 140], under: [118, 94, 112], house: [244, 190, 130], path: [214, 216, 190], walk: [222, 208, 188], step: [210, 196, 176], wall: [250, 234, 210] };      // one stone for the whole town (MELO 2026-11-17, after Stardew Valley): sage ground, cream stone and flagstones, red roofs
 const DOOR = [-5, 3], TDOOR = [3, 0], LDOOR = [2, -3];
 const blocked = new Set();
 const key = (i, j) => i + ',' + j;
@@ -873,7 +873,9 @@ function drawWorld(t, dt) {
   // ground
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
-  for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i + .06, j + .06, 0, .88, .88, tint(PAL.path)); }
+  { const hs = n => { const h = Math.sin(n * 12.9898) * 43758.5453 % 1; return h < 0 ? -h : h; };      // a flagstone path with the grass showing in the gaps between the stones (MELO 2026-11-18): two rows of slabs to a cell, their joints not in line, each a shade apart; the stone toned toward the grass so the path sits softly in it
+    for (const k of PATH) { const [i, j] = k.split(',').map(Number); for (let r = 0; r < 2; r++) { const cut = .35 + .3 * hs(i * 31 + j * 17 + r * 5.1), xs = [0, cut, 1]; for (let q = 0; q < 2; q++) { const g = .05, f = hs(i * 13 + j * 7 + r * 3 + q * 1.9) * 2 - 1;
+      v.quad(i + xs[q] + g, j + r * .5 + g, 0, xs[q + 1] - xs[q] - 2 * g, .5 - 2 * g, tint(mix(PAL.path, f > 0 ? [255, 250, 236] : PAL.isl, Math.abs(f) * .12))); } } } }
   for (let i = 0; i < 4; i++) v.box(5.09 + i * .352, .02, -.4 * i - .6, .26, .96, .2, PAL.step);      // four stepping stones down to the church, evenly spaced from the island's edge to the church's slab, each hanging in the air with a gap before the next, across and down
   v.box(5, 3, -0.3, 1, 1, 0.3, PAL.walk);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
   v.box(6.5, -2, CDZ - .3, 2, 2.75, .3, PAL.walk);      // the strip in front of the church is kept narrow      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
