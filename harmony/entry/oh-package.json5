@@ -1,9 +1,0 @@
-{
-  "name": "entry",
-  "version": "1.0.0",
-  "description": "The game shown full screen in a Web component.",
-  "main": "",
-  "author": "argoodies",
-  "license": "UNLICENSED",
-  "dependencies": {}
-}
