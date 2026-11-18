@@ -1893,12 +1893,14 @@ function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a small gold cr
 }
 const gearDrag = k => bag.open && bag.drag && bag.drag.moved && bag.drag.from === k;      // the thing worn in that place is in your hand just now
 function drawWorn(x, y, K) { bag.chefAt = [x, y, K]; }      // with the backpack open (MELO 2026-11-18): where the chef stands, for the column of what he wears beside him (drawGear, laid over the room)
-function drawGear(t) {      // what you wear, in a row of tiles just right of the chef: weapon, drink, charm from the left. Things are put on by dropping them on a tile, taken off by dragging them away
-  const at = bag.gearAt = {}; if (!bag.chefAt) return; const [x, y, K] = bag.chefAt, dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = 40, gap = 6, x0 = Math.min(x + K * .3 + cs / 2, W - 8 - 3 * cs - 2 * gap + cs / 2), iy = y + cs * .35;      // a row, below and to the right of him (MELO 2026-11-18)
-  if (bag.sell) return;      // selling at the shipping box: what you wear is not shown (MELO 2026-11-18)
-  ['weapon', 'drink', 'acc'].forEach((k, n) => { const ix = x0 + n * (cs + gap), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
+function drawGear(t) {      // what you wear, in a capsule at the bottom middle of the screen (MELO 2026-11-18): drink, weapon, charm from the left. Things are put on by dropping them on a tile, taken off by dragging them away
+  const at = bag.gearAt = {}; if (bag.sell) return;      // selling at the shipping box: what you wear is not shown
+  const dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, gap = 10, pd = 14, iy = H * .64,      // a little below the middle of the screen (MELO 2026-11-18)
+    x0 = W / 2 - cs - gap;      // tiles, gaps and edge as the backpack's
+  capsule(x0 - cs / 2 - pd, iy - cs / 2 - pd, 3 * cs + 2 * gap + 2 * pd, cs + 2 * pd);
+  ['drink', 'weapon', 'acc'].forEach((k, n) => { const ix = x0 + n * (cs + gap), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
     at[k] = [ix, iy, cs / 2];
-    ctx.beginPath(); rrect(ix - cs / 2, iy - cs / 2, cs, cs, cs * .2); ctx.fillStyle = 'rgba(30,24,60,.6)'; ctx.fill(); glassWell(ix, iy, cs, cs, over);
+    glassWell(ix, iy, cs, cs, over);
     if (id && !gearDrag(k)) drawItem(id, ix, iy - Math.sin(t * 2 + n) * 1.2, cs * .3); });
 }
 function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn in his hands (x, y: his feet; K: his size). A blade in mid-stroke is not drawn: the arc of the cut stands for it.
@@ -1989,13 +1991,17 @@ function glassWell(cx, cy, w, h, lit) {      // a place in the backpack: a plain
   const x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * .2;
   rrect(x, y, w, h, r); ctx.fillStyle = css(lit ? [255, 236, 190] : [255, 255, 255], lit ? .42 : .13); ctx.fill();
 }
+function capsule(x, y, w, h) {      // a capsule drawn on the canvas, coloured as the corner buttons are (pillSky): nearly see-through, a thin light edge
+  ctx.save(); ctx.beginPath(); rrect(x, y, w, h, Math.min(h / 2, 27));      // the backpack's corners as round as the gear capsule's ends (MELO 2026-11-18)
+  ctx.fillStyle = css(mix([255, 248, 252], [30, 24, 60], pillN < 0 ? 1 : pillN), .1); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+}
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.left + r.width / 2, r.bottom] : [W / 2, 56]; })();
-  const BW = Math.min(W - 24, 420), pad = 14, p = Math.min(64, (BW - 2 * pad + 10) / 6), c = p - 10, bx = (W - BW) / 2, by = top0[1] + 12, desc = bag.sel && !dg && L.items[bag.sel] ? wrapText(L.items[bag.sel][1], BW - 2 * pad) : null, BH = pad * 2 + 2 * p - 10 + (desc ? 34 + desc.length * 19 : 0);      // what you wear is not here but on the chef (drawWorn)
+  const BW = Math.min(W - 24, 420), pad = 14, p = Math.min(64, (BW - 2 * pad + 10) / 6), c = p - 10, bx = (W - BW) / 2, by = top0[1] + 12, desc = null,      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
+    BH = pad * 2 + 2 * p - 10 + (desc ? 34 + desc.length * 19 : 0);      // what you wear is not here but on the chef (drawWorn)
   bag.cell = c;
-  { const tx = clamp(top0[0], bx + 24, bx + BW - 24); ctx.save(); ctx.beginPath(); rrect(bx, by, BW, BH, 18); ctx.moveTo(tx - 9, by + .5); ctx.lineTo(tx, by - 9); ctx.lineTo(tx + 9, by + .5);      // the bubble, its tail pointing up at the backpack button
-    ctx.fillStyle = 'rgba(30,24,60,.86)'; ctx.fill(); ctx.restore(); ctx.save(); ctx.beginPath(); rrect(bx, by, BW, BH, 18); ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
+  capsule(bx, by, BW, BH);      // a capsule, as the corner buttons are (MELO 2026-11-18)
   const well = (cx, cy, id, place) => { const sel = id && bag.sel === id, held = dg && dg.id === id && dg.from === place, over = dg && dg.over === place;
     spots.push([cx, cy, place]);
     glassWell(cx, cy, c, c, sel || over);
@@ -2019,7 +2025,7 @@ function bagOver(x, y) { let best = null, bd = 46; for (const [sx, sy, place] of
 function bagMove(x, y) { const d = bag.drag; if (!d) return; d.x = x; d.y = y; if (!d.moved && Math.hypot(x - d.x0, y - d.y0) > 8) { d.moved = true; bag.sel = d.id; chime(74, 0, .06, .5); } const sb = bag.sell && mode === 'bar' && BARHIT.ship, o = d.moved ? bagOver(x, y) : null; d.over = !d.moved ? null : typeof o !== 'string' && sb && Math.hypot(x - sb[0], y - sb[1]) < sb[2] * 1.4 ? 'ship' : o; }      // a place on the chef wins over the box beside him      // over the shipping box on the little table: dropped, it is sold
 function bagUp() {      // finger up: without a drag it was only a look; with one, the thing goes where it was dropped if it belongs there
   const d = bag.drag; bag.drag = null; if (!d) return;
-  if (!d.moved) { bag.sel = d.id; chime(69, 0, .08, .7); return; }
+  if (!d.moved) { bag.sel = d.id; chime(69, 0, .08, .7); const it = S().items[d.id]; if (it) { const txt = it[0] + (LANG === 'en' ? ': ' : '：') + it[1]; if (mode === 'church') churchBanner(txt, 3); else toastSay(txt); } return; }      // a tap: the chef says what it is (in the church, the banner does)
   const to = d.over, id = d.id, kind = ITEMS[id], P0 = save.bagPos, slabs = bagSlabs(); let ok = false;
   if (to === 'ship') { sellOne(id, [d.x, d.y - 20]); saveNow(); return; }
   if (to === d.from || to == null) ok = false;
