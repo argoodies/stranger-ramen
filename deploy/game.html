@@ -2070,7 +2070,9 @@ function addCoins(n, from, delay = 0) {      // n coins, flying from a point on 
 }
 function payCoin(to, done) {      // pay one coin; false if there is none
   if (save.coins < 1) { capFx('nope'); knock(); toastSay(S().noCoin); return false; }      // none: the count shakes and the chef says so
-  save.coins--; saveNow(); coinShown = Math.min(coinShown, save.coins); chime(81, 0, .06, .5); done(); return true;      // the count just goes down: no coin flies over (MELO 2026-11-18)
+  save.coins--; saveNow(); coinShown = Math.min(coinShown, save.coins); chime(81, 0, .06, .5); capFx('glow');
+  if (!chefPt) { done(); return true; }
+  const a = chefPt.slice(); flyers.push({ id: 'coin', a, to, t: 0, d: .5, delay: 0, r: 9, arc: 30, done }); return true;      // one coin out of the chef and over to the slot, then the reels turn (MELO 2026-11-18)
 }
 function drawCoin(x, y, r, sx = 1, a = 1) {      // a flat gold coin, as everything in the town is flat (MELO 2026-11-18): a rim, a face, a dollar sign; sx narrows it as it sways
   ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(Math.max(.2, sx), 1);
