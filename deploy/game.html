@@ -1893,10 +1893,10 @@ function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a small gold cr
 }
 const gearDrag = k => bag.open && bag.drag && bag.drag.moved && bag.drag.from === k;      // the thing worn in that place is in your hand just now
 function drawWorn(x, y, K) { bag.chefAt = [x, y, K]; }      // with the backpack open (MELO 2026-11-18): where the chef stands, for the column of what he wears beside him (drawGear, laid over the room)
-function drawGear(t) {      // what you wear, in a capsule at the bottom middle of the screen (MELO 2026-11-18): drink, weapon, charm from the left. Things are put on by dropping them on a tile, taken off by dragging them away
-  const at = bag.gearAt = {}; if (bag.sell) return;      // selling at the shipping box: what you wear is not shown
-  const dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, gap = 10, pd = 14, iy = H * .64,      // a little below the middle of the screen (MELO 2026-11-18)
-    x0 = W / 2 - cs - gap;      // tiles, gaps and edge as the backpack's
+function drawGear(t) {      // what you wear, in a capsule straight to the right of the chef (MELO 2026-11-18): drink, weapon, charm from the left. Things are put on by dropping them on a tile, taken off by dragging them away
+  const at = bag.gearAt = {}; if (bag.sell || !bag.chefAt) return;      // selling at the shipping box: what you wear is not shown
+  const [cx, cy, K] = bag.chefAt, dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, gap = 10, pd = 14, iy = cy - K * .6,      // straight to the right of the chef (MELO 2026-11-18; was a little below the middle of the screen)
+    x0 = Math.min(cx + K * .35 + pd + cs / 2, W - 8 - pd - 2 * (cs + gap) - cs / 2);      // tiles, gaps and edge as the backpack's
   capsule(x0 - cs / 2 - pd, iy - cs / 2 - pd, 3 * cs + 2 * gap + 2 * pd, cs + 2 * pd);
   ['drink', 'weapon', 'acc'].forEach((k, n) => { const ix = x0 + n * (cs + gap), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
     at[k] = [ix, iy, cs / 2];
