@@ -17,6 +17,7 @@ button.pill{cursor:pointer}
 button.pill:active{transform:scale(.96)}
 button.pill.hint{animation:pillpulse 1.2s ease-in-out infinite;border-color:rgba(255,236,170,.9)}
 @keyframes pillpulse{50%{box-shadow:0 0 0 5px rgba(255,236,170,.55)}}
+#bag.on{background:rgba(62,42,76,.9);color:rgb(255,226,170);box-shadow:inset 0 2px 5px rgba(0,0,0,.45);transform:translateY(1px)}      /* the backpack open (or the selling one): its button pressed in, filled with the trays' plum, the case in gold (MELO 2026-11-18) */
 #bag.gain{animation:baggain 2.2s linear 1}      /* something new in the backpack: its edge glows warm, stays lit 1.2 s, then fades over 1 s as the hearts a drink brings back do (MELO 2026-11-17) */
 @keyframes baggain{0%,55%{box-shadow:0 0 9px 2px rgba(255,236,170,.75),inset 0 0 6px rgba(255,236,170,.45);border-color:rgba(255,236,170,1)}100%{box-shadow:0 0 9px 2px rgba(255,236,170,0),inset 0 0 6px rgba(255,236,170,0)}}
 #coin{display:none;border-color:transparent;background:none!important;pointer-events:none;cursor:default;align-items:center;gap:6px;padding:7px 13px 7px 10px;font:400 15px var(--serif);letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:20px}      /* the coins you hold (MELO 2026-11-18): a capsule at the top left, in the ramen shop and the coffee house only */
@@ -2065,7 +2066,7 @@ function capsule(x, y, w, h, rr, main) {      // the tray the backpack's things 
 }
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
   if (mode === 'bar') bag.sell = true;      // in the coffee house there is only the one backpack: the selling one, its box open beside it (MELO 2026-11-18)
-  if (bag.drawnAt == null || last - bag.drawnAt > 150) { bag.tagFlip = last + 200; if (mode === 'bar') { bar.boxSay = S().shipSay; bar.boxSayT = 3; } }      // just opened: the tag turns; in the coffee house the box says what it is for
+  if (bag.drawnAt == null || last - bag.drawnAt > 150) { bag.tagFlip = last - 120; if (mode === 'bar') { bar.boxSay = S().shipSay; bar.boxSayT = 3; } }      // just opened: the tag is already turning on the first frame (MELO 2026-11-18); in the coffee house the box says what it is for
   bag.drawnAt = last;      // the backpack just opened (not drawn the frame before): its tag gives its two turns (MELO 2026-11-18)
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.right, r.top, r.bottom] : [56, 12, 56]; })();      // the backpack button's right edge, top and foot
@@ -2909,7 +2910,7 @@ function frame(now) {
   { const can = ['church', 'bar', 'stall'].includes(mode) && !(mode === 'stall' && (stall.board || storyHook)) && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)),      // the ramen shop has the backpack too (MELO 2026-11-18)
       set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };      // the backpack and the prophecies are at hand only where things are found: in the church (not in a fight) and in the coffee house; never out in the town, the ramen shop, the library or the tower room (MELO 2026-11-14)
     set('coin', false, 'flex');      // no counter: the coins are in the backpack (MELO 2026-11-18)      // the coins: in the ramen shop and the coffee house only, and over the shipping box (MELO 2026-11-18)
-    if (!can) bag.open = bag.sell = false; set('bag', can, 'block');      // the button stays: a tap opens the bubble, another closes it
+    if (!can) bag.open = bag.sell = false; set('bag', can, 'block'); { const on = !!(can && bag.open), bb = $('bag'); if (bb.classList.contains('on') !== on) bb.classList.toggle('on', on); }      // the button stays: a tap opens the bubble, another closes it
     const pv = !['title', 'icon'].includes(mode) && !(mode === 'church' && (church.story || church.chapter)); for (const k of BUFFS) set(k === 'speed' ? 'bspeed' : 'bfreeze', pv && !bag.open && buffOn(k), 'flex');      // the prophecies you hold show everywhere you play, the backpack only where things are found (MELO 2026-11-14)      // each prophecy as a white mark beside the backpack button      // the backpack is at hand inside the church whenever there is no fight on
     set('gear', mode === 'church' && !!save.dev && !church.fight && !church.story && !church.chapter && !bag.open && church.down <= 0, 'block');      // developer mode: a gear for choosing the round
     set('bclose', false, 'block'); }      // with the backpack open the only button is a cross, and all it does is close the backpack
