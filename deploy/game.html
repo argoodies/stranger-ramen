@@ -1444,7 +1444,7 @@ function drawStall(t) {
   ring('soup'); const lp = P(POT_X + .26, POTY2 - .18, 1.55); line([lp, [lp[0] + s * .3, lp[1] - s * .5]], [150, 110, 90], s * .05); ctx.restore(); ctx.restore();
   for (let i = 0; i < 6; i++) { const act_ = (i % 2 === 0) ? (st.pot === 'cooking' ? 1 : st.pot === 'done' ? .7 : .3) : .5, ph = (t * .5 * (act_ + .4) + i * .17) % 1, p = P(POT_X + .2 * POT_K * Math.sin(t * 1.3 + i * 2), i % 2 ? POTY2 : POTY1, 1 + (.6 + ph * 1.5) * POT_K); circ(p[0], p[1], s * POT_K * (.08 + .15 * ph), [255, 250, 245], .28 * act_ * (1 - ph)); }
   // the owner (always behind the prep table)
-  const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05; chefPt = [op[0], op[1] - s * .9];      // where coins fly to
+  const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05; chefPt = [op[0], op[1] - s * .9]; if (bag.open) drawWorn(op[0], op[1], K);      // where coins fly to; with the backpack open, where the worn things show beside him
   const drawOwner = () => {
     st.lit = lerp(st.lit || 0, clamp((1.0 - Math.hypot(st.owner.x - LAMP_XY[0], st.owner.y - LAMP_XY[1])) / .3 + .5), .18);      // under the lamp your face lights up, as by the library window (MELO 2026-11-14)
     const lit = c => { const d = c; return mix(d, mix(d, [255, 214, 140], .14), st.lit); }, oy = op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0);
@@ -2009,7 +2009,7 @@ function glassWell(cx, cy, w, h, lit) {      // a place in the backpack: a plain
 const PILLA = .28;      // how filled the backpack's capsules are; the corner buttons stay at .1 (MELO 2026-11-18)
 function capsule(x, y, w, h) {      // a capsule drawn on the canvas, coloured as the corner buttons are (pillSky): nearly see-through, a thin light edge
   ctx.save(); ctx.beginPath(); rrect(x, y, w, h, Math.min(h / 2, 27));      // the backpack's corners as round as the gear capsule's ends (MELO 2026-11-18)
-  ctx.fillStyle = css(mix([255, 248, 252], [30, 24, 60], pillN < 0 ? 1 : pillN), PILLA); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+  ctx.fillStyle = css([30, 24, 60], .5); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();      // always the dark glass seen in the coffee house, whatever the sky or the room behind (MELO 2026-11-18)
 }
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
@@ -2846,7 +2846,8 @@ function frame(now) {
   drawFlyers(dt);      // coins and prizes in flight, over everything
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5), lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
-  { const can = ['church', 'bar'].includes(mode) && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)), set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };      // the backpack and the prophecies are at hand only where things are found: in the church (not in a fight) and in the coffee house; never out in the town, the ramen shop, the library or the tower room (MELO 2026-11-14)
+  { const can = ['church', 'bar', 'stall'].includes(mode) && !(mode === 'stall' && (stall.board || storyHook)) && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)),      // the ramen shop has the backpack too (MELO 2026-11-18)
+      set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };      // the backpack and the prophecies are at hand only where things are found: in the church (not in a fight) and in the coffee house; never out in the town, the ramen shop, the library or the tower room (MELO 2026-11-14)
     set('coin', false, 'flex');      // no counter: the coins are in the backpack (MELO 2026-11-18)      // the coins: in the ramen shop and the coffee house only, and over the shipping box (MELO 2026-11-18)
     if (!can) bag.open = bag.sell = false; set('bag', can, 'block');      // the button stays: a tap opens the bubble, another closes it
     const pv = !['title', 'icon'].includes(mode) && !(mode === 'church' && (church.story || church.chapter)); for (const k of BUFFS) set(k === 'speed' ? 'bspeed' : 'bfreeze', pv && !bag.open && buffOn(k), 'flex');      // the prophecies you hold show everywhere you play, the backpack only where things are found (MELO 2026-11-14)      // each prophecy as a white mark beside the backpack button      // the backpack is at hand inside the church whenever there is no fight on
