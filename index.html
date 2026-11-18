@@ -2065,6 +2065,7 @@ function capsule(x, y, w, h, rr, main) {      // the tray the backpack's things 
   ctx.restore();
 }
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
+  if (bag.drawnAt == null || last - bag.drawnAt > 150) bag.tagFlip = last + 200; bag.drawnAt = last;      // the backpack just opened (not drawn the frame before): its tag gives its two turns (MELO 2026-11-18)
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.right, r.top, r.bottom] : [56, 12, 56]; })();      // the backpack button's right edge, top and foot
   const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, bx = (W - BW) / 2, by = ((W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12) + (BAGCUE === 'handle' ? 12 : 0), desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
