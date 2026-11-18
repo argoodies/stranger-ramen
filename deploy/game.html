@@ -1806,7 +1806,7 @@ function drawLib(t) {
     const wp = P(0, yc, z0 + top * .55), T = .24, rim = out.map(([u, w]) => v.F('R', [0, yc, z0], u, w)); glow(wp[0], wp[1], s * 2.2, lightC, .7);
     shaftFn = () => { const pts = rim.concat(fall(1)).sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];      // the shaft itself: everything between the opening and its patch, fading as it falls
       for (const q of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); } for (const q of pts.slice().reverse()) { while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
-      const hull = lo.slice(0, -1).concat(up.slice(0, -1)), c1 = P(cxp, cyp), g = ctx.createLinearGradient(wp[0], wp[1], c1[0], c1[1]); g.addColorStop(0, css(lightC, .26)); g.addColorStop(1, css(lightC, .05));
+      const hull = lo.slice(0, -1).concat(up.slice(0, -1)), c1 = P(cxp, cyp), g = ctx.createLinearGradient(wp[0], wp[1], c1[0], c1[1]); g.addColorStop(0, css(lightC, .14)); g.addColorStop(1, css(lightC, .025));      // fainter (MELO 2026-11-18; was .26 to .05)
       ctx.beginPath(); hull.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); }
     // the opening is cut through the thickness of the wall: inside its outline you see the sill and the far jamb, and beyond them the sky
     ctx.save(); ctx.beginPath(); rim.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();
