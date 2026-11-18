@@ -1910,9 +1910,17 @@ function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a small gold cr
 const gearDrag = k => bag.open && bag.drag && bag.drag.moved && bag.drag.from === k;      // the thing worn in that place is in your hand just now
 function drawWorn(x, y, K) { bag.chefAt = [x, y, K]; }      // with the backpack open (MELO 2026-11-18): where the chef stands, for the column of what he wears beside him (drawGear, laid over the room)
 function drawGear(t) {      // what you wear, in a capsule straight to the right of the chef (MELO 2026-11-18): drink, weapon, charm from the left. Things are put on by dropping them on a tile, taken off by dragging them away
-  const at = bag.gearAt = {}; if (bag.sell || !bag.chefAt) return;      // selling at the shipping box: what you wear is not shown
-  const [cx, cy, K] = bag.chefAt, dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, gap = 10, pd = 14, iy = cy - K * .6,      // straight to the right of the chef (MELO 2026-11-18; was a little below the middle of the screen)
-    x0 = Math.min(cx + K * .35 + pd + cs / 2, W - 8 - pd - 2 * (cs + gap) - cs / 2);      // tiles, gaps and edge as the backpack's
+  const at = bag.gearAt = {}; if (!bag.chefAt) return;      // shown while selling too (MELO 2026-11-18), kept clear of the shipping box and of the server's words
+  const [cx, cy, K] = bag.chefAt, dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, gap = 10, pd = 14, CW = 3 * cs + 2 * gap + 2 * pd, CH = cs + 2 * pd,
+    fit = (x0, iy) => [clamp(x0, 8 + pd + cs / 2, W - 8 - pd - 2 * (cs + gap) - cs / 2), iy];      // x0, iy: the first tile's middle; tiles, gaps and edge as the backpack's
+  let [x0, iy] = fit(cx + K * .35 + pd + cs / 2, cy - K * .6);      // straight to the right of the chef (MELO 2026-11-18)
+  if (bag.sell && mode === 'bar') {      // selling: not over the box (its lid open) nor where the server's bubble comes up, whether or not it is showing just now, so the capsule never jumps
+    const keep = [], sb = BARHIT.ship, kq = bar.keeperAt, mw = Math.min(W * .62, 250);
+    if (sb) keep.push([sb[0] - sb[2] * 1.3, sb[1] - sb[2] * 2.8, sb[0] + sb[2] * 1.3, sb[1] + sb[2]]);
+    if (kq) { const ty = kq[1] - K * 1.75, bx = clamp(kq[0] - mw / 2, 8, W - mw - 8); keep.push([bx, ty - 60, bx + mw, ty + 4]); }
+    const hits = (x, y) => { const r = [x - cs / 2 - pd, y - CH / 2, x - cs / 2 - pd + CW, y + CH / 2]; return keep.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]); };
+    const tries = [[x0, iy], fit(cx - K * .35 - pd - cs / 2 - 2 * (cs + gap), cy - K * .6), fit(cx - (cs + gap), cy + CH / 2 + 12), fit(W / 2 - (cs + gap), H - 24 - CH / 2)];      // right of the chef, left of him, under his feet, at the foot of the screen
+    [x0, iy] = tries.find(([x, y]) => !hits(x, y)) || tries[tries.length - 1]; }
   capsule(x0 - cs / 2 - pd, iy - cs / 2 - pd, 3 * cs + 2 * gap + 2 * pd, cs + 2 * pd);
   ['drink', 'weapon', 'acc'].forEach((k, n) => { const ix = x0 + n * (cs + gap), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
     at[k] = [ix, iy, cs / 2];
