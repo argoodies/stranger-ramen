@@ -2475,7 +2475,7 @@ function drawChurch(t, dt) {
   poly([P(2.2, my - .6), P(CL, my - .6), P(CL, my + .6), P(2.2, my + .6)], tn([214, 128, 140]), .92); for (const y of [my - .5, my + .5]) line([P(2.2, y), P(CL, y)], DKN(GOLD), s * .03, .9);
   // the two walls: cream stone, a gold cornice, tall stained glass between slim pilasters
   poly([P(0, 0, 0), P(CL, 0, 0), P(CL, 0, Hh), P(0, 0, Hh)], tn([250, 238, 224])); poly([P(0, 0, 0), P(0, CW, 0), P(0, CW, Hh), P(0, 0, Hh)], tn([234, 218, 212]));
-  asDark(() => wallThick(v, CL, CW, Hh, -1, tn([255, 250, 240]), tn([226, 208, 200]), tn([210, 192, 190]), .3));
+  asDark(() => { const [, sl, sr] = v.sh([240, 230, 220]); wallThick(v, CL, CW, Hh, -1, tn([255, 250, 240]), sr, sl, .3); });      // the walls' upright ends in the same shades as the slab's sides below them (MELO 2026-11-18: at night they stood out lighter)
   poly([P(0, 0, 0), P(CL, 0, 0), P(CL, 0, .5), P(0, 0, .5)], tn([236, 220, 208])); poly([P(0, 0, 0), P(0, CW, 0), P(0, CW, .5), P(0, 0, .5)], tn([220, 202, 198]));
   line([P(0, 0, Hh - .35), P(CL, 0, Hh - .35)], DKN(GOLD), s * .05, .9); line([P(0, 0, Hh - .35), P(0, CW, Hh - .35)], DKN(GOLD), s * .05, .8);      // the gold cornice and the rose window's gold rings darken with the room too, until the torch is lit (MELO 2026-11-18)
   const shafts = [], sat = c => { const m = (c[0] + c[1] + c[2]) / 3; return c.map(v => clamp(Math.round(m + (v - m) * 1.7), 0, 255)); };      // [the window's outline on screen, the patch it lights on the floor, its glass colour]
