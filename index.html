@@ -679,22 +679,25 @@ function drawShipBox(v, sx, sy, z0) {
   const v0 = v; v = Object.create(v0); v.P = (x, y, z = 0) => v0.P(x, y, z + z0);      // drawn as if on the ground, lifted onto the table top
   let P = null; const r = SHIPR, H0 = .24, carry = bag.open && bag.sell && bag.drag && bag.drag.moved, op = shipLid = lerp(shipLid, bag.open && bag.sell ? 1 : 0, .2),      // open only while selling (MELO 2026-11-18)
     jt = clamp(1 - (performance.now() - (bag.shipT || -1e9)) / 350);
-  if (carry && bag.drag.over === 'ship') { const g = v.P(sx, sy, .2); glow(g[0], g[1], v.s * .7, [255, 236, 170], .7); }
+  const hot = shipHot = lerp(shipHot, carry && bag.drag.over === 'ship' ? 1 : 0, .3), lg = (c, k = 1) => mix(c, [255, 226, 160], .5 * hot * k);      // a thing held over it: the box lights right up (MELO 2026-11-18)
+  if (hot > .01) { const g = v.P(sx, sy, .2); glow(g[0], g[1], v.s * 1.6, [255, 230, 160], hot); }
   if (jt > 0) { v = Object.create(v); const P1 = v.P; v.P = (x, y, z = 0) => { const q = P1(x, y, z); return [q[0] + Math.sin(jt * 30) * jt * v0.s * .03, q[1]]; }; }
   P = v.P.bind(v);
   const BOX = [108, 66, 46];      // a dark walnut, to stand clear of the room behind (MELO 2026-11-18)
-  v.box(sx - r, sy - r, 0, r * 2, r * 2, H0, BOX);
+  v.box(sx - r, sy - r, 0, r * 2, r * 2, H0, lg(BOX));
   for (const z of [.08, .16]) { poly([P(sx - r, sy + r, z), P(sx + r, sy + r, z), P(sx + r, sy + r, z + .012), P(sx - r, sy + r, z + .012)], tint([70, 42, 32])); poly([P(sx + r, sy - r, z), P(sx + r, sy + r, z), P(sx + r, sy + r, z + .012), P(sx + r, sy - r, z + .012)], tint([58, 36, 28])); }      // the gaps between its boards
-  { const q = P(sx + r, sy, .12); drawCoin(q[0], q[1], v.s * .045, .55); }      // a coin painted on its side
-  const a = op * 1.9, TH = .045, L = r * 2 + .02, lid = (u, w, h = 0) => P(sx - r - .01 + w * L * Math.cos(a) - h * Math.sin(a), sy - r - .01 + u * L, H0 + w * L * Math.sin(a) + h * Math.cos(a));      // the lid: a slab with a thickness (MELO 2026-11-18), hinged along its side against the wall
-  if (op > .02) poly([P(sx - r + .02, sy - r + .02, H0), P(sx + r - .02, sy - r + .02, H0), P(sx + r - .02, sy + r - .02, H0), P(sx - r + .02, sy + r - .02, H0)], tint([40, 26, 24]));
-  const [lt, ll, lr] = v.sh([140, 92, 64]), face = h => poly([lid(0, 0, h), lid(1, 0, h), lid(1, 1, h), lid(0, 1, h)], h ? lt : lr), back = a > Math.PI / 2;
+  { const q = P(sx, sy + r, .12); drawCoin(q[0], q[1], v.s * .045, .55); }      // a coin painted on its side, the one facing the room
+  const a = op * 1.9, TH = .045, L = r * 2 + .02, lid = (u, w, h = 0) => P(sx - r - .01 + u * L, sy - r - .01 + w * L * Math.cos(a) - h * Math.sin(a), H0 + w * L * Math.sin(a) + h * Math.cos(a));      // the lid: a slab with a thickness (MELO 2026-11-18), hinged along its back side; the box turned a quarter clockwise (MELO 2026-11-18)
+  if (op > .02) poly([P(sx - r + .02, sy - r + .02, H0), P(sx + r - .02, sy - r + .02, H0), P(sx + r - .02, sy + r - .02, H0), P(sx - r + .02, sy + r - .02, H0)], lg(tint([40, 26, 24]), 1.4));
+  const [lt, ll, lr] = v.sh(lg([116, 74, 52])), face = h => poly([lid(0, 0, h), lid(1, 0, h), lid(1, 1, h), lid(0, 1, h)], h ? lt : ll), back = (() => { const o = lid(0, 0), u = lid(1, 0), w = lid(0, 1); return (u[0] - o[0]) * (w[1] - o[1]) - (u[1] - o[1]) * (w[0] - o[0]) < 0; })();      // the top turned away from us: worked out on the screen, not by the angle, so the underside shows as soon as it faces us
   face(back ? TH : 0);      // the face turned away, first
-  poly([lid(1, 0, 0), lid(1, 1, 0), lid(1, 1, TH), lid(1, 0, TH)], ll);      // its near edge
-  poly([lid(0, 1, 0), lid(1, 1, 0), lid(1, 1, TH), lid(0, 1, TH)], back ? ll : lr);      // its free edge
+  poly([lid(1, 0, 0), lid(1, 1, 0), lid(1, 1, TH), lid(1, 0, TH)], lr);      // its near edge
+  poly([lid(0, 1, 0), lid(1, 1, 0), lid(1, 1, TH), lid(0, 1, TH)], back ? lr : ll);      // its free edge
   face(back ? 0 : TH);
   const c = P(sx, sy, .15); BARHIT.ship = [c[0], c[1], v.s * .4];
+  if (hot > .01) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(c[0], c[1] - v.s * .1, v.s * .9, [255, 214, 140], .9 * hot); ctx.restore(); }      // and a bright bloom over it
 }
+let shipHot = 0;
 let shipLid = 0;
 function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a red spire with a chimney, a lit doorway under three red door-cloths, an arched window in the gable end
   const x0 = -4.92, y0 = 1.4, w = 1.5, x1 = x0 + w, y1 = y0 + w, ym = y0 + w / 2, h = 1.42, SP = 1.5, ov = .16, cx = x0 + 1.13, cy = ym - .4, P = v.P.bind(v);
