@@ -773,7 +773,7 @@ function slotTick(dt) { const m = bar.slot; if (!m) return; if (m.flash > 0) m.f
     else { chime(55, 0, .08, .6); chime(52, .14, .07, .6); } } }
 function drawSlot(v, s, t) {      // a small red cabinet against the left wall, facing into the room: three reels in a lit window, a coin slot, a tray, a lever on its near side and a lamp on top
   const P = v.P.bind(v), m = bar.slot || {}, x0 = .14, x1 = .76, y0 = 3.18, y1 = 3.82, Hb = 1.45, jt = clamp(1 - (performance.now() - (m.wob || -1e9)) / 500), dx = Math.sin(jt * 30) * .02 * jt, fl = m.flash > 0 && Math.sin(m.flash * 18) > 0;
-  footRound(v, (x0 + x1) / 2, (y0 + y1) / 2, 0, .36);
+  footSq(v, (x0 + x1) / 2, (y0 + y1) / 2, 0, (x1 - x0) / 2 + .02, (y1 - y0) / 2 + .02);      // a square shadow under a square cabinet (MELO 2026-11-18)
   ctx.save(); ctx.translate(dx * s, 0);
   v.box(x0 - .02, y0 - .02, 0, x1 - x0 + .04, y1 - y0 + .04, .12, [92, 40, 50]);      // its foot
   v.box(x0, y0, .12, x1 - x0, y1 - y0, Hb - .12, [184, 58, 70]);
@@ -791,8 +791,11 @@ function drawSlot(v, s, t) {      // a small red cabinet against the left wall, 
     else drawItem(m.reels ? m.reels[k] : SLOTS[k], c[0], c[1], r);
     ctx.restore(); }
   const lb = P((x0 + x1) / 2, (y0 + y1) / 2, Hb + .09), lp = P((x0 + x1) / 2, (y0 + y1) / 2, Hb + .17), on = fl || m.st === 'spin'; ell(lb[0], lb[1], s * .12, s * .06, tint([150, 110, 60])); if (on) glow(lp[0], lp[1], s * .8, [255, 220, 130], fl ? .9 : .45); ctx.beginPath(); ctx.arc(lp[0], lb[1], s * .1, Math.PI, 0); ctx.fillStyle = css(fl ? [255, 248, 210] : on ? [255, 214, 140] : tint([226, 120, 90])); ctx.fill();      // the lamp on top: lit while the reels turn, blinking for a win
-  { const pv = P(.45, y1, .95), up = 1 - m.pull * 1.6, kn = P(.45, y1 + .1, .95 + .5 * up);      // the lever, on its near side: pulled down as the coin goes in
-    line([pv, P(.45, y1 + .1, .95)], tint([150, 150, 160]), Math.max(2, s * .04)); line([P(.45, y1 + .1, .95), kn], tint([190, 190, 200]), Math.max(2, s * .035)); circ(kn[0], kn[1], s * .065, tint([220, 60, 64])); }
+  { const yL = y1 + .07, hub = [.32, yL, .95], u = m.pull > .78 ? (1 - m.pull) / .22 : m.pull / .78, th = lerp(-.12, 1.42, ease(u)), Lr = .32,      // the lever, on its near side (MELO 2026-11-18): an arm turning about a hub, leaning a little back at rest, swung forward and down as the coin goes in, then springing back
+    kp = [hub[0] + Lr * Math.sin(th), yL, hub[2] + Lr * Math.cos(th)], H = P(...hub), kn = P(...kp);
+    poly([P(.32 - .07, y1, .88), P(.32 + .07, y1, .88), P(.32 + .07, y1, 1.02), P(.32 - .07, y1, 1.02)], tint([150, 120, 70]));      // the plate it is fixed to
+    line([P(.32, y1, .95), H], tint([120, 120, 132]), Math.max(2, s * .05)); circ(H[0], H[1], s * .045, tint([170, 170, 182]));      // its hub
+    line([H, kn], tint([196, 196, 206]), Math.max(2, s * .035)); circ(kn[0], kn[1], s * .07, tint([220, 60, 64])); circ(kn[0] - s * .02, kn[1] - s * .025, s * .022, tint([255, 160, 160])); }
   ctx.restore();
   const hc = P((x0 + x1) / 2, (y0 + y1) / 2, .75); BARHIT.slot = [hc[0], hc[1], s * .62]; bar.slotAt = F(3.5, .65); bar.slotTray = F(3.5, .3);
 }
