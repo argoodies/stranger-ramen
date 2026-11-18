@@ -492,16 +492,16 @@ function musicTick() {
 // ------------------------------------------------------------ world
 let CLOTH = [214, 52, 60];      // the shop's door-cloths
 const PAL = { stone: [244, 226, 200], roof: [214, 104, 92], isl: [150, 178, 140], under: [118, 94, 112], house: [244, 190, 130], path: [150, 206, 190], walk: [222, 208, 188], step: [210, 196, 176], wall: [250, 234, 210] };      // one stone for the whole town (MELO 2026-11-17, after Stardew Valley): sage ground, cream stone and flagstones, red roofs
-const COBBLE = { stone: [226, 214, 196], grout: [150, 132, 124], vary: .12 }, WALKCOB = { stone: [222, 208, 188], grout: [166, 148, 136], vary: .12 };      // the cobbled paths, and the flagstones on the platforms and stepping stones
+const COBBLE = { stone: [226, 214, 196], grout: [176, 160, 150], vary: .14 }, WALKCOB = { stone: [222, 208, 188], grout: [184, 168, 156], vary: .14 };      // the cobbled paths, and the flagstones on the platforms and stepping stones
 const DOOR = [-5, 3], TDOOR = [3, 0], LDOOR = [2, -3];
 const blocked = new Set();
 const key = (i, j) => i + ',' + j;
 for (let i = -2; i <= 1; i++) for (let j = -2; j <= 1; j++) blocked.add(key(i, j));
 [[2, -1], [2, 0], [2, -5], [3, -5], [2, -4], [3, -4], [-5, 1], [-4, 1], [-5, 2], [-4, 2]].forEach(c => blocked.add(key(c[0], c[1])));
 const TREES = [[-5, -5], [-3, -4], [4, -4], [3, 4], [-1, 4], [-5, 4]];      // the one that stood by the coffee house now stands beside the library
-const CDOOR = [7, 0], BDOOR = [5, 3], CDX = -2.5, CDY = -1, CDZ = -2.0;
+const CDOOR = [7, 0], BDOOR = [5, 3], CDX = -2.5, CDY = -1, CDZ = -2.0, BZ = -1.2;      // BZ: the coffee house's ground, out off the island like the church's, two stepping stones down (MELO 2026-11-18)
 const wx = (x, y) => x <= 5 || y > 1.2 ? x : x < 7 ? 5 + (x - 5) * .75 : x - .5, wxi = (x, y) => x <= 5 || y > 1.2 ? x : x < 6.5 ? 5 + (x - 5) / .75 : x + .5;      // the church's two cells out from the island are drawn half a cell closer: the walk over the stones is squeezed to a cell and a half, and the church's ground is drawn half a cell back (wxi undoes it, for taps)      // CDZ: the church's ground lies a storey below the town, reached by steps
-const wz = (x, y) => x >= 7 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.4 * (1 + Math.min(3, Math.floor((x - 5) * 2))) : 0;      // four stepping stones over two cells, each .4 below the last      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
+const wz = (x, y) => x > 5 && y > 2.8 && y < 4.2 ? (x < 5.88 ? -.4 * (1 + Math.min(1, Math.floor((x - 5) / .4))) : BZ) : x >= 7 && y < 1.2 && y > -2.2 ? CDZ : x > 5 && y > -.2 && y < 1.2 ? -.4 * (1 + Math.min(3, Math.floor((x - 5) * 2))) : 0;      // four stepping stones over two cells, each .4 below the last      // the height of the ground at a point: the steps down to the church, and the church's own ground      // CDY: the church and its rock sit one cell back from where they were drawn, so the bridge's path runs straight up to the door
       // BDOOR: the cell in front of the bar's door, on the islet where the dead-end path at the bottom corner now leads
       // the church stands on the little island; this is the cell in front of its door
 [[7, -2], [8, -2], [7, -1], [8, -1], [8, 0], [6, 3]].forEach(c => blocked.add(key(c[0], c[1])));      // the church, and the bar
@@ -686,7 +686,6 @@ function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a r
 }
 function drawBarHouse(v, t) {      // the little coffee house: stone walls, a flat roof with a low parapet and a board on top, wide lit shop windows under red-and-cream striped awnings. Its door opens onto the walkway, round the back
   const x0 = 6, y0 = 2.85, w = 1.3, h = 1.35, lit = [255, 214, 140], nn = clamp((G.n - .35) / .3), P = v.P.bind(v), GR = PAL.roof, CR = [244, 234, 214];      // the awnings striped in the town's roof red
-  v.box(x0 - .05, y0 - .05, -.3, w + .1, w + .1, .3, PAL.walk);      // a thin footing in the church bridge's blue, no island round it
   v.box(x0, y0, 0, w, w, h, PAL.stone); v.box(x0 - .04, y0 - .04, h, w + .08, w + .08, .16, mix(PAL.stone, [255, 255, 255], .2));      // walls, and the parapet round the flat roof
   // a wide window on each face you can see, glowing, with a dark frame and a sill
   const win = (pl, o) => { const wl = .8, wh = .55, z = .32, c = (u, zz) => v.F(pl, o, u, zz); { const g = c(0, z + wh / 2); glow(g[0], g[1], v.s * .9, lit, .45); }
@@ -871,23 +870,26 @@ function drawWorld(t, dt) {
     v.s = s = s2; v.cx = lerp(W / 2 - (camX - camY) * s * C30, oX - (camX - camY - 3) * s * C30, titleK); v.cy = lerp(H * lerp(0.62, 0.66, zoomOut) - (camX + camY) * s * 0.5 - lerp(0, 3.2 * s, zoomOut), oY - (camX + camY) * s * .5, titleK) + storyPan; }
   if (storyFrame) { const TF = titleFrame(), z = zoomOut; v.s = s = lerp(sNear, TF.s, z); v.cx = lerp(W / 2 - (camX - camY) * s * C30, TF.oX - (camX - camY - 3) * s * C30, z); v.cy = lerp(H * .62 - (camX + camY) * s * .5, TF.oY - (camX + camY) * s * .5, z) + storyPan; }      // the story's last shot draws back until the town sits exactly as in the view from the top of the tower
   if (hideChef) { const TF = titleFrame(); v.s = s = TF.s; v.cx = TF.oX - (camX - camY - 3) * s * C30; v.cy = TF.oY - (camX + camY) * s * .5; }      // the view from the top of the tower: framed as the title screen, the island at the title's size and place
-  const cobTop = (x, y, w, d, z, nx, ny) => { const C = WALKCOB; v.quad(x, y, z, w, d, tint(C.grout)); const sw = w / nx, sd = d / ny, g = Math.min(sw, sd) * .08;      // flagstones on a platform's top: nx by ny stones with joints, each a shade apart
-    for (let a = 0; a < nx; a++) for (let b = 0; b < ny; b++) { const h = Math.abs(Math.sin((x * 3.1 + y * 5.7 + a * 1.3 + b * 2.9) * 12.9898) * 43758.5453 % 1), f = h * 2 - 1; v.quad(x + a * sw + g, y + b * sd + g, z, sw - 2 * g, sd - 2 * g, tint(mix(C.stone, f > 0 ? [255, 246, 220] : C.grout, Math.abs(f) * C.vary))); } };
+  const stoneAt = (x, y, z, w, d, C, h) => { const f = h * 2 - 1; v.quad(x, y, z, w, d, tint(mix(C.stone, f > 0 ? [255, 248, 228] : C.grout, Math.abs(f) * C.vary))); };      // one flat stone, a shade apart from its neighbours: no thickness, clean planes (MELO 2026-11-18)
+  const hash = (a, b, c) => { const h = Math.sin((a * 7.1 + b * 3.3 + c * 1.7) * 12.9898) * 43758.5453 % 1; return h < 0 ? -h : h; };
+  const cobTop = (x, y, w, d, z, nx, ny) => { const C = WALKCOB; v.quad(x, y, z, w, d, tint(C.grout)); const sw = w / nx, sd = d / ny, g = Math.min(sw, sd) * .04;      // flagstones on a platform's top: nx by ny stones with joints, each a shade apart
+    for (let a = 0; a < nx; a++) for (let b = 0; b < ny; b++) stoneAt(x + a * sw + g, y + b * sd + g, z, sw - 2 * g, sd - 2 * g, C, hash(x * 3.1 + a, y * 5.7 + b, a * 1.3 + b * 2.9)); };
   // ground
   v.box(-1, -1, -4.6, 2, 2, 1.4, PAL.under); v.box(-2.5, -2.5, -3.2, 5, 5, 1.2, PAL.under); v.box(-3.8, -3.8, -2, 7.6, 7.6, 1, mix(PAL.under, PAL.isl, .3));
   v.box(-5, -5, -1, 10, 10, 1, PAL.isl);
-  { const C = COBBLE; for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i, j, 0, 1, 1, tint(C.grout));      // the cell's joints, then its stones: four to a cell in a running bond, each a shade apart
-      const st = [[0, 0, .5, .5], [.5, 0, .5, .5], [0, .5, .5, .5], [.5, .5, .5, .5]]; st.forEach(([a, b, w, d], q) => { const h = Math.sin((i * 7.1 + j * 3.3 + q * 1.7) * 12.9898) * 43758.5453 % 1, f = (h < 0 ? -h : h) * 2 - 1; v.quad(i + a + .04, j + b + .04, 0, w - .08, d - .08, tint(mix(C.stone, f > 0 ? [255, 246, 220] : C.grout, Math.abs(f) * C.vary))); }); } }
+  { const C = COBBLE; for (const k of PATH) { const [i, j] = k.split(',').map(Number); v.quad(i, j, 0, 1, 1, tint(C.grout));      // the cell's joints, then its stones: two rows to a cell, the joints of one row not in line with the next, stones of a few sizes
+      for (let r = 0; r < 2; r++) { const cut = .3 + .4 * hash(i, j, r + 5), xs = [0, cut, 1]; for (let q = 0; q < 2; q++) { const g = .02; stoneAt(i + xs[q] + g, j + r * .5 + g, 0, xs[q + 1] - xs[q] - 2 * g, .5 - 2 * g, C, hash(i, j, r * 2 + q)); } } } }
   for (let i = 0; i < 4; i++) { v.box(5.09 + i * .352, .02, -.4 * i - .6, .26, .96, .2, PAL.step); cobTop(5.09 + i * .352, .02, .26, .96, -.4 * i - .4, 1, 2); }      // four stepping stones down to the church, evenly spaced from the island's edge to the church's slab, each hanging in the air with a gap before the next, across and down
-  v.box(5, 3, -0.3, 1, 1, 0.3, PAL.walk); cobTop(5, 3, 1, 1, 0, 2, 2);      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
-  v.box(6.5, -2, CDZ - .3, 2, 2.75, .3, PAL.walk); cobTop(6.5, -2, 2, 2.75, CDZ, 4, 5);      // the strip in front of the church is kept narrow      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
+  for (let i = 0; i < 2; i++) { v.box(5.08 + i * .4, 3.02, -.4 * i - .6, .28, .96, .2, PAL.step); cobTop(5.08 + i * .4, 3.02, .28, .96, -.4 * i - .4, 1, 2); }      // two stepping stones down to the coffee house, as to the church
+  v.box(5.9, 2.7, BZ - .3, 1.65, 1.65, .3, PAL.walk); cobTop(5.9, 2.7, 1.65, 1.65, BZ, 2, 2);      // the coffee house's slab, out on its own like the church's, paved in large square flags      // where the path dead-ends by the bottom corner it carries on as a short walkway, the same blue as the church's bridge, out to the coffee house
+  v.box(6.5, -2, CDZ - .3, 2, 2.75, .3, PAL.walk); cobTop(6.5, -2, 2, 2.75, CDZ, 2, 3);      // the strip in front of the church is kept narrow      // a thin slab like the one under the coffee house      // the church's slab: two cells wide, three deep, a deeper blue than the bridge, nothing below it      // the church's rock: a little depth, a step in underneath
   if (player.path.length) { const c = player.path[player.path.length - 1], p = v.P(wx(c[0] + .5, c[1] + .5), c[1] + .5, wz(c[0] + .5, c[1] + .5)); ell(p[0], p[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .5); }
   // objects
   const objs = [];
   objs.push({ k: -0.9, d: () => { v.box(2.2, -4.4, 0, 1.3, 1.3, 2.4, PAL.stone); { const dp = v.F('L', [2.85, -3.1, 0], 0, .4); glow(dp[0], dp[1], v.s * (1 + .12 * Math.sin(t * 3)), [255, 214, 140], .7); } v.arch('L', [2.85, -3.1, 0], .4, .56, [255, 214, 140]); const c = v.P(2.85, -3.75, 2.4), R = .6 * s * 1.2247, [, cl, cr] = v.sh(PAL.roof); ell(c[0], c[1], R, R * .577, cr); ctx.beginPath(); ctx.arc(c[0], c[1], R, Math.PI, TAU); ctx.fillStyle = css(cr); ctx.fill(); ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.arc(c[0], c[1], R, Math.PI, Math.PI * 1.58); ctx.closePath(); ctx.fillStyle = css(cl); ctx.fill(); } });
   objs.push({ k: 0, d: () => drawTower(v, t) });
   objs.push({ k: 9.6 + CDX + CDY, d: () => drawChapel(v, t) });      // sorted where the church now stands, so whoever is in front of it is drawn over it
-  objs.push({ k: 12.4, d: () => drawBarHouse(v, t) });
+  objs.push({ k: 12.4, d: () => { v.cy -= BZ * v.s; drawBarHouse(v, t); v.cy += BZ * v.s; } });      // drawn on its own ground, BZ down
   objs.push({ k: 1.6, d: () => { for (let i = 0; i < 3; i++) v.box(1.5 + .4 * i, -.6, 0, .4, 1.2, 1.2 - .4 * i, mix(PAL.stone, PAL.under, .2)); } });
   objs.push({ k: -2.0, d: () => drawHouse(v, t) });
   for (const [i, j] of TREES) objs.push({ k: i + j + 1, d: () => tree(v, i, j) });
@@ -2095,7 +2097,7 @@ const RAIN_FAR = -9, RAIN_NEAR = 12;      // landing nearer than the island's ba
 function rainSurf(x, y, z) {      // the flat top a raindrop's ring lies on, as drawn [x0, y0, x1, y1, height]: the ring is clipped to it, so it never spreads past a platform's edge; none on the little stepping stones
   if (z != null) return [6, 2.85, 7.3, 4.15, z];      // the coffee house's flat roof
   if (x >= -5 && x < 5 && y >= -5 && y < 5) return [-5, -5, 5, 5, 0];      // the island
-  if (Math.floor(x) === 5 && Math.floor(y) === 3) return [5, 3, 6, 4, 0];      // the walkway to the coffee house
+  if (x >= 5.9 && x < 7.55 && y >= 2.7 && y < 4.35) return [5.9, 2.7, 7.55, 4.35, BZ];      // the coffee house's slab
   if (x >= 7) return [6.5, -2, 8.5, .75, CDZ];      // the church's slab
   return null; }
 function rainRing(v, q, rr, al, sf) { if (!sf) return; const [x0, y0, x1, y1, z] = sf; ctx.save(); ctx.beginPath(); [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].forEach(([x, y], n) => { const p = v.P(x, y, z); n ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }); ctx.closePath(); ctx.clip();
@@ -2108,8 +2110,8 @@ function rainDrop(v, t, r, K) {      // one drop, aimed at its spot on the groun
   else if (onIsland) { const w = (ph - FALL) / (1 - FALL); rainRing(v, land, K * (.06 + .3 * w), .6 * (1 - w), rainSurf(r.gx, r.gy)); } }
 const RIPPLES = []; { let k = 0; const add = (x0, y0, w, h, n, z) => { for (let i = 0; i < n; i++, k++) { const h1 = Math.abs(Math.sin(k * 12.9898) * 43758.5453 % 1), h2 = Math.abs(Math.sin(k * 78.233) * 12543.13 % 1), h3 = Math.abs(Math.sin(k * 39.425) * 24634.63 % 1); RIPPLES.push({ x: x0 + .12 + (w - .24) * h1, y: y0 + .12 + (h - .24) * h2, z, ph: h3 * 9, sp: .8 + .4 * h1 * h2 }); } };
   for (let i = -5; i < 5; i++) for (let j = -5; j < 5; j++) if (walkable(i, j)) add(i, j, 1, 1, 1, null);      // one ripple to each cell of open ground on the island
-  add(CDOOR[0], CDOOR[1], 1, 1, 3, null); add(BDOOR[0], BDOOR[1], 1, 1, 1, null);      // and the ground in front of the church's door, and the walkway to the coffee house
-  add(6, 2.85, 1.3, 1.3, 3, 1.51); }      // and the coffee house's flat roof
+  add(CDOOR[0], CDOOR[1], 1, 1, 3, null);      // and the ground in front of the church's door, and the walkway to the coffee house
+  add(6, 2.85, 1.3, 1.3, 3, 1.51 + BZ); }      // and the coffee house's flat roof
 function ripple(v, t, K, r) {      // a ring opening where a drop has just landed, now and then, at its own pace
   const ph = (t * .55 * r.sp + r.ph) % 1; if (ph > .4) return; const w = ph / .4, q = r.z == null ? v.P(wx(r.x, r.y), r.y, wz(r.x, r.y)) : v.P(r.x, r.y, r.z), rr = K * (.06 + .3 * w);
   rainRing(v, q, rr, .6 * (1 - w), rainSurf(r.x, r.y, r.z)); }
