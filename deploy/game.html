@@ -679,8 +679,9 @@ function drawShipBox(v, sx, sy, z0) {
   const v0 = v; v = Object.create(v0); v.P = (x, y, z = 0) => v0.P(x, y, z + z0);      // drawn as if on the ground, lifted onto the table top
   let P = null; const r = SHIPR, H0 = .24, carry = bag.open && bag.sell && bag.drag && bag.drag.moved, op = shipLid = lerp(shipLid, bag.open && bag.sell ? 1 : 0, .2),      // open only while selling (MELO 2026-11-18)
     jt = clamp(1 - (performance.now() - (bag.shipT || -1e9)) / 350);
-  const hot = shipHot = lerp(shipHot, carry && bag.drag.over === 'ship' ? 1 : 0, .3), lg = (c, k = 1) => mix(c, [255, 226, 160], .5 * hot * k);      // a thing held over it: the box lights right up (MELO 2026-11-18)
-  if (hot > .01) { const g = v.P(sx, sy, .2); glow(g[0], g[1], v.s * 1.6, [255, 230, 160], hot); }
+  const hot = shipHot = lerp(shipHot, carry && sellable(bag.drag.id) ? (bag.drag.over === 'ship' ? 1 : .35) : 0, .3),      // something you can sell in your hand: the box already glows; held over it, it lights right up (MELO 2026-11-18)
+    lg = (c, k = 1) => mix(c, [255, 226, 160], .5 * hot * k);      // a thing held over it: the box lights right up (MELO 2026-11-18)
+  if (hot > .01) { const g = v.P(sx, sy, .2); glow(g[0], g[1], v.s * (.8 + .9 * hot), [255, 230, 160], hot); }
   if (jt > 0) { v = Object.create(v); const P1 = v.P; v.P = (x, y, z = 0) => { const q = P1(x, y, z); return [q[0] + Math.sin(jt * 30) * jt * v0.s * .03, q[1]]; }; }
   P = v.P.bind(v);
   const BOX = [108, 66, 46];      // a dark walnut, to stand clear of the room behind (MELO 2026-11-18)
@@ -1915,7 +1916,8 @@ function drawGear(t) {      // what you wear, in a capsule straight to the right
   capsule(x0 - cs / 2 - pd, iy - cs / 2 - pd, 3 * cs + 2 * gap + 2 * pd, cs + 2 * pd);
   ['drink', 'weapon', 'acc'].forEach((k, n) => { const ix = x0 + n * (cs + gap), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
     at[k] = [ix, iy, cs / 2];
-    glassWell(ix, iy, cs, cs, over || (!!id && bag.selAt === k));      // a tap lights it, as in the backpack
+    const fits = dg && ITEMS[dg.id] === k && dg.from !== k; if (fits && !over) glow(ix, iy, cs * .9, [255, 236, 170], .45 + .15 * Math.sin(t * 6));      // a thing of its kind in your hand: its tile glows, to show where it goes (MELO 2026-11-18)
+    glassWell(ix, iy, cs, cs, (over && ITEMS[dg.id] === k) || fits || (!!id && bag.selAt === k));      // only a tile the thing in your hand can go on lights up      // a tap lights it, as in the backpack
     if (id && !gearDrag(k)) drawItem(id, ix, iy - Math.sin(t * 2 + n) * 1.2, cs * .3); });
 }
 function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn in his hands (x, y: his feet; K: his size). A blade in mid-stroke is not drawn: the arc of the cut stands for it.
@@ -2012,7 +2014,7 @@ function glassWell(cx, cy, w, h, lit) {      // a place in the backpack: a plain
 const PILLA = .28;      // how filled the backpack's capsules are; the corner buttons stay at .1 (MELO 2026-11-18)
 function capsule(x, y, w, h) {      // a capsule drawn on the canvas, coloured as the corner buttons are (pillSky): nearly see-through, a thin light edge
   ctx.save(); ctx.beginPath(); rrect(x, y, w, h, Math.min(h / 2, 27));      // the backpack's corners as round as the gear capsule's ends (MELO 2026-11-18)
-  ctx.fillStyle = css([30, 24, 60], .5); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();      // always the dark glass seen in the coffee house, whatever the sky or the room behind (MELO 2026-11-18)
+  ctx.fillStyle = css([30, 24, 60], .92); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();      // always the dark glass seen in the coffee house, whatever the sky or the room behind; .92 so the day clouds drifting behind do not show through as grey smudges (MELO 2026-11-18)
 }
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
