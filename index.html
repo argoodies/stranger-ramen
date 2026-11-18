@@ -2009,9 +2009,9 @@ function drawItem(id, x, y, r) {
   else if (id === 'flower') { line([[x, y + r * .9], [x + r * .05, y]], [96, 160, 120], Math.max(1.5, r * .1)); for (let i = 0; i < 5; i++) { const q = i * TAU / 5 - 1.57; circ(x + Math.cos(q) * r * .34, y - r * .15 + Math.sin(q) * r * .34, r * .26, [244, 150, 180]); } circ(x, y - r * .15, r * .2, [250, 210, 110]); }
   else { if (id === 'sleep') glow(x, y, r * 1.5, [150, 140, 255], .8); drawKnife(x, y, r, 1, id === 'sleep' ? [176, 170, 255] : [226, 232, 244]); }
 }
-// Where each thing you carry lies: save.bagPos[id] = slab 0..7, four across and two down (MELO 2026-11-18); a third row once you own more than eight kinds of thing (worn ones too, so taking one off always finds a free place). Things you own but have never placed take the first free slab.
+// Where each thing you carry lies: save.bagPos[id] = slab 0..7, four across and two down (MELO 2026-11-18); a third row only if more than eight kinds lie loose at once, so nothing is ever hidden; taking a thing off when the eight places are full is simply refused (MELO 2026-11-18). Things you own but have never placed take the first free slab.
 function bagSlabs() {
-  const P0 = save.bagPos = save.bagPos || {}, loose = owned().filter(id => rest(id) > 0), N = owned().length > 8 ? 12 : 8, out = Array(N).fill(null);
+  const P0 = save.bagPos = save.bagPos || {}, loose = owned().filter(id => rest(id) > 0), N = loose.length > 8 ? 12 : 8, out = Array(N).fill(null);
   for (const id of Object.keys(P0)) if (!loose.includes(id)) delete P0[id];
   for (const id of loose) if (P0[id] != null && P0[id] >= 0 && P0[id] < N && !out[P0[id]]) out[P0[id]] = id; else delete P0[id];
   for (const id of loose) if (P0[id] == null) { const k = out.indexOf(null); if (k < 0) break; out[k] = id; P0[id] = k; }
