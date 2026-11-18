@@ -25,7 +25,7 @@ const OUT = path.resolve(process.argv[2] || 'playthrough'), PAGE = path.resolve(
   const js = (f, a) => p.evaluate(f, a);
   const tick = (sec = .5) => js(s => { for (let i = 0; i < Math.round(s * 30); i++) frame(last + 1000 / 30); }, sec);
   const tap = async (x, y) => { await p.mouse.move(x, y); await p.mouse.down(); await p.mouse.up(); await tick(.1); };
-  const state = () => js(() => ({ mode, n: +G.n.toFixed(2), coins: save.coins, cards: Object.assign({}, save.cards), say: (stall.ownSayT > 0 && stall.ownSay) || (bar.mySayT > 0 && bar.mySay) || (bar.keepSayT > 0 && bar.keepSay) || '' }));
+  const state = () => js(() => ({ mode, n: +G.n.toFixed(2), coins: save.coins, cards: Object.assign({}, save.cards), say: (stall.ownSayT > 0 && stall.ownSay) || (bar.mySayT > 0 && bar.mySay) || (bar.keepSayT > 0 && bar.keepSay) || (bar.boxSayT > 0 && bar.boxSay) || '' }));
   const step = async (name, fn) => {
     const rec = { n: ++n, name, ok: true, notes: [] }, note = s => rec.notes.push(s);
     try { const r = await fn(note); if (r === false) rec.ok = false; } catch (e) { rec.ok = false; note('threw: ' + e.message); }
@@ -67,7 +67,7 @@ const OUT = path.resolve(process.argv[2] || 'playthrough'), PAGE = path.resolve(
   await step('sell_hint', async note => {
     const has = await js(() => { save.cards.ring = (save.cards.ring || 0) + 1; save.ring = true; return true; }); await tick(.3);
     const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'ring'); return h && [h[0] + c / 2, h[1] + c / 2]; }); if (!hit) { note('ring not in the backpack'); return false; }
-    await tap(hit[0], hit[1]); await tick(.5); note('server says: ' + await js(() => bar.keepSay)); return has; });
+    await tap(hit[0], hit[1]); await tick(.5); note('the box says: ' + await js(() => bar.boxSay)); return has; });
   await step('sold', async note => {
     const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'ring'); return h && [h[0] + c / 2, h[1] + c / 2]; }), box = await js(() => BARHIT.ship), c0 = await js(() => save.coins);
     await p.mouse.move(hit[0], hit[1]); await p.mouse.down(); for (let i = 1; i <= 12; i++) { await p.mouse.move(hit[0] + (box[0] - hit[0]) * i / 12, hit[1] + (box[1] + 10 - hit[1]) * i / 12); await tick(.05); }
