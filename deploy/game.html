@@ -1133,7 +1133,7 @@ function intoBowl() {
 // carry the bowl in your hands to a customer
 function serve(i) {
   const s = stall, b = s.bowl, c = s.seats[i];
-  if (s.hold !== 'bowl' || !b.noodle || !c || c.state !== 'wait') return false;      // a bowl with no soup can be served too: it is dry noodles, and the customer says so
+  if (s.hold !== 'bowl' || !b.noodle || !c || c.state !== 'wait' || s.coins[i]) return false;      // nothing is served where a coin still lies: the bowl trembles in your hands (MELO 2026-11-18)      // a bowl with no soup can be served too: it is dry noodles, and the customer says so
   if (s.sinceSelf >= 3) { s.ownSay = S().hungryFirst; s.ownSayT = 4; return false; }
   const ok = !!b.soup && same(b, c.want);
   c.state = 'eat'; c.t = 0; c.ok = ok; c.dish = Object.assign({}, b); c.say = !b.soup ? S().drySay : ok ? pick(S().sayOk) : complaint(b, c.want);
@@ -1241,7 +1241,7 @@ function stallTap(x, y) {
   else if (best.startsWith('jartop')) { s.jarTopAt = performance.now(); return; }
       // empty jars: they only rattle, without a sound
   else if (best === 'board') { if (h) ok = false; else { goDo('board', SPOT.boil[0], SPOT.boil[1]); chime(69, 0, .08, .7); return; } }
-  else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.noodle && c && c.state === 'wait' && s.sinceSelf < 3) { goDo('serve' + i, SERVEX, LANE_Y0); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
+  else if (best.startsWith('seat') || best.startsWith('spot')) { const i = +best[4], c = s.seats[i]; if (h === 'bowl' && s.bowl.noodle && c && c.state === 'wait' && s.sinceSelf < 3 && !s.coins[i]) { goDo('serve' + i, SERVEX, LANE_Y0); chime(69, 0, .08, .7); ok = true; } else ok = serve(i); }
   if (!ok) { s.nope = s.hold === 'bowl' ? 'own' : best; s.nopeT = 0.35; chime(45, 0, .1, .3); }      // a bowl that cannot go there: it is the bowl in your hands that trembles
 }
 function barTap() {
