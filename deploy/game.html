@@ -2017,33 +2017,61 @@ function bagSlabs() {
   for (const id of loose) if (P0[id] == null) { const k = out.indexOf(null); if (k < 0) break; out[k] = id; P0[id] = k; }
   return out;
 }
-// The backpack's look, the same by day and by night (MELO 2026-11-18). 'paper': the cream of the speech bubbles, the places pressed into it; 'lacquer': a deep plum tray with a gold hairline, the places sunk into it
-let BAGSTYLE = 'lacquer';      // MELO chose the plum tray (2026-11-18)
-const BAGLOOK = {
-  paper: { body: [250, 246, 238], edge: [255, 255, 255], edgeA: .9, shadow: 'rgba(70,40,80,.28)', wellTop: [222, 210, 196], wellBot: [238, 230, 220], rim: [255, 255, 255], litFill: [255, 226, 160], litEdge: [228, 168, 80], badge: [92, 64, 120], badgeInk: [255, 244, 222] },
-  lacquer: { body: [62, 42, 76], edge: [222, 186, 124], edgeA: .55, shadow: 'rgba(20,10,30,.35)', wellTop: [34, 22, 44], wellBot: [50, 34, 62], rim: [222, 186, 124], litFill: [255, 214, 140], litEdge: [255, 214, 140], badge: [255, 236, 190], badgeInk: [60, 40, 90] },
-};
-const bagLook = () => BAGLOOK[BAGSTYLE] || BAGLOOK.paper;
-function glassWell(cx, cy, w, h, lit) {      // a place in the backpack: pressed into the tray, darker at its top edge where the light does not reach, a fine light lip along its foot
-  const L = bagLook(), x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * .2;
+// The backpack's look (MELO 2026-11-18): the plum tray, the same by day and by night, with something of a bag about it rather than a material. BAGCUE picks which:
+// 'flap' a lid across the top of the backpack with a buckle tab; 'handle' a handle on top, as on the button's case; 'zip' a zip along its top with its pull; 'pocket' each place a pocket with a lip
+let BAGCUE = 'tag';      // MELO chose the hanging tag (2026-11-18)
+const BAGL = { body: [62, 42, 76], edge: [255, 255, 255], edgeA: .5, shadow: 'rgba(20,10,30,.35)', wellTop: [34, 22, 44], wellBot: [50, 34, 62], lit: [255, 214, 140], badge: [255, 236, 190], badgeInk: [60, 40, 90] };
+const bagLook = () => BAGL;
+function glassWell(cx, cy, w, h, lit) {      // a place in the backpack: sunk into it, darker at its top
+  const L = BAGL, x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * .2;
   ctx.save(); rrect(x, y, w, h, r);
-  if (lit) { ctx.fillStyle = css(L.litFill, BAGSTYLE === 'paper' ? .75 : .32); ctx.fill(); ctx.strokeStyle = css(L.litEdge, .95); ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore(); return; }
-  const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, css(L.wellTop)); g.addColorStop(1, css(L.wellBot)); ctx.fillStyle = g; ctx.fill();
-  ctx.clip(); ctx.beginPath(); ctx.moveTo(x, y + h - .5); ctx.lineTo(x + w, y + h - .5); ctx.strokeStyle = css(L.rim, BAGSTYLE === 'paper' ? .9 : .25); ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
+  if (lit) { ctx.fillStyle = css(L.lit, .32); ctx.fill(); ctx.strokeStyle = css(L.lit, .95); ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore(); return; }
+  const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, css(L.wellTop)); g.addColorStop(1, css(L.wellBot)); ctx.fillStyle = g; ctx.fill(); ctx.clip();
+  if (BAGCUE === 'pocket') {      // a pocket: its opening a soft lip across the top, the cloth below it falling a little lighter
+    ctx.beginPath(); ctx.moveTo(x, y + h * .26); ctx.quadraticCurveTo(cx, y + h * .4, x + w, y + h * .26); ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath(); ctx.fillStyle = css([255, 255, 255], .05); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x, y + h * .26); ctx.quadraticCurveTo(cx, y + h * .4, x + w, y + h * .26); ctx.strokeStyle = css([255, 255, 255], .2); ctx.lineWidth = 1.2; ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(x, y + h - .5); ctx.lineTo(x + w, y + h - .5); ctx.strokeStyle = css([255, 255, 255], .12); ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
 }
-function capsule(x, y, w, h, rr) {      // the tray the backpack's things lie in: solid, a soft shadow under it, a hairline edge
-  const L = bagLook(); ctx.save(); ctx.beginPath(); rrect(x, y, w, h, rr != null ? rr : Math.min(h / 2, 27));
-  ctx.shadowColor = L.shadow; ctx.shadowBlur = 18; ctx.shadowOffsetY = 5; ctx.fillStyle = css(L.body, .98); ctx.fill();
-  ctx.shadowColor = 'transparent'; ctx.strokeStyle = css(L.edge, L.edgeA); ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+function bagPath(q, x, y, w, h, rt, rb) { q.moveTo(x + rt, y); q.arcTo(x + w, y, x + w, y + h, rt); q.arcTo(x + w, y + h, x, y + h, rb); q.arcTo(x, y + h, x, y, rb); q.arcTo(x, y, x + w, y, rt); q.closePath(); }      // a rounded box, its top corners rt, its foot's rb
+function capsule(x, y, w, h, rr, main) {      // the tray the backpack's things lie in: a little see-through, a soft shadow round it, the buttons' white hairline edge; main: the backpack itself ({p}: its tile pitch), not the gear beside the chef
+  const L = BAGL, R = rr != null ? rr : Math.min(h / 2, 27), RT = BAGCUE === 'arch' && main ? Math.min(h / 2, R + 16) : R, shape = () => { ctx.beginPath(); bagPath(ctx, x, y, w, h, RT, R); }; ctx.save();
+  const lite = a => css([255, 255, 255], a), edge = () => { ctx.strokeStyle = css(L.edge, L.edgeA); ctx.lineWidth = 1; ctx.stroke(); };
+  if (BAGCUE === 'sides' && main) for (const s of [-1, 1]) { const pw = 9, ph = h * .5, px = s < 0 ? x - pw + 2 : x + w - 2, py = y + h * .38;      // a pocket on either side
+    ctx.beginPath(); bagPath(ctx, px, py, pw, ph, 3, 5); ctx.fillStyle = css(mix(L.body, [255, 255, 255], .1), .9); ctx.fill(); edge(); }
+  ctx.save(); { const q = new Path2D(); q.rect(x - 60, y - 60, w + 120, h + 120); bagPath(q, x, y, w, h, RT, R); ctx.clip(q, 'evenodd'); }      // the shadow only outside the tray
+  shape(); ctx.shadowColor = L.shadow; ctx.shadowBlur = 18; ctx.shadowOffsetY = 5; ctx.fillStyle = css(L.body); ctx.fill(); ctx.restore();
+  shape(); ctx.fillStyle = css(L.body, .8); ctx.fill();
+  ctx.save(); shape(); ctx.clip();
+  if (BAGCUE === 'flap' && main) { const fh = 10; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + fh - 3); ctx.quadraticCurveTo(x + w / 2, y + fh + 5, x, y + fh - 3); ctx.closePath(); ctx.fillStyle = lite(.12); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; ctx.stroke();
+    const tw = 26; ctx.fillStyle = css(mix(L.body, [255, 255, 255], .25)); rrect(x + w / 2 - tw / 2, y + fh - 3, tw, 11, 4); ctx.fill(); ctx.strokeStyle = css([236, 196, 120], .95); ctx.lineWidth = 1.4; rrect(x + w / 2 - 5, y + fh - 1, 10, 7, 2); ctx.stroke(); }
+  if (BAGCUE === 'zip' && main) { const zy = y + 6; ctx.fillStyle = lite(.22); for (let zx = x + R; zx < x + w - R - 10; zx += 4) ctx.fillRect(zx, zy - 1.5, 2, 3); const px = x + w - R - 6; ctx.fillStyle = css([236, 196, 120], .9); rrect(px - 3, zy - 2, 6, 11, 2.5); ctx.fill(); }
+  if (BAGCUE === 'front' && main && main.p) { const fy = y + 14 + main.p - 7, fx = x + 6, fw = w - 12, fh = y + h - 6 - fy;      // a front pocket holding the lower row, its top edge curving a little
+    ctx.beginPath(); ctx.moveTo(fx, fy + 4); ctx.quadraticCurveTo(fx + fw / 2, fy - 4, fx + fw, fy + 4); ctx.lineTo(fx + fw, fy + fh - 10); ctx.arcTo(fx + fw, fy + fh, fx, fy + fh, Math.max(4, R - 6)); ctx.arcTo(fx, fy + fh, fx, fy, Math.max(4, R - 6)); ctx.closePath();
+    ctx.fillStyle = lite(.07); ctx.fill(); ctx.strokeStyle = lite(.22); ctx.lineWidth = 1; ctx.stroke(); }
+  if (BAGCUE === 'arch' && main) { ctx.beginPath(); bagPath(ctx, x + 5, y + 5, w - 10, h - 10, Math.max(2, RT - 5), Math.max(2, R - 5)); ctx.strokeStyle = lite(.13); ctx.lineWidth = 1; ctx.stroke(); }      // the top rounded as a bag's, a seam just inside
+  ctx.restore();
+  shape(); edge();
+  if (BAGCUE === 'handle' && main) { const hw = Math.min(56, w * .28), cx = x + w / 2; ctx.beginPath(); ctx.moveTo(cx - hw / 2, y + 1); ctx.lineTo(cx - hw / 2, y - 6); ctx.quadraticCurveTo(cx - hw / 2, y - 11, cx - hw / 2 + 5, y - 11); ctx.lineTo(cx + hw / 2 - 5, y - 11); ctx.quadraticCurveTo(cx + hw / 2, y - 11, cx + hw / 2, y - 6); ctx.lineTo(cx + hw / 2, y + 1);
+    ctx.lineCap = 'round'; ctx.strokeStyle = css(L.body, .85); ctx.lineWidth = 6; ctx.stroke(); edge(); }
+  if (BAGCUE === 'tag' && main) { const ax = x + w - R * .3, ay = y + R * .3, hx0 = x + w + 7, hy0 = ay + 18;      // a plain little tag hanging off its corner on a string, from a gold ring (MELO 2026-11-18)
+    const fu = bag.tagFlip != null ? clamp((last - bag.tagFlip) / 1000) : 1, fx = Math.cos(eout(fu) * 2 * TAU), dk = 1 - fu, sw = .42 * Math.sin(fu * 3 * TAU) * dk;      // tapped, it spins round twice and swings on its string, the string twisting, all settling (MELO 2026-11-18)
+    const dx = hx0 - ax, dy = hy0 - ay, hx = ax + dx * Math.cos(sw) - dy * Math.sin(sw), hy = ay + dx * Math.sin(sw) + dy * Math.cos(sw), tilt = -.18 + sw * 1.3, len = Math.hypot(dx, dy);
+    ctx.beginPath(); ctx.arc(ax, ay, 3.2, 0, TAU); ctx.strokeStyle = css([236, 196, 120], .95); ctx.lineWidth = 1.4; ctx.stroke();
+    { const nx = -(hy - ay) / len, ny = (hx - ax) / len, ph = fu * 3 * TAU, w1 = 3 + 7 * Math.sin(ph - .9) * dk, w2 = 3 + 10 * Math.sin(ph - 1.8) * dk;      // a soft string: it sags a little at rest, and as the tag swings its middle lags behind, the lower part most (MELO 2026-11-18)
+      ctx.beginPath(); ctx.moveTo(ax, ay + 3); ctx.bezierCurveTo(ax + (hx - ax) / 3 + nx * w1, ay + 3 + (hy - ay - 3) / 3 + ny * w1, ax + (hx - ax) * 2 / 3 + nx * w2, ay + 3 + (hy - ay - 3) * 2 / 3 + ny * w2, hx, hy); ctx.lineCap = 'round'; ctx.strokeStyle = lite(.6); ctx.lineWidth = 1; ctx.stroke(); }
+    bag.tagAt = [hx0, hy0 + 9, 16];
+    ctx.save(); ctx.translate(hx, hy); ctx.rotate(tilt); ctx.scale(Math.abs(fx) < .02 ? .02 : fx, 1); ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(8, 0); ctx.lineTo(8, 16); ctx.lineTo(-8, 16); ctx.lineTo(-8, 0); ctx.closePath(); ctx.fillStyle = css(fx > 0 ? [236, 206, 160] : [222, 190, 144]); ctx.fill(); ctx.strokeStyle = 'rgba(80,50,30,.4)'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, 1.6, 0, TAU); ctx.fillStyle = css([90, 60, 50]); ctx.fill(); ctx.restore(); }      // no mark on it, front or back; its back a shade darker so the turn shows
+  ctx.restore();
 }
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.right, r.top, r.bottom] : [56, 12, 56]; })();      // the backpack button's right edge, top and foot
-  const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, bx = (W - BW) / 2, by = (W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12, desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
+  const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, bx = (W - BW) / 2, by = ((W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12) + (BAGCUE === 'handle' ? 12 : 0), desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
     BH = pad * 2 + rows * p - 10 + (desc ? 34 + desc.length * 19 : 0);      // what you wear is not here but on the chef (drawWorn)
   bag.cell = c;
   bag.box = [bx, by - 10, bx + BW, by + BH];
-  capsule(bx, by, BW, BH, c * .2 + pad);      // a capsule, as the corner buttons are (MELO 2026-11-18)
+  capsule(bx, by, BW, BH, c * .2 + pad, { p });      // a capsule, as the corner buttons are (MELO 2026-11-18)
   const well = (cx, cy, id, place) => { const sel = id && bag.selAt === place,      // only the one tapped lights, not every place holding the same thing (MELO 2026-11-18)
     held = dg && dg.id === id && dg.from === place, over = dg && dg.over === place;
     spots.push([cx, cy, place]);
@@ -2061,6 +2089,7 @@ function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own
 function bagTap(x, y) {      // finger down: pick a thing up, or (off the bubble) close the backpack
   const B = bag.box, cell = bag.cell || 56, h = bag.hits.find(h => x > h[0] && x < h[0] + cell && y > h[1] && y < h[1] + cell);
   if (h) { bag.drag = { id: h[2], from: h[3], x, y, x0: x, y0: y, moved: false, over: null }; return; }
+  const tg = bag.tagAt; if (tg && Math.hypot(x - tg[0], y - tg[1]) < tg[2]) { if (bag.tagFlip == null || last - bag.tagFlip > 1000) { bag.tagFlip = last; chime(81, 0, .05, .5); chime(86, .12, .05, .4); } return; }      // the tag on the backpack: a tap spins it
   if (!B || x < B[0] || x > B[2] || y < B[1] || y > B[3]) { bag.open = bag.sell = false; bag.sel = bag.selAt = null; chime(62, 0, .1, .8); }
 }
 function bagOver(x, y) { let best = null, bd = 46; for (const [sx, sy, place] of bag.spots || []) { const d = Math.hypot(x - sx, y - sy); if (d < bd) { bd = d; best = place; } } return best; }
