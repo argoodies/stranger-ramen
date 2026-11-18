@@ -1703,7 +1703,7 @@ function libTap(x, y) {
   else if (c[1] === 0 && c[0] >= 0 && c[0] < LN) libGo([c[0], 1], 'shelf');      // the strip of floor at the shelf's foot: that is the shelf too
 }
 function drawLib(t) {
-  TK = 0.34; TINT = [22, 22, 60]; SHADOW = [40, 30, 70]; skyNow(t, .2);
+  TK = .5; TINT = [56, 30, 54]; SHADOW = [40, 30, 70]; skyNow(t, .2);      // a dark room by day as by night, in the coffee house's warm dark (MELO 2026-11-18; was TK .34 toward a cool blue)
   const N = LN, Hh = 3.4, s = roomScale(N, Hh), v = lv; v.s = s; v.cx = W / 2; v.cy = roomTop(N, Hh, s);      // MELO 2026-11-14: sized and centred as the ramen shop is (was smaller and lower)
   const P = v.P.bind(v), tn = c => tint(c);
   const lightC = mix([255, 196, 204], [170, 190, 255], G.n);      // by day the window lets in the rose of the sky, by night a cool blue
