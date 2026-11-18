@@ -19,8 +19,10 @@ button.pill.hint{animation:pillpulse 1.2s ease-in-out infinite;border-color:rgba
 @keyframes pillpulse{50%{box-shadow:0 0 0 5px rgba(255,236,170,.55)}}
 #bag.gain{animation:baggain 2.2s linear 1}      /* something new in the backpack: its edge glows warm, stays lit 1.2 s, then fades over 1 s as the hearts a drink brings back do (MELO 2026-11-17) */
 @keyframes baggain{0%,55%{box-shadow:0 0 9px 2px rgba(255,236,170,.75),inset 0 0 6px rgba(255,236,170,.45);border-color:rgba(255,236,170,1)}100%{box-shadow:0 0 9px 2px rgba(255,236,170,0),inset 0 0 6px rgba(255,236,170,0)}}
-#coin{display:none;border-color:transparent;align-items:center;gap:6px;padding:7px 13px 7px 10px;font:400 15px var(--serif);letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:20px}      /* the coins you hold (MELO 2026-11-18): a capsule at the top left, in the ramen shop and the coffee house only */
+#coin{display:none;border-color:transparent;background:none!important;pointer-events:none;cursor:default;align-items:center;gap:6px;padding:7px 13px 7px 10px;font:400 15px var(--serif);letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:20px}      /* the coins you hold (MELO 2026-11-18): a capsule at the top left, in the ramen shop and the coffee house only */
 #coin.bump{animation:coinbump .32s ease-out 1}
+#coin.glow{animation:coinglow .5s ease-out 1}
+@keyframes coinglow{30%{color:#fff3c4;filter:drop-shadow(0 0 6px rgba(255,226,150,.95))}}      /* a coin landed: the count lights up for a moment */
 @keyframes coinbump{40%{transform:scale(1.12)}}
 #coin.nope{animation:coinnope .4s linear 1}
 @keyframes coinnope{20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
@@ -903,7 +905,7 @@ function drawBar(t) {
   if (!storyHook) objs.push({ k: bar.x + bar.y, d: () => { const q = P(bar.x, bar.y), hop = bar.path.length ? Math.abs(Math.sin(t * 11)) * s * .08 : 0;
     bar.lit = lerp(bar.lit || 0, clamp((1.1 - Math.hypot(bar.x, bar.y - 1.5)) / .3 + .5), .18);      // as in the library (MELO 2026-11-14): in the room's own shade, lit by the light from the door only when standing at it
     const up = 1 - LIFT.bar * (1 - nn), lit = c => mix(c, TINT, lerp(.1, .3, nn)).map(x => x * up);      // his face as in 0.1.8 (MELO 2026-11-14): the room's shade as it was then (.1 by day, .3 at night), with the daytime lift (roomLift, added after 0.1.8) taken back out
-    fig(q[0], q[1] - hop, K, { kind: 'chef', floor: floorOf(v, [[0, 0, N, N, 0]]), apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) }); bar.at = q; if (bag.open) { drawWorn(q[0], q[1] - hop, K, t); } } });      // the backpack open: what he wears in tiles beside him
+    fig(q[0], q[1] - hop, K, { kind: 'chef', floor: floorOf(v, [[0, 0, N, N, 0]]), apron: lit([220, 80, 80]), body: lit(WHITE), head: lit(SKIN) }); bar.at = q; chefPt = [q[0], q[1] - K * .8]; if (bag.open) { drawWorn(q[0], q[1] - hop, K, t); } } });      // the backpack open: what he wears in tiles beside him
   if (bar.path.length) { const c = bar.path[bar.path.length - 1], p = P(c[0] + .5, c[1] + .5); ell(p[0], p[1], s * .3, s * .15, [255, 240, 200], .35); }
   objs.sort((a, b) => a.k - b.k).forEach(o => o.d());
   if (storyAfter) storyAfter(v, K, t, 'bar');
@@ -1442,7 +1444,7 @@ function drawStall(t) {
   ring('soup'); const lp = P(POT_X + .26, POTY2 - .18, 1.55); line([lp, [lp[0] + s * .3, lp[1] - s * .5]], [150, 110, 90], s * .05); ctx.restore(); ctx.restore();
   for (let i = 0; i < 6; i++) { const act_ = (i % 2 === 0) ? (st.pot === 'cooking' ? 1 : st.pot === 'done' ? .7 : .3) : .5, ph = (t * .5 * (act_ + .4) + i * .17) % 1, p = P(POT_X + .2 * POT_K * Math.sin(t * 1.3 + i * 2), i % 2 ? POTY2 : POTY1, 1 + (.6 + ph * 1.5) * POT_K); circ(p[0], p[1], s * POT_K * (.08 + .15 * ph), [255, 250, 245], .28 * act_ * (1 - ph)); }
   // the owner (always behind the prep table)
-  const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05;
+  const op = P(st.owner.x, st.owner.y), moving = Math.hypot(st.owner.tx - st.owner.x, st.owner.ty - st.owner.y) > .05; chefPt = [op[0], op[1] - s * .9];      // where coins fly to
   const drawOwner = () => {
     st.lit = lerp(st.lit || 0, clamp((1.0 - Math.hypot(st.owner.x - LAMP_XY[0], st.owner.y - LAMP_XY[1])) / .3 + .5), .18);      // under the lamp your face lights up, as by the library window (MELO 2026-11-14)
     const lit = c => { const d = c; return mix(d, mix(d, [255, 214, 140], .14), st.lit); }, oy = op[1] - (moving ? Math.abs(Math.sin(t * 12)) * s * .06 : 0);
@@ -2057,20 +2059,18 @@ const COINMAX = 9999, SELL = 5; save.coins = clamp(Math.floor(+save.coins || 0),
 let coinShown = save.coins, coinBusy = 0;      // the capsule counts up as each coin lands in it; coinBusy: coins still on their way
 const flyers = [];      // coins and prizes in flight across the screen: { id ('coin' or an item), a: [x, y], to: () => [x, y], t, d (seconds), delay, r, arc, done }
 function coinCap() { const el = $('coin'); if (el.style.display === 'none') return null; const r = el.getBoundingClientRect(); return [r.left + 19, r.top + r.height / 2]; }      // where a coin lands: on the capsule's own coin
-function capFx(cls) { const el = $('coin'); el.classList.remove('bump', 'nope'); void el.offsetWidth; el.classList.add(cls); }
-$('coin').addEventListener('click', () => { toastSay(save.coins > 0 ? S().coinSay : S().noCoin); chime(81, 0, .08, .7); });      // a tap on the capsule: the chef says what coins are for (MELO 2026-11-18)
-$('coin').addEventListener('animationend', e => e.currentTarget.classList.remove('bump', 'nope'));
-function addCoins(n, from, delay = 0) {      // n coins, flying from a point on the screen to the capsule one after another
+function capFx(cls) { const el = $('coin'); el.classList.remove('bump', 'nope', 'glow'); void el.offsetWidth; el.classList.add(cls); }
+$('coin').addEventListener('animationend', e => e.currentTarget.classList.remove('bump', 'nope', 'glow'));
+let chefPt = null;      // the chef's middle on the screen, set as he is drawn in the ramen shop or the coffee house: coins you get fly to him
+function addCoins(n, from, delay = 0) {      // n coins, flying from a point on the screen to the chef one after another; the count at the top right lights up as each lands (MELO 2026-11-18)
   const was = save.coins; save.coins = Math.min(COINMAX, save.coins + n); saveNow(); const got = save.coins - was;
-  if (!from || !coinCap()) { coinShown = save.coins; capFx('bump'); return; }
-  for (let k = 0; k < n; k++) { coinBusy++; const a0 = [from[0] + (k - (n - 1) / 2) * 7, from[1]]; flyers.push({ id: 'coin', a: a0, to: () => [a0[0], a0[1] - 46], t: 0, d: .7, delay: delay + k * .09, r: 11, arc: 0, rise: true,      // up a little and gone; the capsule counts it (MELO 2026-11-18)
-    done: () => { coinBusy--; if (k < got) coinShown = Math.min(COINMAX, coinShown + 1); capFx('bump'); chime(88 + (k % 3) * 2, 0, .06, .5); } }); }
+  if (!from || !coinCap()) { coinShown = save.coins; capFx('glow'); return; }
+  for (let k = 0; k < n; k++) { coinBusy++; const a0 = [from[0] + (k - (n - 1) / 2) * 7, from[1]]; flyers.push({ id: 'coin', a: a0, to: () => chefPt || [a0[0], a0[1] - 46], t: 0, d: .6, delay: delay + k * .09, r: 11, arc: 40, rise: true,
+    done: () => { coinBusy--; if (k < got) coinShown = Math.min(COINMAX, coinShown + 1); capFx('glow'); chime(88 + (k % 3) * 2, 0, .06, .5); } }); }
 }
-function payCoin(to, done) {      // one coin out of the capsule and over to a point (the slot machine's slot); false if there is none
-  if (save.coins < 1) { capFx('nope'); knock(); return false; }
-  save.coins--; saveNow(); coinShown = Math.min(coinShown, save.coins); const a = coinCap();
-  if (!a) { done(); return true; }
-  flyers.push({ id: 'coin', a, to, t: 0, d: .5, delay: 0, r: 9, arc: 30, done }); chime(81, 0, .06, .5); return true;
+function payCoin(to, done) {      // pay one coin; false if there is none
+  if (save.coins < 1) { capFx('nope'); knock(); toastSay(S().noCoin); return false; }      // none: the count shakes and the chef says so
+  save.coins--; saveNow(); coinShown = Math.min(coinShown, save.coins); chime(81, 0, .06, .5); done(); return true;      // the count just goes down: no coin flies over (MELO 2026-11-18)
 }
 function drawCoin(x, y, r, sx = 1, a = 1) {      // a flat gold coin, as everything in the town is flat (MELO 2026-11-18): a rim, a face, a dollar sign; sx narrows it as it sways
   ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(Math.max(.2, sx), 1);
