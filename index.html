@@ -764,23 +764,35 @@ function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, 
 function updateBar(dt) {   const had = bar.path.length; if (walk(bar, dt, 3 * buffK())) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT', 'boxSayT', 'mySayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); slotTick(dt); }
 function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; if (save.coffeeTaken != null) bar.taken = save.coffeeTaken;      // the day the iced coffee was taken is kept in the save: gone for the rest of that day, even after the game is closed and opened again (MELO 2026-11-15)
   Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
- whoSayT: 0, keepSayT: 0, boxSayT: 0, mySayT: 0, boxWait: false, cat: { x: .5, y: 2.5, tx: .5, ty: 2.5, sit: 4, t: 0, face: 1, meowT: 0 }, slot: { st: 'idle', t: 0, win: null, flash: 0, pull: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }      // the cat one tile nearer the door, the slot machine in its old corner (MELO 2026-11-18)
+ whoSayT: 0, keepSayT: 0, boxSayT: 0, mySayT: 0, boxWait: false, cat: { x: .5, y: 2.5, tx: .5, ty: 2.5, sit: 4, t: 0, face: 1, meowT: 0 }, slot: { st: 'idle', t: 0, win: null, flash: 0, pull: 0, set: giftSet(-1) } }); chime(64, 0, .12); chime(71, .14, .1); }      // the cat one tile nearer the door, the slot machine in its old corner (MELO 2026-11-18)
 function leaveBar() { mode = 'world'; $('zoom').style.display = 'none'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
 // The gift machine (MELO 2026-11-19; was a slot machine, which an individual developer may not ship): a coin in, a turn of its knob —
 // one time in six a weapon or a charm; otherwise nothing comes out, and the chef says he missed (MELO 2026-11-19; the cat treat it gave before is gone).
+// the heap in the claw machine (MELO 2026-11-19): eight ways the five gifts can lie, in the back or front row ('b'/'f'), y across (larger is further left), z their foot; t the one the claw goes for, never one with another on it. The chute is at the front on the left, so the front row keeps clear of it
+const GIFT_LAYS = [{ g: [['b', 3.42, .8], ['b', 3.42, .92], ['b', 3.42, 1.04], ['b', 3.58, .8], ['f', 3.4, .8], ['f', 3.56, .8], ['b', 3.58, .92]], t: 4 }],      /* behind the one the claw goes for, a stack of three (MELO 2026-11-19) */      // one way the heap lies (MELO 2026-11-19: back to the first)
+  GIFT_SETS = [      // four colourings of the heap (MELO 2026-11-19): one at random each time you come into the coffee house, and a new one shaken up by every win; [box, ribbon] for each of the seven, every one a different bright colour, set against its neighbours
+    [[[235, 64, 64], [255, 255, 255]], [[255, 206, 40], [200, 30, 70]], [[50, 130, 235], [255, 255, 255]], [[60, 190, 100], [255, 255, 255]], [[255, 100, 170], [255, 255, 255]], [[255, 140, 40], [255, 255, 255]], [[160, 90, 220], [255, 255, 255]]],
+    [[[40, 200, 220], [255, 255, 255]], [[230, 60, 170], [255, 255, 255]], [[255, 220, 60], [40, 50, 140]], [[255, 120, 40], [255, 255, 255]], [[120, 90, 230], [255, 255, 255]], [[160, 220, 50], [200, 30, 70]], [[255, 96, 96], [255, 255, 255]]],
+    [[[60, 90, 220], [255, 255, 255]], [[250, 190, 30], [200, 30, 70]], [[255, 80, 140], [255, 255, 255]], [[20, 170, 150], [255, 255, 255]], [[240, 90, 50], [255, 255, 255]], [[180, 70, 200], [255, 255, 255]], [[100, 230, 170], [200, 30, 70]]],
+    [[[220, 40, 60], [255, 255, 255]], [[70, 170, 255], [255, 255, 255]], [[250, 230, 70], [200, 30, 70]], [[220, 50, 200], [255, 255, 255]], [[255, 150, 30], [255, 255, 255]], [[40, 180, 80], [255, 255, 255]], [[150, 130, 255], [255, 255, 255]]]],
+  GIFT_MIX = 1.6;      // how long the heap churns after a turn, win or miss
+function giftSet(not) { let k; do k = Math.floor(Math.random() * GIFT_SETS.length); while (k === not); return k; }
 const SLOTS = ['knife', 'sleep', 'twin', 'guard', 'doom', 'flower'], CLAW = [.55, 1.15, 1.4, 2.05, 2.65, 2.9], GIFT_T = CLAW[5];      // a claw machine (MELO 2026-11-19): over, down, grip, up, back to the chute, let go
-function slotPull() { const m = bar.slot; if (!m || m.st !== 'idle' || storyHook) { if (m) m.wob = performance.now(); return; }
+function slotPull() { const m = bar.slot; if (!m || m.st !== 'idle' || storyHook || (last - (m.mix || -1e9)) / 1000 < GIFT_MIX) { if (m) m.wob = performance.now(); return; }
   const to = () => bar.slotAt || [W / 2, H / 2];
-  m.win = Math.random() < 1 / 6 ? pick(SLOTS) : 'none'; m.tg = 3;      // the claw goes for the red gift at the front on the right (MELO 2026-11-19)
+  m.win = Math.random() < 1 / 6 ? pick(SLOTS) : 'none'; m.tg = GIFT_LAYS[m.lay || 0].t;      // the claw goes for the gift on top at the front, as the heap lies
+  m.miss = m.win === 'none' ? pick(['nudge', 'half', 'top', 'empty']) : null; m.ts = { nudge: .1, half: .42, top: CLAW[3] - CLAW[2], empty: .1 }[m.miss] || .42;      // misses come in kinds (MELO 2026-11-19): it barely stirs, slips halfway up, is let go at the top, or the claw shuts on nothing beside it
+  m.thumpT = m.miss && m.miss !== 'empty' ? CLAW[2] + m.ts + Math.sqrt(Math.max(.001, (1.3 - GIFT_LAYS[m.lay || 0].g[m.tg][2] - .2) * ease(m.ts / (CLAW[3] - CLAW[2]))) / 4.5) : -1;      // when the dropped gift lands
   m.st = 'coin'; if (!payCoin(to, () => { m.st = 'spin'; m.t = 0; m.pull = 1; chime(60, 0, .1); noise(.2, .08, 400, 1200); })) { m.st = 'idle'; m.win = null; m.wob = performance.now(); }      // the coin flies over to the slot, then the knob turns
 }
 function slotTick(dt) { const m = bar.slot; if (!m) return; if (m.flash > 0) m.flash -= dt; if (m.pull > 0) m.pull = Math.max(0, m.pull - dt / .9);
   if (m.st !== 'spin') return; const t0 = m.t; m.t += dt;
   const at = k => t0 < k && m.t >= k; if (at(.02)) noise(.5, .03, 300, 500); if (at(CLAW[0])) noise(.55, .03, 500, 300); if (at(CLAW[1])) chime(70, 0, .05, .5); if (at(CLAW[2])) noise(.6, .03, 300, 520);      // the claw whirs over and down, clicks shut, whirs up
-  if (m.win === 'none' && at(CLAW[2] + .62)) noise(.12, .07, 900, 200);      /* missed: the gift slips out and thumps back onto the heap */ if (m.win !== 'none' && at(CLAW[4] + .12)) noise(.15, .06, 700, 150);      // won: it drops down the chute
+  if (m.thumpT > 0 && at(m.thumpT)) noise(.12, .07, 900, 200);      /* missed: the gift slips out and thumps back onto the heap */ if (m.win !== 'none' && at(CLAW[4] + .12)) noise(.15, .06, 700, 150);      // won: it drops down the chute
   if (m.t >= GIFT_T) { m.st = 'idle'; const id = m.win; m.win = null;
+    if (id !== 'none') { const k0 = m.set || 0; m.prev = { lay: 0, cols: GIFT_SETS[k0], gone: m.tg }; m.set = giftSet(k0); m.mix = last; noise(1.2, .05, 220, 640); }      // a win shakes the heap up into the air and it lands in new colours; a miss leaves it be (MELO 2026-11-19)
     if (id === 'none') { bar.mySay = S().noCatch; bar.mySayT = 2.4; chime(62, 0, .08); chime(58, .12, .08); return; }      // nothing this time: the chef just says so
-    m.flash = 1; m.refill = last; [72, 76, 79].forEach((n, i) => chime(n, i * .09, .1));      // a gift drops into the tray and goes over to the chef
+    m.flash = 1; [72, 76, 79].forEach((n, i) => chime(n, i * .09, .1));      // a gift drops into the tray and goes over to the chef
     const from = bar.slotTray || bar.slotAt || [W / 2, H / 2]; flyers.push({ id, a: from, to: () => chefPt || from, t: 0, d: .8, delay: .2, r: 14, arc: 60,
       done: () => { save.cards[id] = cardN(id) + 1; const k = ITEMS[id]; save[id] = true; if (!save.equip[k] || !have(save.equip[k])) save.equip[k] = id; bar.mySay = S().got(S().items[id][0]); bagGlow(); saveNow(); bar.mySayT = 3; } }); } }
 function drawSlot(v, s, t) {      // the gift machine: a small red cabinet against the left wall, facing into the room: wrapped gifts behind a glass window, a knob and a coin slot, a tray, a lamp on top
@@ -796,30 +808,33 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
   quad(y0 + .04, y1 - .04, .76, 1.42, tint([226, 182, 96]));      // the window's gold frame; behind its glass a heap of little wrapped gifts (MELO 2026-11-19: no reels)
   quad(y0 + .08, y1 - .08, .8, 1.38, tint([92, 52, 62]));      // the opening behind the glass, dark inside
   { const g = .12, xf = x1 - .04 - g, xb = xf - .14,      // gifts as little cubes, each its own colour and ribbon (MELO 2026-11-19: they have depth), a heap behind the glass
-      G = [[xb, 3.42, .8, [110, 170, 220], [255, 255, 255]], [xb, 3.58, .8, [140, 200, 150], [255, 236, 170]], [xb, 3.5, .92,      /* the top one rests across the two under it */ [200, 140, 210], [255, 255, 255]],
-        [xf, 3.4, .8, [232, 96, 96], [255, 236, 170]], [xf, 3.56, .8, [250, 200, 90], [214, 80, 80]]];
+      lay = (L, cols) => GIFT_LAYS[L].g.map(([r, y, z], n) => [r === 'f' ? xf : xb, y, z, ...cols[n]]), G = lay(0, GIFT_SETS[m.set || 0]);
     const WQ = [F(y0 + .08, .8), F(y1 - .08, .8), F(y1 - .08, 1.38), F(y0 + .08, 1.38)]; ctx.save(); ctx.beginPath(); WQ.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // kept inside the glass
     const gift = (x, y, z, c, rb) => { const cx = x + g / 2, cy = y + g / 2, zt = z + g, lw = Math.max(1, s * .016);
       v.box(x, y, z, g, g, g, c);
       line([P(cx, y, zt), P(cx, y + g, zt)], rb, lw); line([P(x, cy, zt), P(x + g, cy, zt)], rb, lw); line([P(x + g, cy, z), P(x + g, cy, zt)], rb, lw); line([P(cx, y + g, z), P(cx, y + g, zt)], rb, lw);      // the ribbon round it
       const bw = P(cx, cy, zt + .012); circ(bw[0] - s * .02, bw[1], s * .02, rb); circ(bw[0] + s * .02, bw[1], s * .02, rb); };      // and its bow
     // the claw (MELO 2026-11-19): it hangs from a carriage on a rail under the window's top, over the chute in the near corner; a turn sends it over a gift, down, shut, up: a miss lets the gift slip back onto the heap, a win carries it to the chute and drops it
-    const [ta, tb, tc, td, te, tf] = CLAW, T = m.st === 'spin' ? m.t : 99, win = m.win && m.win !== 'none', tg = G[m.tg || 3], HOME = y1 - .1,      /* the chute on the left (y runs right to left on screen) */ ty = tg ? tg[1] : HOME, ZT = 1.3, ZL = tg[2] + g + .08, ccx = xf + g / 2,
+    const [ta, tb, tc, td, te, tf] = CLAW, T = m.st === 'spin' ? m.t : 99, win = m.win && m.win !== 'none', tg = G[m.tg != null ? m.tg : GIFT_LAYS[m.lay || 0].t], HOME = y1 - .1,      /* the chute on the left (y runs right to left on screen) */ ty = (tg ? tg[1] : HOME) + (m.miss === 'empty' ? .1 : 0),      /* an empty grab comes down just beside it */ ZT = 1.3, ZL = tg[2] + g + .08, ccx = xf + g / 2,
       cy = T < ta ? lerp(HOME, ty, ease(T / ta)) : T < td ? ty : T < te ? lerp(ty, HOME, ease((T - td) / (te - td))) : HOME,
       hz = T < ta ? ZT : T < tb ? lerp(ZT, ZL, ease((T - ta) / (tb - ta))) : T < tc ? ZL : T < td ? lerp(ZL, ZT, ease((T - tc) / (td - tc))) : ZT,
-      ts = tc + .42, op = T < tb ? 1 : T < tc ? 1 - (T - tb) / (tc - tb) : !win && T < te ? clamp((T - ts) / .12) * .45 : T < te ? 0 : clamp((T - te) / (tf - te));      // how far its fingers stand open: shut on the gift, loosening as a missed one slips
+      ts = tc + (m.ts || .42), op = T < tb ? 1 : T < tc ? 1 - (T - tb) / (tc - tb) : !win && T < te ? clamp((T - ts) / .12) * .45 : T < te ? 0 : clamp((T - te) / (tf - te));      // how far its fingers stand open: shut on the gift, loosening as a missed one slips
     let carry = null;      // where the gift it went for is while the claw has it
-    if (T < 99 && T >= tc) { const off = ZL - tg[2];
+    if (T < 99 && T >= tc && m.miss !== 'empty') { const off = ZL - tg[2];
       if (win) carry = T < te ? [cy - g / 2, hz - off] : [HOME - g / 2, ZT - off - 3 * (T - te) * (T - te) * 6];      // carried to the chute, then let go down it
       else { const zs = lerp(ZL, ZT, ease((Math.min(T, ts) - tc) / (td - tc))) - off, u = Math.max(0, T - ts), fall = zs - 4.5 * u * u, b = tg[2];      // a miss: up a little with the claw, then it slips and falls back, with a small bounce
-        carry = [ty - g / 2, fall > b ? fall : b + Math.max(0, Math.sin((u - Math.sqrt((zs - b) / 4.5)) * 14)) * .025 * Math.exp(-(u - Math.sqrt((zs - b) / 4.5)) * 6)]; } }
-    const rf = (last - (m.refill || -1e9)) / 1000, TB = .9, items = [], dk = (x, y, z) => x * 10 + y + (z - .8);      // drawn far row first, then right to left, lower before higher: so a gift on others lies over them, and the claw and what it holds take their place among the rest (MELO 2026-11-19)
-    G.forEach(([gx, gy, gz, c, rb], n) => {
-      if (n === (m.tg || 3) && (carry || (win && T >= tf))) return;
-      if (n === 3 && rf < 1.6) { if (rf < .55) return; const u = rf - .55, zf = 1.3 - 4.5 * u * u, land = Math.sqrt(.5 / 4.5), z = zf > gz ? zf : gz + Math.max(0, Math.sin((u - land) * 16)) * .03 * Math.exp(-(u - land) * 7);      // a win (MELO 2026-11-19): a new red gift drops in where the old one was
-        items.push([dk(gx, gy, z), () => gift(gx, gy - g / 2, z, c, rb)]); return; }
-      const tb2 = rf < TB ? (1 - rf / TB) : 0, hop = tb2 * Math.abs(Math.sin(rf * 16 + n * 1.7)) * .09 * (gz > .85 ? 1.3 : 1), sw = tb2 * Math.sin(rf * 13 + n * 2.3) * .04;      // and while the glass shines the heap tumbles (MELO 2026-11-19: harder)
-      items.push([dk(gx, gy, gz), () => gift(gx, gy - g / 2 + sw, gz + hop, c, rb)]); });
+        carry = [tg[1] - g / 2, fall > b ? fall : b + Math.max(0, Math.sin((u - Math.sqrt((zs - b) / 4.5)) * 14)) * .025 * Math.exp(-(u - Math.sqrt((zs - b) / 4.5)) * 6)]; } }
+    const mu = (last - (m.mix || -1e9)) / 1000 / GIFT_MIX, items = [], dk = (x, y, z) => x * 10 + y + (z - .8);      // drawn far row first, then right to left, lower before higher: so a gift on others lies over them, and the claw and what it holds take their place among the rest (MELO 2026-11-19)
+    if (mu < 1 && m.prev) { const A = lay(m.prev.lay, m.prev.cols), tt = mu * GIFT_MIX, rnd = k => { const q = Math.sin(k * 12.9898 + (m.mix % 1000) * .0137) * 43758.5453; return q - Math.floor(q); },      // the churn (MELO 2026-11-19): a great shove throws every gift up into the air; each falls under its own weight, lands somewhere, is thrown once more and comes down where it will lie, the lower ones first, its colour changing up in the air
+        hop = (a, b, u, h) => [lerp(a[0], b[0], u), lerp(a[1], b[1], u), lerp(a[2], b[2], u) + 4 * h * u * (1 - u)];      // a throw from a to b under gravity, rising h above the line between them
+      G.forEach((d, n) => { const a = n === m.prev.gone ? [xf, HOME, .66] : A[n], t0 = n * .04, t1 = .55 + rnd(n) * .12, t2 = .98 + (d[2] - .8) * 1.6,
+          mid = [rnd(n + 7) < .5 ? xb : xf, 3.3 + rnd(n + 3) * .34, .8], top = 1.12 + rnd(n + 9) * .08;
+        let q; if (tt < t0) q = a; else if (tt < t1) { const u = (tt - t0) / (t1 - t0); q = hop(a, mid, u, top - Math.max(a[2], mid[2])); }
+        else if (tt < t2) { const u = (tt - t1) / (t2 - t1); q = hop(mid, d, u, .2 + rnd(n + 5) * .1 + Math.max(0, d[2] - .8)); }
+        else { const u = tt - t2; q = [d[0], d[1], d[2] + Math.abs(Math.sin(u * 22)) * .03 * Math.exp(-u * 9)]; }      // and settles with a little bounce
+        const [x, y, z] = q, [c, rb] = tt < (t0 + t1) / 2 ? A[n].slice(3) : d.slice(3);
+        items.push([dk(x, y, z), () => gift(x, y - g / 2, z, c, rb)]); }); }
+    else G.forEach(([gx, gy, gz, c, rb], n) => { if (n === m.tg && carry) return; items.push([dk(gx, gy, gz), () => gift(gx, gy - g / 2, gz, c, rb)]); });
     const lw = Math.max(1.6, s * .03), MET = [236, 238, 244], DK = [150, 140, 150], kn = .075 + .05 * op, tp = .05 + .06 * op,
       finger = sg => line([P(ccx, cy + sg * .02, hz), P(ccx, cy + sg * kn, hz - .045), P(ccx, cy + sg * tp, hz - .1)], MET, lw),      // two fingers, bent in at the tips
       ck = carry ? dk(tg[0], carry[0] + g / 2, carry[1]) : dk(xf, cy, hz - g - .08);
@@ -830,7 +845,7 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
     v.box(ccx - .035, cy - .035, 1.32, .07, .07, .04, MET);
     items.sort((a, b) => a[0] - b[0]).forEach(it => it[1]());
     ctx.restore(); }
-  poly([F(y0 + .08, .8), F(y1 - .08, .8), F(y1 - .08, 1.38), F(y0 + .08, 1.38)], fl ? [255, 246, 220] : [236, 242, 246], fl ? .35 : .12);      // the glass over them
+  poly([F(y0 + .08, .8), F(y1 - .08, .8), F(y1 - .08, 1.38), F(y0 + .08, 1.38)], fl ? [255, 246, 220] : [236, 242, 246], fl ? .35 : .06);      // the glass over them
   poly([F(y0 + .08, 1.38), F(y0 + .2, 1.38), F(y0 + .12, .8), F(y0 + .08, .8)], [255, 255, 255], .25);      // a gleam on the glass
   const lb = P((x0 + x1) / 2, (y0 + y1) / 2, Hb + .09), lp = P((x0 + x1) / 2, (y0 + y1) / 2, Hb + .17), on = fl || m.st === 'spin' || m.st === 'coin'; ell(lb[0], lb[1], s * .12, s * .06, tint([150, 110, 60])); if (on) glow(lp[0], lp[1], s * .8, [255, 220, 130], fl ? .9 : .45); ctx.beginPath(); ctx.arc(lp[0], lb[1], s * .1, Math.PI, 0); ctx.fillStyle = css(fl ? [255, 248, 210] : on ? [255, 214, 140] : tint([226, 120, 90])); ctx.fill();      // the lamp on top: lit while the reels turn, blinking for a win
   { const a = -ease(1 - m.pull) * TAU;      // the knob below the window (MELO 2026-11-19: no lever): a gold dial with a bar across it, turned once round from where it rests and back to it as the gift comes
