@@ -1836,7 +1836,7 @@ function drawGuard(x, y, r, a = 1) {      // the Guardian Cross: a small gold cr
 const gearDrag = k => bag.open && bag.drag && bag.drag.moved && bag.drag.from === k;      // the thing worn in that place is in your hand just now
 function drawWorn(x, y, K) { bag.chefAt = [x, y, K]; }      // with the backpack open (MELO 2026-11-18): where the chef stands, for the column of what he wears beside him (drawGear, laid over the room)
 function gearFan(cx, cy, K, cs, keep) {      // where the three little capsules of what you wear fan out (MELO 2026-11-19): right over the chef's head if there is room, else turned a little to either side, a little further out; keep: what to stay clear of besides the chef himself
-  const pd = 6, S2 = cs / 2 + pd, mid = [cx, cy - K * .62], sp = Math.PI / 6, R0 = Math.max(cs + S2, (2 * S2 + 8) / (2 * Math.sin(sp / 2))), ks = keep.concat([[cx - K * .3, cy - K * 1.3, cx + K * .3, cy + 4]]);
+  const pd = GEARPD, S2 = cs / 2 + pd, mid = [cx, cy - K * .62], sp = Math.PI / 6, R0 = Math.max(cs + S2, (2 * S2 + 8) / (2 * Math.sin(sp / 2))), ks = keep.concat([[cx - K * .3, cy - K * 1.3, cx + K * .3, cy + 4]]);
   const ok = pts => pts.every(([x, y]) => { const r = [x - S2, y - S2, x + S2, y + S2]; if (r[0] < 8 || r[2] > W - 8 || r[1] < 12 || r[3] > H - 24) return false; return !ks.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]); });
   const ths = []; for (let d = -180; d < 180; d += 15) ths.push(d * Math.PI / 180); const off = a => Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) - (Math.sin(a) < 0 ? .01 : 0); ths.sort((a, b) => off(a) - off(b));      // out to the chef's right first (MELO 2026-11-19), then tipping up or down, up first
   for (let R = R0; R <= R0 * 2.4; R += R0 * .15)      // a 60° fan (MELO 2026-11-19), its tiles at least one tile clear of the chef's middle
@@ -1846,18 +1846,18 @@ function gearFan(cx, cy, K, cs, keep) {      // where the three little capsules 
 function fanPts(mid, th, R, sp) { const P = a => [mid[0] + Math.cos(a) * R, mid[1] + Math.sin(a) * R], e = q => q[1] + .6 * q[0], dir = e(P(th - sp)) <= e(P(th + sp)) ? 1 : -1; return [-1, 0, 1].map(n => P(th + n * sp * dir)); }      // drink, weapon, charm from the fan's top end, or its left end where it runs across
 function drawGear(t) {      // what you wear (MELO 2026-11-19): three little square capsules fanned out beside the chef, drink, weapon, charm from the top, opening out from him when the backpack opens. Things are put on by dropping them on a tile, taken off by dragging them away
   const at = bag.gearAt = {}; bag.gearRects = []; if (!bag.chefAt) return;      // shown while selling too, kept clear of the backpack, the chef's words, the shipping box and its table, and the server
-  const [cx, cy, K] = bag.chefAt, dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, pd = 6, S2 = cs / 2 + pd, mid = [cx, cy - K * .62], KINDS = ['drink', 'weapon', 'acc'];
+  const [cx, cy, K] = bag.chefAt, dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, pd = GEARPD, S2 = cs / 2 + pd, mid = [cx, cy - K * .62], KINDS = ['drink', 'weapon', 'acc'];
   let fan = bag.lay && bag.lay.fan; if (!fan) { fan = gearFan(cx, cy, K, cs, []); if (bag.lay) bag.lay.fan = fan; }
   const u = eout(clamp((last - fan.t) / 300)), pts = fanPts(mid, fan.th, fan.R, fan.sp);      // opening: out from the chef, each a beat after the one before
   KINDS.forEach((k, n) => { const v = eout(clamp((last - fan.t - n * 60) / 260)), [fx, fy] = pts[n], ix = lerp(mid[0], fx, v), iy = lerp(mid[1], fy, v), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
     at[k] = [fx, fy, cs / 2]; bag.gearRects.push([fx - S2, fy - S2, fx + S2, fy + S2]);
     if (v <= .01) return; ctx.save(); ctx.globalAlpha *= v; const sc = .4 + .6 * v; ctx.translate(ix, iy); ctx.scale(sc, sc); ctx.translate(-ix, -iy);
-    capsule(ix - S2, iy - S2, 2 * S2, 2 * S2, cs * .2 + pd);      // a little square capsule of its own, corners round about the tile's
+    capsule(ix - S2, iy - S2, 2 * S2, 2 * S2, cs * WELLR + pd * .7);      // a little square capsule of its own, its corners the tile's plus the gap between, so the gap is even all round (MELO 2026-11-19)
     const fits = dg && ITEMS[dg.id] === k && dg.from !== k; if (fits && !over) glow(ix, iy, cs * .9, [255, 236, 170], .45 + .15 * Math.sin(t * 6));      // a thing of its kind in your hand: its tile glows, to show where it goes
     glassWell(ix, iy, cs, cs, (over && ITEMS[dg.id] === k) || fits || (!!id && bag.selAt === k));
     if (id && !gearDrag(k)) { drawItem(id, ix, iy - Math.sin(t * 2 + n) * 1.2, cs * .3);
       const wa = bag.wornAt && bag.wornAt.k === k ? clamp((last - bag.wornAt.t - 260) / 320) : 1, sc2 = wa * (1 + .45 * Math.sin(wa * Math.PI));      // just put on: the tick waits a beat, then pops up, swelling past its size and settling (MELO 2026-11-19)
-      const qx = ix + cs / 2 - 6, qy = iy + cs / 2 - 6; if (sc2 > .01) { ctx.save(); ctx.translate(qx, qy); ctx.scale(sc2, sc2); ctx.translate(-qx, -qy); if (wa < 1) glow(qx, qy, 16, [255, 236, 190], 1 - wa);
+      const qx = ix + cs / 2 - 10, qy = iy + cs / 2 - 10;      /* wholly inside its tile, 3px in from its edges, so the capsule's padding stays even all round (MELO 2026-11-19) */ if (sc2 > .01) { ctx.save(); ctx.translate(qx, qy); ctx.scale(sc2, sc2); ctx.translate(-qx, -qy); if (wa < 1) glow(qx, qy, 16, [255, 236, 190], 1 - wa);
       ctx.fillStyle = css(bagLook().badge); ctx.beginPath(); ctx.arc(qx, qy, 7, 0, TAU); ctx.fill();      // worn: a tick in its bottom-right corner (MELO 2026-11-19)
       ctx.beginPath(); ctx.moveTo(qx - 3.2, qy + .2); ctx.lineTo(qx - .9, qy + 2.5); ctx.lineTo(qx + 3.4, qy - 2.4); ctx.strokeStyle = css(bagLook().badgeInk); ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore(); } }
     ctx.restore(); });
@@ -1956,8 +1956,10 @@ function bagSlabs() {
 let BAGCUE = 'tag';      // MELO chose the hanging tag (2026-11-18)
 const BAGL = { body: [62, 42, 76], edge: [255, 255, 255], edgeA: .5, shadow: 'rgba(20,10,30,.35)', wellTop: [34, 22, 44], wellBot: [50, 34, 62], lit: [255, 214, 140], badge: [255, 236, 190], badgeInk: [60, 40, 90] };
 const bagLook = () => BAGL;
+const WELLR = .14, GEARPD = 8;      // GEARPD: the padding round a worn thing's tile in its capsule
+      // how round a tile's corners are, against its size; whatever holds tiles is rounded that plus its padding, so its corners run parallel to theirs (MELO 2026-11-19)
 function glassWell(cx, cy, w, h, lit) {      // a place in the backpack: sunk into it, darker at its top
-  const L = BAGL, x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * .2;
+  const L = BAGL, x = cx - w / 2, y = cy - h / 2, r = Math.min(w, h) * WELLR;
   ctx.save(); rrect(x, y, w, h, r);
   if (lit) { ctx.fillStyle = css(L.lit, .32); ctx.fill(); ctx.strokeStyle = css(L.lit, .95); ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore(); return; }
   const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, css(L.wellTop)); g.addColorStop(1, css(L.wellBot)); ctx.fillStyle = g; ctx.fill(); ctx.clip();
@@ -2005,8 +2007,8 @@ function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own
   bag.drawnAt = last;      // the backpack just opened (not drawn the frame before): its tag gives its two turns (MELO 2026-11-18)
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.right, r.top, r.bottom] : [56, 12, 56]; })();      // the backpack button's right edge, top and foot
-  const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
-    BH = pad * 2 + rows * p - 10 + (desc ? 34 + desc.length * 19 : 0);      // what you wear is not here but on the chef (drawWorn)
+  const slabs = bagSlabs(), rows = slabs.length / 4, pad = GEARPD, p = Math.round(Math.min(64, (W - 70) / 7)), c = p - GEARPD,      /* its edge as far from the tiles as they are from each other, and both as the gear capsules' padding (MELO 2026-11-19), all on whole pixels */ BW = 2 * pad + 4 * p - GEARPD, desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
+    BH = pad * 2 + rows * p - GEARPD + (desc ? 34 + desc.length * 19 : 0);      // what you wear is not here but on the chef (drawWorn)
   const foot = (() => { if (sabPx == null) { const d = document.createElement('div'); d.style.cssText = 'position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)'; document.body.appendChild(d); sabPx = parseFloat(getComputedStyle(d).paddingBottom) || 0; d.remove(); } return H - 18 - sabPx; })(),      /* clear of the home bar */
     ch = BAGAT === 'chef' && bag.chefAt, key = [W, H, mode, BW, BH, !!ch].join(), L0 = bag.lay;
   if (opened || !L0 || L0.key !== key || (ch && Math.hypot(ch[0] - L0.ch[0], ch[1] - L0.ch[1]) > 12)) {      // worked out when it opens, and again only if the screen changes or the chef walks off: not every frame, so nothing shakes as the box jolts on a sale (MELO 2026-11-19)
@@ -2019,10 +2021,10 @@ function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own
       fan = gearFan(cx, cy, K, c, keep.filter((k, i) => i !== 0 && i !== 2).concat([[at[0] - 6, at[1] - 6, at[0] + BW + 6, at[1] + BH + 6]])); }
     if (!at) at = BAGAT === 'top' ? [(W - BW) / 2, ((W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12)] : [(W - BW) / 2, foot - BH];      // else in the middle at the foot of the screen
     bag.lay = { key, ch: ch ? [ch[0], ch[1]] : null, panel: at, fan }; }
-  const [bx, by] = bag.lay.panel;
+  const bx = Math.round(bag.lay.panel[0]), by = Math.round(bag.lay.panel[1]);
   bag.cell = c;
   bag.box = [bx, by - 10, bx + BW, by + BH];
-  capsule(bx, by, BW, BH, c * .2 + pad, { p });      // a capsule, as the corner buttons are (MELO 2026-11-18)
+  capsule(bx, by, BW, BH, c * WELLR + pad * .7, { p });      /* corners a little squarer than the tiles' would make them, so they don't look pinched (MELO 2026-11-19) */      // a capsule, as the corner buttons are (MELO 2026-11-18)
   const well = (cx, cy, id, place) => { const sel = id && bag.selAt === place,      // only the one tapped lights, not every place holding the same thing (MELO 2026-11-18)
     held = dg && dg.id === id && dg.from === place, over = dg && dg.over === place;
     spots.push([cx, cy, place]);
@@ -2030,7 +2032,7 @@ function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own
     if (id) hits.push([cx - c / 2, cy - c / 2, id, place]);
     const left = typeof place === 'number' ? rest(id) - (held ? 1 : 0) : 0;      // one in the hand: the rest of its stack stays where it was
     if (id && (!held || left > 0)) { const yy = cy - Math.sin(t * 2 + cx * .05) * 1.2; drawItem(id, cx, yy, c * .3);
-      const n = left; if (n > 1) { const qx = cx + c / 2 - 6, qy = cy + c / 2 - 6, tw = n > 99 ? 9 : n > 9 ? 4 : 0; ctx.fillStyle = css(bagLook().badge); rrect(qx - 7 - tw / 2, qy - 7, 14 + tw, 14, 7); ctx.fill(); ctx.font = `400 9px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css(bagLook().badgeInk); { ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(String(n)); ctx.fillText(String(n), qx + (m.actualBoundingBoxLeft - m.actualBoundingBoxRight) / 2, qy + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2); } } } };      // a stack shows how many lie there      // the count: smaller (MELO 2026-11-18), a little wider for two figures
+      const n = left; if (n > 1) { const tw = n > 99 ? 9 : n > 9 ? 4 : 0, qx = cx + c / 2 - 10 - tw / 2, qy = cy + c / 2 - 10; ctx.fillStyle = css(bagLook().badge); rrect(qx - 7 - tw / 2, qy - 7, 14 + tw, 14, 7);      /* wholly inside its tile, 3px in from its edges, so the padding round the tile stays even (MELO 2026-11-19) */ ctx.fill(); ctx.font = `400 9px ${THINF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = css(bagLook().badgeInk); { ctx.textBaseline = 'alphabetic'; const m = ctx.measureText(String(n)); ctx.fillText(String(n), qx + (m.actualBoundingBoxLeft - m.actualBoundingBoxRight) / 2, qy + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2); } } } };      // a stack shows how many lie there      // the count: smaller (MELO 2026-11-18), a little wider for two figures
   drawGear(t); const y0 = by + pad + c / 2, gx = bx + pad + c / 2;
   for (let n = 0; n < slabs.length; n++) well(gx + (n % 4) * p, y0 + Math.floor(n / 4) * p, slabs[n], n);      // what you carry
   for (const k in bag.gearAt || {}) { const [gx2, gy2, r] = bag.gearAt[k], id = have(save.equip[k]) ? save.equip[k] : null; spots.push([gx2, gy2, k]); if (id) hits.push([gx2 - c / 2, gy2 - c / 2, id, k]); }      // the places on the chef: drop a thing there to put it on, drag it off to take it off
