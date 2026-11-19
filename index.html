@@ -810,7 +810,7 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
   { const g = .135, xf = x1 - .04 - g, xb = xf - .15,      /* a touch bigger (MELO 2026-11-19) */      // gifts as little cubes, each its own colour and ribbon (MELO 2026-11-19: they have depth), a heap behind the glass
       lay = (L, cols) => GIFT_LAYS[L].g.map(([r, y, z], n) => [r === 'f' ? xf : xb, y, z, ...cols[n]]), G = lay(0, GIFT_SETS[m.set || 0]);
     const WQ = [F(y0 + .08, .8), F(y1 - .08, .8), F(y1 - .08, 1.38), F(y0 + .08, 1.38)]; ctx.save(); ctx.beginPath(); WQ.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.clip();      // kept inside the glass
-    { const lx = x1 - .03, ly = (y0 + y1) / 2, lc = P(lx, ly, 1.32), lf = P(lx, ly, .9); glow(lf[0], lf[1], s * .55, [255, 230, 200], .3); glow(lc[0], lc[1], s * .45, [255, 242, 214], .75);      // one little lamp in the middle of the inside's ceiling (MELO 2026-11-19), its warm light falling over the heap
+    { const lx = x1 - .03, ly = (y0 + y1) / 2, lc = P(lx, ly, 1.32), lf = P(lx, ly, .9); glow(lf[0], lf[1], s * .55, [255, 230, 200], .3); glow(lc[0], lc[1], s * .45, [255, 242, 214], .75);      // a lamp hidden up in the machine's top, out of sight (MELO 2026-11-19): only its warm light, from the middle of the inside's ceiling down over the heap
     }
     const gift = (x, y, z, c, rb) => { const cx = x + g / 2, cy = y + g / 2, zt = z + g, lw = Math.max(1, s * .016);
       v.sh = c2 => [mix(c2, [255, 255, 255], .28), c2, mix(c2, [60, 30, 60], .16)]; v.box(x, y, z, g, g, g, c); delete v.sh;      // lit by the lamps inside the machine, not the room's light: they stay bright (MELO 2026-11-19)
@@ -848,7 +848,6 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
     line([P(ccx, y0 + .1, 1.35), P(ccx, y1 - .1, 1.35)], DK, lw * 1.4);      // the rail, then the carriage on it
     v.box(ccx - .035, cy - .035, 1.32, .07, .07, .04, MET);
     items.sort((a, b) => a[0] - b[0]).forEach(it => it[1]());
-    { const lc = P(x1 - .03, (y0 + y1) / 2, 1.32); glow(lc[0], lc[1], s * .2, [255, 248, 225], .9); ell(lc[0], lc[1], s * .05, s * .025, [255, 250, 236]); }      // the lamp itself, under the ceiling in front of the heap
     ctx.restore(); }
   poly([F(y0 + .08, .8), F(y1 - .08, .8), F(y1 - .08, 1.38), F(y0 + .08, 1.38)], fl ? [255, 246, 220] : [236, 242, 246], fl ? .35 : .06);      // the glass over them
   poly([F(y0 + .08, 1.38), F(y0 + .2, 1.38), F(y0 + .12, .8), F(y0 + .08, .8)], [255, 255, 255], .25);      // a gleam on the glass
