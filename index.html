@@ -1937,7 +1937,9 @@ function drawGear(t) {      // what you wear, in a capsule straight to the right
     at[k] = [ix, iy, cs / 2];
     const fits = dg && ITEMS[dg.id] === k && dg.from !== k; if (fits && !over) glow(ix, iy, cs * .9, [255, 236, 170], .45 + .15 * Math.sin(t * 6));      // a thing of its kind in your hand: its tile glows, to show where it goes (MELO 2026-11-18)
     glassWell(ix, iy, cs, cs, (over && ITEMS[dg.id] === k) || fits || (!!id && bag.selAt === k));      // only a tile the thing in your hand can go on lights up      // a tap lights it, as in the backpack
-    if (id && !gearDrag(k)) drawItem(id, ix, iy - Math.sin(t * 2 + n) * 1.2, cs * .3); });
+    if (id && !gearDrag(k)) { drawItem(id, ix, iy - Math.sin(t * 2 + n) * 1.2, cs * .3);
+      const qx = ix + cs / 2 - 6, qy = iy + cs / 2 - 6; ctx.fillStyle = css(bagLook().badge); ctx.beginPath(); ctx.arc(qx, qy, 7, 0, TAU); ctx.fill();      // worn: a tick in its bottom-right corner, where a stack shows its count in the backpack (MELO 2026-11-19)
+      ctx.beginPath(); ctx.moveTo(qx - 3.2, qy + .2); ctx.lineTo(qx - .9, qy + 2.5); ctx.lineTo(qx + 3.4, qy - 2.4); ctx.strokeStyle = css(bagLook().badgeInk); ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); } });
 }
 function drawHeld(x, y, K, hide1, hide2) {      // what the chef carries, drawn in his hands (x, y: his feet; K: his size). A blade in mid-stroke is not drawn: the arc of the cut stands for it.
   if (!armed()) return; const sl = sleepy(), hx = x + K * .3, hy = y - K * .42;
