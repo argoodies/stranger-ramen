@@ -675,7 +675,11 @@ function drawTower(v, t) {
 }
 // The shipping box (MELO 2026-11-18): a small crate on the little table by the coffee house's door. A tap lifts its lid on the backpack;
 // a thing dropped in is sold for 5 coins.
-let sabPx = null; const CHEF_GAP = .6; const BAGAT = 'bottom';      // where the idle backpack sits: 'bottom' (MELO 2026-11-19, a try) or 'top'
+const chefSayRect = (cx, cy, K) => { const mw = Math.min(W * .62, 250), l = clamp(cx - mw / 2, 8, W - mw - 8); return [l, cy - K * 1.75 - 64, l + mw, cy - K * 1.3]; };      // where the chef's words come up over his head: kept clear by the backpack and the gear (MELO 2026-11-19, the church)
+let sabPx = null; const CHEF_GAP = .6; const BAGAT = 'chef';      // where the idle backpack sits: 'chef' (on his left, the gear on his right, each a chef's width off: MELO 2026-11-19), 'bottom' or 'top'
+function freeSpot(w, h, px, py, keep, x0, y0, x1, y1, down = 1) {      /* down: how much worse a place below px, py counts than one as far above */      // the top-left corner, within x0..x1, y0..y1, nearest px, py, of a w by h box clear of every keep rect [l, t, r, b]; null if there is none
+  let got = null, bd = 1e9; for (let y = y0; y <= y1; y += 6) for (let x = x0; x <= x1 + 5; x += 6) { const xx = Math.min(x, x1), d = Math.hypot(xx - px, (y - py) * (y > py ? down : 1)); if (d < bd && !keep.some(k => xx < k[2] && xx + w > k[0] && y < k[3] && y + h > k[1])) { bd = d; got = [xx, y]; } }
+  return got; }
 const SHIPR = .15, SHIP_DROP = 1.4, SHIP_UP = 3;      // how far round the box a thing let go of still goes into it, in box radii; above the box it reaches SHIP_UP times as far (MELO 2026-11-19: the old zone, drawn out upward), below it down to the near edge of the round table top (MELO 2026-11-19)
 function drawShipBox(v, sx, sy, z0) {
   const v0 = v; v = Object.create(v0); v.P = (x, y, z = 0) => v0.P(x, y, z + z0);      // drawn as if on the ground, lifted onto the table top
@@ -1918,15 +1922,15 @@ function drawGear(t) {      // what you wear, in a capsule straight to the right
     fit = (x0, iy) => [clamp(x0, 8 + pd + cs / 2, W - 8 - pd - 2 * (cs + gap) - cs / 2), iy];      // x0, iy: the first tile's middle; tiles, gaps and edge as the backpack's
   const CG = K * CHEF_GAP;      // a chef's width between him and the capsule (MELO 2026-11-19)
   let [x0, iy] = fit(cx + K * .3 + CG + pd + cs / 2, cy - K * .6);      // to the right of the chef, a chef's width off (MELO 2026-11-18, 2026-11-19)
-  {      // not over the backpack nor up against the chef; selling, not over the box (its lid open) nor where the box's words come up, whether or not they show just now, so the capsule never jumps
+  if (bag.lay && bag.lay.gear) [x0, iy] = bag.lay.gear; else {      // worked out once with the backpack (drawBag), not every frame; not over the backpack nor up against the chef; selling, not over the box (its lid open) nor where the box's words come up, whether or not they show just now, so the capsule never jumps
     const keep = bag.box ? [[bag.box[0], bag.box[1], bag.box[2] + 10, bag.box[3] + 10]] : [], sb = bag.sell && mode === 'bar' && BARHIT.ship, mw = Math.min(W * .62, 250);
-    keep.push([cx - K * .3 - CG, cy - K * 1.3, cx + K * .3 + CG, cy + 4]);      // the chef, with a chef's width clear each side
+    keep.push([cx - K * .3 - CG, cy - K * 1.3, cx + K * .3 + CG, cy + 4], chefSayRect(cx, cy, K));      // the chef, with a chef's width clear each side, and his words
     if (sb && bar.keeperAt) { const q = bar.keeperAt; keep.push([q[0] - K * .45, q[1] - K * 1.3, q[0] + K * .45, q[1] + 4]); }      // nor over the server
     if (sb) keep.push([sb[0] - sb[2] * 1.3, sb[1] - sb[2] * 2.8, sb[0] + sb[2] * 1.3, sb[1] + sb[2]]);
     if (sb) { const ty = sb[1] - sb[2] * 2.2, bx = clamp(sb[0] - mw / 2, 8, W - mw - 8); keep.push([bx, ty - 66, bx + mw, ty + 4]); }      // where the box's words come up
     const hits = (x, y) => { const r = [x - cs / 2 - pd, y - CH / 2, x - cs / 2 - pd + CW, y + CH / 2]; return keep.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]); };
     let got = null, bd = 1e9; for (let y = 12 + CH / 2; y < H - 24 - CH / 2; y += 6) for (let x = 8 + pd + cs / 2; x <= W - 8 - pd - 2 * (cs + gap) - cs / 2 + 5; x += 6) { const xx = fit(x, y)[0], d = Math.hypot(xx - x0, y - iy); if (d < bd && !hits(xx, y)) { bd = d; got = [xx, y]; } }      // the free place nearest the one beside the chef (MELO 2026-11-18)
-    [x0, iy] = got || fit(W / 2 - (cs + gap), H - 24 - CH / 2); }
+    [x0, iy] = got || fit(W / 2 - (cs + gap), H - 24 - CH / 2); if (bag.lay) bag.lay.gear = [x0, iy]; }
   bag.gearBox = [x0 - cs / 2 - pd, iy - cs / 2 - pd, x0 - cs / 2 - pd + CW, iy + cs / 2 + pd];      /* the capsule itself: over it a place on the chef wins over the shipping box, round it the box does */
   capsule(x0 - cs / 2 - pd, iy - cs / 2 - pd, 3 * cs + 2 * gap + 2 * pd, cs + 2 * pd, cs * .2 + pd);      // corners round about the tiles' own (MELO 2026-11-18)
   ['drink', 'weapon', 'acc'].forEach((k, n) => { const ix = x0 + n * (cs + gap), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
@@ -2071,14 +2075,24 @@ function capsule(x, y, w, h, rr, main) {      // the tray the backpack's things 
 }
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
   if (mode === 'bar') bag.sell = true;      // in the coffee house there is only the one backpack: the selling one, its box open beside it (MELO 2026-11-18)
-  if (bag.drawnAt == null || last - bag.drawnAt > 150) { bag.tagFlip = last - 120; if (mode === 'bar') { bar.boxSay = S().shipSay; bar.boxSayT = 3; } }      // just opened: the tag is already turning on the first frame (MELO 2026-11-18); in the coffee house the box says what it is for
+  const opened = bag.drawnAt == null || last - bag.drawnAt > 150;
+  if (opened) { bag.tagFlip = last - 120; if (mode === 'bar') { bar.boxSay = S().shipSay; bar.boxSayT = 3; } }      // just opened: the tag is already turning on the first frame (MELO 2026-11-18); in the coffee house the box says what it is for
   bag.drawnAt = last;      // the backpack just opened (not drawn the frame before): its tag gives its two turns (MELO 2026-11-18)
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.right, r.top, r.bottom] : [56, 12, 56]; })();      // the backpack button's right edge, top and foot
-  const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, bx = (W - BW) / 2, desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
+  const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
     BH = pad * 2 + rows * p - 10 + (desc ? 34 + desc.length * 19 : 0);      // what you wear is not here but on the chef (drawWorn)
   const foot = (() => { if (sabPx == null) { const d = document.createElement('div'); d.style.cssText = 'position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)'; document.body.appendChild(d); sabPx = parseFloat(getComputedStyle(d).paddingBottom) || 0; d.remove(); } return H - 18 - sabPx; })(),      /* clear of the home bar */
-    by = BAGAT === 'bottom' ? foot - BH : ((W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12) + (BAGCUE === 'handle' ? 12 : 0);      // BAGAT 'bottom': the idle backpack at the foot of the screen, in the middle (MELO 2026-11-19, a try); 'top': level with its button
+    ch = BAGAT === 'chef' && bag.chefAt, key = [W, H, mode, BW, BH, !!ch].join(), L0 = bag.lay;
+  if (opened || !L0 || L0.key !== key || (ch && Math.hypot(ch[0] - L0.ch[0], ch[1] - L0.ch[1]) > 12)) {      // worked out when it opens, and again only if the screen changes or the chef walks off: not every frame, so nothing shakes as the box jolts on a sale (MELO 2026-11-19)
+    let at = null;
+    if (ch) { const [cx, cy, K] = ch, CG = K * CHEF_GAP, keep = [[cx - K * .3 - CG, cy - K * 1.3, cx + K * .3 + CG, cy + 4], [0, 0, top0[0] + 8, top0[2] + 8], chefSayRect(cx, cy, K)], sb = mode === 'bar' && BARHIT.ship;      // clear of the chef by a chef's width, and of the corner buttons
+      if (sb) { const mw = Math.min(W * .62, 250), ty = sb[1] - sb[2] * 2.2, qx = clamp(sb[0] - mw / 2, 8, W - mw - 8); keep.push([sb[0] - sb[2] * 1.3, sb[1] - sb[2] * 2.8, sb[0] + sb[2] * 1.3, sb[1] + sb[2]], [qx, ty - 66, qx + mw, ty + 4]); }      // and of the box and its words
+      if (sb && bar.keeperAt) { const q = bar.keeperAt; keep.push([q[0] - K * .45, q[1] - K * 1.3, q[0] + K * .45, q[1] + 4]); }
+      at = freeSpot(BW, BH + 10, Math.max(8, cx - K * .3 - CG - BW), cy - K * 1.3 - BH - 10, keep, 8, 8, W - 8 - BW, foot - BH, 3); if (at) at[1] += 10; }      // up on his left, its foot at the top of his hat; lower only if it must (MELO 2026-11-19)
+    if (!at) at = BAGAT === 'top' ? [(W - BW) / 2, ((W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12)] : [(W - BW) / 2, foot - BH];      // else in the middle at the foot of the screen
+    bag.lay = { key, ch: ch ? [ch[0], ch[1]] : null, panel: at, gear: null }; }
+  const [bx, by] = bag.lay.panel;
   bag.cell = c;
   bag.box = [bx, by - 10, bx + BW, by + BH];
   capsule(bx, by, BW, BH, c * .2 + pad, { p });      // a capsule, as the corner buttons are (MELO 2026-11-18)
