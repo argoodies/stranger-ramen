@@ -16,6 +16,7 @@ v = next((x for x in vs if x['attributes']['versionString'] == ver), None)
 if not v: v = must('POST', '/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {'platform': 'IOS', 'versionString': ver, 'releaseType': 'AFTER_APPROVAL', 'copyright': '2026 ARGoodies'}, 'relationships': {'app': {'data': {'type': 'apps', 'id': APP}}}}})['data']
 VID = v['id']; print('version', ver, VID, v['attributes'].get('appStoreState'))
 NEW = {'en-US': '- Switching language on the title screen no longer makes the screen shrink\n- After switching language, the chef says which language he switched to\n- In the library, the floor in front of the bookshelf is easier to tap\n- When you get something new, the backpack button glows for a moment', 'zh-Hant': '· 開始畫面切換語言時，畫面不再縮一下\n· 切換語言後，主角會說出「已切換為…」\n· 圖書館裡書架前的地板更好點了\n· 獲得新物品時，左上角背包會亮一下', 'zh-Hans': '· 开始画面切换语言时，画面不再缩一下\n· 切换语言后，主角会说出「已切换为…」\n· 图书馆里书架前的地板更好点了\n· 获得新物品时，左上角背包会亮一下'}
+if os.environ.get('WHATSNEW'): NEW = json.load(open(os.environ['WHATSNEW'], encoding='utf-8'))      # what's new from a file: {locale: text}
 def upload(set_id, path):
     data = open(path, 'rb').read()
     r = must('POST', '/v1/appScreenshots', {'data': {'type': 'appScreenshots', 'attributes': {'fileName': os.path.basename(path), 'fileSize': len(data)}, 'relationships': {'appScreenshotSet': {'data': {'type': 'appScreenshotSets', 'id': set_id}}}}})['data']
