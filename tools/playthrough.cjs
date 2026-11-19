@@ -63,13 +63,13 @@ const OUT = path.resolve(process.argv[2] || 'playthrough'), PAGE = path.resolve(
     const h = await js(() => BARHIT.slot), c0 = await js(() => save.coins); await tap(h[0], h[1]);
     const went = await until(() => bar.slot.st !== 'idle', 15); await until(() => bar.slot.st === 'idle', 15); await tick(1.5);
     const c1 = await js(() => save.coins), win = await js(() => bar.slot.win); note(`coins ${c0} -> ${c1}, ${win ? 'won ' + win : 'no win'}`); return went && c1 === c0 - 1; });
-  await step('sell_mode', async note => { const h = await js(() => BARHIT.ship); await tap(h[0], h[1]); await tick(.3); const said = await js(() => bar.boxSayT > 0 ? bar.boxSay : ''); await tick(1); const s = await js(() => bag.open && bag.sell); note(`the box says: ${said}; selling ${s}`); return s; });
+  await step('sell_mode', async note => { const h = await js(() => BARHIT.ship); await tap(h[0], h[1]); await tick(.5); const said = await js(() => bar.boxSayT > 0 ? bar.boxSay : ''), shut = await js(() => !bag.open); await tap(h[0], h[1]); await tick(1); const s = await js(() => bag.open && bag.sell); note(`the box says: ${said}; still shut after one tap: ${shut}; after a second, selling ${s}`); return shut && s; });
   await step('sell_tap', async note => {
-    const has = await js(() => { save.cards.ring = (save.cards.ring || 0) + 1; save.ring = true; return true; }); await tick(.3);
-    const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'ring'); return h && [h[0] + c / 2, h[1] + c / 2]; }); if (!hit) { note('ring not in the backpack'); return false; }
-    await tap(hit[0], hit[1]); await tick(.5); const r = await js(() => [bag.sel, bar.boxSayT > 0 || bar.mySayT > 0]); note(`picked ${r[0]}, ${r[1] ? 'a bubble came up' : 'nothing said'}`); return has && r[0] === 'ring' && !r[1]; });
+    const has = await js(() => { save.cards.guard = (save.cards.guard || 0) + 1; return true; }); await tick(.3);
+    const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'guard'); return h && [h[0] + c / 2, h[1] + c / 2]; }); if (!hit) { note('ring not in the backpack'); return false; }
+    await tap(hit[0], hit[1]); await tick(.5); const r = await js(() => [bag.sel, bar.boxSayT > 0 || bar.mySayT > 0]); note(`picked ${r[0]}, ${r[1] ? 'a bubble came up' : 'nothing said'}`); return has && r[0] === 'guard' && !r[1]; });
   await step('sold', async note => {
-    const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'ring'); return h && [h[0] + c / 2, h[1] + c / 2]; }), box = await js(() => BARHIT.ship), c0 = await js(() => save.coins);
+    const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'guard'); return h && [h[0] + c / 2, h[1] + c / 2]; }), box = await js(() => BARHIT.ship), c0 = await js(() => save.coins);
     await p.mouse.move(hit[0], hit[1]); await p.mouse.down(); for (let i = 1; i <= 12; i++) { await p.mouse.move(hit[0] + (box[0] - hit[0]) * i / 12, hit[1] + (box[1] + 10 - hit[1]) * i / 12); await tick(.05); }
     await tick(.4); await p.mouse.up(); await tick(2); const c1 = await js(() => save.coins); note(`coins ${c0} -> ${c1}`); return c1 === c0 + 5; });
   await step('backpack', async note => { await js(() => { bag.open = bag.sell = false; }); await tick(.3); await js(() => document.getElementById('bag').click()); await tick(.8); return js(() => bag.open); });

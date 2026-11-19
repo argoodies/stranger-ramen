@@ -61,7 +61,6 @@ button.act.hint{animation:pulse 1.1s ease-in-out infinite}
     <button class="pill" id="lang" style="display:none;padding:8px 11px;line-height:0" aria-label="Language"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.2v2.3M2.6 5.6h9.8M10.4 5.6C9.3 9.6 6.9 12.2 3.2 13.8M5.6 7.6c1.5 2.7 3.7 4.8 6.6 6.1"/><path d="M13.2 21.6l4.3-10.4 4.3 10.4M14.8 17.9h5.4"/></svg></button>      <!-- 文A: the language button -->
     <div id="langMenu"><button data-l="hans">简体中文</button><button data-l="hant">繁體中文</button><button data-l="en">English</button><button data-l="auto">跟随系统</button></div>
     <button class="pill" id="leave" style="display:none">← 离开</button>
-    <button class="pill" id="bback" style="display:none;padding:8px 11px;line-height:0" aria-label="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l-8 8 8 8"/></svg></button>
     <button class="pill" id="bclose" style="display:none;padding:8px 11px;line-height:0" aria-label="close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <button class="pill" id="zoom" style="display:none;padding:8px 11px;line-height:0" aria-label="全景"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
     <div id="bagcol" style="display:flex;align-items:flex-start;gap:6px">      <!-- the backpack, then the prophecies as two small circles in the same row (4px down: their middle on the backpack's, and on the fight's hearts): in a fight the backpack hides and the circles stay clear of the drink and hearts across the top (MELO 2026-11-16) -->
@@ -159,9 +158,8 @@ const STR = {
     barDay: ['早上好，来杯咖啡吗？', '今天的豆子烤得正好。'], barNight: ['晚上好，喝点什么？', '今晚来杯麦酒吧。'], barServeDay: '您的咖啡。', barServeNight: '您的酒。', barEnjoy: '请享用。', meow: '喵～', barPatron: { sailor: ['起雾的时候，听钟楼的钟声认路。', '海上可没有拉面吃。'], drunk: ['嗝……老板，再来一杯。', '我就坐一会儿……'], bard: ['想听一首关于钟楼的歌吗？', '这间酒馆，适合写一首慢歌。'] },
     churchDown: '不行了……', advSay: '你的攻击被我保护了。', passed: '小恶魔传刀了！', debugAsk: '跳到第几关？（1–7）', devOn: '进入开发者模式。', devOff: '离开开发者模式。', devTitle: '开发者', devJump: '跳关', devItems: '获得物品', devTime: '调整时间', devBuff: '开启预言', devCut: '过场动画', devWipe: '清除本地数据', devWipeSure: '再点一次，清除所有本地数据', devRate: '弹出评星', rateShown: '已弹出', rateRated: '已评过或达上限', rateTF: 'TestFlight 不弹', rateWeb: '网页不支持', rateAndroid: 'Android 不支持', cutTower: '塔顶的风景', cutStory: '迷乱的漩涡', tapGo: '点击任意处继续', chapterDone: '已完成', chapterNo: '第一章', on: '开', off: '关', drySay: '怎么是拌面？',
     thanks: '谢谢。', moreSoon: '谢谢。后面的内容还在制作中。', again: n => '欢迎挑战' + n + '周目。', congrats: () => '祝贺你。', ch2Soon: '第二章的游戏内容还在制作中。', ach2: '获得成就：迷乱的漩涡二周目', lightTorch: '点燃火把，进入战斗。', towerGo: '我带你去看看塔顶的风景。', towerDone: '谢谢。', guardSave: '十字架替我挡住了！', got: n => '是' + n + '，我收下了。',
-    bagSlots: ['武器', '饰品', '饮品'], ringSave: '戒指把这一下弹回去了！',
-    realBoss: '这是真正的Boss！', takeCoffee: '可以带走。', shipSay: '多余的东西可以放进小盒子变卖。', boxHi: '可以把东西放这里变卖。', coinSay: '金币可以用来投币抽奖。', noCoin: '现在没钱。', noWin: '没中奖。', sellHint: n => n + '拖拽到小盒子即可变卖。', wornSay: n => '成功装配' + n + '。', story: [['看，流星！', '快许个愿吧。'], ['老样子，两杯拿铁？', '嗯，和你一样就好。'], ['要最好看的那一朵。', '谢谢你。'], ['鸟儿又来找你了。', '它们是来看你的。'], ['我要去教堂唱诗了。', '我会等你。'], [], ['就是她！她是恶魔伪装的！', '什么？！', '我不是！'], ['我要今天就处决掉你。'], ['不好了！出事了！', '什么？！'], ['住手！'], ['啊——！', '这……这是漩涡的力量……'], [], ['糟糕，门打不开了！'], ['不要走……'], []], useSay: { coffee: '又有力气了！' }, gotProphecy: '得到一个预言。', buffNames: { speed: '速度预言', freeze: '冰冻预言' }, buffSay: { speed: '走路跑步都更快了。', freeze: '弹刀让敌人冻慢五秒。' }, items: { coffee: ['咖啡', '战斗中回半血。'], coin: ['金币', '投币抽奖用。'], twin: ['双刀', '一次两刀，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时随机雷劈。'], flower: ['鲜花', '毫无用处。'], sleep: ['睡刀', '弹刀三倍伤害，可让恶魔昏睡。'], guard: ['守护十字架', '三成格挡恶魔。'], knife: ['菜刀', '弹刀十倍伤害。'], ring: ['贞洁之戒', '倒下前反弹一击。'] },
-    badges: { full: ['完全拉面', '牛肉、香菜、辣椒，一样不落。'], spicy: ['全辣拉面', '一碗面里放了三勺辣椒。'], pukka: ['双毒徽章', '赢下一局，结束时场上留着两个红色小标。'], sailor: ['不倒徽章', '被投票处决，却没有倒下。'], heretic: ['反转徽章', '提名自己被处决，然后赢了。'], ring: ['贞洁之戒', '从教堂里救出了贞洁者。'] },
+    bagSlots: ['武器', '饰品', '饮品'],
+    realBoss: '这是真正的Boss！', takeCoffee: '可以带走。', shipSay: '多余的东西可以放进小盒子变卖。', boxHi: '可以把东西放这里变卖。', coinSay: '金币可以用来投币抽奖。', noCoin: '现在没钱。', noWin: '没中奖。', sellHint: n => n + '拖拽到小盒子即可变卖。', wornSay: n => '成功装配' + n + '。', story: [['看，流星！', '快许个愿吧。'], ['老样子，两杯拿铁？', '嗯，和你一样就好。'], ['要最好看的那一朵。', '谢谢你。'], ['鸟儿又来找你了。', '它们是来看你的。'], ['我要去教堂唱诗了。', '我会等你。'], [], ['就是她！她是恶魔伪装的！', '什么？！', '我不是！'], ['我要今天就处决掉你。'], ['不好了！出事了！', '什么？！'], ['住手！'], ['啊——！', '这……这是漩涡的力量……'], [], ['糟糕，门打不开了！'], ['不要走……'], []], useSay: { coffee: '又有力气了！' }, gotProphecy: '得到一个预言。', buffNames: { speed: '速度预言', freeze: '冰冻预言' }, buffSay: { speed: '走路跑步都更快了。', freeze: '弹刀让敌人冻慢五秒。' }, items: { coffee: ['咖啡', '战斗中回半血。'], coin: ['金币', '投币抽奖用。'], twin: ['双刀', '一次两刀，弹刀三倍伤害。'], doom: ['末日项链', '弹刀时随机雷劈。'], flower: ['鲜花', '毫无用处。'], sleep: ['睡刀', '弹刀三倍伤害，可让恶魔昏睡。'], guard: ['守护十字架', '三成格挡恶魔。'], knife: ['菜刀', '弹刀十倍伤害。'] },
     welcome: '欢迎来玩一分钟染。', night: '天黑请闭眼。', pickSailor: '请选择一个人。', pickPukka: '请选择一个人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，没有人死。',
     sailorSay: (v, t) => t === v ? '我自己喝了酒。' : '我和' + who(v, t) + '喝了酒。', hereticSay: '我能反转结果。',
@@ -189,9 +187,8 @@ const STR = {
     barDay: ['早安，來杯咖啡嗎？', '今天的豆子烘得正好。'], barNight: ['晚上好，喝點什麼？', '今晚來杯麥酒吧。'], barServeDay: '您的咖啡。', barServeNight: '您的酒。', barEnjoy: '請享用。', meow: '喵～', barPatron: { sailor: ['起霧的時候，聽鐘樓的鐘聲認路。', '海上可沒有拉麵吃。'], drunk: ['嗝……老闆，再來一杯。', '我就坐一會兒……'], bard: ['想聽一首關於鐘樓的歌嗎？', '這間酒館，適合寫一首慢歌。'] },
     churchDown: '不行了……', advSay: '你的攻擊被我保護了。', passed: '小惡魔傳刀了！', debugAsk: '跳到第幾關？（1–7）', devOn: '進入開發者模式。', devOff: '離開開發者模式。', devTitle: '開發者', devJump: '跳關', devItems: '獲得物品', devTime: '調整時間', devBuff: '開啟預言', devCut: '過場動畫', devWipe: '清除本機資料', devWipeSure: '再點一次，清除所有本機資料', devRate: '彈出評星', rateShown: '已彈出', rateRated: '已評過或達上限', rateTF: 'TestFlight 不彈', rateWeb: '網頁不支援', rateAndroid: 'Android 不支援', cutTower: '塔頂的風景', cutStory: '迷亂的漩渦', tapGo: '點擊任意處繼續', chapterDone: '已完成', chapterNo: '第一章', on: '開', off: '關', drySay: '怎麼是拌麵？',
     thanks: '謝謝。', moreSoon: '謝謝。後面的內容還在製作中。', again: n => '歡迎挑戰' + n + '周目。', congrats: () => '祝賀你。', ch2Soon: '第二章的遊戲內容還在製作中。', ach2: '獲得成就：迷亂的漩渦二周目', lightTorch: '點燃火把，進入戰鬥。', towerGo: '我帶你去看看塔頂的風景。', towerDone: '謝謝。', guardSave: '十字架替我擋住了！', got: n => '是' + n + '，我收下了。',
-    bagSlots: ['武器', '飾品', '飲品'], ringSave: '戒指把這一下彈回去了！',
-    realBoss: '這是真正的Boss！', takeCoffee: '可以帶走。', shipSay: '多餘的東西可以放進小盒子變賣。', boxHi: '可以把東西放這裡變賣。', coinSay: '金幣可以用來投幣抽獎。', noCoin: '現在沒錢。', noWin: '沒中獎。', sellHint: n => n + '拖曳到小盒子即可變賣。', wornSay: n => '成功裝配' + n + '。', story: [['看，流星！', '快許個願吧。'], ['老樣子，兩杯拿鐵？', '嗯，和你一樣就好。'], ['要最好看的那一朵。', '謝謝你。'], ['鳥兒又來找你了。', '牠們是來看你的。'], ['我要去教堂唱詩了。', '我會等你。'], [], ['就是她！她是惡魔偽裝的！', '什麼？！', '我不是！'], ['我要今天就處決掉你。'], ['不好了！出事了！', '什麼？！'], ['住手！'], ['啊——！', '這……這是漩渦的力量……'], [], ['糟糕，門打不開了！'], ['不要走……'], []], useSay: { coffee: '又有力氣了！' }, gotProphecy: '得到一個預言。', buffNames: { speed: '速度預言', freeze: '冰凍預言' }, buffSay: { speed: '走路跑步都更快了。', freeze: '彈刀讓敵人凍慢五秒。' }, items: { coffee: ['咖啡', '戰鬥中回半血。'], coin: ['金幣', '投幣抽獎用。'], twin: ['雙刀', '一次兩刀，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時隨機雷劈。'], flower: ['鮮花', '毫無用處。'], sleep: ['睡刀', '彈刀三倍傷害，可讓惡魔昏睡。'], guard: ['守護十字架', '三成格擋惡魔。'], knife: ['菜刀', '彈刀十倍傷害。'], ring: ['貞潔之戒', '倒下前反彈一擊。'] },
-    badges: { full: ['完全拉麵', '牛肉、香菜、辣椒，一樣不落。'], spicy: ['全辣拉麵', '一碗麵裡放了三勺辣椒。'], pukka: ['雙毒徽章', '贏下一局，結束時場上留著兩個紅色小標。'], sailor: ['不倒徽章', '被投票處決，卻沒有倒下。'], heretic: ['反轉徽章', '提名自己被處決，然後贏了。'], ring: ['貞潔之戒', '從教堂裡救出了貞潔者。'] },
+    bagSlots: ['武器', '飾品', '飲品'],
+    realBoss: '這是真正的Boss！', takeCoffee: '可以帶走。', shipSay: '多餘的東西可以放進小盒子變賣。', boxHi: '可以把東西放這裡變賣。', coinSay: '金幣可以用來投幣抽獎。', noCoin: '現在沒錢。', noWin: '沒中獎。', sellHint: n => n + '拖曳到小盒子即可變賣。', wornSay: n => '成功裝配' + n + '。', story: [['看，流星！', '快許個願吧。'], ['老樣子，兩杯拿鐵？', '嗯，和你一樣就好。'], ['要最好看的那一朵。', '謝謝你。'], ['鳥兒又來找你了。', '牠們是來看你的。'], ['我要去教堂唱詩了。', '我會等你。'], [], ['就是她！她是惡魔偽裝的！', '什麼？！', '我不是！'], ['我要今天就處決掉你。'], ['不好了！出事了！', '什麼？！'], ['住手！'], ['啊——！', '這……這是漩渦的力量……'], [], ['糟糕，門打不開了！'], ['不要走……'], []], useSay: { coffee: '又有力氣了！' }, gotProphecy: '得到一個預言。', buffNames: { speed: '速度預言', freeze: '冰凍預言' }, buffSay: { speed: '走路跑步都更快了。', freeze: '彈刀讓敵人凍慢五秒。' }, items: { coffee: ['咖啡', '戰鬥中回半血。'], coin: ['金幣', '投幣抽獎用。'], twin: ['雙刀', '一次兩刀，彈刀三倍傷害。'], doom: ['末日項鍊', '彈刀時隨機雷劈。'], flower: ['鮮花', '毫無用處。'], sleep: ['睡刀', '彈刀三倍傷害，可讓惡魔昏睡。'], guard: ['守護十字架', '三成格擋惡魔。'], knife: ['菜刀', '彈刀十倍傷害。'] },
     welcome: '歡迎來玩一分鐘染。', night: '天黑請閉眼。', pickSailor: '請選擇一個人。', pickPukka: '請選擇一個人。', ok: '好的。',
     dawnDied: i => '天亮了。昨夜，' + st[i] + '死了。', nightDied: i => '今夜，' + st[i] + '死了。', dawnQuiet: '天亮了。昨夜平安，沒有人死。',
     sailorSay: (v, t) => t === v ? '我自己喝了酒。' : '我和' + who(v, t) + '喝了酒。', hereticSay: '我能反轉結果。',
@@ -219,9 +216,8 @@ const STR = {
     barDay: ['Morning! Coffee?', 'The beans are roasted just right today.'], barNight: ['Evening. What will it be?', 'An ale tonight, perhaps.'], barServeDay: 'Your coffee.', barServeNight: 'Your drink.', barEnjoy: 'Enjoy.', meow: 'Meow~', barPatron: { sailor: ['In the fog I steer by the clocktower bell.', 'No ramen out at sea.'], drunk: ['Hic… one more, barkeep.', 'Just sitting a while…'], bard: ['Shall I sing you a song of the clocktower?', 'This little bar wants a slow song.'] },
     churchDown: 'I am done for…', advSay: 'Your blow? I protected that.', passed: 'The imp passed the blade on!', debugAsk: 'Jump to which round? (1–7)', devOn: 'Developer mode on.', devOff: 'Developer mode off.', devTitle: 'Developer', devJump: 'Jump to round', devItems: 'Get an item', devTime: 'Set the time', devBuff: 'Prophecies', devCut: 'Cutscenes', devWipe: 'Clear local data', devWipeSure: 'Tap again to erase all local data', devRate: 'Ask for a rating', rateShown: 'Shown', rateRated: 'Rated or limit hit', rateTF: 'Not in TestFlight', rateWeb: 'Not on web', rateAndroid: 'Not on Android', cutTower: 'The View from the Top', cutStory: 'The Bewildered Whirlwind', tapGo: 'Tap anywhere to continue', chapterDone: 'Completed', chapterNo: 'Chapter One', on: 'On', off: 'Off', drySay: 'Dry noodles? Where is the soup?',
     thanks: 'Thank you.', moreSoon: 'Thank you. The rest is still being made.', again: n => 'Welcome to run ' + n + '.', congrats: () => 'Congratulations!', ch2Soon: 'Chapter Two is still being made.', ach2: 'Achievement: The Whirlwind, Second Run', lightTorch: 'Light the torch to begin the fight.', towerGo: 'Let me show you the view from the top.', towerDone: 'Thank you.', guardSave: 'The cross took that one for me!', got: n => n + '. I will take it.',
-    bagSlots: ['Weapon', 'Charm', 'Drink'], ringSave: 'The ring threw that one back!',
-    realBoss: 'This is the real boss!', takeCoffee: 'To take away.', shipSay: 'Put anything you can spare in the little box to sell it.', boxHi: 'Put things in here to sell them.', coinSay: 'Coins are for the lucky draw.', noCoin: 'No money right now.', noWin: 'No luck.', sellHint: n => 'Drag the ' + n + ' onto the little box to sell it.', wornSay: n => 'The ' + n + ' is on.', story: [['Look, a shooting star!', 'Quick, make a wish.'], ['The usual? Two lattes?', 'Mm. Same as you.'], ['The prettiest one you have.', 'Thank you.'], ['The birds have come to find you again.', 'They came to see you.'], ['I am going to sing in the church.', 'I will wait for you.'], [], ['It is her! She is a demon in disguise!', 'What?!', 'I am not!'], ['I will execute you this very day.'], ['Quick! Something has happened!', 'What?!'], ['Stop!'], ['Aaah!', 'Th-this is the whirlwind\'s power...'], [], ['Oh no, the doors will not open!'], ['Do not go...'], []], useSay: { coffee: 'Back on my feet!' }, gotProphecy: 'A prophecy for me.', buffNames: { speed: 'Prophecy of Speed', freeze: 'Prophecy of Frost' }, buffSay: { speed: 'I walk and run faster.', freeze: 'A parry slows a foe for five seconds.' }, items: { coffee: ['Iced Coffee', 'Heals half your hearts in a fight.'], coin: ['Coin', 'For the lucky draw.'], twin: ['Twin Blades', 'Two cuts; parries deal 3× damage.'], doom: ['Doomsday Necklace', 'Parries call lightning.'], flower: ['Flower', 'Does nothing.'], sleep: ['Sleep Knife', 'Parries deal 3× damage; demons may doze.'], guard: ['Guardian Cross', 'Blocks 3 in 10 blows.'], knife: ['Kitchen Knife', 'Parries deal 10× damage.'], ring: ['Ring of Chastity', 'Throws back one fatal blow.'] },
-    badges: { full: ['The Works', 'Beef, cilantro and chili, all in one bowl.'], spicy: ['Triple Chili', 'Three scoops of chili in one bowl.'], pukka: ['Double Dose', 'Win a game with two red marks left on the table.'], sailor: ['Still Standing', 'Voted out, and still on your feet.'], heretic: ['Turnabout', 'Nominate yourself, get executed, and win.'], ring: ['Ring of Chastity', 'Rescued the Virgin from the church.'] },
+    bagSlots: ['Weapon', 'Charm', 'Drink'],
+    realBoss: 'This is the real boss!', takeCoffee: 'To take away.', shipSay: 'Put anything you can spare in the little box to sell it.', boxHi: 'Put things in here to sell them.', coinSay: 'Coins are for the lucky draw.', noCoin: 'No money right now.', noWin: 'No luck.', sellHint: n => 'Drag the ' + n + ' onto the little box to sell it.', wornSay: n => 'The ' + n + ' is on.', story: [['Look, a shooting star!', 'Quick, make a wish.'], ['The usual? Two lattes?', 'Mm. Same as you.'], ['The prettiest one you have.', 'Thank you.'], ['The birds have come to find you again.', 'They came to see you.'], ['I am going to sing in the church.', 'I will wait for you.'], [], ['It is her! She is a demon in disguise!', 'What?!', 'I am not!'], ['I will execute you this very day.'], ['Quick! Something has happened!', 'What?!'], ['Stop!'], ['Aaah!', 'Th-this is the whirlwind\'s power...'], [], ['Oh no, the doors will not open!'], ['Do not go...'], []], useSay: { coffee: 'Back on my feet!' }, gotProphecy: 'A prophecy for me.', buffNames: { speed: 'Prophecy of Speed', freeze: 'Prophecy of Frost' }, buffSay: { speed: 'I walk and run faster.', freeze: 'A parry slows a foe for five seconds.' }, items: { coffee: ['Iced Coffee', 'Heals half your hearts in a fight.'], coin: ['Coin', 'For the lucky draw.'], twin: ['Twin Blades', 'Two cuts; parries deal 3× damage.'], doom: ['Doomsday Necklace', 'Parries call lightning.'], flower: ['Flower', 'Does nothing.'], sleep: ['Sleep Knife', 'Parries deal 3× damage; demons may doze.'], guard: ['Guardian Cross', 'Blocks 3 in 10 blows.'], knife: ['Kitchen Knife', 'Parries deal 10× damage.'] },
     welcome: 'Welcome to moment puzzle.', night: 'Night falls. Close your eyes.', pickSailor: 'Please choose a player.', pickPukka: 'Please choose a player.', ok: 'Very well.',
     dawnDied: i => 'Dawn. Last night, ' + st[i] + ' died.', nightDied: i => 'Tonight, ' + st[i] + ' died.', dawnQuiet: 'Dawn. No one died last night.',
     sailorSay: (v, t) => t === v ? 'I had a drink by myself.' : 'I had a drink with ' + who(v, t) + '.', hereticSay: 'I can reverse the result.',
@@ -765,14 +761,13 @@ function barCat(dt) {      // the cat: now padding about the floor, now sitting 
   if (d < .05) { if (Math.random() < .5) c.sit = rnd(3, 7); c.tx = rnd(.3, 2.6); c.ty = rnd(.4, 3.6); if (Math.abs(c.tx - 2.5) < .5 && Math.abs(c.ty - bar.whoAt - .5) < .6) c.tx = 1; if (c.tx < 1.2 && c.ty < 1.2) c.ty = rnd(1.5, 3.6); if (c.tx < 1.6 && c.ty > 2.8) c.tx = rnd(1.7, 2.6); return; }      // clear of the table by the door and of the slot machine
   const st = Math.min(d, .55 * dt); c.x += dx / d * st; c.y += dy / d * st; c.face = Math.sign(dx - dy) || c.face; c.depth = Math.sign(dx + dy); }      // face: which way it heads across the screen
 function barBump() { const c = bar.cat; if (!c) return; const dx = c.x - bar.x, dy = c.y - bar.y, d = Math.hypot(dx, dy), R = .45; if (d < R) { const k = d > .001 ? (R - d) / d : 1; c.x += dx * k * .6; c.y += dy * k * .6; bar.x -= dx * k * .4; bar.y -= dy * k * .4; c.x = clamp(c.x, .2, 2.8); c.y = clamp(c.y, .2, 3.8); if (c.x < 1.1 && c.y < 1.1) c.y = 1.1; if (c.x < 1.1 && c.y > 2.9) c.y = 2.9; if (c.sit <= 0) { c.tx = c.x; c.ty = c.y; } } }      // the cat and the chef bump rather than pass through each other
-function updateBar(dt) { if (bar.openIn > 0 && (bar.openIn -= dt) <= 0 && !bag.open) { bag.open = bag.sell = true; bag.sel = bag.selAt = null; bag.drag = null; bar.boxSayT = Math.min(bar.boxSayT, .25); chime(71, 0, .1); }      // the box has spoken: now it opens, its words fading as it does (MELO 2026-11-19)
-  const had = bar.path.length; if (walk(bar, dt, 3 * buffK())) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT', 'boxSayT', 'mySayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); slotTick(dt); }
+function updateBar(dt) { const had = bar.path.length; if (walk(bar, dt, 3 * buffK())) chime(pick([62, 65, 69]) + 12, 0, .03, .5); if (had && !bar.path.length && bar.pending != null) barArrive(); for (const k of ['whoSayT', 'keepSayT', 'boxSayT', 'mySayT']) if (bar[k] > 0) bar[k] -= dt; barCat(dt); barBump(); slotTick(dt); }
 function enterBar() { mode = 'bar'; $('zoom').style.display = 'none'; fade = 1; if (save.coffeeTaken != null) bar.taken = save.coffeeTaken;      // the day the iced coffee was taken is kept in the save: gone for the rest of that day, even after the game is closed and opened again (MELO 2026-11-15)
   Object.assign(bar, { x: .5, y: 1.5, path: [], pending: null, cups: [], who: pick(['sailor', 'drunk']), whoAt: 0,      // the other customer always stands at the right end of the counter, by the machine and the bottles
- whoSayT: 0, keepSayT: 0, boxSayT: 0, mySayT: 0, openIn: 0, cat: { x: .5, y: 2.5, tx: .5, ty: 2.5, sit: 4, t: 0, face: 1, meowT: 0 }, slot: { st: 'idle', t: 0, reels: ['ring', 'knife', 'flower'], win: null, flash: 0, pull: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }      // the cat one tile nearer the door, the slot machine in its old corner (MELO 2026-11-18)
+ whoSayT: 0, keepSayT: 0, boxSayT: 0, mySayT: 0, boxWait: false, cat: { x: .5, y: 2.5, tx: .5, ty: 2.5, sit: 4, t: 0, face: 1, meowT: 0 }, slot: { st: 'idle', t: 0, reels: ['guard', 'knife', 'flower'], win: null, flash: 0, pull: 0 } }); chime(64, 0, .12); chime(71, .14, .1); }      // the cat one tile nearer the door, the slot machine in its old corner (MELO 2026-11-18)
 function leaveBar() { mode = 'world'; $('zoom').style.display = 'none'; player.x = BDOOR[0] + .5; player.y = BDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14); }
 // The slot machine (MELO 2026-11-18): a coin a pull, three reels of the weapons and charms; one pull in six wins one of them, at random
-const SLOTS = ['knife', 'sleep', 'twin', 'ring', 'guard', 'doom', 'flower'], SLOT_STOP = [1.0, 1.4, 1.8];
+const SLOTS = ['knife', 'sleep', 'twin', 'guard', 'doom', 'flower'], SLOT_STOP = [1.0, 1.4, 1.8];
 function slotPull() { const m = bar.slot; if (!m || m.st !== 'idle' || storyHook) { if (m) m.wob = performance.now(); return; }
   const to = () => bar.slotAt || [W / 2, H / 2];
   const win = Math.random() < 1 / 6, prize = pick(SLOTS); m.win = win ? prize : null;
@@ -818,12 +813,13 @@ function drawSlot(v, s, t) {      // a small red cabinet against the left wall, 
 }
 function cafeTap(x, y) {
   const hit = k => { const h = BARHIT[k]; return h && Math.hypot(x - h[0], y - h[1]) < h[2]; };
+  if (bar.boxWait && bar.boxSayT > 0) { bar.boxWait = false; if (!bag.open) { bag.open = bag.sell = true; bag.sel = bag.selAt = null; bag.drag = null; } bar.boxSayT = Math.min(bar.boxSayT, .25); chime(71, 0, .1); return; }      // the box has spoken: the next tap, anywhere, opens it and the backpack, as a line of dialogue is moved on (MELO 2026-11-19), and its words fade
   if (hit('exit')) return barGo([0, 1], 'exit');
   if (hit('take')) { const per = Math.floor(G.t / HALF), id = 'coffee';      // the iced coffee on the little table: yours to take, once each day
     scAch('iced_coffee'); bar.taken = save.coffeeTaken = per; save.cards[id] = cardN(id) + 1; save[id] = true; if (!save.equip.drink || !have(save.equip.drink)) save.equip.drink = id; saveNow(); { const h = BARHIT.take;      /* no glow on the backpack button: a drink is nothing rare (MELO 2026-11-18) */ if (h) flyers.push({ id, a: [h[0], h[1]], to: () => chefPt || [h[0], h[1]], t: 0, d: .6, delay: 0, r: 14, arc: 40 }); }      // the cup flies over to the chef (MELO 2026-11-18)
     bar.mySay = S().takeCoffee; bar.mySayT = 3; chime(84, 0, .1); chime(91, .1, .1); return; }
   if (hit('slot')) { barGo([1, 3], 'slot'); return; }      // the slot machine: walk up to it, then a coin goes in
-  if (hit('ship')) { if (!bag.open && !(bar.openIn > 0)) { bar.boxSay = S().boxHi; bar.boxSayT = 3; bar.openIn = .8; }      /* a tap: the box first says what it is for, then opens and the backpack with it (MELO 2026-11-19) */ chime(64, 0, .1); chime(71, .1, .1); return; }      // the box opens the backpack, as its button does: in the coffee house the backpack is always the selling one (MELO 2026-11-18)      // the shipping box on the little table: things you can spare are sold here, dragged out of the backpack onto it (MELO 2026-11-18)
+  if (hit('ship')) { if (!bag.open) { bar.boxSay = S().boxHi; bar.boxSayT = 999; bar.boxWait = true; }      /* a tap: the box says what it is for and waits; the next tap opens it (MELO 2026-11-19) */ chime(64, 0, .1); chime(71, .1, .1); return; }      // the box opens the backpack, as its button does: in the coffee house the backpack is always the selling one (MELO 2026-11-18)      // the shipping box on the little table: things you can spare are sold here, dragged out of the backpack onto it (MELO 2026-11-18)
   if (hit('table')) { bar.wobTable = performance.now(); return; }      // the bare table rocks, silently
   if (hit('cat')) { const c = bar.cat; c.meowT = 1.6; c.sit = Math.max(c.sit, 2.5); sfx(760, .12, .12, 'triangle'); sfx(980, .2, .1, 'triangle', .08); sfx(700, .22, .07, 'triangle', .22); return; }      // stroking the cat: a meow
   for (const cp of bar.cups) if (hit('cup' + bar.cups.indexOf(cp))) { if (cp.full) { cp.full = false; chime(72, 0, .08); chime(67, .15, .06); } else cp.wob = performance.now(); return; }      // a full cup is drunk; an empty one just rattles, silently      // drunk up from wherever you stand: an empty cup is left on the counter
@@ -1059,7 +1055,7 @@ function worldTap(sx, sy) {
 }
 
 // ------------------------------------------------------------ stall
-const stall = { coins: [null, null, null], board: false, drag: null, tip: null, glowOn: false, BD: null, sinceSelf: 0, myBowl: null, eatT: 0, ownSay: '', ownSayT: 0, pot: 'empty', potT: 0, strainer: false, bowl: null, seats: [null, null, null], spawn: 1.2, owner: { x: 2.4, y: 1.2, tx: 2.4, ty: 1.2 }, fx: [], fly: [], bowlAnim: {}, nope: null, nopeT: 0 };
+const stall = { coins: [null, null, null], sinceSelf: 0, myBowl: null, eatT: 0, ownSay: '', ownSayT: 0, pot: 'empty', potT: 0, strainer: false, bowl: null, seats: [null, null, null], spawn: 1.2, owner: { x: 2.4, y: 1.2, tx: 2.4, ty: 1.2 }, fx: [], fly: [], bowlAnim: {}, nope: null, nopeT: 0 };
 const save = JSON.parse(localStorage.getItem('ctramen') || '{"coins":0,"served":0}');
 const has = () => false;
 const HALF = 180, G = { n: 1, late: false, t: HALF };      // a first game opens at night; after that the game opens at the hour it was left at
@@ -1071,9 +1067,6 @@ function clockHands() { const h = gameHour(); return [(h % 12) / 12 * TAU, (h % 
 function tick(dt) { G.t += dt; const night = (G.t % (2 * HALF)) >= HALF; G.n = lerp(G.n, nWant(), 1 - Math.pow(0.002, dt));      // day turns to night (and back) in about a second, as in /3b (was some fifteen seconds)
   const hr = Math.floor(G.t / HOUR); if (hr !== savedHour) { savedHour = hr; try { localStorage.setItem(TKEY, String(hr * HOUR)); } catch (e) {} } }
 const cookT = () => has('fast') ? 1.3 : 2.6, waitMax = () => has('calm') ? 110 : 70, speedK = () => has('swift') ? 1.5 : 1;
-// ---- achievements: round badges on the wooden board in the shop. save.badges[id] = [x, y] (0..1 on the board), save.badgeNew = ids not yet looked at
-const BADGE_IDS = ['full', 'spicy', 'pukka', 'sailor', 'heretic', 'ring'], BADGE_HOME = { full: [.27, .27], spicy: [.73, .25], pukka: [.28, .7], sailor: [.72, .68], heretic: [.5, .47], ring: [.5, .85] };
-save.badges = save.badges || {}; save.badgeNew = [];
 save.equip = save.equip || { weapon: 'knife', acc: null };      // what you are wearing; the kitchen knife is yours from the start
 if (save.equip.relic) { if (!save.equip.acc) save.equip.acc = save.equip.relic; delete save.equip.relic; }      // there was once a third slot
 const saveNow = () => { try { localStorage.setItem('ctramen', JSON.stringify(save)); } catch (e) {} };
@@ -1281,7 +1274,7 @@ function dump() {
 }
 function enterStall() {
   mode = 'stall'; $('leave').style.display = 'block'; $('zoom').style.display = 'none'; $('enter').style.display = 'none';
-  setHold(null); $('bback').style.display = 'none'; stall.pend = null; stall.board = false; stall.drag = null; stall.tip = null; stall.glowOn = false; stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.fresh = save.badgeNew.length > 0; stall.toldWalk = false; stall.oracle = false; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
+  setHold(null); stall.pend = null; stall.leaving = false; Object.assign(stall.owner, { x: SHOP_DOOR[0], y: SHOP_DOOR[1], tx: 2.4, ty: 1.2, ptx: null, path: null }); stall.spawn = 3; stall.toldWalk = false; stall.oracle = false; stall.done = false; stall.sinceSelf = 0; stall.myBowl = null; stall.eatT = 0; fade = 1; chime(67, 0, .16); chime(74, .1, .16); chime(79, .2, .16); refreshUI();
 }
 function leaveStall() {
   $('leave').classList.remove('hint');
@@ -1300,11 +1293,10 @@ function updateStall(dt) {
     while (o.path && o.path.length && step > 0) { const [px, py] = o.path[0], d = Math.hypot(px - o.x, py - o.y); if (d <= step) { o.x = px; o.y = py; o.path.shift(); step -= d; } else { o.x += (px - o.x) / d * step; o.y += (py - o.y) / d * step; step = 0; } }
     if (s.leaving && !(o.path && o.path.length)) { s.leaving = false; leaveStall(); return; }
     if (s.pend && !(o.path && o.path.length)) { const p = s.pend; s.pend = null; if (p === 'oracle') { if (s.oracle) { save.buffs[s.oracle] = true; saveNow(); s.oracle = false; s.ownSay = S().gotProphecy; s.ownSayT = 3; chime(88, 0, .12, 1.2); chime(93, .12, .1, 1.2); } } else if (p === 'dump') dump(); else if (p === 'bar') barTap(); else if (p.startsWith('serve')) serve(+p[5]); else if (p === 'board' && !s.hold) { s.board = true; s.needSettle = true; s.tip = null; s.drag = null; chime(62, 0, .14, 1); chime(69, .08, .1, 1); } } }
-  if (s.sinceSelf < 3 && !s.myBowl && !s.done && !s.glowOn && !s.fresh && !s.board && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
+  if (s.sinceSelf < 3 && !s.myBowl && !s.done && s.seats.every(c => !c) && (s.spawn -= dt) < 0) { spawnCustomer(); s.spawn = 1.4; refreshUI(); }      // one customer at a time: the next comes in only after the last has gone
   if (s.hungryDue && s.seats.every(c => !c)) { s.hungryDue = false; if (!s.myBowl && !s.done) { s.ownSay = S().hungry; s.ownSayT = 4; } }      // "time to make one for myself" only once the third customer has eaten and gone (MELO 2026-11-16; was said the moment the third bowl was served)
   if (s.ownSayT > 0) s.ownSayT -= dt;
-  { const on = (s.done || s.fresh) && !s.myBowl && s.eatT <= 0 && save.badgeNew.length > 0; if (on && !s.glowOn) { s.ownSay = S().newBadge; s.ownSayT = 6; chime(81, 0, .14, 1.4); chime(88, .12, .12, 1.4); } s.glowOn = on; }
-  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (Math.random() < .3) s.oracle = pick(BUFFS); else if (!save.badgeNew.length) { if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } } }      // your own bowl finished: three times in ten, nothing is said and a prophecy mark appears where the bowl stood
+  if (s.eatT > 0) { s.eatT -= dt; if (s.eatT <= 0) { s.myBowl = null; s.done = true; if (Math.random() < .3) s.oracle = pick(BUFFS); else if (!sayWalk()) { s.ownSay = pick(S().yum); s.ownSayT = 3; } } }      // your own bowl finished: three times in ten, nothing is said and a prophecy mark appears where the bowl stood
   s.seats.forEach((c, i) => {
     if (!c) return; c.t += dt;
     if (c.state === 'arrive' && c.t > .8) { c.state = 'wait'; c.t = 0; refreshUI(); }
@@ -1550,89 +1542,10 @@ function drawStall(t) {
     ctx.fillStyle = css([250, 246, 238], .96 * fadeA); rrect(bx, by, cw, bh, 10); ctx.fill();
     lines.forEach((l, k) => text(l, bx + cw / 2, by + 6 + lh * (k + .5), fs, [50, 36, 70], 1, 'center', true));
   }
-  if (st.board) { drawBoard(t); return; }
   if (st.ownSayT > 0) sayBubble(op[0], op[1] - s * 2.02, st.ownSay, clamp(W * .036, 12, 15), clamp(st.ownSayT * 2), Math.min(W * .62, 250));
 }
-// a round badge: metal ring, cream face, a flat picture
-function drawBadge(id, x, y, r, lift = 0, plain = false) {
-  // a plain slice of dark wood with the picture burnt in, darker still
-  const cy = y - lift, WH = [50, 28, 22];
-  ell(x, y + r * .14 + lift * .6, r * 1.02, r * .98, [30, 16, 20], .35);
-  circ(x, cy + r * .09, r, [74, 46, 34]); circ(x, cy, r, [128, 86, 58]);
-  ctx.save(); ctx.beginPath(); ctx.arc(x, cy, r, 0, TAU); ctx.clip(); ctx.strokeStyle = css([108, 70, 48], .7); ctx.lineWidth = Math.max(1, r * .03);
-  for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.ellipse(x - r * 1.1, cy + r * .6, r * (.5 + k * .36), r * (.34 + k * .27), -.35, 0, TAU); ctx.stroke(); }
-  ctx.restore(); if (plain) return;      // on the wall, from afar: just the slices of wood
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  if (id === 'pukka' || id === 'sailor' || id === 'heretic') { roleToken(x, cy, r * .74, id, 1, WH); return; }
-  const lw = Math.max(1.5, r * .09); ctx.strokeStyle = css(WH); ctx.fillStyle = css(WH); ctx.lineWidth = lw;
-  if (id === 'ring') { // a ring and its stone
-    ctx.beginPath(); ctx.arc(x, cy + r * .16, r * .4, 0, TAU); ctx.lineWidth = lw * 1.5; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x, cy - r * .64); ctx.lineTo(x + r * .2, cy - r * .42); ctx.lineTo(x, cy - r * .2); ctx.lineTo(x - r * .2, cy - r * .42); ctx.closePath(); ctx.fill(); return;
-  }
-  if (id === 'full') { // a bowl, chopsticks and steam
-    ctx.beginPath(); ctx.moveTo(x - r * .52, cy + r * .02); ctx.lineTo(x + r * .52, cy + r * .02); ctx.arc(x, cy + r * .02, r * .52, 0, Math.PI); ctx.closePath(); ctx.fill();
-    ctx.fillRect(x - r * .2, cy + r * .5, r * .4, r * .09);
-    ctx.beginPath(); ctx.moveTo(x - r * .1, cy - r * .08); ctx.lineTo(x + r * .56, cy - r * .5); ctx.moveTo(x + r * .06, cy - r * .08); ctx.lineTo(x + r * .66, cy - r * .38); ctx.stroke();
-    for (const dx of [-.34, -.1]) { ctx.beginPath(); ctx.moveTo(x + dx * r, cy - r * .14); ctx.quadraticCurveTo(x + (dx - .1) * r, cy - r * .3, x + dx * r, cy - r * .44); ctx.quadraticCurveTo(x + (dx + .1) * r, cy - r * .56, x + dx * r, cy - r * .68); ctx.lineWidth = lw * .8; ctx.stroke(); }
-  } else { // three chilies
-    for (const [dx, rot] of [[-.34, -.5], [0, 0], [.34, .5]]) { ctx.save(); ctx.translate(x + dx * r, cy + r * .06); ctx.rotate(rot); ctx.beginPath(); ctx.moveTo(0, -r * .3); ctx.quadraticCurveTo(r * .24, -r * .05, 0, r * .46); ctx.quadraticCurveTo(-r * .24, -r * .05, 0, -r * .3); ctx.fill(); ctx.beginPath(); ctx.moveTo(0, -r * .3); ctx.lineTo(r * .06, -r * .48); ctx.lineWidth = Math.max(1.5, r * .07); ctx.stroke(); ctx.restore(); }
-  }
-}
-function drawBoard(t) {
-  const st = stall; ctx.fillStyle = css([20, 14, 34], .72); ctx.fillRect(0, 0, W, H);
-  const bw = Math.min(W - 28, 460, (H - 190) / 1.12), bh = bw * 1.12, bx = (W - bw) / 2, by = Math.max(96, (H - bh) / 2), r = bw * .105; st.BD = { x: bx, y: by, w: bw, h: bh, r }; if (st.needSettle) { st.needSettle = false; settleBadges(null); }
-  ctx.fillStyle = css([20, 12, 20], .4); rrect(bx + 4, by + 8, bw, bh, 14); ctx.fill();
-  ctx.fillStyle = css([120, 82, 64]); rrect(bx, by, bw, bh, 14); ctx.fill();
-  const n = 5, ph = (bh - 20) / n;
-  for (let k = 0; k < n; k++) { ctx.fillStyle = css(k % 2 ? [186, 136, 100] : [198, 148, 108]); rrect(bx + 10, by + 10 + k * ph + 1.5, bw - 20, ph - 3, 5); ctx.fill(); ctx.fillStyle = css([226, 180, 136], .35); ctx.fillRect(bx + 16, by + 10 + k * ph + 5, bw - 32, 2); }
-  for (const [u, w] of [[.06, .05], [.94, .05], [.06, .95], [.94, .95]]) circ(bx + bw * u, by + bh * w, bw * .012, [96, 68, 60]);
-  const ids = BADGE_IDS.filter(id => save.badges[id] && !(st.drag && st.drag.id === id)); if (st.drag) ids.push(st.drag.id);
-  for (const id of ids) { const [nx, ny] = save.badges[id], x = bx + nx * bw, y = by + ny * bh, held = st.drag && st.drag.id === id && st.drag.moved;
-    if (save.badgeNew.includes(id)) glow(x, y, r * (2 + .2 * Math.sin(t * 4)), [255, 236, 170], .8);
-    drawBadge(id, x, y, r * (held ? 1.02 : 1), held ? r * .06 : 0); }
-  if (st.tip && save.badges[st.tip]) { const [nx, ny] = save.badges[st.tip], b = S().badges[st.tip]; sayBubble(bx + nx * bw, by + ny * bh - r * 1.02, b[0] + '\n' + b[1], clamp(W * .038, 13, 16), 1, Math.min(W * .72, 280)); }
-  // back button
-  $('bback').style.display = ''; st.BD.back = [bx + bw / 2, by - 30];      // the button is the pill in the top bar; any tap off the board closes too
-}
-// badges never overlap: whatever is in the way is pushed aside at once (the one in your hand stays put while you hold it)
-function badgeLim() { const B = stall.BD, w = B ? B.w : 360, h = w * 1.12, m = 14, rx = .105 + m / w, ry = .105 * w / h + m / h; return [rx, 1 - rx, ry, 1 - ry - .012]; }
-function settleBadges(fixed) {
-  const R = .105, AS = 1.12, D = 2 * R * 1.04, ids = BADGE_IDS.filter(id => save.badges[id]);      // x in board widths, y scaled so distances are round
-  const P = {}; for (const id of ids) P[id] = [save.badges[id][0], save.badges[id][1] * AS];
-  const L = badgeLim(), lim = p => { p[0] = clamp(p[0], L[0], L[1]); p[1] = clamp(p[1], L[2] * AS, L[3] * AS); };
-  for (let it = 0; it < 60; it++) { let moved = false;
-    for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) {
-      const A = P[ids[a]], B = P[ids[b]]; let dx = B[0] - A[0], dy = B[1] - A[1], d = Math.hypot(dx, dy); if (d >= D) continue; moved = true;
-      if (d < 1e-4) { const q = (a * 2.4 + b * 1.3 + it); dx = Math.cos(q); dy = Math.sin(q); d = 1; }
-      const push = (D - d) + .002, ux = dx / d, uy = dy / d, fa = ids[a] === fixed, fb = ids[b] === fixed, wa = fa ? 0 : fb ? 1 : .5, wb = fb ? 0 : fa ? 1 : .5;
-      A[0] -= ux * push * wa; A[1] -= uy * push * wa; B[0] += ux * push * wb; B[1] += uy * push * wb;
-      // squeezed against the edge: slide along it instead of sticking
-      for (const [Q, w] of [[A, wa], [B, wb]]) { if (!w) continue; const bx = Q[0], by = Q[1]; lim(Q); if (Q[0] !== bx) Q[1] += (Q[1] >= .5 * AS ? -1 : 1) * Math.abs(bx - Q[0]) * 1.2; if (Q[1] !== by) Q[0] += (Q[0] >= .5 ? -1 : 1) * Math.abs(by - Q[1]) * 1.2; lim(Q); }
-    }
-    if (!moved) break; }
-  for (const id of ids) save.badges[id] = [P[id][0], P[id][1] / AS];
-}
-function badgesOverlap() { const ids = BADGE_IDS.filter(id => save.badges[id]); let worst = 9; for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) worst = Math.min(worst, Math.hypot(save.badges[ids[a]][0] - save.badges[ids[b]][0], (save.badges[ids[a]][1] - save.badges[ids[b]][1]) * 1.12)); return worst < .21 ? worst : 0; }
-function boardBadgeAt(x, y) { const st = stall, B = st.BD; if (!B) return null; let best = null, bd = 1e9; for (const id of BADGE_IDS) if (save.badges[id]) { const d = Math.hypot(x - (B.x + save.badges[id][0] * B.w), y - (B.y + save.badges[id][1] * B.h)); if (d < B.r * 1.15 && d < bd) { bd = d; best = id; } } return best; }
-// "time for a walk": said once, as soon as your own bowl is eaten and no new-badge hint is left unseen (checked after eating and after closing the board)
-function sayWalk() { const s = stall; if (!s.done || s.toldWalk || save.badgeNew.length) return false; s.toldWalk = true; s.ownSay = S().full; s.ownSayT = 7; return true; }
-function closeBoard() { $('bback').style.display = 'none'; stall.fresh = false; stall.board = false; stall.drag = null; stall.tip = null; if (save.badgeNew.length) { save.badgeNew = []; saveNow(); } chime(69, 0, .12, .8); chime(62, .08, .1, .8); sayWalk(); }
-function boardDown(x, y) {
-  const st = stall, B = st.BD; if (!B) return;
-  if (x < B.x || x > B.x + B.w || y < B.y || y > B.y + B.h) { closeBoard(); return; }
-  const id = boardBadgeAt(x, y);
-  if (!id) { st.tip = null; return; }
-  st.drag = { id, sx: x, sy: y, ox: B.x + save.badges[id][0] * B.w - x, oy: B.y + save.badges[id][1] * B.h - y, moved: false };
-}
-function boardMove(x, y) {
-  const st = stall, B = st.BD, d = st.drag; if (!d || !B) return;
-  if (!d.moved && Math.hypot(x - d.sx, y - d.sy) > 7) { d.moved = true; st.tip = null; }
-  if (d.moved) { const L = badgeLim(); save.badges[d.id] = [clamp((x + d.ox - B.x) / B.w, L[0], L[1]), clamp((y + d.oy - B.y) / B.h, L[2], L[3])]; settleBadges(d.id); if (badgesOverlap()) settleBadges(null); }
-}
-function boardUp() {
-  const st = stall, d = st.drag; if (!d) return; st.drag = null;
-  if (d.moved) { settleBadges(d.id); settleBadges(null); knock(); saveNow(); } else { st.tip = st.tip === d.id ? null : d.id; chime(76, 0, .12, .9); }
-}
+// "time for a walk": said once, as soon as your own bowl is eaten
+function sayWalk() { const s = stall; if (!s.done || s.toldWalk) return false; s.toldWalk = true; s.ownSay = S().full; s.ownSayT = 7; return true; }
 function beefSlice(cx, cy, w, h, a, dz) {      // a big slice of beef lying flat, seen at the bowl's slant: cut straight by the knife, a band of fat along one edge, its cut edge (dz deep) showing below; the same in the bowl, on its plate and in the hand (MELO 2026-11-15)
   const ca = Math.cos(a), sa = Math.sin(a), T = pts => pts.map(([u, v2]) => [cx + u * ca - v2 * sa, cy + (u * sa + v2 * ca) * .58]), sl = [[-w, -h * .8], [w * .92, -h], [w, h * .85], [-w * .9, h]];
   poly(T(sl).map(([px, py]) => [px, py + dz]), [104, 56, 40]); poly(T(sl), [158, 90, 64]);
@@ -1956,7 +1869,7 @@ function drawHud(hp, ringUsed, max = 6) {      // across the top during a fight:
   const HY = $('top').getBoundingClientRect().top + 18;      // level with the first row of corner buttons, right at the top of the safe area (MELO 2026-11-16; was 73 on every screen)
   for (let i = 0; i < max; i++) { const gold = i === 6; const hc = gold ? [255, 204, 110] : [236, 96, 110], hw = church.heal != null && church.healFrom != null && i >= church.healFrom && i < hp ? 1 - clamp((church.heal - .15) / (HEAL_T - .15)) : 0; if (hw > 0) glow(W / 2 + (i - (max - 1) / 2) * 22, HY + 1, 13, [255, 236, 170], .6 * hw); drawHeart(W / 2 + (i - (max - 1) / 2) * 22, HY + 1, 7.5, i < hp ? mix(hc, [255, 244, 200], hw) : [70, 58, 100], i < hp ? 1 : .8); }      // hearts just won back start as light, then slowly redden
   let x = W / 2 + ((max - 1) / 2 + 1) * 22 + 4;
-  const id = save.equip.acc; if (id && have(id)) { ctx.save(); if (id === 'ring' && ringUsed) ctx.globalAlpha = .3; drawItem(id, x, HY, id === 'ring' ? 9.5 : 8); ctx.restore(); x += 26; }
+  const id = save.equip.acc; if (id && have(id)) { ctx.save(); drawItem(id, x, HY, 8); ctx.restore(); x += 26; }
   const c = church; hudDrink = null; const pulse = .5 + .2 * Math.sin(performance.now() / 300);
   const did = save.equip.drink; if (did && have(did)) { const wt = (performance.now() - hudDrinkWob) / 1000, dx = W / 2 - ((max - 1) / 2 + 1) * 22 - 4 + (wt < .4 ? Math.sin(wt * 60) * 3 * (1 - wt / .4) : 0); glow(dx, HY, 16, [255, 230, 170], pulse);
     if (hp === 1 && c.fight) { const t = performance.now() / 1000, beat = .5 + .5 * Math.sin(t * 7), ring = (t * 1.4) % 1; glow(dx, HY, 30 + 8 * beat, [255, 214, 120], .55 + .35 * beat); ctx.beginPath(); ctx.arc(dx, HY, 13 + 12 * ring, 0, TAU); ctx.strokeStyle = css([255, 226, 150], .85 * (1 - ring)); ctx.lineWidth = 2; ctx.stroke(); }      // one heart left: the drink calls out, a quick warm beat and a ring spreading from it
@@ -1995,17 +1908,18 @@ function mvBack(glass) {      // the backpack's backdrop (glass): the night sky'
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 }
 // ---- the backpack: opened from the button that shows while you are on the church's island
-const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', ring: 'acc', guard: 'acc', doom: 'acc', flower: 'acc', coffee: 'drink' }, DRINKS = ['coffee'], BUFFS = ['speed', 'freeze'], LOOT = ['ring', 'guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
+const ITEMS = { knife: 'weapon', sleep: 'weapon', twin: 'weapon', guard: 'acc', doom: 'acc', flower: 'acc', coffee: 'drink' }, DRINKS = ['coffee'], BUFFS = ['speed', 'freeze'], LOOT = ['guard', 'sleep', 'twin', 'doom', 'flower'], bag = { open: false, sel: null, hits: [] };      // one weapon in the hand, one thing worn
 save.cards = save.cards || {}; if (save.cards.stop || save.stop) save.cards.csail = (save.cards.csail || 0) + (save.cards.stop || 1);      // cards and drinks stack: save.cards[id] is how many you hold, the one on its plinth included (an old Time Stop card becomes a Sailor card; the playing cards are gone)
+if (save.cards.ring) { save.coins = Math.min(999, (save.coins || 0) + 5 * save.cards.ring); } delete save.cards.ring; if (save.equip && save.equip.acc === 'ring') save.equip.acc = null; if (save.bagPos) delete save.bagPos.ring;      // the Ring of Chastity is gone (MELO 2026-11-19: it came up too seldom): any you had are bought back, 5 coins each
 for (const id of Object.keys(save.cards)) if (!ITEMS[id]) delete save.cards[id]; if (save.equip.drink && !ITEMS[save.equip.drink]) save.equip.drink = null;
 save.buffs = save.buffs || {}; delete save.equip.card;      // the cards are gone: what a fortune teller leaves now is a prophecy (save.buffs)
 const buffOn = k => !!save.buffs[k], buffK = () => buffOn('speed') ? 1.5 : 1,      // buffK: the Prophecy of Speed quickens the chef's step everywhere, not only in a fight
       STACK = id => !!ITEMS[id], cardN = id => id === 'coin' ? (save.coins || 0) : save.cards[id] || 0,      // coins are a thing in the backpack too (MELO 2026-11-18): their count is save.coins
       rest = id => cardN(id) - (save.equip[ITEMS[id]] === id ? 1 : 0);      // everything stacks now (MELO 2026-11-18; only drinks did): save.cards[id] is how many you hold, the one worn included; rest: how many of it lie loose in the backpack
-if (!save.stackV) { for (const id of Object.keys(ITEMS)) if (ITEMS[id] !== 'drink' && save.cards[id] == null && (id === 'knife' || save[id] || (id === 'ring' && save.badges && save.badges.ring))) save.cards[id] = 1; save.stackV = 1; }      // the weapons and charms you had before they stacked: one of each (the kitchen knife was always yours)
+if (!save.stackV) { for (const id of Object.keys(ITEMS)) if (ITEMS[id] !== 'drink' && save.cards[id] == null && (id === 'knife' || save[id])) save.cards[id] = 1; save.stackV = 1; }      // the weapons and charms you had before they stacked: one of each (the kitchen knife was always yours)
 const have = id => cardN(id) > 0, owned = () => Object.keys(ITEMS).concat('coin').filter(have),      // coins in the backpack: never worn (no ITEMS kind) and never sold
       wearing = id => save.equip[ITEMS[id]] === id && have(id);
-const armed = () => ITEMS[save.equip.weapon] === 'weapon' && have(save.equip.weapon), sleepy = () => wearing('sleep'), ringOn = () => wearing('ring'), guardOn = () => wearing('guard');
+const armed = () => ITEMS[save.equip.weapon] === 'weapon' && have(save.equip.weapon), sleepy = () => wearing('sleep'), guardOn = () => wearing('guard');
 function drawItem(id, x, y, r) {
   if (id === 'coin') { drawCoin(x, y, r * .8); return; }      // a coin in its own gold
   if (id === 'coffee') {      // iced coffee in a clear convenience-store cup, with a lid and a straw
@@ -2027,7 +1941,7 @@ function drawItem(id, x, y, r) {
 }
 // Where each thing you carry lies: save.bagPos[id] = slab 0..7, four across and two down (MELO 2026-11-18); a third row only if more than eight kinds lie loose at once, so nothing is ever hidden; taking a thing off when the eight places are full is simply refused (MELO 2026-11-18). Things you own but have never placed take the first free slab.
 function bagSlabs() {
-  const P0 = save.bagPos = save.bagPos || {}, loose = owned().filter(id => rest(id) > 0), N = loose.length > 8 ? 12 : 8, out = Array(N).fill(null);
+  const P0 = save.bagPos = save.bagPos || {}, loose = owned().filter(id => rest(id) > 0), N = 8, out = Array(N).fill(null);
   for (const id of Object.keys(P0)) if (!loose.includes(id)) delete P0[id];
   for (const id of loose) if (P0[id] != null && P0[id] >= 0 && P0[id] < N && !out[P0[id]]) out[P0[id]] = id; else delete P0[id];
   for (const id of loose) if (P0[id] == null) { const k = out.indexOf(null); if (k < 0) break; out[k] = id; P0[id] = k; }
@@ -2083,7 +1997,7 @@ function capsule(x, y, w, h, rr, main) {      // the tray the backpack's things 
 function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own, a wide bubble dropping from its button; what you wear on the left (weapon, charm, drink, top to bottom), what you carry on the right. Things are moved by dragging, a tap only shows what a thing is; in the coffee house a thing dragged onto the shipping box is sold
   if (mode === 'bar') bag.sell = true;      // in the coffee house there is only the one backpack: the selling one, its box open beside it (MELO 2026-11-18)
   const opened = bag.drawnAt == null || last - bag.drawnAt > 150;
-  if (opened) { bag.tagFlip = last - 120; }      /* nobody says what the box is for: the coin on it says so (MELO 2026-11-19) */      // just opened: the tag is already turning on the first frame (MELO 2026-11-18); in the coffee house the box says what it is for
+  if (opened) { if (mode === 'bar' && bar.boxWait) { bar.boxWait = false; bar.boxSayT = Math.min(bar.boxSayT, .25); }      /* opened by its button while the box waits: its words go too */ bag.tagFlip = last - 120; }      /* nobody says what the box is for: the coin on it says so (MELO 2026-11-19) */      // just opened: the tag is already turning on the first frame (MELO 2026-11-18); in the coffee house the box says what it is for
   bag.drawnAt = last;      // the backpack just opened (not drawn the frame before): its tag gives its two turns (MELO 2026-11-18)
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.right, r.top, r.bottom] : [56, 12, 56]; })();      // the backpack button's right edge, top and foot
@@ -2246,7 +2160,7 @@ function whole(a, fn) {      // draw fn() at alpha a as one piece: first whole o
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = a; ctx.drawImage(oc, 0, 0); ctx.restore(); }
 function churchBanner(txt, sec = 3) { church.banner = txt; church.bannerT = sec; }      // news is not posted on the screen: the chef says it, in a bubble
 function enterChurch() {
-  mode = 'church'; $('zoom').style.display = 'none'; $('bag').style.display = 'none'; $('bback').style.display = 'none'; fade = 1; bag.open = false;      // no button leads out: you walk down the steps at the door, any time there is no fight on
+  mode = 'church'; $('zoom').style.display = 'none'; $('bag').style.display = 'none'; fade = 1; bag.open = false;      // no button leads out: you walk down the steps at the door, any time there is no fight on
   const c = church, p = c.p;
   Object.assign(c, { freeze: 0, inv: 0, bonus: false, wave: 0, hp: 6, hurt: 0, down: 0, ringUsed: false, flash: 0, banner: '', bannerT: 0, foes: [], shots: [], waves: [], cones: [], fx: [], npcs: [], stains: [], chest: null, heal: null, tier: 1, fight: false, done: false, torchOn: false, torchF: 0, lit: 0, say: null, fly: null, pass: null, cam: null });
   Object.assign(p, { x: CX1 - 1.2, y: CW / 2, exit: false, second: null, pend: null, target: null, cd: 0, sw: 0, moving: false }); p.tx = p.x; p.ty = p.y; c.exitOpen = true;      // the steps out are there when you come in
@@ -2274,7 +2188,7 @@ function churchRest() {      // thanks have been said: the good soul and the che
   Object.assign(c, { freeze: 0, bonus: false, npcs: [], chest: null, fly: null, say: null, done: false, torchOn: false, hp: 6, ringUsed: false, stains: [], tier: Math.min(TIERS, c.tier + 1) }); churchBanner(S().lightTorch, 5); noise(.4, .25, 900, 200);
 }
 function leaveChurch() {      // back outside, at the church door; any prophecy is spent
-  save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'none'; $('bback').style.display = 'none';
+  save.buffs = {}; saveNow(); mode = 'world'; $('zoom').style.display = 'none';
   player.x = CDOOR[0] + .5; player.y = CDOOR[1] + .5; player.path = []; player.enter = false; fade = 1; worldHint = 0; chime(74, 0, .14); chime(67, .12, .14);
 }
 function devRating(b) {      // developer mode: ask for a rating now, ignoring the once-only flags; what became of it is written on the button itself
@@ -2290,9 +2204,6 @@ function askRating() {      // when the flower girl has finished saying chapter 
 function churchHurt(src) {
   const c = church, p = c.p, dmg = 1; if (c.hurt > 0 || c.down > 0 || !c.fight || c.inv > 0) return;      // nothing lands while the bottle's five seconds last
   if (src && src.boss && guardOn() && Math.random() < .3) { c.hurt = .5; c.fx.push({ k: 'shield', x: p.x, y: p.y, t: 0, T: .6 }); churchBanner(S().guardSave, 2); sfx(880, .3, .14, 'triangle'); sfx(1320, .4, .1, 'sine', .04); noise(.15, .3, 1500, 3000); return; }      // the Guardian Cross: three times in ten a boss's blow (and only a boss's) simply does not land
-  if (c.hp <= dmg && !c.ringUsed && ringOn()) {      // the Ring of Chastity: once, the blow that would fell you goes back to whoever dealt it
-    c.ringUsed = true; c.hurt = 1; c.fx.push({ k: 'ring', x: p.x, y: p.y, t: 0, T: .7 }); churchBanner(S().ringSave, 3); bell(293.7, .12); chime(86, 0, .14); chime(93, .1, .12);
-    if (src && src.hp > 0) { c.fx.push({ k: 'bolt', x: p.x, y: p.y, x1: src.x, y1: src.y, t: 0, T: .4 }); churchDamage(src, 3); } return; }
   c.hp = Math.max(0, c.hp - dmg); c.hurt = .7; sfx(150, .22, .3, 'triangle'); sfx(98, .3, .2);
   for (let i = 0; i < 1 + dmg * 2; i++) c.stains.push({ x: p.x + (i ? rnd(-.55, .55) : 0), y: p.y + (i ? rnd(-.55, .55) : 0), r: i ? rnd(.07, .16) : rnd(.26, .4) + dmg * .06, q: rnd(.75, 1.25), t: 0 });      // blood on the church floor, there until you leave
   if (c.hp <= 0) { save.buffs = {}; saveNow(); c.down = 2.2; c.p.fallDir = src && (src.y - src.x) > (p.y - p.x) ? -1 : 1; c.p.target = null; c.p.moving = false; c.shots = []; c.waves = []; churchBanner(S().churchDown, 2.2); }
@@ -2939,7 +2850,7 @@ function frame(now) {
   drawFlyers(dt);      // coins and prizes in flight, over everything
   if (fade > 0) { ctx.fillStyle = css([14, 12, 36], clamp(fade)); ctx.fillRect(0, 0, W, H); fade -= dt * 1.6; }
   { const show = mode === 'title' || (mode === 'world' && zoomTarget > .5), lb = $('lang'); if ((lb.style.display !== 'none') !== show) lb.style.display = show ? 'block' : 'none'; if (!show) $('langMenu').classList.remove('open'); }
-  { const can = ['church', 'bar', 'stall'].includes(mode) && !(mode === 'stall' && (stall.board || storyHook)) && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)),      // the ramen shop has the backpack too (MELO 2026-11-18)
+  { const can = ['church', 'bar', 'stall'].includes(mode) && !(mode === 'stall' && storyHook) && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)),      // the ramen shop has the backpack too (MELO 2026-11-18)
       set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };      // the backpack and the prophecies are at hand only where things are found: in the church (not in a fight) and in the coffee house; never out in the town, the ramen shop, the library or the tower room (MELO 2026-11-14)
     set('coin', false, 'flex');      // no counter: the coins are in the backpack (MELO 2026-11-18)      // the coins: in the ramen shop and the coffee house only, and over the shipping box (MELO 2026-11-18)
     if (!can) bag.open = bag.sell = false; set('bag', can, 'block'); { const on = !!(can && bag.open), bb = $('bag'); if (bb.classList.contains('on') !== on) bb.classList.toggle('on', on); }      // the button stays: a tap opens the bubble, another closes it
@@ -2960,16 +2871,15 @@ function start() {
 }
 $('gear').addEventListener('click', () => { if (!church.fight) devMenu(); });
 $('title').addEventListener('pointerdown', e => { e.preventDefault(); if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } start(); });
-cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (bag.open && mode !== 'title') { bagTap(e.clientX, e.clientY); return; } if (mode === 'stall') { if (stall.board) boardDown(e.clientX, e.clientY); else stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'bar') { cafeTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } worldTap(e.clientX, e.clientY); } });
+cv.addEventListener('pointerdown', e => { if ($('langMenu').classList.contains('open')) { $('langMenu').classList.remove('open'); return; } if (AC && AC.state === 'suspended') AC.resume(); if (bag.open && mode !== 'title') { bagTap(e.clientX, e.clientY); return; } if (mode === 'stall') { stallTap(e.clientX, e.clientY); return; } if (mode === 'tower') { towerTap(e.clientX, e.clientY); return; } if (mode === 'lib') { libTap(e.clientX, e.clientY); return; } if (mode === 'bar') { cafeTap(e.clientX, e.clientY); return; } if (mode === 'church') { if (bag.open) bagTap(e.clientX, e.clientY); else churchTap(e.clientX, e.clientY); return; } if (mode === 'world') { if (bag.open) { bagTap(e.clientX, e.clientY); return; } worldTap(e.clientX, e.clientY); } });
 $('leave').addEventListener('click', () => mode === 'stall' ? leaveStall() : leaveTower());
 $('enter').addEventListener('click', () => { if (nearDoor) goDoor(nearDoor); });
 $('bag').addEventListener('click', () => { $('bag').classList.remove('gain');      // the glow was there to be tapped: once it is, the button is as it always is (MELO 2026-11-17)
   bag.open = !bag.open; bag.sell = false; bag.sel = bag.selAt = null; chime(bag.open ? 74 : 62, 0, .12, .8); });
 for (const k of ['speed', 'freeze']) $(k === 'speed' ? 'bspeed' : 'bfreeze').addEventListener('click', () => { if (mode === 'church') churchBanner(S().buffNames[k] + (LANG === 'en' ? ': ' : '：') + S().buffSay[k], 3); else toastSay(S().buffNames[k] + (LANG === 'en' ? ': ' : '：') + S().buffSay[k]); chime(81, 0, .08, .7); });      // a tap says what the prophecy does
 $('bclose').addEventListener('click', () => { bag.open = false; bag.drag = null; chime(62, 0, .1, .8); });
-$('bback').addEventListener('click', () => { if (stall.board) closeBoard(); });
-cv.addEventListener('pointermove', e => { if (mode === 'stall' && stall.board) boardMove(e.clientX, e.clientY); else if (bag.open) bagMove(e.clientX, e.clientY); });
-for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) cv.addEventListener(ev, () => { if (mode === 'stall' && stall.board) boardUp(); else if (bag.open) bagUp(); });
+cv.addEventListener('pointermove', e => { if (bag.open) bagMove(e.clientX, e.clientY); });
+for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) cv.addEventListener(ev, () => { if (bag.open) bagUp(); });
 // A long press must not start a text selection, a callout or the magnifying loupe (iOS shows it over a canvas unless the touch itself is cancelled).
 // Buttons are left alone so that they still get their click.
 document.addEventListener('touchstart', e => { if (!(e.target.closest && e.target.closest('button, input, [data-scroll]'))) e.preventDefault(); }, { passive: false });      // [data-scroll]: a list that scrolls by touch (the Xiaohongshu board)
