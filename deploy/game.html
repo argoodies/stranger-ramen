@@ -675,7 +675,8 @@ function drawTower(v, t) {
 }
 // The shipping box (MELO 2026-11-18): a small crate on the little table by the coffee house's door. A tap lifts its lid on the backpack;
 // a thing dropped in is sold for 5 coins.
-const SHIPR = .15, SHIP_DROP = 1.4, SHIP_UP = 3;      // how far round the box a thing let go of still goes into it, in box radii; above the box it reaches SHIP_UP times as far (MELO 2026-11-19: the old zone, drawn out upward)
+let sabPx = null; const BAGAT = 'bottom';      // where the idle backpack sits: 'bottom' (MELO 2026-11-19, a try) or 'top'
+const SHIPR = .15, SHIP_DROP = 1.4, SHIP_UP = 3;      // how far round the box a thing let go of still goes into it, in box radii; above the box it reaches SHIP_UP times as far (MELO 2026-11-19: the old zone, drawn out upward), below it down to the near edge of the round table top (MELO 2026-11-19)
 function drawShipBox(v, sx, sy, z0) {
   const v0 = v; v = Object.create(v0); v.P = (x, y, z = 0) => v0.P(x, y, z + z0);      // drawn as if on the ground, lifted onto the table top
   let P = null; const r = SHIPR, H0 = .24, carry = bag.open && bag.sell && bag.drag && bag.drag.moved, op = shipLid = lerp(shipLid, bag.open && bag.sell ? 1 : 0, .2),      // open only while selling (MELO 2026-11-18)
@@ -697,7 +698,7 @@ function drawShipBox(v, sx, sy, z0) {
   poly([lid(1, 0, 0), lid(1, 1, 0), lid(1, 1, TH), lid(1, 0, TH)], lr);      // its near edge
   poly([lid(0, 1, 0), lid(1, 1, 0), lid(1, 1, TH), lid(0, 1, TH)], back ? lr : ll);      // its free edge
   face(back ? 0 : TH);
-  const c = P(sx, sy, .15); BARHIT.ship = [c[0], c[1], v.s * .4];
+  const c = P(sx, sy, .15); let low = c[1]; for (let i = 0; i < 24; i++) low = Math.max(low, v0.P(.5 + .36 * Math.cos(i * TAU / 24), .5 + .36 * Math.sin(i * TAU / 24), z0)[1]); BARHIT.ship = [c[0], c[1], v.s * .4, low - c[1] + 6];      /* the 4th: how far down to the table top's near edge */
   if (hot > .01) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(c[0], c[1] - v.s * .1, v.s * .9, [255, 214, 140], .9 * hot); ctx.restore(); }      // and a bright bloom over it
 }
 let shipHot = 0;
@@ -1924,6 +1925,7 @@ function drawGear(t) {      // what you wear, in a capsule straight to the right
     const hits = (x, y) => { const r = [x - cs / 2 - pd, y - CH / 2, x - cs / 2 - pd + CW, y + CH / 2]; return keep.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]); };
     let got = null, bd = 1e9; for (let y = 12 + CH / 2; y < H - 24 - CH / 2; y += 6) for (let x = 8 + pd + cs / 2; x <= W - 8 - pd - 2 * (cs + gap) - cs / 2 + 5; x += 6) { const xx = fit(x, y)[0], d = Math.hypot(xx - x0, y - iy); if (d < bd && !hits(xx, y)) { bd = d; got = [xx, y]; } }      // the free place nearest the one beside the chef (MELO 2026-11-18)
     [x0, iy] = got || fit(W / 2 - (cs + gap), H - 24 - CH / 2); }
+  bag.gearBox = [x0 - cs / 2 - pd, iy - cs / 2 - pd, x0 - cs / 2 - pd + CW, iy + cs / 2 + pd];      /* the capsule itself: over it a place on the chef wins over the shipping box, round it the box does */
   capsule(x0 - cs / 2 - pd, iy - cs / 2 - pd, 3 * cs + 2 * gap + 2 * pd, cs + 2 * pd, cs * .2 + pd);      // corners round about the tiles' own (MELO 2026-11-18)
   ['drink', 'weapon', 'acc'].forEach((k, n) => { const ix = x0 + n * (cs + gap), id = have(save.equip[k]) ? save.equip[k] : null, over = dg && dg.over === k;
     at[k] = [ix, iy, cs / 2];
@@ -2071,8 +2073,10 @@ function drawBag(t) {      // the backpack (MELO 2026-11-18): no page of its own
   bag.drawnAt = last;      // the backpack just opened (not drawn the frame before): its tag gives its two turns (MELO 2026-11-18)
   const L = S(), hits = bag.hits = [], spots = bag.spots = [], has = owned(), dg = bag.drag && bag.drag.moved ? bag.drag : null;
   const top0 = (() => { const r = $('bag').getBoundingClientRect(); return r.height ? [r.right, r.top, r.bottom] : [56, 12, 56]; })();      // the backpack button's right edge, top and foot
-  const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, bx = (W - BW) / 2, by = ((W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12) + (BAGCUE === 'handle' ? 12 : 0), desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
+  const slabs = bagSlabs(), rows = slabs.length / 4, pad = 14, p = Math.min(64, (W - 70) / 7), c = p - 10, BW = 2 * pad + 4 * p - 10, bx = (W - BW) / 2, desc = null,      // four across, in the middle of the screen, level with its button's top if it clears it (MELO 2026-11-18), so the gear capsule fits beside it (MELO 2026-11-18)      // no description in the bubble: a tap and the chef says what it is (MELO 2026-11-18)
     BH = pad * 2 + rows * p - 10 + (desc ? 34 + desc.length * 19 : 0);      // what you wear is not here but on the chef (drawWorn)
+  const foot = (() => { if (sabPx == null) { const d = document.createElement('div'); d.style.cssText = 'position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)'; document.body.appendChild(d); sabPx = parseFloat(getComputedStyle(d).paddingBottom) || 0; d.remove(); } return H - 18 - sabPx; })(),      /* clear of the home bar */
+    by = BAGAT === 'bottom' ? foot - BH : ((W - BW) / 2 > top0[0] + 8 ? top0[1] : top0[2] + 12) + (BAGCUE === 'handle' ? 12 : 0);      // BAGAT 'bottom': the idle backpack at the foot of the screen, in the middle (MELO 2026-11-19, a try); 'top': level with its button
   bag.cell = c;
   bag.box = [bx, by - 10, bx + BW, by + BH];
   capsule(bx, by, BW, BH, c * .2 + pad, { p });      // a capsule, as the corner buttons are (MELO 2026-11-18)
@@ -2097,7 +2101,7 @@ function bagTap(x, y) {      // finger down: pick a thing up, or (off the bubble
   if (!B || x < B[0] || x > B[2] || y < B[1] || y > B[3]) { bag.open = bag.sell = false; bag.sel = bag.selAt = null; chime(62, 0, .1, .8); }
 }
 function bagOver(x, y) { let best = null, bd = 46; for (const [sx, sy, place] of bag.spots || []) { const d = Math.hypot(x - sx, y - sy); if (d < bd) { bd = d; best = place; } } return best; }
-function bagMove(x, y) { const d = bag.drag; if (!d) return; d.x = x; d.y = y; if (!d.moved && Math.hypot(x - d.x0, y - d.y0) > 8) { d.moved = true; bag.sel = d.id; bag.selAt = null; chime(74, 0, .06, .5); } const sb = bag.sell && mode === 'bar' && sellable(d.id) && BARHIT.ship, o = d.moved ? bagOver(x, y) : null; d.over = !d.moved ? null : typeof o !== 'string' && sb && Math.hypot(x - sb[0], (y < sb[1] ? (y - sb[1]) / SHIP_UP : y - sb[1]) * 1.15) < sb[2] * SHIP_DROP ? 'ship' : o; }      // a place on the chef wins over the box beside him      // over the shipping box on the little table: dropped, it is sold
+function bagMove(x, y) { const d = bag.drag; if (!d) return; d.x = x; d.y = y; if (!d.moved && Math.hypot(x - d.x0, y - d.y0) > 8) { d.moved = true; bag.sel = d.id; bag.selAt = null; chime(74, 0, .06, .5); } const sb = bag.sell && mode === 'bar' && sellable(d.id) && BARHIT.ship, o = d.moved ? bagOver(x, y) : null; const gb = bag.gearBox, onGear = typeof o === 'string' && gb && x > gb[0] && x < gb[2] && y > gb[1] && y < gb[3]; d.over = !d.moved ? null : !onGear && sb && Math.hypot((x - sb[0]) / (sb[2] * SHIP_DROP), (y - sb[1]) / (y < sb[1] ? sb[2] * SHIP_DROP / 1.15 * SHIP_UP : Math.max(sb[2] * SHIP_DROP / 1.15, sb[3] || 0))) < 1 ? 'ship' : o; }      // a place on the chef wins over the box beside him only over the capsule itself: its tiles catch things from 46px off, which took the table top below the box (MELO 2026-11-19)      // over the shipping box on the little table: dropped, it is sold
 function bagUp() {      // finger up: without a drag it was only a look; with one, the thing goes where it was dropped if it belongs there
   const d = bag.drag; bag.drag = null; if (!d) return;
   if (!d.moved) { bag.sel = d.id; bag.selAt = d.from; chime(69, 0, .08, .7); if (bag.sell && mode === 'bar' && S().items[d.id]) { bar.boxSay = S().sellHint(S().items[d.id][0]); bar.boxSayT = 3; return; }      // selling: the box says how (MELO 2026-11-18), instead of what it is (MELO 2026-11-18)
