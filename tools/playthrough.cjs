@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // A playthrough from a blank save, for looking at the game after each change (MELO 2026-11-18): the real game in a headless
 // browser, driven step by step through its core loop (title, town, ramen shop, a customer served, the coin taken, the coffee
-// house, the lucky draw, selling, the library, the tower, the church fight), a screenshot after each step, by day and at night.
+// house, the gift machine, selling, the library, the tower, the church fight), a screenshot after each step, by day and at night.
 // Taps go through the canvas like a finger's where the game shows where a thing is; otherwise the game's own entry points.
 // Time is stepped by hand (frame()), so every run plays the same.
 //
@@ -54,15 +54,15 @@ const OUT = path.resolve(process.argv[2] || 'playthrough'), PAGE = path.resolve(
   await step('backpack_in_shop', async note => { await js(() => document.getElementById('bag').click()); await tick(.8); const o = await js(() => bag.open); note('open ' + o); await js(() => { bag.open = false; }); return o; });
   await step('ramen_shop_night', async () => { await js(() => { G.n = 1; nWant = () => 1; }); await tick(1.5); });
 
-  // the coffee house: take the iced coffee, a pull of the lucky draw, then the shipping box
+  // the coffee house: take the iced coffee, a turn of the gift machine, then the shipping box
   await step('coffee_house', async note => { await js(() => { G.n = 0; nWant = () => 0; G.t = 1; bar.taken = null; save.coffeeTaken = null; leaveStall(); }); await tick(1); await js(() => goDoor('bar')); const ok = await until(() => mode === 'bar', 30); await tick(2); note(ok ? 'walked in' : 'never got in'); return ok; });
   await step('iced_coffee', async note => {
     const h = await js(() => BARHIT.take); if (!h) { note('no coffee out (already taken this half-day?)'); return true; }
     const d0 = await js(() => cardN('coffee')); await tap(h[0], h[1]); await tick(2); const d1 = await js(() => cardN('coffee')); note(`coffee ${d0} -> ${d1}`); return d1 === d0 + 1; });
-  await step('lucky_draw', async note => {
-    const h = await js(() => BARHIT.slot), c0 = await js(() => save.coins); await tap(h[0], h[1]);
+  await step('gift_machine', async note => {
+    const h = await js(() => BARHIT.slot), c0 = await js(() => save.coins), n0 = await js(() => Object.values(save.cards).reduce((a, b) => a + b, 0)); await tap(h[0], h[1]);
     const went = await until(() => bar.slot.st !== 'idle', 15); await until(() => bar.slot.st === 'idle', 15); await tick(1.5);
-    const c1 = await js(() => save.coins), win = await js(() => bar.slot.win); note(`coins ${c0} -> ${c1}, ${win ? 'won ' + win : 'no win'}`); return went && c1 === c0 - 1; });
+    const c1 = await js(() => save.coins), n1 = await js(() => Object.values(save.cards).reduce((a, b) => a + b, 0)), said = await js(() => bar.mySay); note(`coins ${c0} -> ${c1}, things ${n0} -> ${n1}: ${said}`); return went && c1 === c0 - 1 && n1 === n0 + 1; });
   await step('sell_mode', async note => { const h = await js(() => BARHIT.ship); await tap(h[0], h[1]); await tick(.5); const said = await js(() => bar.boxSayT > 0 ? bar.boxSay : ''), shut = await js(() => !bag.open); await tap(h[0], h[1]); await tick(1); const s = await js(() => bag.open && bag.sell); note(`the box says: ${said}; still shut after one tap: ${shut}; after a second, selling ${s}`); return shut && s; });
   await step('sell_tap', async note => {
     const has = await js(() => { save.cards.guard = (save.cards.guard || 0) + 1; return true; }); await tick(.3);

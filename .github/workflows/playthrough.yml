@@ -1,7 +1,7 @@
 name: Playthrough screenshots
 
 # Plays the game from a blank save through its core loop in headless Chromium (tools/playthrough.cjs): title, town,
-# the ramen shop (a customer served, the coin taken), the coffee house (iced coffee, the lucky draw, selling), the library,
+# the ramen shop (a customer served, the coin taken), the coffee house (iced coffee, the gift machine, selling), the library,
 # the tower and a church fight, by day and at night. A screenshot after each step, a report of what each step found and
 # any page errors are kept as the run's artifact. The run fails if a step fails or the page throws. Manual trigger only.
 on:
