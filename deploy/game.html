@@ -813,8 +813,8 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
     { const lx = x1 - .03, ly = (y0 + y1) / 2, lc = P(lx, ly, 1.32), lf = P(lx, ly, .9); glow(lf[0], lf[1], s * .8, [255, 230, 200], .32); glow(lc[0], lc[1], s * .7, [255, 242, 214], .78);      /* spread wider (MELO 2026-11-19) */      // a lamp hidden up in the machine's top, out of sight (MELO 2026-11-19): only its warm light, from the middle of the inside's ceiling down over the heap
     }
     const gift = (x, y, z, c, rb) => { const cx = x + g / 2, cy = y + g / 2, zt = z + g, lw = Math.max(1, s * .016);
-      v.sh = c2 => { const d = mix(c2, tint(c2), .65); return [mix(d, [255, 255, 255], .06), mix(d, [60, 30, 60], .12), mix(d, [60, 30, 60], .3)]; };      /* not so bright (MELO 2026-11-19): partly in the room's light */ v.box(x, y, z, g, g, g, c); delete v.sh;      // lit by the lamps inside the machine, not the room's light: they stay bright (MELO 2026-11-19)
-      { const w = g * .09; rb = [248, 246, 242]; const sd = [224, 220, 226];      /* the cat's white, its shaded side on the box's sides (MELO 2026-11-19) */      // the ribbon round it: flat bands laid on its faces, filled rather than stroked, so their edges stay smooth on a phone (MELO 2026-11-19)
+      v.box(x, y, z, g, g, g, c);      /* in the room's own light, as bright as things by the door (MELO 2026-11-19) */      // lit by the lamps inside the machine, not the room's light: they stay bright (MELO 2026-11-19)
+      { const w = g * .09; rb = mix([248, 246, 242], tint([248, 246, 242]), .5); const sd = mix([224, 220, 226], tint([224, 220, 226]), .5);      /* half way between */      /* in the room's light too (MELO 2026-11-19: not so bright) */      /* the cat's white, its shaded side on the box's sides (MELO 2026-11-19) */      // the ribbon round it: flat bands laid on its faces, filled rather than stroked, so their edges stay smooth on a phone (MELO 2026-11-19)
         poly([P(cx - w, y, zt), P(cx + w, y, zt), P(cx + w, y + g, zt), P(cx - w, y + g, zt)], rb); poly([P(x, cy - w, zt), P(x + g, cy - w, zt), P(x + g, cy + w, zt), P(x, cy + w, zt)], rb);
         poly([P(x + g, cy - w, z), P(x + g, cy + w, z), P(x + g, cy + w, zt), P(x + g, cy - w, zt)], sd); poly([P(cx - w, y + g, z), P(cx + w, y + g, z), P(cx + w, y + g, zt), P(cx - w, y + g, zt)], sd); }
       const bw = P(cx, cy, zt + .012); circ(bw[0] - s * .02, bw[1], s * .02, rb); circ(bw[0] + s * .02, bw[1], s * .02, rb); };      // and its bow
@@ -839,10 +839,10 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
         const [x, y, z] = q, [c, rb] = tt < (t0 + t1) / 2 ? A[n].slice(3) : d.slice(3);
         items.push([dk(x, y, z), () => gift(x, y - g / 2, z, c, rb)]); }); }
     else G.forEach(([gx, gy, gz, c, rb], n) => { if (n === m.tg && carry) return; items.push([dk(gx, gy, gz), () => gift(gx, gy - g / 2, gz, c, rb)]); });
-    const lw = Math.max(1.6, s * .03), MET = [236, 238, 244], DK = [150, 140, 150], kn = .075 + .05 * op, tp = .05 + .06 * op,
+    const lw = Math.max(1.6, s * .03), MET = mix([236, 238, 244], tint([236, 238, 244]), .5), DK = [150, 140, 150],      /* the claw as bright as the ribbons (MELO 2026-11-19) */ kn = .075 + .05 * op, tp = .05 + .06 * op,
       finger = sg => line([P(ccx, cy + sg * .02, hz), P(ccx, cy + sg * kn, hz - .045), P(ccx, cy + sg * tp, hz - .1)], MET, lw),      // two fingers, bent in at the tips
       ck = carry ? dk(tg[0], carry[0] + g / 2, carry[1]) : dk(xf, cy, hz - g - .08);
-    items.push([ck - .002, () => { line([P(ccx, cy, 1.32), P(ccx, cy, hz + .03)], [235, 225, 230], Math.max(1, lw * .5)); v.box(ccx - .035, cy - .035, hz, .07, .07, .035, MET); finger(-1); }]);      // its cable, its hub, and its far finger behind what it holds
+    items.push([ck - .002, () => { line([P(ccx, cy, 1.32), P(ccx, cy, hz + .03)], mix([235, 225, 230], tint([235, 225, 230]), .5), Math.max(1, lw * .5)); v.box(ccx - .035, cy - .035, hz, .07, .07, .035, MET); finger(-1); }]);      // its cable, its hub, and its far finger behind what it holds
     if (carry) items.push([ck, () => gift(tg[0], carry[0], carry[1], tg[3], tg[4])]);
     items.push([ck + .002, () => finger(1)]);      // its near finger in front
     line([P(ccx, y0 + .1, 1.35), P(ccx, y1 - .1, 1.35)], DK, lw * 1.4);      // the rail, then the carriage on it
@@ -851,7 +851,7 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
     ctx.restore(); }
   poly([F(y0 + .08, .8), F(y1 - .08, .8), F(y1 - .08, 1.38), F(y0 + .08, 1.38)], fl ? [255, 246, 220] : [236, 242, 246], fl ? .35 : .06);      // the glass over them
   poly([F(y0 + .08, 1.38), F(y0 + .2, 1.38), F(y0 + .12, .8), F(y0 + .08, .8)], [255, 255, 255], .25);      // a gleam on the glass
-  const lb = P((x0 + x1) / 2, (y0 + y1) / 2, Hb + .09), lp = P((x0 + x1) / 2, (y0 + y1) / 2, Hb + .17), on = true;      /* always lit, blinking only for a win (MELO 2026-11-19) */ ell(lb[0], lb[1], s * .12, s * .06, tint([150, 110, 60])); if (on) glow(lp[0], lp[1], s * .8, [255, 220, 130], fl ? .9 : .45); ctx.beginPath(); ctx.arc(lp[0], lb[1], s * .1, Math.PI, 0); ctx.fillStyle = css(fl ? [255, 248, 210] : on ? [255, 214, 140] : tint([226, 120, 90])); ctx.fill();      // the lamp on top: lit while the reels turn, blinking for a win
+  // no lamp on top (MELO 2026-11-19): the only light is the one hidden inside, under the inner box's top
   { const a = -ease(1 - m.pull) * TAU;      // the knob below the window (MELO 2026-11-19: no lever): a gold dial with a bar across it, turned once round from where it rests and back to it as the gift comes
     const KR = .1, Fo = (y, z, o = .03) => P(x1 + o, y, z), ring = (r, o = .03) => Array.from({ length: 24 }, (_, i) => Fo(3.5 + r * Math.cos(i * TAU / 24), .5 + r * Math.sin(i * TAU / 24), o)), at = (u, w) => Fo(3.5 + u * Math.cos(a) - w * Math.sin(a), .5 + u * Math.sin(a) + w * Math.cos(a), .04);      // laid on the cabinet's slanting front, as the coin slot is
     poly(ring(KR, 0), tint([150, 110, 60])); poly(ring(KR), tint([226, 182, 96]));      /* its rim, then its face standing a little off the front */ poly([at(-.082, -.02), at(.082, -.02), at(.082, .02), at(-.082, .02)], tint([150, 104, 56])); poly(ring(.016, .045), tint([255, 236, 190])); }
