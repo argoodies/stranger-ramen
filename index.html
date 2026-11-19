@@ -84,7 +84,7 @@ const $ = id => document.getElementById(id);
 const cv = $('c'); let ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1;
 function resize() {
-  DPR = Math.min(2, window.devicePixelRatio || 1);
+  DPR = Math.min(3, window.devicePixelRatio || 1);      // full sharpness on 3x phones too: at 2x the browser blew the picture up and small edges, the gift ribbons, came out rough (MELO 2026-11-19)
   W = window.innerWidth; H = window.innerHeight;
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
   starCache = null;
@@ -814,7 +814,9 @@ function drawSlot(v, s, t) {      // the gift machine: a small red cabinet again
     }
     const gift = (x, y, z, c, rb) => { const cx = x + g / 2, cy = y + g / 2, zt = z + g, lw = Math.max(1, s * .016);
       v.sh = c2 => [mix(c2, [255, 255, 255], .28), c2, mix(c2, [60, 30, 60], .16)]; v.box(x, y, z, g, g, g, c); delete v.sh;      // lit by the lamps inside the machine, not the room's light: they stay bright (MELO 2026-11-19)
-      line([P(cx, y, zt), P(cx, y + g, zt)], rb, lw); line([P(x, cy, zt), P(x + g, cy, zt)], rb, lw); line([P(x + g, cy, z), P(x + g, cy, zt)], rb, lw); line([P(cx, y + g, z), P(cx, y + g, zt)], rb, lw);      // the ribbon round it
+      { const w = g * .09, sd = mix(rb, [200, 190, 210], .18);      // the ribbon round it: flat bands laid on its faces, filled rather than stroked, so their edges stay smooth on a phone (MELO 2026-11-19)
+        poly([P(cx - w, y, zt), P(cx + w, y, zt), P(cx + w, y + g, zt), P(cx - w, y + g, zt)], rb); poly([P(x, cy - w, zt), P(x + g, cy - w, zt), P(x + g, cy + w, zt), P(x, cy + w, zt)], rb);
+        poly([P(x + g, cy - w, z), P(x + g, cy + w, z), P(x + g, cy + w, zt), P(x + g, cy - w, zt)], sd); poly([P(cx - w, y + g, z), P(cx + w, y + g, z), P(cx + w, y + g, zt), P(cx - w, y + g, zt)], sd); }
       const bw = P(cx, cy, zt + .012); circ(bw[0] - s * .02, bw[1], s * .02, rb); circ(bw[0] + s * .02, bw[1], s * .02, rb); };      // and its bow
     // the claw (MELO 2026-11-19): it hangs from a carriage on a rail under the window's top, over the chute in the near corner; a turn sends it over a gift, down, shut, up: a miss lets the gift slip back onto the heap, a win carries it to the chute and drops it
     const [ta, tb, tc, td, te, tf] = CLAW, T = m.st === 'spin' ? m.t : 99, win = m.win && m.win !== 'none', tg = G[m.tg != null ? m.tg : GIFT_LAYS[m.lay || 0].t], HOME = y1 - .1,      /* the chute on the left (y runs right to left on screen) */ ty = tg ? tg[1] : HOME, ZT = 1.3, ZL = tg[2] + g + .08, ccx = xf + g / 2,
