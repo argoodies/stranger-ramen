@@ -67,7 +67,7 @@ const OUT = path.resolve(process.argv[2] || 'playthrough'), PAGE = path.resolve(
   await step('sell_hint', async note => {
     const has = await js(() => { save.cards.ring = (save.cards.ring || 0) + 1; save.ring = true; return true; }); await tick(.3);
     const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'ring'); return h && [h[0] + c / 2, h[1] + c / 2]; }); if (!hit) { note('ring not in the backpack'); return false; }
-    await tap(hit[0], hit[1]); await tick(.5); note('the box says: ' + await js(() => bar.boxSay)); return has; });
+    await tap(hit[0], hit[1]); await tick(.5); note('the chef says: ' + await js(() => bar.mySay)); return has; });
   await step('sold', async note => {
     const hit = await js(() => { const c = bag.cell, h = bag.hits.find(h => h[2] === 'ring'); return h && [h[0] + c / 2, h[1] + c / 2]; }), box = await js(() => BARHIT.ship), c0 = await js(() => save.coins);
     await p.mouse.move(hit[0], hit[1]); await p.mouse.down(); for (let i = 1; i <= 12; i++) { await p.mouse.move(hit[0] + (box[0] - hit[0]) * i / 12, hit[1] + (box[1] + 10 - hit[1]) * i / 12); await tick(.05); }
