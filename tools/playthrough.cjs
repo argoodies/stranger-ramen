@@ -62,7 +62,7 @@ const OUT = path.resolve(process.argv[2] || 'playthrough'), PAGE = path.resolve(
   await step('gift_machine', async note => {
     const h = await js(() => BARHIT.slot), c0 = await js(() => save.coins), n0 = await js(() => Object.values(save.cards).reduce((a, b) => a + b, 0)); await tap(h[0], h[1]);
     const went = await until(() => bar.slot.st !== 'idle', 15); await until(() => bar.slot.st === 'idle', 15); await tick(1.5);
-    const c1 = await js(() => save.coins), n1 = await js(() => Object.values(save.cards).reduce((a, b) => a + b, 0)), said = await js(() => bar.mySay); note(`coins ${c0} -> ${c1}, things ${n0} -> ${n1}: ${said}`); return went && c1 === c0 - 1 && n1 === n0 + 1; });
+    const c1 = await js(() => save.coins), n1 = await js(() => Object.values(save.cards).reduce((a, b) => a + b, 0)), said = await js(() => bar.mySay); note(`coins ${c0} -> ${c1}, things ${n0} -> ${n1}: ${said}`); return went && c1 === c0 - 1 && (n1 === n0 + 1 || (n1 === n0 && said === await js(() => S().noCatch))); });      // one turn in six gives a thing; otherwise nothing, and the chef says he missed
   await step('sell_mode', async note => { const h = await js(() => BARHIT.ship); await tap(h[0], h[1]); await tick(.5); const said = await js(() => bar.boxSayT > 0 ? bar.boxSay : ''), shut = await js(() => !bag.open); await tap(h[0], h[1]); await tick(1); const s = await js(() => bag.open && bag.sell); note(`the box says: ${said}; still shut after one tap: ${shut}; after a second, selling ${s}`); return shut && s; });
   await step('sell_tap', async note => {
     const has = await js(() => { save.cards.guard = (save.cards.guard || 0) + 1; return true; }); await tick(.3);
