@@ -679,9 +679,9 @@ function freeSpot(w, h, px, py, keep, x0, y0, x1, y1, down = 1) {      /* down: 
 const SHIPR = .15, SHIP_DROP = 1.4, SHIP_UP = 3, SHIP_LIFT = .16; let LIDA = 1.9;      // how far the lid opens, in radians      // how far round the box a thing let go of still goes into it, in box radii; above the box it reaches SHIP_UP times as far (MELO 2026-11-19: the old zone, drawn out upward), below it down to the near edge of the round table top (MELO 2026-11-19)
 function drawShipBox(v, sx, sy, z0) {
   let lift = 0; const v0 = v; v = Object.create(v0); v.P = (x, y, z = 0) => v0.P(x, y, z + z0 + lift);      // drawn as if on the ground, lifted onto the table top (and, open, up off it)
-  let P = null; const r = SHIPR, H0 = .24, carry = bag.open && bag.sell && bag.drag && bag.drag.moved, op = shipLid = lerp(shipLid, bag.open && bag.sell ? 1 : 0, .2),      // open only while selling (MELO 2026-11-18)
+  let P = null; const r = SHIPR, H0 = .24, carry = bag.open && bag.sell && bag.drag && bag.drag.moved, op = shipLid = lerp(shipLid, bag.open && bag.sell ? 1 : 0, .2), up = shipRise = lerp(shipRise, (bag.open && bag.sell) || (mode === 'bar' && bar.boxWait) ? 1 : 0, .2),      /* it rises as it first speaks, still shut, and opens up there on the next tap (MELO 2026-11-19) */      // open only while selling (MELO 2026-11-18)
     jt = clamp(1 - (performance.now() - (bag.shipT || -1e9)) / 350);
-  { const e = ease(op); if (e > .01) { lift = e * (SHIP_LIFT + .025 * Math.sin(last / 1000 * 2.4));      // open: it rises off the table and hangs there, bobbing (MELO 2026-11-19)
+  { const e = ease(up); if (e > .01) { lift = e * (SHIP_LIFT + .025 * Math.sin(last / 1000 * 2.4));      // open: it rises off the table and hangs there, bobbing (MELO 2026-11-19)
     const k = 1 - .35 * (lift / (SHIP_LIFT + .025)), pts = []; for (let i = 0; i < 20; i++) { const a = i * TAU / 20; pts.push(v0.P(sx + Math.cos(a) * SHIPR * 1.2 * k, sy + Math.sin(a) * SHIPR * 1.2 * k, z0 + .002)); }
     poly(pts, [40, 24, 30], .28 * e); } }      // its shadow left on the table, smaller the higher it is
   const hot = shipHot = lerp(shipHot, carry && sellable(bag.drag.id) ? (bag.drag.over === 'ship' ? 1 : .15) : 0, .3),      // something you can sell in your hand: the box already glows; held over it, it lights right up (MELO 2026-11-18)
@@ -705,7 +705,7 @@ function drawShipBox(v, sx, sy, z0) {
   if (hot > .01) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(c[0], c[1] - v.s * .1, v.s * .9, [255, 214, 140], .9 * hot); ctx.restore(); }      // and a bright bloom over it
 }
 let shipHot = 0;
-let shipLid = 0;
+let shipLid = 0, shipRise = 0;
 function drawHouse(v, t) {      // the ramen shop from outside: cream walls, a red spire with a chimney, a lit doorway under three red door-cloths, an arched window in the gable end
   const x0 = -4.92, y0 = 1.4, w = 1.5, x1 = x0 + w, y1 = y0 + w, ym = y0 + w / 2, h = 1.42, SP = 1.5, ov = .16, cx = x0 + 1.13, cy = ym - .4, P = v.P.bind(v);
   const [, wl, wr] = v.sh(PAL.wall), [rt, rl, rr] = v.sh(PAL.roof), lit = [255, 220, 150], wood = tint([176, 120, 84]);
