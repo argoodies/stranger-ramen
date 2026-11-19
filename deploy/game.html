@@ -675,7 +675,7 @@ function drawTower(v, t) {
 }
 // The shipping box (MELO 2026-11-18): a small crate on the little table by the coffee house's door. A tap lifts its lid on the backpack;
 // a thing dropped in is sold for 5 coins.
-let sabPx = null; const BAGAT = 'bottom';      // where the idle backpack sits: 'bottom' (MELO 2026-11-19, a try) or 'top'
+let sabPx = null; const CHEF_GAP = .6; const BAGAT = 'bottom';      // where the idle backpack sits: 'bottom' (MELO 2026-11-19, a try) or 'top'
 const SHIPR = .15, SHIP_DROP = 1.4, SHIP_UP = 3;      // how far round the box a thing let go of still goes into it, in box radii; above the box it reaches SHIP_UP times as far (MELO 2026-11-19: the old zone, drawn out upward), below it down to the near edge of the round table top (MELO 2026-11-19)
 function drawShipBox(v, sx, sy, z0) {
   const v0 = v; v = Object.create(v0); v.P = (x, y, z = 0) => v0.P(x, y, z + z0);      // drawn as if on the ground, lifted onto the table top
@@ -1916,10 +1916,12 @@ function drawGear(t) {      // what you wear, in a capsule straight to the right
   const at = bag.gearAt = {}; if (!bag.chefAt) return;      // shown while selling too (MELO 2026-11-18), kept clear of the shipping box and of the server's words
   const [cx, cy, K] = bag.chefAt, dg = bag.drag && bag.drag.moved ? bag.drag : null, cs = bag.cell || 48, gap = 10, pd = 14, CW = 3 * cs + 2 * gap + 2 * pd, CH = cs + 2 * pd,
     fit = (x0, iy) => [clamp(x0, 8 + pd + cs / 2, W - 8 - pd - 2 * (cs + gap) - cs / 2), iy];      // x0, iy: the first tile's middle; tiles, gaps and edge as the backpack's
-  let [x0, iy] = fit(cx + K * .35 + pd + cs / 2, cy - K * .6);      // straight to the right of the chef (MELO 2026-11-18)
-  if (bag.sell && mode === 'bar') {      // selling: not over the box (its lid open) nor where the server's bubble comes up, whether or not it is showing just now, so the capsule never jumps
-    const keep = bag.box ? [[bag.box[0], bag.box[1], bag.box[2] + 10, bag.box[3] + 10]] : [], sb = BARHIT.ship, mw = Math.min(W * .62, 250);
-    for (const q of [bag.chefAt, bar.keeperAt]) if (q) keep.push([q[0] - K * .45, q[1] - K * 1.3, q[0] + K * .45, q[1] + 4]);      // nor over the chef or the server
+  const CG = K * CHEF_GAP;      // a chef's width between him and the capsule (MELO 2026-11-19)
+  let [x0, iy] = fit(cx + K * .3 + CG + pd + cs / 2, cy - K * .6);      // to the right of the chef, a chef's width off (MELO 2026-11-18, 2026-11-19)
+  {      // not over the backpack nor up against the chef; selling, not over the box (its lid open) nor where the box's words come up, whether or not they show just now, so the capsule never jumps
+    const keep = bag.box ? [[bag.box[0], bag.box[1], bag.box[2] + 10, bag.box[3] + 10]] : [], sb = bag.sell && mode === 'bar' && BARHIT.ship, mw = Math.min(W * .62, 250);
+    keep.push([cx - K * .3 - CG, cy - K * 1.3, cx + K * .3 + CG, cy + 4]);      // the chef, with a chef's width clear each side
+    if (sb && bar.keeperAt) { const q = bar.keeperAt; keep.push([q[0] - K * .45, q[1] - K * 1.3, q[0] + K * .45, q[1] + 4]); }      // nor over the server
     if (sb) keep.push([sb[0] - sb[2] * 1.3, sb[1] - sb[2] * 2.8, sb[0] + sb[2] * 1.3, sb[1] + sb[2]]);
     if (sb) { const ty = sb[1] - sb[2] * 2.2, bx = clamp(sb[0] - mw / 2, 8, W - mw - 8); keep.push([bx, ty - 66, bx + mw, ty + 4]); }      // where the box's words come up
     const hits = (x, y) => { const r = [x - cs / 2 - pd, y - CH / 2, x - cs / 2 - pd + CW, y + CH / 2]; return keep.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]); };
