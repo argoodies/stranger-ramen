@@ -1682,7 +1682,7 @@ function leaveTower() {
 function hushAll() { for (const n of npcs) n.sayT = 0; bar.keepSayT = bar.boxSayT = bar.mySayT = bar.whoSayT = 0; if (bar.cat) bar.cat.meowT = 0; lib.sayT = 0; tw.say = tw.msay = null; church.say = null; church.bannerT = 0; }      // a cutscene starts: whatever anyone was saying before it is cut off, so no old bubble hangs over it
 function towerShow() {      // up to the top: by night one shooting star crosses the sky; by day there is simply the view
   const night = G.n > .5, R = []; for (let i = 0; i < 60; i++) R.push(Math.random());
-  hushAll(); tw.view = { kind: night ? 'meteor' : 'day', night, t: 0, R, bt: night ? TVIEW : 1.2 };      // bt: when the bell strikes; with no shooting star to wait for, almost at once (MELO 2026-11-21) hideChef = true; zoomTarget = 1; zoomOut = 1; fade = .55;      // a quick cut, not a slow fade
+  hushAll(); tw.view = { kind: night ? 'meteor' : 'day', night, t: 0, R, bt: night ? TVIEW : 1.2 };      /* bt: when the bell strikes; with no shooting star to wait for, almost at once (MELO 2026-11-21) */ hideChef = true; zoomTarget = 1; zoomOut = 1; fade = .55;      // a quick cut, not a slow fade
 }
 function updateTower(dt) {
   const V = tw.view;
