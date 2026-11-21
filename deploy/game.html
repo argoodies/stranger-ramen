@@ -424,11 +424,6 @@ function bell(f, vol = 0.22) {
   if (!AC) return; const t = AC.currentTime;
   for (const [r, a, d] of [[0.5, .55, 4.5], [1, 1, 3.4], [1.19, .55, 2.6], [1.5, .32, 2], [2, .45, 1.5], [2.74, .22, 1], [4.07, .1, .45]]) tone(f * r, t, d, vol * a);
 }
-function clockBell(vol = .2, when = 0) {      // the clocktower's bell (MELO 2026-11-21: a metal bell, not a drum): a hard metal strike, then a cluster of inharmonic partials, the high ones bright at first and gone soonest; each a detuned pair, so the metal beats and shimmers
-  if (!AC) return; const t = AC.currentTime + when, f = 220; noise(.03, vol * 1.6, 7000, 3800, when); noise(.12, vol * .5, 3200, 1800, when);
-  for (const [r, a, d] of [[.5, .22, 6], [1, .45, 4.8], [1.19, .32, 4], [1.5, .2, 3], [2, .55, 3.6], [2.51, .34, 2.6], [2.76, .3, 2.2], [3.43, .26, 1.7], [4.07, .22, 1.3], [5.4, .16, .85], [6.8, .11, .55], [8.93, .08, .35]])
-    for (const k of [.997, 1.003]) tone(f * r * k, t, d, vol * a * .5);
-}
 function pad(notes, t, dur) {
   for (const m of notes) for (const det of [1.0035, 0.9965]) {
     const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = mtof(m) * det;
@@ -1694,7 +1689,7 @@ function updateTower(dt) {
   if (V) { const t0 = V.t; V.t += dt; const at = s => t0 < s && V.t >= s;
     if (V.kind === 'meteor' && at(TSTAR)) { noise(.7, .06, 5000, 1500); chime(96, .55, .06, 2.6); }
     updateWorld(dt);      // down below, life goes on: whoever is out walking keeps walking
-    if (at(V.bt)) clockBell(); if (at(V.bt + 1.8)) clockBell();      // two strokes of the clock end it
+    if (at(V.bt)) bell(146.8, .2); if (at(V.bt + 1.8)) bell(146.8, .2);      // two strokes of the clock end it
     return; }
   if (tw.say && (tw.say.t -= dt) <= 0) tw.say = null;
   if (tw.msay && (tw.msay.t -= dt) <= 0) { const go = tw.msay.go; tw.msay = null; if (go) return towerShow(); }
