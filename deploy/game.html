@@ -1300,7 +1300,7 @@ function stallPick(x, y) {
 }
 function stallTap(x, y) {
   for (let i = 0; i < 3; i++) { const c = stall.coins[i]; if (c && c.at && Math.hypot(x - c.at[0], y - c.at[1]) < c.at[2]) { stall.coins[i] = null; addCoins(1, [c.at[0], c.at[1]]); chime(84, 0, .1); chime(91, .07, .08); return; } }      // a coin over the board: a tap takes it, wherever you stand
-  if (stall.book && stall.bookAt && Math.hypot(x - stall.bookAt[0], y - stall.bookAt[1]) < 34) { if (stall.hold) return; goDo('book', SERVEX, LANE_Y0); chime(69, 0, .08, .7); return; }      // the purple book: walk over to it (where you eat your own bowl), then its skill point is yours
+  if (stall.book && stall.bookAt && Math.hypot(x - stall.bookAt[0], y - stall.bookAt[1]) < 34) { if (stall.hold) return; goDo('book', SERVEX, LANE_Y0); chime(69, 0, .08, .7); return; }      // the skill point's mark: walk over to it (where you eat your own bowl), then it is yours
   const best = stallPick(x, y);
   if (!best) {      // nothing there to use: a tap on the floor just walks the owner over, as outdoors
     if (stall.hold && stall.hold !== 'bowl') { if (stall.hold === 'noodle') stall.pot = 'done'; setHold(null); chime(57, 0, .1, .6); return; }      // holding noodles, the soup ladle or a topping: a tap on bare floor puts it back (the noodles back in the pot)
@@ -1490,7 +1490,7 @@ function drawStall(t) {
   hint(() => iso_bowl(v, BARX, BOWLY, 1.02, .33, mb)); if (mb.soup) steam(BARX, BOWLY, 1.12, 3); ctx.restore(); }
   ring('bar'); for (let i = 0; i < 3; i++) ring('spot' + i);
   ctx.restore();
-  if (st.book) { const q = v.P(BARX, BOWLY, 1.02), y = q[1] - s * (.78 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * 1.1, [214, 190, 255], .7); drawPurpleBook(q[0], y, s * .88); st.bookAt = [q[0], y]; }      // out of the window's clip: the purple book floats over your place at the counter, a warm ring of light below (MELO 2026-11-21)
+  if (st.book) { const q = v.P(BARX, BOWLY, 1.02), y = q[1] - s * (.55 + .06 * Math.sin(t * 2.4)); ell(q[0], q[1], s * .32, s * .16, [255, 214, 110], .5); glow(q[0], y, s * .9, [255, 230, 160], .6); drawSkillMark(q[0], y, s * .24); st.bookAt = [q[0], y]; }      // a skill point floats over your place at the counter, like the prophecies did: a dashed ring on a clear ground with the skill tree's mark, a warm ring of light below (MELO 2026-11-21)
   v.cy -= CTD * s;
   { const o = st.owner, m = st.mark; if (m && o.tx === m[0] && o.ty === m[1] && Math.hypot(o.x - m[0], o.y - m[1]) > .06) { const q = P(m[0], m[1]); ell(q[0], q[1], s * .3 * (1 + .1 * Math.sin(t * 6)), s * .15, [255, 240, 200], .45); } }      // where a tap on the floor is taking the owner
   { const q = P(st.owner.x, st.owner.y), k = s * 1.15; floorClip(floorOf(v, [[0, 0, X, Y, 0]])); ell(q[0], q[1], .36 * k, .10 * k, [20, 12, 40], .3); ctx.restore(); }      // the chef's shadow, on the floor before any furniture, so the stove and the tables cover it where they stand in front of it (it lay across their sides, MELO 2026-11-14)
@@ -1935,7 +1935,7 @@ function drawHud(hp, max = 6, live = true) {      // live: in a fight (the drink
   if (c.inv > 0) { ctx.beginPath(); ctx.arc(x, 73, 11, -Math.PI / 2, -Math.PI / 2 + TAU * c.inv / 5); ctx.strokeStyle = css([255, 214, 120], .95); ctx.lineWidth = 2.5; ctx.stroke(); }      // the drink's five seconds, running down
 }
 let hudDrink = null, hudDrinkWob = -1e9;      // where the card sits on the fight's top bar, so a tap can play it
-// The chef's skill tree (MELO 2026-11-21), in place of the prophecies. A skill point comes from the purple book that floats over your place at the counter after
+// The chef's skill tree (MELO 2026-11-21), in place of the prophecies. A skill point comes from the mark (a dashed ring with the tree's four arrows) that floats over your place at the counter after
 // you eat a bowl you made yourself. For now the skills are passive, two of them: the Knockback Blade at level 1, then the Frost Blade at level 6. The chef starts
 // at level 1 and every point spent is a level more; each works only on a parry: 30% at level 1, 5% more each level, up to level 10 (75%).
 const SK = [{ id: 'knock', lv: 1, from: null, max: 10 }, { id: 'frost', lv: 6, from: 'knock', max: 10 }, { id: 'fire', lv: 6, from: 'knock', max: 10 }];
@@ -1944,16 +1944,12 @@ const skLv = id => save.sk[id] || 0, chefLv = () => 1 + Object.values(save.sk).r
 const skWhy = k => skLv(k.id) >= k.max ? 'max' : k.from && !skLv(k.from) ? 'from' : chefLv() < k.lv ? 'lv' : !(save.sp > 0) ? 'sp' : null;      // why it cannot be learnt now, or null
 function skLearn(id) { const k = skOf(id); if (skWhy(k)) return false; save.sp--; save.sk[id] = skLv(id) + 1; saveNow(); [74, 79, 83, 86].forEach((m, i) => chime(m, .08 * i, .12)); return true; }
 function skGain(n = 1) { save.sp = (save.sp || 0) + n; saveNow(); const b = $('skill'); b.classList.remove('gain'); void b.offsetWidth; b.classList.add('gain'); }
-function drawPurpleBook(x, y, s) {      // the purple book (紫书) of the three-player game: a stiff open book hanging in the air, a true 3D model seen square on from a little above
-  let ox = 0, oy = 0; const W = s * .46, L = s * .56, T = s * .13, C = s * .07, Sp = s * .055, al = .42, pit = .62, paper = [250, 246, 238], leafEdge = [222, 214, 214], board = [146, 118, 181], boardD = [120, 94, 156], ca = Math.cos(al), sa = Math.sin(al),
-    P3 = (X, Y, Z) => [ox + X, oy - (Y * Math.cos(pit) + Z * Math.sin(pit))],      // X across, Y up, Z away from you; no perspective, like the rest of the game
-    pt = (sg, u, h, z) => P3(sg * (Sp + u * ca - h * sa), u * sa + h * ca, z), u0 = (T * sa - Sp) / ca, ln = L * .44, lc = L * .5, wp = W * .87;
-  { const qs = []; for (const sg of [-1, 1]) for (const z of [-lc, lc]) qs.push(pt(sg, W, 0, z), pt(sg, W, -C, z), pt(sg, wp, T, z), pt(sg, u0, T, z), pt(sg, 0, -C, z)); const ys = qs.map(q => q[1]); ox = x; oy = y - (Math.min(...ys) + Math.max(...ys)) / 2; }
-  for (const sg of [-1, 1]) { poly([pt(sg, W, 0, -lc), pt(sg, W, 0, lc), pt(sg, W, -C, lc), pt(sg, W, -C, -lc)], boardD); poly([pt(sg, 0, 0, -lc), pt(sg, W, 0, -lc), pt(sg, W, 0, lc), pt(sg, 0, 0, lc)], board); poly([pt(sg, 0, 0, -lc), pt(sg, W, 0, -lc), pt(sg, W, -C, -lc), pt(sg, 0, -C, -lc)], boardD); }      // the covers, their near edges a shade darker
-  poly([P3(-Sp, 0, -lc), P3(Sp, 0, -lc), P3(Sp, 0, lc), P3(-Sp, 0, lc)], board); poly([P3(-Sp, 0, -lc), P3(Sp, 0, -lc), P3(Sp + C * sa, -C * ca, -lc), P3(-Sp - C * sa, -C * ca, -lc)], boardD);      // the spine
-  for (const sg of [-1, 1]) { poly([P3(0, 0, -ln), pt(sg, 0, 0, -ln), pt(sg, wp, 0, -ln), pt(sg, wp, T, -ln), pt(sg, u0, T, -ln)], leafEdge); poly([pt(sg, wp, 0, -ln), pt(sg, wp, 0, ln), pt(sg, wp, T, ln), pt(sg, wp, T, -ln)], leafEdge); }      // the pages' thickness
-  for (const sg of [-1, 1]) poly([pt(sg, u0, T, -ln), pt(sg, wp, T, -ln), pt(sg, wp, T, ln), pt(sg, u0, T, ln)], paper);      // and their faces, one solid white
-}
+function drawSkillMark(x, y, r) {      // the skill point's mark over the counter: a dashed ring, clear inside, and the skill tree's four arrows (as on its button)
+  const cl = [255, 255, 255]; glow(x, y, r * 1.8, cl, .3); ctx.save(); ctx.setLineDash([Math.max(2, r * .32), Math.max(1.5, r * .22)]); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = css(cl, .95); ctx.lineWidth = Math.max(1.2, r * .12); ctx.stroke(); ctx.restore();
+  const k = r * .62 / 10, X = v => x + (v - 12) * k, Y = v => y + (v - 12) * k; ctx.save(); ctx.strokeStyle = css(cl); ctx.lineWidth = Math.max(1.1, r * .1); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
+  ctx.moveTo(X(12), Y(9.6)); ctx.lineTo(X(14.4), Y(12)); ctx.lineTo(X(12), Y(14.4)); ctx.lineTo(X(9.6), Y(12)); ctx.closePath();      // the diamond in the middle
+  for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) { const px = dy, py = -dx; ctx.moveTo(X(12 + dx * 5), Y(12 + dy * 5)); ctx.lineTo(X(12 + dx * 9.5), Y(12 + dy * 9.5)); ctx.moveTo(X(12 + dx * 7.1 + px * 2.4), Y(12 + dy * 7.1 + py * 2.4)); ctx.lineTo(X(12 + dx * 9.5), Y(12 + dy * 9.5)); ctx.lineTo(X(12 + dx * 7.1 - px * 2.4), Y(12 + dy * 7.1 - py * 2.4)); }      // and an arrow out each way
+  ctx.stroke(); ctx.restore(); }
 function skIcon(id, x, y, r, cl = [255, 255, 255], a = 1) {      // each skill's mark, the old prophecy badges (MELO 2026-11-21): a dashed ring, and in it two chevrons (knockback, the Prophecy of Speed's), a snowflake (frost, the Prophecy of Frost's) or a flame (fire)
   ctx.save(); ctx.globalAlpha *= a; ctx.setLineDash([Math.max(2, r * .32), Math.max(1.5, r * .22)]); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = css(cl, .95); ctx.lineWidth = Math.max(1.2, r * .12); ctx.stroke(); ctx.restore();
   ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.strokeStyle = css(cl); ctx.lineWidth = Math.max(1.1, r * (id === 'knock' ? .14 : .1)); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
@@ -2971,7 +2967,7 @@ function frame(now) {
       set = (id, on, how) => { const el = $(id), d = on ? how : 'none'; if (el.style.display !== d) el.style.display = d; };      // the backpack and the prophecies are at hand only where things are found: in the church (not in a fight) and in the coffee house; never out in the town, the ramen shop, the library or the tower room (MELO 2026-11-14)
     set('coin', false, 'flex');      // no counter: the coins are in the backpack (MELO 2026-11-18)      // the coins: in the ramen shop and the coffee house only, and over the shipping box (MELO 2026-11-18)
     if (!can) { bag.open = bag.sell = false; $('bag').classList.remove('gain'); } set('bag', can, 'block');      /* a glow not seen before the button went away is dropped, not saved for when it comes back (MELO 2026-11-20) */ { const on = !!(can && bag.open), bb = $('bag'); if (bb.classList.contains('on') !== on) bb.classList.toggle('on', on); }      // the button stays: a tap opens the bubble, another closes it
-    { const on = !['title', 'icon'].includes(mode) && !(mode === 'world' && zoomTarget > .5) && !bag.open && !storyHook && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)) && !document.getElementById('dbg'); set('skill', on, 'flex'); if (!on) { const sk = document.getElementById('skt'); if (sk) sk.remove(); }      // the skill tree, wherever you play, but not in a fight or a story
+    { const on = !['title', 'icon'].includes(mode) && !(mode === 'world' && zoomTarget > .5) && !bag.open && !storyHook && !(mode === 'church' && (church.fight || church.story || church.chapter || church.down > 0)) && !document.getElementById('dbg') && (save.sp || 0) > 0; set('skill', on, 'flex');      /* only while there is a skill point to spend: it comes with one, and goes once they are all spent (MELO 2026-11-21) */ if (!on) { const sk = document.getElementById('skt'); if (sk) sk.remove(); }      // the skill tree, wherever you play, but not in a fight or a story
       const n = save.sp || 0, sn = $('spN'), tx = n > 0 ? String(n) : ''; if (sn.textContent !== tx) { sn.textContent = tx; sn.style.display = n > 0 ? 'inline' : 'none'; } }
     set('gear', mode === 'church' && !!save.dev && !church.fight && !church.story && !church.chapter && !bag.open && church.down <= 0, 'block');      // developer mode: a gear for choosing the round
     set('bclose', false, 'block'); }      // with the backpack open the only button is a cross, and all it does is close the backpack
