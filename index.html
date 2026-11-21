@@ -1682,14 +1682,14 @@ function leaveTower() {
 function hushAll() { for (const n of npcs) n.sayT = 0; bar.keepSayT = bar.boxSayT = bar.mySayT = bar.whoSayT = 0; if (bar.cat) bar.cat.meowT = 0; lib.sayT = 0; tw.say = tw.msay = null; church.say = null; church.bannerT = 0; }      // a cutscene starts: whatever anyone was saying before it is cut off, so no old bubble hangs over it
 function towerShow() {      // up to the top: by night one shooting star crosses the sky; by day there is simply the view
   const night = G.n > .5, R = []; for (let i = 0; i < 60; i++) R.push(Math.random());
-  hushAll(); tw.view = { kind: night ? 'meteor' : 'day', night, t: 0, R }; hideChef = true; zoomTarget = 1; zoomOut = 1; fade = .55;      // a quick cut, not a slow fade
+  hushAll(); tw.view = { kind: night ? 'meteor' : 'day', night, t: 0, R, bt: night ? TVIEW : 1.2 };      // bt: when the bell strikes; with no shooting star to wait for, almost at once (MELO 2026-11-21) hideChef = true; zoomTarget = 1; zoomOut = 1; fade = .55;      // a quick cut, not a slow fade
 }
 function updateTower(dt) {
   const V = tw.view;
   if (V) { const t0 = V.t; V.t += dt; const at = s => t0 < s && V.t >= s;
     if (V.kind === 'meteor' && at(TSTAR)) { noise(.7, .06, 5000, 1500); chime(96, .55, .06, 2.6); }
     updateWorld(dt);      // down below, life goes on: whoever is out walking keeps walking
-    if (at(TVIEW)) bell(146.8, .2); if (at(TVIEW + 1.8)) bell(146.8, .2);      // two strokes of the clock end it
+    if (at(V.bt)) bell(146.8, .2); if (at(V.bt + 1.8)) bell(146.8, .2);      // two strokes of the clock end it
     return; }
   if (tw.say && (tw.say.t -= dt) <= 0) tw.say = null;
   if (tw.msay && (tw.msay.t -= dt) <= 0) { const go = tw.msay.go; tw.msay = null; if (go) return towerShow(); }
@@ -1705,7 +1705,7 @@ function updateTower(dt) {
 function devTower() { mode = 'tower'; Object.assign(tw, { x: TN - 1.1, y: TN - .9, moving: false, pend: null, msay: null, view: null, say: null }); tw.tx = tw.x; tw.ty = tw.y; towerShow(); tw.view.dev = true; }      // developer mode: the view from the tower, watched from the church and back to it
 function towerViewEnd() { const V = tw.view; fade = .55; tw.view = null; hideChef = false; zoomTarget = 0; zoomOut = 0; if (V.dev) { mode = 'church'; fade = 1; return; } tw.seen = true; tw.say = { text: S().towerDone, t: 4 }; }      // tapped away once the clock has struck twice
 function towerTap(sx, sy) {
-  if (tw.view) { if (tw.view.t >= TVIEW + 1.8) towerViewEnd(); return; }      // until the second stroke and its hint, a tap does nothing
+  if (tw.view) { if (tw.view.t >= tw.view.bt + 1.8) towerViewEnd(); return; }      // until the second stroke and its hint, a tap does nothing
   if (tw.msay) return; const H = tw.HIT, near = (h, r) => h && Math.hypot(sx - h[0], sy - h[1]) < r;
   if (near(H.man, twv.s * .9)) { tw.pend = 'talk'; tw.tx = TMAN[0] + .75; tw.ty = TMAN[1] + .75; chime(69, 0, .07, .8); return; }
   if (near(H.exit, twv.s * 1.0)) { tw.pend = 'exit'; tw.tx = TEXIT[0]; tw.ty = TEXIT[1]; chime(69, 0, .07, .8); return; }
@@ -1748,7 +1748,7 @@ function drawTowerView(t, front) {      // called twice a frame: behind the town
         ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx + nx * wd, hy + ny * wd); ctx.lineTo(hx + ux * wd * 1.5, hy + uy * wd * 1.5); ctx.lineTo(hx - nx * wd, hy - ny * wd); ctx.closePath(); ctx.fillStyle = g; ctx.fill();      // the streak itself: a needle, widest at the head
         glow(hx, hy, wd * (3 + 5 * bright), [200, 230, 255], .9 * bright); circ(hx, hy, wd * (.8 + .5 * bright), [255, 255, 255], bright); }
       else if (d < 1.35) { const f = (d - 1) / .35; glow(x1, y1, wd * (16 - 8 * f), [226, 240, 255], 1 - f); for (let i = 0; i < 4; i++) { const q = .5 + i * .45, e = f * wd * (6 + 3 * r(i)); circ(x1 + (ux * Math.cos(q) - nx * Math.sin(q)) * e + ux * e, y1 + (uy * Math.cos(q) - ny * Math.sin(q)) * e + uy * e, wd * .45 * (1 - f), [255, 244, 220], 1 - f); } } } }
-  if (front && V.t > TVIEW) { const d = V.t - TVIEW, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
+  if (front && V.t > V.bt) { const d = V.t - V.bt, a = clamp(1 - Math.abs(d % 1.8 - .2) * 3) * (d < 3.4 ? 1 : 0), tp = wv.P(0, 0, 7.5); glow(tp[0], tp[1], wv.s * (3 + 2 * a), [255, 236, 190], .5 * a); }      // the bell
 }
 
 
@@ -2916,7 +2916,7 @@ function frame(now) {
   if (mode !== 'title') tick(dt);
   bag.chefAt = null;      // set again by drawWorn whenever the chef is drawn with the backpack open
   if (mode === 'stall') { updateStall(dt); drawStall(T); }
-  else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); if (tw.view.t >= TVIEW + 1.8) tapHint('tapGo', tw.view.t - TVIEW - 1.8); } else drawTowerRoom(T); }      // the view from the top: after the clock's second stroke, "tap anywhere to continue"
+  else if (mode === 'tower') { updateTower(dt); if (tw.view) { drawWorld(T, dt); drawTowerView(T, true); if (tw.view.t >= tw.view.bt + 1.8) tapHint('tapGo', tw.view.t - tw.view.bt - 1.8); } else drawTowerRoom(T); }      // the view from the top: after the clock's second stroke, "tap anywhere to continue"
   else if (mode === 'lib') { updateLib(dt); drawLib(T, dt); }
   else if (mode === 'bar') { updateBar(dt); drawBar(T, dt); }
   else if (mode === 'church') { updateChurch(dt); drawChurch(T, dt); }
@@ -3008,7 +3008,7 @@ if (location.hash) {
   if (location.hash === '#night') { G.t = 200; G.n = 1; }
   if (location.hash === '#isle') setTimeout(() => { player.x = 8.5; player.y = 1.5; player.path = []; }, 200);
   if (location.hash.startsWith('#church')) setTimeout(() => { enterChurch(); fade = 0; }, 200);
-  if (location.hash.startsWith('#tower')) setTimeout(() => { enterTower(); fade = 0; const k = location.hash.slice(6); if (k) { towerShow(); fade = 0; if (k !== 'view') { tw.view.kind = k; tw.view.night = k === 'meteor'; G.n = tw.view.night ? 1 : 0; G.t = tw.view.night ? HALF + 20 : 20; } } }, 200);      // #tower, #towerview, #towermeteor, #towerday
+  if (location.hash.startsWith('#tower')) setTimeout(() => { enterTower(); fade = 0; const k = location.hash.slice(6); if (k) { towerShow(); fade = 0; if (k !== 'view') { tw.view.kind = k; tw.view.night = k === 'meteor'; tw.view.bt = k === 'meteor' ? TVIEW : 1.2; G.n = tw.view.night ? 1 : 0; G.t = tw.view.night ? HALF + 20 : 20; } } }, 200);      // #tower, #towerview, #towermeteor, #towerday
   if (location.hash === '#shotbar') setTimeout(() => { G.n = 1; G.t = HALF + 20; enterBar(); fade = 0; Object.assign(bar, { who: 'sailor', x: 1.5, y: 2.5, path: [] }); Object.assign(bar.cat, { x: .7, y: 3.2, sit: 999 }); setTimeout(() => { const k = BARHIT.keeper; if (k) cafeTap(k[0], k[1]); }, 300); }, 200);      // the store screenshot of the coffee house at night: a drink served, the sailor at the counter, the cat
   if (location.hash === '#shottower') setTimeout(() => { enterTower(); towerShow(); fade = 0; G.n = 1; G.t = HALF + 20; Object.assign(tw.view, { kind: 'meteor', night: true, t: TSTAR + .47 }); updateTower = () => {}; }, 200);      // for the store screenshot: the night view from the top, held at the moment the shooting star crosses
   if (location.hash === '#shotchurch' || location.hash === '#shotchurch2') setTimeout(() => {      // two fixed scenes for the store screenshots: round one's whirlwind, and a chest being opened
